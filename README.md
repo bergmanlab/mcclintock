@@ -47,15 +47,36 @@ How to run
 ------
 
 ###Installation
-To install the software, from the main pipeline folder, run the script install.sh with no arguments. This will download and unpack all of the TE detection pipelines and check that the required dependencies are available in your path. Missing dependencies will be report and you must install or make sure these are available to run the full pipeline.
+To install the software, from the main pipeline folder, first clone the repository:
+
+```
+git clone git@github.com:bergmanlab/mcclintock.git
+```
+
+Then cd into the project directory and run the script install.sh with no arguments:
+
+```
+cd mcclintock
+sh install.sh
+```
+
+This will download and unpack all of the TE detection pipelines and check that the required dependencies are available in your path. Missing dependencies will be reported and you must install or make sure these are available to run the full pipeline.
 
 ###Running on a test dataset
-A script is included to run the full pipeline on a test dataset of the yeast genome. To run this test change directory into the folder named test and run the script runttest.sh. This script will download the yeast genome and a pair of fastq files from SRA, then run the full pipeline, and verify the results.
+A script is included to run the full pipeline on a test Illumina resequencing dataset from the yeast genome. To run this test script change directory into the folder named test and run the script runttest.sh. 
+
+```
+cd ../test
+sh runtest.sh
+```
+
+This script will download the UCSC sacCer2 yeast reference genome, an annotation of TEs in the yeast reference genome from [Carr, Bensasson and Bergman (2012)](http://www.plosone.org/article/info%3Adoi%2F10.1371%2Fjournal.pone.0050978), and a pair of fastq files from SRA, then run the full pipeline, and verify the results.
 
 ###Running individual TE detection methods
-Each folder contains one of the TE detection methods tested in the review. In addition to the standard software there is also a file named runXXXX.sh Running this file without arguments will explain to the user what input files should be used to execute the method. These arguments should be supplied after the script name with spaces in between, as follows:
-
-    runXXXX.sh argument1 argument2 argument3 ...
+Each folder contains one of the TE detection methods tested in the review. In addition to the standard software there is also a file named runXXXX.sh. Running this file without arguments will explain to the user what input files should be used to execute the method. These arguments should be supplied after the script name with spaces in between, as follows:
+```
+runXXXX.sh argument1 argument2 argument3 ...
+```
 
 ###Output format
 The output of the run scripts is a bed format file with the 4th column containing the name of the TE name and whether it is a novel insertion (new) or a TE shared with the reference (old). The outputs also include a header line for use with the UCSC genome browser.
