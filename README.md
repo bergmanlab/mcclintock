@@ -1,6 +1,3 @@
-TE Detection Software Methods
-=============
-
 Introduction
 ------
 Many methods have been developed to detect TE insertions from whole genome shotgun sequencing data. In this pipeline we have collected five available methods. Most of them have different inputs and output formats so a pipeline has been created that standardises the input and output requirements and returns results from all five methods.
