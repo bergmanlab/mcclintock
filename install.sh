@@ -51,9 +51,10 @@ do
 done
 
 # Test BioPerl
-if ! perl -e 'use Bio::Seq' &>/dev/null;  then
-        echo "BioPerl... NOT FOUND"
-else
-        echo "BioPerl... FOUND"
-fi
-
+bioperltest=$(perl -e 'use Bio::Seq' 2>&1)
+if [ -n "$bioperltest" ]
+then
+  echo "BioPerl... NOT FOUND"
+else  
+  echo "BioPerl... FOUND"
+fi 
