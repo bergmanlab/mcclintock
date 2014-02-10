@@ -66,7 +66,7 @@ This will download and unpack all of the TE detection pipelines and check that t
 A script is included to run the full pipeline on a test Illumina resequencing dataset from the yeast genome. To run this test script change directory into the folder named test and run the script runttest.sh. 
 
 ```
-cd ../test
+cd test
 sh runtest.sh
 ```
 
