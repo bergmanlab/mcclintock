@@ -1,0 +1,7 @@
+insert	id	family	superfamily	suborder	order	class	problem
+TY3_1p#LTR_Gypsy	TY3_1p	TY3_1p	Gypsy	LTR	LTR	RNA	0
+TY1#LTR_Copia	TY1	TY1	Copia	LTR	LTR	RNA	0
+TY4#LTR_Copia	TY4	TY4	Copia	LTR	LTR	RNA	0
+TY5#LTR_Copia	TY5	TY5	Copia	LTR	LTR	RNA	0
+TY3#LTR_Gypsy	TY3	TY3	Gypsy	LTR	LTR	RNA	0
+TY2#LTR_Copia	TY1	TY2	Copia	LTR	LTR	RNA	0
