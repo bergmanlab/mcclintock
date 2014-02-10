@@ -1,6 +1,6 @@
 Introduction
 ------
-Many methods have been developed to detect TE insertions from whole genome shotgun sequencing data. In this pipeline we have collected five available methods. Most of them have different inputs and output formats so a pipeline has been created that standardises the input and output requirements and returns results from all five methods.
+Many methods have been developed to detect transposable element (TE) insertions from whole genome shotgun next-generation sequencing (NGS) data, each of which has different dependencies, run interfaces, and output formatcs. Here, we have developed a meta-pipeline to run five available methods for detecting TE insertions in NGS data, which generates output in the UCSC Browser extensible data (BED) format.
 
 Software Methods
 ------
