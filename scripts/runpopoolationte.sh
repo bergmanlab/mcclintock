@@ -3,8 +3,7 @@
 if (( $# > 0 ))
 then
 	# Get the name of the sample being analysed.
-	samplename=`basename $4 .fq`
-	samplename=`basename $4 .fastq`
+	samplename=`basename $4 _1.fastq`
 	
 	# Create a directory for analysis files
 	mkdir $samplename
@@ -46,14 +45,17 @@ then
 
 	# Create an output file in BED format selecting only the relevant inserts.
 	# Name and description for use with the UCSC genome browser are added to output here.
-        echo -e "track name=\"PoPoolationTE\" description=\"PoPoolationTE\"" >> $samplename/$samplename.bed
-	awk -F"\t" '{if($3=="FR" && $7!~/-/)print $1"\t"$2"\t"$2"\t"$4"_old\t0\t."; else if($3=="FR") print $1"\t"$2"\t"$2"\t"$4"_new\t0\t."}' $samplename/te-polymorphism.txt >> $samplename/$samplename.bed
+	awk -F"\t" '{if($3=="FR" && $7!~/-/)print $1"\t"$2"\t"$2"\t"$4"_old\t0\t."; else if($3=="FR") print $1"\t"$2"\t"$2"\t"$4"_new\t0\t."}' $samplename/te-polymorphism.txt >> $samplename/$samplename"_popoolationte_presort.bed"
+	echo -e "track name=\"$samplename"_PoPoolationTE"\" description=\"$samplename"_PoPoolationTE"\"" > $samplename/$samplename"_popoolationte.bed"
+	bedtools sort -i $samplename/$samplename"_popoolationte_presort.bed" >> $samplename/$samplename"_popoolationte.bed"
+	rm $samplename/$samplename"_popoolationte_presort.bed"
+
 else
 	echo "Supply fasta reference file as option 1"
 	echo "Supply fasta TE database file as option 2"
 	echo "Supply TE hierarchy file as option 3"
-	echo "Supply fq1 as option 4"
-	echo "Supply fq2 as option 5" 
+	echo "Supply fastq1 as option 4"
+	echo "Supply fastq2 as option 5" 
 	echo "Supply a gff3 annotation of the TEs in the genome as option 6"
 fi
 
