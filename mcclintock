@@ -8,7 +8,7 @@ then
 	printf "Argument 1: A reference genome sequence in fasta format.\n"
 	printf "Argument 2: The consensus sequences of the TEs for the species in fasta format.\n"
 	printf "Argument 3: The locations of known TEs in the reference genome in GFF 3 format. This must include a unique ID attribute for every entry.\n"
-	printf "Argument 4: A tab deliminated file with one entry per ID in the GFF file and two columns: the first containing the ID and the second containing the TE family it belongs to.\n"
+	printf "Argument 4: A tab delimited file with one entry per ID in the GFF file and two columns: the first containing the ID and the second containing the TE family it belongs to.\n"
 	printf "Argument 5: The absolute path of the first fastq file from a paired end read, this should be named ending _1.fastq.\n"
 	printf "Argument 6: The absolute path of the second fastq file from a paired end read, this should be named ending _2.fastq.\n"
 	exit
