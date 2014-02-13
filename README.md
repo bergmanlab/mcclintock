@@ -1,6 +1,6 @@
 Introduction
 ------
-Many methods have been developed to detect transposable element (TE) insertions from whole genome shotgun next-generation sequencing (NGS) data, each of which has different dependencies, run interfaces, and output formatcs. Here, we have developed a meta-pipeline to run five available methods for detecting TE insertions in NGS data, which generates output in the UCSC Browser extensible data (BED) format.
+Many methods have been developed to detect transposable element (TE) insertions from whole genome shotgun next-generation sequencing (NGS) data, each of which has different dependencies, run interfaces, and output formats. Here, we have developed a meta-pipeline to run five available methods for detecting TE insertions in NGS data, which generates output in the UCSC Browser extensible data (BED) format.
 
 Software Methods
 ------
@@ -16,7 +16,7 @@ All of the software systems must be run on a unix based system with the software
 
  * ngs_te_mapper
   * [R](http://cran.r-project.org/) (v.3.0.2)
-  * [blat](http://hgwdev.cse.ucsc.edu/~kent/src/blatSrc.zip) (v.35x1)
+  * [BWA](http://sourceforge.net/projects/bio-bwa/files/) (v.0.7.2-r351)
 
  * PoPoolationTE
   * [Perl](http://www.perl.org/get.html) (v.5.14.2)
@@ -70,7 +70,16 @@ cd test
 sh runtest.sh
 ```
 
-This script will download the UCSC sacCer2 yeast reference genome, an annotation of TEs in the yeast reference genome from [Carr, Bensasson and Bergman (2012)](http://www.plosone.org/article/info%3Adoi%2F10.1371%2Fjournal.pone.0050978), and a pair of fastq files from SRA, then run the full pipeline, and verify the results.
+This script will download the UCSC sacCer2 yeast reference genome, an annotation of TEs in the yeast reference genome from [Carr, Bensasson and Bergman (2012)](http://www.plosone.org/article/info%3Adoi%2F10.1371%2Fjournal.pone.0050978), and a pair of fastq files from SRA, then run the full pipeline.
+
+###Running the pipeline
+The pipeline is invoked by running the scrip mcclintock in the main project folder. mcclintock takes the following 6 input files, in the order described, and will run all five TE detection methods:
+* Argument 1: A reference genome sequence in fasta format.
+* Argument 2: The consensus sequences of the TEs for the species in fasta format.
+* Argument 3: The locations of known TEs in the reference genome in GFF 3 format. This must include a unique ID attribute for every entry.
+* Argument 4: A tab delimited file with one entry per ID in the GFF file and two columns: the first containing the ID and the second containing the TE family it belongs to.
+* Argument 5: The absolute path to the first fastq file from a paired end read, this must be named ending _1.fastq.
+* Argument 6: The absolute path to the second fastq file from a paired end read, this must be named ending _2.fastq.
 
 ###Running individual TE detection methods
 Each folder contains one of the TE detection methods tested in the review. In addition to the standard software there is also a file named runXXXX.sh. Running this file without arguments will explain to the user what input files should be used to execute the method. These arguments should be supplied after the script name with spaces in between, as follows:
@@ -79,4 +88,4 @@ runXXXX.sh argument1 argument2 argument3 ...
 ```
 
 ###Output format
-The output of the run scripts is a bed format file with the 4th column containing the name of the TE name and whether it is a novel insertion (new) or a TE shared with the reference (old). The outputs also include a header line for use with the UCSC genome browser.
+The output of the run scripts is a bed format file with the 4th column containing the name of the TE name and whether it is a novel insertion (new) or a TE shared with the reference (old). The outputs also include a header line for use with the UCSC genome browser. The output files are found within the subdirectory for each specific method in a folder named after the sample with the file name formatted as sample_method.bed.
