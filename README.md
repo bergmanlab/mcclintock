@@ -80,6 +80,10 @@ The pipeline is invoked by running the scrip mcclintock in the main project fold
 * Argument 4: A tab delimited file with one entry per ID in the GFF file and two columns: the first containing the ID and the second containing the TE family it belongs to.
 * Argument 5: The absolute path to the first fastq file from a paired end read, this must be named ending _1.fastq.
 * Argument 6: The absolute path to the second fastq file from a paired end read, this must be named ending _2.fastq.
+Data created during pre-processing will be stored in a folder in the main directory named after the reference genome used with individual sub-directories for samples. 
+
+###Output format
+The output of the run scripts is a bed format file with the 4th column containing the name of the TE name and whether it is a novel insertion (new) or a TE shared with the reference (old). The outputs also include a header line for use with the UCSC genome browser. The output files are found within the subdirectory for each specific method in a folder named after the sample with the file name formatted as sample_method.bed.
 
 ###Running individual TE detection methods
 Each folder contains one of the TE detection methods tested in the review. In addition to the standard software there is also a file named runXXXX.sh. Running this file without arguments will explain to the user what input files should be used to execute the method. These arguments should be supplied after the script name with spaces in between, as follows:
@@ -87,5 +91,3 @@ Each folder contains one of the TE detection methods tested in the review. In ad
 runXXXX.sh argument1 argument2 argument3 ...
 ```
 
-###Output format
-The output of the run scripts is a bed format file with the 4th column containing the name of the TE name and whether it is a novel insertion (new) or a TE shared with the reference (old). The outputs also include a header line for use with the UCSC genome browser. The output files are found within the subdirectory for each specific method in a folder named after the sample with the file name formatted as sample_method.bed.
