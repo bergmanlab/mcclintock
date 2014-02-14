@@ -73,11 +73,11 @@ sh runtest.sh
 This script will download the UCSC sacCer2 yeast reference genome, an annotation of TEs in the yeast reference genome from [Carr, Bensasson and Bergman (2012)](http://www.plosone.org/article/info%3Adoi%2F10.1371%2Fjournal.pone.0050978), and a pair of fastq files from SRA, then run the full pipeline.
 
 ###Running the pipeline
-The pipeline is invoked by running the scrip mcclintock in the main project folder. mcclintock takes the following 6 input files, in the order described, and will run all five TE detection methods:
+The pipeline is invoked by running the mcclintock.sh script in the main project folder. This script takes the following 6 input files, in the order described, and will run all five TE detection methods:
 * Argument 1: A reference genome sequence in fasta format.
 * Argument 2: The consensus sequences of the TEs for the species in fasta format.
 * Argument 3: The locations of known TEs in the reference genome in GFF 3 format. This must include a unique ID attribute for every entry.
-* Argument 4: A tab delimited file with one entry per ID in the GFF file and two columns: the first containing the ID and the second containing the TE family it belongs to.
+* Argument 4: A tab-delimited file with one entry per ID in the GFF file and two columns: the first containing the ID and the second containing the TE family it belongs to.
 * Argument 5: The absolute path to the first fastq file from a paired end read, this must be named ending _1.fastq.
 * Argument 6: The absolute path to the second fastq file from a paired end read, this must be named ending _2.fastq.
 
