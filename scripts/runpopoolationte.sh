@@ -47,8 +47,9 @@ then
 	# Name and description for use with the UCSC genome browser are added to output here.
 	awk -F"\t" '{if($3=="FR" && $7!~/-/)print $1"\t"$2"\t"$2"\t"$4"_old\t0\t."; else if($3=="FR") print $1"\t"$2"\t"$2"\t"$4"_new\t0\t."}' $samplename/te-polymorphism.txt >> $samplename/$samplename"_popoolationte_presort.bed"
 	echo -e "track name=\"$samplename"_PoPoolationTE"\" description=\"$samplename"_PoPoolationTE"\"" > $samplename/$samplename"_popoolationte.bed"
-	bedtools sort -i $samplename/$samplename"_popoolationte_presort.bed" >> $samplename/$samplename"_popoolationte.bed"
-	rm $samplename/$samplename"_popoolationte_presort.bed"
+	#bedtools sort -i $samplename/$samplename"_popoolationte_presort.bed" >> $samplename/$samplename"_popoolationte.bed"
+	mv $samplename/$samplename"_popoolationte_presort.bed" $samplename/$samplename"_popoolationte.bed" 
+	#rm $samplename/$samplename"_popoolationte_presort.bed"
 
 else
 	echo "Supply fasta reference file as option 1"

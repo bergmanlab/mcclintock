@@ -124,7 +124,7 @@ printf "\nRunning PoPoolationTE pipeline...\n\n"
 
 # Create te_hierachy
 printf "insert\tid\tfamily\tsuperfamily\tsuborder\torder\tclass\tproblem\n" > $test_dir/$genome/reference/te_hierarchy
-awk '{printf $0"\tna\tna\tna\tna\tna\t0\n"}' $te_families >> $test_dir/$genome/reference/te_hierarchy
+awk '{printf $0"\t"$2"\t"$2"\tna\tna\tna\t0\n"}' $te_families >> $test_dir/$genome/reference/te_hierarchy
 te_hierarchy=$test_dir/$genome/reference/te_hierarchy
 
 cd ../popoolationte
