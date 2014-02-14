@@ -34,7 +34,7 @@ then
 	
 	# Extract only the relevant data from the output file and sort the results
 	# Name and description for use with the UCSC genome browser are added to output here.
-	awk -F'[\t;]' '{print $1"\t"$2"\t"$3"\t"$9"_new\t0\t"$8}' $projectdir/analysis/bed_tsd/$samplename"_"$fasta2"insertions.bed" > $projectdir/$3"_ngs_te_mapper_presort.bed"
+	awk -F'[\t;]' '{print $1"\t"$2"\t"$3"\t"$6"_"$9"\t0\t"$5}' $projectdir/analysis/bed_tsd/$samplename"_"$fasta2"insertions.bed" > $projectdir/$3"_ngs_te_mapper_presort.bed"
 	echo -e "track name=\"$3"_ngs_te_mapper"\" description=\"$3"_ngs_te_mapper"\"" > $projectdir/$3"_ngs_te_mapper.bed"
 	bedtools sort -i $projectdir/$3"_ngs_te_mapper_presort.bed" >> $projectdir/$3"_ngs_te_mapper.bed"
 	rm $projectdir/$3"_ngs_te_mapper_presort.bed"
