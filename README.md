@@ -80,6 +80,7 @@ The pipeline is invoked by running the scrip mcclintock in the main project fold
 * Argument 4: A tab delimited file with one entry per ID in the GFF file and two columns: the first containing the ID and the second containing the TE family it belongs to.
 * Argument 5: The absolute path to the first fastq file from a paired end read, this must be named ending _1.fastq.
 * Argument 6: The absolute path to the second fastq file from a paired end read, this must be named ending _2.fastq.
+
 Data created during pre-processing will be stored in a folder in the main directory named after the reference genome used with individual sub-directories for samples. 
 
 ###Output format
