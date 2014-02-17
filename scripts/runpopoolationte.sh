@@ -47,7 +47,7 @@ then
 	# Name and description for use with the UCSC genome browser are added to output here.
 	awk -F"\t" '{if($3=="FR" && $7!~/-/)print $1"\t"$2"\t"$2"\t"$4"_old\t0\t."; else if($3=="FR") print $1"\t"$2"\t"$2"\t"$4"_new\t0\t."}' $samplename/te-polymorphism.txt >> $samplename/$samplename"_popoolationte_presort.bed"
 	echo -e "track name=\"$samplename"_PoPoolationTE"\" description=\"$samplename"_PoPoolationTE"\"" > $samplename/$samplename"_popoolationte.bed"
-	sort -k1,1 -k2,2n SRR800842"_popoolationte_presort.bed" >> $samplename/$samplename"_popoolationte.bed"
+	sort -k1,1 -k2,2n $samplename/$samplename"_popoolationte_presort.bed" >> $samplename/$samplename"_popoolationte.bed"
 	rm $samplename/$samplename"_popoolationte_presort.bed"
 
 else
