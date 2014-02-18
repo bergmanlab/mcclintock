@@ -1,27 +1,60 @@
 #!/bin/bash -l
 
-# Argument order: reference consensus gfflocations fastq1 fastq2
-# Print usage if user is incorrect:
-if (( $# != 6 ))
-then
-	printf "This script takes the following inputs and will run 5 different transposable element (TE) detection methods:\n"
-	printf "Argument 1: A reference genome sequence in fasta format.\n"
-	printf "Argument 2: The consensus sequences of the TEs for the species in fasta format.\n"
-	printf "Argument 3: The locations of known TEs in the reference genome in GFF 3 format. This must include a unique ID attribute for every entry.\n"
-	printf "Argument 4: A tab delimited file with one entry per ID in the GFF file and two columns: the first containing the ID and the second containing the TE family it belongs to.\n"
-	printf "Argument 5: The absolute path of the first fastq file from a paired end read, this should be named ending _1.fastq.\n"
-	printf "Argument 6: The absolute path of the second fastq file from a paired end read, this should be named ending _2.fastq.\n"
-	exit
-fi
+# Get the options supplied to the program.
+while getopts ":r:c:g:h:1:2:" opt; do
+	case $opt in
+		r)
+			inputr=$OPTARG
+			;;
+		c)
+			inputc=$OPTARG
+			;;
+		g)
+			inputg=$OPTARG
+			;;
+		h)
+			inputh=$OPTARG
+			;;
+		1)	
+			input1=$OPTARG
+			;;
+		2)
+			input2=$OPTARG
+			;;
+		\?)
+			printf "Invalid option: -$OPTARG\n\n"
+			printf "This script takes the following inputs and will run 5 different transposable element (TE) detection methods:\n"
+			printf "-r : A reference genome sequence in fasta format.\n"
+			printf "-c : The consensus sequences of the TEs for the species in fasta format.\n"
+			printf "-g : The locations of known TEs in the reference genome in GFF 3 format. This must include a unique ID attribute for every entry.\n"
+			printf "-h : A tab delimited file with one entry per ID in the GFF file and two columns: the first containing the ID and the second containing the TE family it belongs to. The family should correspond to the names of the sequences in the consensus fasta file.\n"
+			printf "-1 : The absolute path of the first fastq file from a paired end read, this should be named ending _1.fastq.\n"
+			printf "-2 : The absolute path of the second fastq file from a paired end read, this should be named ending _2.fastq.\n"
+			exit 1
+			;;
+		:)
+			printf "Option -$OPTARG requires an argument.\n\n"
+			printf "This script takes the following inputs and will run 5 different transposable element (TE) detection methods:\n"
+			printf "-r : A reference genome sequence in fasta format.\n"
+			printf "-c : The consensus sequences of the TEs for the species in fasta format.\n"
+			printf "-g : The locations of known TEs in the reference genome in GFF 3 format. This must include a unique ID attribute for every entry.\n"
+			printf "-h : A tab delimited file with one entry per ID in the GFF file and two columns: the first containing the ID and the second containing the TE family it belongs to. The family should correspond to the names of the sequences in the consensus fasta file.\n"
+			printf "-1 : The absolute path of the first fastq file from a paired end read, this should be named ending _1.fastq.\n"
+			printf "-2 : The absolute path of the second fastq file from a paired end read, this should be named ending _2.fastq.\n"
+			exit 1
+			;;
+	esac
+done
 
-genome=${1##*/}
-genome=${genome%%.*}
-sample=${5##*/}
-sample=${sample%%_1.f*}
+# Set up folder structure
 
 printf "\nCreating directory structure...\n\n"
 
-# Set up folder structure
+genome=${inputr##*/}
+genome=${genome%%.*}
+sample=${input1##*/}
+sample=${sample%%_1.f*}
+
 test_dir=`pwd`
 mkdir $test_dir/$genome/
 mkdir $test_dir/$genome/reference
@@ -31,18 +64,18 @@ mkdir $test_dir/$genome/$sample/bam
 mkdir $test_dir/$genome/$sample/sam
 
 # Copy inout files in to sample directory (neccessary for RelocaTE)
-reference_genome_file=${1##*/}
-cp -n $1 $test_dir/$genome/reference/$reference_genome_file
-consensus_te_seqs_file=${2##*/}
-cp -n $2 $test_dir/$genome/reference/$consensus_te_seqs_file
-te_locations_file=${3##*/}
-cp -n $3 $test_dir/$genome/reference/$te_locations_file
-te_families_file=${4##*/}
-cp -n $4 $test_dir/$genome/reference/$te_families_file
-fastq1_file=${5##*/}
-cp -s $5 $test_dir/$genome/$sample/fastq/$fastq1_file
-fastq2_file=${6##*/}
-cp -s $6 $test_dir/$genome/$sample/fastq/$fastq2_file
+reference_genome_file=${inputr##*/}
+cp -n $inputr $test_dir/$genome/reference/$reference_genome_file
+consensus_te_seqs_file=${inputc##*/}
+cp -n $inputc $test_dir/$genome/reference/$consensus_te_seqs_file
+te_locations_file=${inputg##*/}
+cp -n $inputg $test_dir/$genome/reference/$te_locations_file
+te_families_file=${inputh##*/}
+cp -n $inputh $test_dir/$genome/reference/$te_families_file
+fastq1_file=${input1##*/}
+cp -s $input1 $test_dir/$genome/$sample/fastq/$fastq1_file
+fastq2_file=${input2##*/}
+cp -s $input2 $test_dir/$genome/$sample/fastq/$fastq2_file
 
 # Assign variables to input files
 reference_genome=$test_dir/$genome/reference/$reference_genome_file
@@ -63,9 +96,10 @@ mv edited.gff $te_locations
 bedtools getfasta -name -fi $reference_genome -bed $te_locations -fo $test_dir/$genome/reference/all_te_seqs.fasta
 all_te_seqs=$test_dir/$genome/reference/all_te_seqs.fasta
 
+# Create sam and bam files for input
+
 printf "\nCreating bam alignment...\n\n"
 
-# Create sam and bam files for input
 bwa mem -v 0 $reference_genome $fastq1 $fastq2 > $test_dir/$genome/$sample/sam/$sample.sam
 sort --temporary-directory=. $test_dir/$genome/$sample/sam/$sample.sam > $test_dir/$genome/$sample/sam/sorted$sample.sam
 rm $test_dir/$genome/$sample/sam/$sample.sam
@@ -85,11 +119,15 @@ samtools index $bam
 printf "\nRunning RelocaTE pipeline...\n\n"
 
 # Add TSD lengths to consensus TE sequences
-awk '{if (/>/) print $0" TSD=UNK"; else print $0}' $consensus_te_seqs > $test_dir/$genome/reference/reloca_te_seqs.fasta
-relocate_te_seqs=$test_dir/$genome/reference/reloca_te_seqs.fasta
+awk '{if (/>/) print $0" TSD=UNK"; else print $0}' $consensus_te_seqs > $test_dir/$genome/reference/relocate_te_seqs.fasta
+relocate_te_seqs=$test_dir/$genome/reference/relocate_te_seqs.fasta
+
+# Create general gff file to allow reference TE detection in RelocaTE
+awk 'FNR==NR{array[$1]=$2;next}{print $1,$2,array[$3],$4,$5,$6,$7,$8,$9}' FS='\t' OFS='\t' $te_families $te_locations > $test_dir/$genome/reference/relocate_te_locations.gff
+relocate_te_locations=$test_dir/$genome/reference/relocate_te_locations.gff
 
 cd RelocaTE
-bash runrelocate.sh $relocate_te_seqs $reference_genome $test_dir/$genome/$sample/fastq $sample $te_locations
+bash runrelocate.sh $relocate_te_seqs $reference_genome $test_dir/$genome/$sample/fastq $sample $relocate_te_locations
 
 # Run ngs_te_mapper pipeline
 
