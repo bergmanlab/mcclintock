@@ -33,4 +33,4 @@ rm tmp
 
 # Run the pipeline 
 cd ..
-bash mcclintock.sh $test_dir/sacCer2.fa $test_dir/sac_cer_TE_seqs.fa $test_dir/reference_TE_locations.gff $test_dir/sac_cer_te_families.tsv $test_dir/SRR800842_1.fastq $test_dir/SRR800842_2.fastq
+bash mcclintock.sh -r $test_dir/sacCer2.fa -c $test_dir/sac_cer_TE_seqs.fa -g $test_dir/reference_TE_locations.gff -h $test_dir/sac_cer_te_families.tsv -1 $test_dir/SRR800842_1.fastq -2 $test_dir/SRR800842_2.fastq
