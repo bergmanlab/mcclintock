@@ -35,6 +35,9 @@ cp scripts/splitforRetroSeq.pl RetroSeq
 cp scripts/runrelocate.sh RelocaTE
 cp scripts/runtelocate.sh TE-locate
 
+# Change #! to make software more compatible with different environments
+sed -i 's/#!\/usr\/bin\/perl -w/#!\/usr\/bin\/env perl/' RelocaTE/scripts/*.pl
+
 # Check dependencies 
 echo "Testing dependencies..."
 dependencies="R RepeatMasker bedtools samtools bcftools bwa exonerate bowtie blat perl"
