@@ -1,7 +1,7 @@
 #!/bin/bash -l
 
 # Get the options supplied to the program.
-while getopts ":r:c:g:h:1:2:" opt; do
+while getopts ":r:c:g:t:1:2:h" opt; do
 	case $opt in
 		r)
 			inputr=$OPTARG
@@ -12,8 +12,8 @@ while getopts ":r:c:g:h:1:2:" opt; do
 		g)
 			inputg=$OPTARG
 			;;
-		h)
-			inputh=$OPTARG
+		t)
+			inputt=$OPTARG
 			;;
 		1)	
 			input1=$OPTARG
@@ -21,26 +21,39 @@ while getopts ":r:c:g:h:1:2:" opt; do
 		2)
 			input2=$OPTARG
 			;;
+		h)
+			echo "This script takes the following inputs and will run 5 different transposable element (TE) detection methods:"
+			echo "-r : A reference genome sequence in fasta format."
+			echo "-c : The consensus sequences of the TEs for the species in fasta format."
+			echo "-g : The locations of known TEs in the reference genome in GFF 3 format. This must include a unique ID attribute for every entry."
+			echo "-t : A tab delimited file with one entry per ID in the GFF file and two columns: the first containing the ID and the second containing the TE family it belongs to. The family should correspond to the names of the sequences in the consensus fasta file."
+			echo "-1 : The absolute path of the first fastq file from a paired end read, this should be named ending _1.fastq."
+			echo "-2 : The absolute path of the second fastq file from a paired end read, this should be named ending _2.fastq."
+			echo "-h : Prints this help guide."
+			exit 1
+			;;
 		\?)
-			printf "Invalid option: -$OPTARG\n\n"
-			printf "This script takes the following inputs and will run 5 different transposable element (TE) detection methods:\n"
-			printf "-r : A reference genome sequence in fasta format.\n"
-			printf "-c : The consensus sequences of the TEs for the species in fasta format.\n"
-			printf "-g : The locations of known TEs in the reference genome in GFF 3 format. This must include a unique ID attribute for every entry.\n"
-			printf "-h : A tab delimited file with one entry per ID in the GFF file and two columns: the first containing the ID and the second containing the TE family it belongs to. The family should correspond to the names of the sequences in the consensus fasta file.\n"
-			printf "-1 : The absolute path of the first fastq file from a paired end read, this should be named ending _1.fastq.\n"
-			printf "-2 : The absolute path of the second fastq file from a paired end read, this should be named ending _2.fastq.\n"
+			echo "Invalid option: -$OPTARG"
+			echo "This script takes the following inputs and will run 5 different transposable element (TE) detection methods:"
+			echo "-r : A reference genome sequence in fasta format."
+			echo "-c : The consensus sequences of the TEs for the species in fasta format."
+			echo "-g : The locations of known TEs in the reference genome in GFF 3 format. This must include a unique ID attribute for every entry."
+			echo "-t : A tab delimited file with one entry per ID in the GFF file and two columns: the first containing the ID and the second containing the TE family it belongs to. The family should correspond to the names of the sequences in the consensus fasta file."
+			echo "-1 : The absolute path of the first fastq file from a paired end read, this should be named ending _1.fastq."
+			echo "-2 : The absolute path of the second fastq file from a paired end read, this should be named ending _2.fastq."
+			echo "-h : Prints this help guide."
 			exit 1
 			;;
 		:)
-			printf "Option -$OPTARG requires an argument.\n\n"
-			printf "This script takes the following inputs and will run 5 different transposable element (TE) detection methods:\n"
-			printf "-r : A reference genome sequence in fasta format.\n"
-			printf "-c : The consensus sequences of the TEs for the species in fasta format.\n"
-			printf "-g : The locations of known TEs in the reference genome in GFF 3 format. This must include a unique ID attribute for every entry.\n"
-			printf "-h : A tab delimited file with one entry per ID in the GFF file and two columns: the first containing the ID and the second containing the TE family it belongs to. The family should correspond to the names of the sequences in the consensus fasta file.\n"
-			printf "-1 : The absolute path of the first fastq file from a paired end read, this should be named ending _1.fastq.\n"
-			printf "-2 : The absolute path of the second fastq file from a paired end read, this should be named ending _2.fastq.\n"
+			echo "Option -$OPTARG requires an argument."
+			echo "This script takes the following inputs and will run 5 different transposable element (TE) detection methods:"
+			echo "-r : A reference genome sequence in fasta format."
+			echo "-c : The consensus sequences of the TEs for the species in fasta format."
+			echo "-g : The locations of known TEs in the reference genome in GFF 3 format. This must include a unique ID attribute for every entry."
+			echo "-t : A tab delimited file with one entry per ID in the GFF file and two columns: the first containing the ID and the second containing the TE family it belongs to. The family should correspond to the names of the sequences in the consensus fasta file."
+			echo "-1 : The absolute path of the first fastq file from a paired end read, this should be named ending _1.fastq."
+			echo "-2 : The absolute path of the second fastq file from a paired end read, this should be named ending _2.fastq."
+			echo "-h : Prints this help guide.\n"
 			exit 1
 			;;
 	esac
@@ -70,8 +83,8 @@ consensus_te_seqs_file=${inputc##*/}
 cp -n $inputc $test_dir/$genome/reference/$consensus_te_seqs_file
 te_locations_file=${inputg##*/}
 cp -n $inputg $test_dir/$genome/reference/$te_locations_file
-te_families_file=${inputh##*/}
-cp -n $inputh $test_dir/$genome/reference/$te_families_file
+te_families_file=${inputt##*/}
+cp -n $inputt $test_dir/$genome/reference/$te_families_file
 fastq1_file=${input1##*/}
 cp -s $input1 $test_dir/$genome/$sample/fastq/$fastq1_file
 fastq2_file=${input2##*/}
