@@ -1,7 +1,7 @@
 #!/bin/bash -l
 
 # Get the options supplied to the program.
-while getopts ":r:c:g:t:1:2:h" opt; do
+while getopts ":r:c:g:t:1:2:hi" opt; do
 	case $opt in
 		r)
 			inputr=$OPTARG
@@ -20,6 +20,9 @@ while getopts ":r:c:g:t:1:2:h" opt; do
 			;;
 		2)
 			input2=$OPTARG
+			;;
+		i)	
+			remove_intermediates=on
 			;;
 		h)
 			echo "This script takes the following inputs and will run 5 different transposable element (TE) detection methods:"
@@ -184,10 +187,24 @@ bash runpopoolationte.sh $reference_genome $all_te_seqs $te_hierarchy $fastq1 $f
 
 # Collate results from individual methods folders
 cd $test_dir
-mv RetroSeq/$sample/$sample"_retroseq.bed" $test_dir/$genome/$sample/results/
 mv RelocaTE/$sample/$sample"_relocate.bed" $test_dir/$genome/$sample/results/
 mv ngs_te_mapper/$sample/$sample"_ngs_te_mapper.bed" $test_dir/$genome/$sample/results/
+mv RetroSeq/$sample/$sample"_retroseq.bed" $test_dir/$genome/$sample/results/
 mv TE-locate/$sample/$sample"_telocate.bed" $test_dir/$genome/$sample/results/
 mv popoolationte/$sample/$sample"_popoolationte.bed" $test_dir/$genome/$sample/results/
+
+# If cleanup intermediate files is specified then delete all intermediate files specific to the sample
+# i.e. leave any reusable species data behind.
+if [ "$remove_intermediates" = "on" ]
+then
+	rm -r $genome/$sample/reads
+	rm -r $genome/$sample/bam
+	rm -r $genome/$sample/sam
+	rm -r RelocaTE/$sample
+	rm -r ngs_te_mapper/$sample
+	rm -r RetroSeq/$sample
+	rm -r TE-locate/$sample
+	rm -r popoolationte/$sample
+fi
 
 printf "\nPipeline Complete\n\n"
