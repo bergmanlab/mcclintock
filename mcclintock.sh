@@ -72,7 +72,7 @@ test_dir=`pwd`
 mkdir $test_dir/$genome/
 mkdir $test_dir/$genome/reference
 mkdir $test_dir/$genome/$sample
-mkdir $test_dir/$genome/$sample/fastq
+mkdir $test_dir/$genome/$sample/reads
 mkdir $test_dir/$genome/$sample/bam
 mkdir $test_dir/$genome/$sample/sam
 
@@ -86,17 +86,17 @@ cp -n $inputg $test_dir/$genome/reference/$te_locations_file
 te_families_file=${inputt##*/}
 cp -n $inputt $test_dir/$genome/reference/$te_families_file
 fastq1_file=${input1##*/}
-cp -s $input1 $test_dir/$genome/$sample/fastq/$fastq1_file
+cp -s $input1 $test_dir/$genome/$sample/reads/$fastq1_file
 fastq2_file=${input2##*/}
-cp -s $input2 $test_dir/$genome/$sample/fastq/$fastq2_file
+cp -s $input2 $test_dir/$genome/$sample/reads/$fastq2_file
 
 # Assign variables to input files
 reference_genome=$test_dir/$genome/reference/$reference_genome_file
 consensus_te_seqs=$test_dir/$genome/reference/$consensus_te_seqs_file
 te_locations=$test_dir/$genome/reference/$te_locations_file
 te_families=$test_dir/$genome/reference/$te_families_file
-fastq1=$test_dir/$genome/$sample/fastq/$fastq1_file
-fastq2=$test_dir/$genome/$sample/fastq/$fastq2_file
+fastq1=$test_dir/$genome/$sample/reads/$fastq1_file
+fastq2=$test_dir/$genome/$sample/reads/$fastq2_file
 
 # Create indexes of reference genome
 samtools faidx $reference_genome
@@ -140,7 +140,7 @@ awk 'FNR==NR{array[$1]=$2;next}{print $1,$2,array[$3],$4,$5,$6,$7,$8,$9}' FS='\t
 relocate_te_locations=$test_dir/$genome/reference/relocate_te_locations.gff
 
 cd RelocaTE
-bash runrelocate.sh $relocate_te_seqs $reference_genome $test_dir/$genome/$sample/fastq $sample $relocate_te_locations
+bash runrelocate.sh $relocate_te_seqs $reference_genome $test_dir/$genome/$sample/reads $sample $relocate_te_locations
 
 # Run ngs_te_mapper pipeline
 
