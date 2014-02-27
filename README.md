@@ -82,6 +82,11 @@ The pipeline is invoked by running the mcclintock.sh script in the main project 
 * -2 : The absolute path of the second fastq file from a paired end read, this should be named ending _2.fastq.
 * -h : Prints this help guide.
 
+Example pipeline run:
+```
+sh mcclintock.sh -r reference.fasta -c te_consensus.fasta -g te_locations.gff -t te_families.tsv -1 sample_1.fastq -2 sample_2.fastq
+```
+
 Data created during pre-processing will be stored in a folder in the main directory named after the reference genome used with individual sub-directories for samples. 
 
 ###Output format
@@ -90,6 +95,6 @@ The output of the run scripts is a bed format file with the 4th column containin
 ###Running individual TE detection methods
 Each folder contains one of the TE detection methods tested in the review. In addition to the standard software there is also a file named runXXXX.sh. Running this file without arguments will explain to the user what input files should be used to execute the method. These arguments should be supplied after the script name with spaces in between, as follows:
 ```
-runXXXX.sh argument1 argument2 argument3 ...
+sh runXXXX.sh argument1 argument2 argument3 ...
 ```
 
