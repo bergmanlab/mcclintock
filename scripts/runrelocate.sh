@@ -3,7 +3,9 @@
 if (( $# > 0 ))
 then
 	# Run the relocaTE pipeline
-	awk -F'[\t]' '{print $3"\t"$1":"$4".."$5}' $5 > annotation
+	if [! -f annotation]; then
+		awk -F'[\t]' '{print $3"\t"$1":"$4".."$5}' $5 > annotation
+	fi
 	perl scripts/relocaTE.pl -t $1 -d $3 -g $2 -1 _1 -2 _2 -o $4 -r annotation
 	
 	# Extract the relevant information from the output files for each TE and collate them.

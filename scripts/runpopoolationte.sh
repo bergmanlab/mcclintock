@@ -9,10 +9,12 @@ then
 	mkdir $samplename
 	
 	# Mask any copies of the TE present in the reference genome.
-	RepeatMasker -no_is -nolow -norna --lib $2 -pa 4 $1
-	cat $1.masked $2 > combinedref.fa
-	mv combinedref.fa $1.masked
-	bwa index $1.masked
+	if [!-f $1.masked.bwt]; then
+		RepeatMasker -no_is -nolow -norna --lib $2 -pa 4 $1
+		cat $1.masked $2 > combinedref.fa
+		mv combinedref.fa $1.masked
+		bwa index $1.masked
+	fi
 
 	# Remove any spaces in the names of reads to prevent errors.
 	tr -d ' ' < $4 > $samplename/reads1.fq
