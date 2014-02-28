@@ -30,6 +30,7 @@ while getopts ":r:c:g:t:1:2:hi" opt; do
 			echo "-c : The consensus sequences of the TEs for the species in fasta format."
 			echo "-g : The locations of known TEs in the reference genome in GFF 3 format. This must include a unique ID attribute for every entry."
 			echo "-t : A tab delimited file with one entry per ID in the GFF file and two columns: the first containing the ID and the second containing the TE family it belongs to. The family should correspond to the names of the sequences in the consensus fasta file."
+			echo "-i : If this option is specified then all sample specific intermediate files will be removed, leaving only the overall results."
 			echo "-1 : The absolute path of the first fastq file from a paired end read, this should be named ending _1.fastq."
 			echo "-2 : The absolute path of the second fastq file from a paired end read, this should be named ending _2.fastq."
 			echo "-h : Prints this help guide."
@@ -42,6 +43,7 @@ while getopts ":r:c:g:t:1:2:hi" opt; do
 			echo "-c : The consensus sequences of the TEs for the species in fasta format."
 			echo "-g : The locations of known TEs in the reference genome in GFF 3 format. This must include a unique ID attribute for every entry."
 			echo "-t : A tab delimited file with one entry per ID in the GFF file and two columns: the first containing the ID and the second containing the TE family it belongs to. The family should correspond to the names of the sequences in the consensus fasta file."
+			echo "-i : If this option is specified then all sample specific intermediate files will be removed, leaving only the overall results."
 			echo "-1 : The absolute path of the first fastq file from a paired end read, this should be named ending _1.fastq."
 			echo "-2 : The absolute path of the second fastq file from a paired end read, this should be named ending _2.fastq."
 			echo "-h : Prints this help guide."
@@ -54,6 +56,7 @@ while getopts ":r:c:g:t:1:2:hi" opt; do
 			echo "-c : The consensus sequences of the TEs for the species in fasta format."
 			echo "-g : The locations of known TEs in the reference genome in GFF 3 format. This must include a unique ID attribute for every entry."
 			echo "-t : A tab delimited file with one entry per ID in the GFF file and two columns: the first containing the ID and the second containing the TE family it belongs to. The family should correspond to the names of the sequences in the consensus fasta file."
+			echo "-i : If this option is specified then all sample specific intermediate files will be removed, leaving only the overall results."
 			echo "-1 : The absolute path of the first fastq file from a paired end read, this should be named ending _1.fastq."
 			echo "-2 : The absolute path of the second fastq file from a paired end read, this should be named ending _2.fastq."
 			echo "-h : Prints this help guide.\n"
@@ -197,6 +200,7 @@ mv popoolationte/$sample/$sample"_popoolationte.bed" $test_dir/$genome/$sample/r
 # i.e. leave any reusable species data behind.
 if [ "$remove_intermediates" = "on" ]
 then
+	printf "\nRemoving intermediate files\n\n"
 	rm -r $genome/$sample/reads
 	rm -r $genome/$sample/bam
 	rm -r $genome/$sample/sam
