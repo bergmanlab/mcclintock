@@ -78,6 +78,7 @@ The pipeline is invoked by running the mcclintock.sh script in the main project 
 * -c : The consensus sequences of the TEs for the species in fasta format.
 * -g : The locations of known TEs in the reference genome in GFF 3 format. This must include a unique ID attribute for every entry.
 * -t : A tab delimited file with one entry per ID in the GFF file and two columns: the first containing the ID and the second containing the TE family it belongs to. The family should correspond to the names of the sequences in the consensus fasta file.
+* -i : If this option is specified then all sample specific intermediate files will be removed, leaving only the overall results.
 * -1 : The absolute path of the first fastq file from a paired end read, this should be named ending _1.fastq.
 * -2 : The absolute path of the second fastq file from a paired end read, this should be named ending _2.fastq.
 * -h : Prints this help guide.
@@ -90,7 +91,7 @@ sh mcclintock.sh -r reference.fasta -c te_consensus.fasta -g te_locations.gff -t
 Data created during pre-processing will be stored in a folder in the main directory named after the reference genome used with individual sub-directories for samples. 
 
 ###Output format
-The output of the run scripts is a bed format file with the 4th column containing the name of the TE name and whether it is a novel insertion (new) or a TE shared with the reference (old). The outputs also include a header line for use with the UCSC genome browser. The output files are found within the subdirectory for each specific method in a folder named after the sample with the file name formatted as sample_method.bed.
+The output of the run scripts is a bed format file with the 4th column containing the name of the TE name and whether it is a novel insertion (new) or a TE shared with the reference (old). The outputs also include a header line for use with the UCSC genome browser. The final results files are located in a results folder saved in the specific sample folder within the directory named after the reference genome.
 
 ###Running individual TE detection methods
 Each folder contains one of the TE detection methods tested in the review. In addition to the standard software there is also a file named runXXXX.sh. Running this file without arguments will explain to the user what input files should be used to execute the method. These arguments should be supplied after the script name with spaces in between, as follows:
