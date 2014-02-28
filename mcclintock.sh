@@ -75,23 +75,33 @@ sample=${input1##*/}
 sample=${sample%%_1.f*}
 
 test_dir=`pwd`
-mkdir $test_dir/$genome/
-mkdir $test_dir/$genome/reference
+if [! -f $test_dir/$genome]; then
+	mkdir $test_dir/$genome/
+	mkdir $test_dir/$genome/reference
+fi
 mkdir $test_dir/$genome/$sample
 mkdir $test_dir/$genome/$sample/reads
 mkdir $test_dir/$genome/$sample/bam
 mkdir $test_dir/$genome/$sample/sam
 mkdir $test_dir/$genome/$sample/results
 
-# Copy inout files in to sample directory (neccessary for RelocaTE)
+# Copy input files in to sample directory (neccessary for RelocaTE)
 reference_genome_file=${inputr##*/}
-cp -n $inputr $test_dir/$genome/reference/$reference_genome_file
+if [! -f $test_dir/$genome/reference/$reference_genome_file]; then
+	cp -n $inputr $test_dir/$genome/reference/$reference_genome_file
+fi
 consensus_te_seqs_file=${inputc##*/}
-cp -n $inputc $test_dir/$genome/reference/$consensus_te_seqs_file
+if [! -f $test_dir/$genome/reference/$consensus_te_seqs_file]; then
+	cp -n $inputc $test_dir/$genome/reference/$consensus_te_seqs_file
+fi
 te_locations_file=${inputg##*/}
-cp -n $inputg $test_dir/$genome/reference/$te_locations_file
+if [! -f $test_dir/$genome/reference/$te_locations_file]; then
+	cp -n $inputg $test_dir/$genome/reference/$te_locations_file
+fi
 te_families_file=${inputt##*/}
-cp -n $inputt $test_dir/$genome/reference/$te_families_file
+if [! -f $test_dir/$genome/reference/$te_families_file]; then
+	cp -n $inputt $test_dir/$genome/reference/$te_families_file
+fi
 fastq1_file=${input1##*/}
 cp -s $input1 $test_dir/$genome/$sample/reads/$fastq1_file
 fastq2_file=${input2##*/}
@@ -105,15 +115,21 @@ te_families=$test_dir/$genome/reference/$te_families_file
 fastq1=$test_dir/$genome/$sample/reads/$fastq1_file
 fastq2=$test_dir/$genome/$sample/reads/$fastq2_file
 
-# Create indexes of reference genome
-samtools faidx $reference_genome
-bwa index $reference_genome
+# Create indexes of reference genome if not already made for this genome
+if [! -f $reference_genome".fai"]; then 
+	samtools faidx $reference_genome
+fi
+if [! -f $reference_genome".bwt"]; then 
+	bwa index $reference_genome
+fi
 
-# Extract sequence of all reference TE copies
+# Extract sequence of all reference TE copies if this has not already been done
 # Cut first line if it begins with #
-grep -v '^#' $te_locations | awk -F'[\t=;]' 'BEGIN {OFS = "\t"}; {printf $1"\t"$2"\t"; for(x=1;x<=NF;x++) if ($x~"ID") printf $(x+1); print "\t"$4,$5,$6,$7,$8,"ID="}' | awk -F'\t' '{print $0$3";Name="$3";Alias="$3}' > edited.gff
-mv edited.gff $te_locations
-bedtools getfasta -name -fi $reference_genome -bed $te_locations -fo $test_dir/$genome/reference/all_te_seqs.fasta
+if [! -f $test_dir/$genome/reference/all_te_seqs.fasta]; then
+	grep -v '^#' $te_locations | awk -F'[\t=;]' 'BEGIN {OFS = "\t"}; {printf $1"\t"$2"\t"; for(x=1;x<=NF;x++) if ($x~"ID") printf $(x+1); print "\t"$4,$5,$6,$7,$8,"ID="}' | awk -F'\t' '{print $0$3";Name="$3";Alias="$3}' > edited.gff
+	mv edited.gff $te_locations
+	bedtools getfasta -name -fi $reference_genome -bed $te_locations -fo $test_dir/$genome/reference/all_te_seqs.fasta
+fi
 all_te_seqs=$test_dir/$genome/reference/all_te_seqs.fasta
 
 # Create sam and bam files for input
@@ -139,11 +155,15 @@ samtools index $bam
 printf "\nRunning RelocaTE pipeline...\n\n"
 
 # Add TSD lengths to consensus TE sequences
-awk '{if (/>/) print $0" TSD=UNK"; else print $0}' $consensus_te_seqs > $test_dir/$genome/reference/relocate_te_seqs.fasta
+if [! -f $test_dir/$genome/reference/relocate_te_seqs.fasta]; then
+	awk '{if (/>/) print $0" TSD=UNK"; else print $0}' $consensus_te_seqs > $test_dir/$genome/reference/relocate_te_seqs.fasta
+fi
 relocate_te_seqs=$test_dir/$genome/reference/relocate_te_seqs.fasta
 
 # Create general gff file to allow reference TE detection in RelocaTE
-awk 'FNR==NR{array[$1]=$2;next}{print $1,$2,array[$3],$4,$5,$6,$7,$8,$9}' FS='\t' OFS='\t' $te_families $te_locations > $test_dir/$genome/reference/relocate_te_locations.gff
+if [! -f $test_dir/$genome/reference/relocate_te_locations.gff]; then
+	awk 'FNR==NR{array[$1]=$2;next}{print $1,$2,array[$3],$4,$5,$6,$7,$8,$9}' FS='\t' OFS='\t' $te_families $te_locations > $test_dir/$genome/reference/relocate_te_locations.gff
+fi
 relocate_te_locations=$test_dir/$genome/reference/relocate_te_locations.gff
 
 cd RelocaTE
@@ -170,9 +190,11 @@ printf "\nRunning TE-locate pipeline...\n\n"
 
 # Adjust hierachy levels
 cd ../TE-locate
-perl TE_hierarchy.pl $te_locations $te_families Alias
 telocate_te_locations=${te_locations%.*}
 telocate_te_locations=$telocate_te_locations"_HL.gff"
+if [! -f $telocate_te_locations]; then
+	perl TE_hierarchy.pl $te_locations $te_families Alias
+fi
 
 bash runtelocate.sh $sam_folder $reference_genome $telocate_te_locations 2 $sample
 
@@ -181,8 +203,10 @@ bash runtelocate.sh $sam_folder $reference_genome $telocate_te_locations 2 $samp
 printf "\nRunning PoPoolationTE pipeline...\n\n"
 
 # Create te_hierachy
-printf "insert\tid\tfamily\tsuperfamily\tsuborder\torder\tclass\tproblem\n" > $test_dir/$genome/reference/te_hierarchy
-awk '{printf $0"\t"$2"\t"$2"\tna\tna\tna\t0\n"}' $te_families >> $test_dir/$genome/reference/te_hierarchy
+if [! -f $test_dir/$genome/reference/te_hierarchy]; then
+	printf "insert\tid\tfamily\tsuperfamily\tsuborder\torder\tclass\tproblem\n" > $test_dir/$genome/reference/te_hierarchy
+	awk '{printf $0"\t"$2"\t"$2"\tna\tna\tna\t0\n"}' $te_families >> $test_dir/$genome/reference/te_hierarchy
+fi
 te_hierarchy=$test_dir/$genome/reference/te_hierarchy
 
 cd ../popoolationte
