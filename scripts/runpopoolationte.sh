@@ -9,7 +9,7 @@ then
 	mkdir $samplename
 	
 	# Mask any copies of the TE present in the reference genome.
-	if [!-f $1.masked.bwt]; then
+	if [ !-f $1.masked.bwt ]; then
 		RepeatMasker -no_is -nolow -norna --lib $2 -pa 4 $1
 		cat $1.masked $2 > combinedref.fa
 		mv combinedref.fa $1.masked
