@@ -9,8 +9,8 @@ then
 	mkdir $samplename
 	
 	# Mask any copies of the TE present in the reference genome.
-	if [ !-f $1.masked.bwt ]; then
-		RepeatMasker -no_is -nolow -norna --lib $2 -pa 4 $1
+	if [ ! -f $1.masked.bwt ]; then
+		RepeatMasker -no_is -nolow -norna --lib $2 -pa $7 $1
 		cat $1.masked $2 > combinedref.fa
 		mv combinedref.fa $1.masked
 		bwa index $1.masked
@@ -21,8 +21,8 @@ then
 	tr -d ' ' < $5 > $samplename/reads2.fq	
 
 	# Perform 2 bwa alignments.
-	bwa bwasw -t 6 $1.masked $samplename/reads1.fq > $samplename/1.sam
-	bwa bwasw -t 6 $1.masked $samplename/reads2.fq > $samplename/2.sam
+	bwa bwasw -t $7 $1.masked $samplename/reads1.fq > $samplename/1.sam
+	bwa bwasw -t $7 $1.masked $samplename/reads2.fq > $samplename/2.sam
 
 	# Combine each alignment using included script.
 	perl samro.pl --sam1 $samplename/1.sam --sam2 $samplename/2.sam --fq1 $samplename/reads1.fq --fq2 $samplename/reads2.fq --output $samplename/pe-reads.sam
@@ -59,5 +59,6 @@ else
 	echo "Supply fastq1 as option 4"
 	echo "Supply fastq2 as option 5" 
 	echo "Supply a gff3 annotation of the TEs in the genome as option 6"
+	echo "Supply a number of processors as option 7"
 fi
 

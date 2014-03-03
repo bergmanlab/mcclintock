@@ -1,7 +1,7 @@
 #!/bin/bash -l
 
 # Get the options supplied to the program.
-while getopts ":r:c:g:t:1:2:hi" opt; do
+while getopts ":r:c:g:t:1:2:p:hi" opt; do
 	case $opt in
 		r)
 			inputr=$OPTARG
@@ -21,6 +21,8 @@ while getopts ":r:c:g:t:1:2:hi" opt; do
 		2)
 			input2=$OPTARG
 			;;
+		p)
+			processors=$OPTARG
 		i)	
 			remove_intermediates=on
 			;;
@@ -33,6 +35,7 @@ while getopts ":r:c:g:t:1:2:hi" opt; do
 			echo "-i : If this option is specified then all sample specific intermediate files will be removed, leaving only the overall results."
 			echo "-1 : The absolute path of the first fastq file from a paired end read, this should be named ending _1.fastq."
 			echo "-2 : The absolute path of the second fastq file from a paired end read, this should be named ending _2.fastq."
+			echo "-p : The number of processors to use for parallel stages of the pipeline."
 			echo "-h : Prints this help guide."
 			exit 1
 			;;
@@ -46,6 +49,7 @@ while getopts ":r:c:g:t:1:2:hi" opt; do
 			echo "-i : If this option is specified then all sample specific intermediate files will be removed, leaving only the overall results."
 			echo "-1 : The absolute path of the first fastq file from a paired end read, this should be named ending _1.fastq."
 			echo "-2 : The absolute path of the second fastq file from a paired end read, this should be named ending _2.fastq."
+			echo "-p : The number of processors to use for parallel stages of the pipeline."
 			echo "-h : Prints this help guide."
 			exit 1
 			;;
@@ -59,6 +63,7 @@ while getopts ":r:c:g:t:1:2:hi" opt; do
 			echo "-i : If this option is specified then all sample specific intermediate files will be removed, leaving only the overall results."
 			echo "-1 : The absolute path of the first fastq file from a paired end read, this should be named ending _1.fastq."
 			echo "-2 : The absolute path of the second fastq file from a paired end read, this should be named ending _2.fastq."
+			echo "-p : The number of processors to use for parallel stages of the pipeline."
 			echo "-h : Prints this help guide.\n"
 			exit 1
 			;;
@@ -136,7 +141,7 @@ all_te_seqs=$test_dir/$genome/reference/all_te_seqs.fasta
 
 printf "\nCreating bam alignment...\n\n"
 
-bwa mem -v 0 $reference_genome $fastq1 $fastq2 > $test_dir/$genome/$sample/sam/$sample.sam
+bwa mem -t $processors -v 0 $reference_genome $fastq1 $fastq2 > $test_dir/$genome/$sample/sam/$sample.sam
 sort --temporary-directory=. $test_dir/$genome/$sample/sam/$sample.sam > $test_dir/$genome/$sample/sam/sorted$sample.sam
 rm $test_dir/$genome/$sample/sam/$sample.sam
 mv $test_dir/$genome/$sample/sam/sorted$sample.sam $test_dir/$genome/$sample/sam/$sample.sam 
@@ -210,7 +215,7 @@ fi
 te_hierarchy=$test_dir/$genome/reference/te_hierarchy
 
 cd ../popoolationte
-bash runpopoolationte.sh $reference_genome $all_te_seqs $te_hierarchy $fastq1 $fastq2 $te_locations
+bash runpopoolationte.sh $reference_genome $all_te_seqs $te_hierarchy $fastq1 $fastq2 $te_locations $processors
 
 # Collate results from individual methods folders
 cd $test_dir
