@@ -23,6 +23,7 @@ while getopts ":r:c:g:t:1:2:p:hi" opt; do
 			;;
 		p)
 			processors=$OPTARG
+			;;
 		i)	
 			remove_intermediates=on
 			;;
