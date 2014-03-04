@@ -1,6 +1,28 @@
 #!/bin/bash -l
 
-# Get the options supplied to the program.
+usage () 
+{
+echo "McClintock Usage"
+echo "This script takes the following inputs and will run 5 different transposable element (TE) detection methods:"
+echo "-r : A reference genome sequence in fasta format. [Required]"
+echo "-c : The consensus sequences of the TEs for the species in fasta format. [Required]"
+echo "-g : The locations of known TEs in the reference genome in GFF 3 format. This must include a unique ID"
+echo "     attribute for every entry. [Required]"
+echo "-t : A tab delimited file with one entry per ID in the GFF file and two columns: the first containing"
+echo "     the ID and the second containing the TE family it belongs to. The family should correspond to the"
+echo "     names of the sequences in the consensus fasta file. [Required]"
+echo "-i : If this option is specified then all sample specific intermediate files will be removed, leaving only"
+echo "     the overall results."
+echo "-1 : The absolute path of the first fastq file from a paired end read, this should be named ending _1.fastq. [Required]"
+echo "-2 : The absolute path of the second fastq file from a paired end read, this should be named ending _2.fastq. [Required]"
+echo "-p : The number of processors to use for parallel stages of the pipeline."
+echo "-h : Prints this help guide."
+}
+
+# Set default value for processors in case it is not supplied
+processors=1
+
+# Get the options supplied to the program
 while getopts ":r:c:g:t:1:2:p:hi" opt; do
 	case $opt in
 		r)
@@ -28,48 +50,28 @@ while getopts ":r:c:g:t:1:2:p:hi" opt; do
 			remove_intermediates=on
 			;;
 		h)
-			echo "This script takes the following inputs and will run 5 different transposable element (TE) detection methods:"
-			echo "-r : A reference genome sequence in fasta format."
-			echo "-c : The consensus sequences of the TEs for the species in fasta format."
-			echo "-g : The locations of known TEs in the reference genome in GFF 3 format. This must include a unique ID attribute for every entry."
-			echo "-t : A tab delimited file with one entry per ID in the GFF file and two columns: the first containing the ID and the second containing the TE family it belongs to. The family should correspond to the names of the sequences in the consensus fasta file."
-			echo "-i : If this option is specified then all sample specific intermediate files will be removed, leaving only the overall results."
-			echo "-1 : The absolute path of the first fastq file from a paired end read, this should be named ending _1.fastq."
-			echo "-2 : The absolute path of the second fastq file from a paired end read, this should be named ending _2.fastq."
-			echo "-p : The number of processors to use for parallel stages of the pipeline."
-			echo "-h : Prints this help guide."
+			usage
 			exit 1
 			;;
 		\?)
-			echo "Invalid option: -$OPTARG"
-			echo "This script takes the following inputs and will run 5 different transposable element (TE) detection methods:"
-			echo "-r : A reference genome sequence in fasta format."
-			echo "-c : The consensus sequences of the TEs for the species in fasta format."
-			echo "-g : The locations of known TEs in the reference genome in GFF 3 format. This must include a unique ID attribute for every entry."
-			echo "-t : A tab delimited file with one entry per ID in the GFF file and two columns: the first containing the ID and the second containing the TE family it belongs to. The family should correspond to the names of the sequences in the consensus fasta file."
-			echo "-i : If this option is specified then all sample specific intermediate files will be removed, leaving only the overall results."
-			echo "-1 : The absolute path of the first fastq file from a paired end read, this should be named ending _1.fastq."
-			echo "-2 : The absolute path of the second fastq file from a paired end read, this should be named ending _2.fastq."
-			echo "-p : The number of processors to use for parallel stages of the pipeline."
-			echo "-h : Prints this help guide."
+			echo "Unknown option: -$OPTARG"
+			usage
 			exit 1
 			;;
 		:)
-			echo "Option -$OPTARG requires an argument."
-			echo "This script takes the following inputs and will run 5 different transposable element (TE) detection methods:"
-			echo "-r : A reference genome sequence in fasta format."
-			echo "-c : The consensus sequences of the TEs for the species in fasta format."
-			echo "-g : The locations of known TEs in the reference genome in GFF 3 format. This must include a unique ID attribute for every entry."
-			echo "-t : A tab delimited file with one entry per ID in the GFF file and two columns: the first containing the ID and the second containing the TE family it belongs to. The family should correspond to the names of the sequences in the consensus fasta file."
-			echo "-i : If this option is specified then all sample specific intermediate files will be removed, leaving only the overall results."
-			echo "-1 : The absolute path of the first fastq file from a paired end read, this should be named ending _1.fastq."
-			echo "-2 : The absolute path of the second fastq file from a paired end read, this should be named ending _2.fastq."
-			echo "-p : The number of processors to use for parallel stages of the pipeline."
-			echo "-h : Prints this help guide.\n"
+			echo "Missing option argument for -$OPTARG"
+			usage
 			exit 1
 			;;
 	esac
 done
+
+# Test for presence of required arguments
+if [[ -z "$inputr" || -z "$inputc" || -z "$inputg" || -z "$inputt" || -z "$input1" || -z "$input2" ]]; then
+	echo "A required parameter is missing"
+	usage
+	exit 1
+fi
 
 # Set up folder structure
 
