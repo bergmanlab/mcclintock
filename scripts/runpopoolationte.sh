@@ -8,9 +8,11 @@ then
 	# Create a directory for analysis files
 	mkdir $samplename
 	
+	processors=$7
+	
 	# Mask any copies of the TE present in the reference genome.
-	if [ ! -f $1.masked.bwt ]; then
-		RepeatMasker -no_is -nolow -norna --lib $2 -pa $7 $1
+	if [ ! -f $1.masked ]; then
+		RepeatMasker -no_is -nolow -norna --lib $2 -pa $processors $1
 		cat $1.masked $2 > combinedref.fa
 		mv combinedref.fa $1.masked
 		bwa index $1.masked
@@ -21,8 +23,8 @@ then
 	tr -d ' ' < $5 > $samplename/reads2.fq	
 
 	# Perform 2 bwa alignments.
-	bwa bwasw -t $7 $1.masked $samplename/reads1.fq > $samplename/1.sam
-	bwa bwasw -t $7 $1.masked $samplename/reads2.fq > $samplename/2.sam
+	bwa bwasw -t $processors $1.masked $samplename/reads1.fq > $samplename/1.sam
+	bwa bwasw -t $processors $1.masked $samplename/reads2.fq > $samplename/2.sam
 
 	# Combine each alignment using included script.
 	perl samro.pl --sam1 $samplename/1.sam --sam2 $samplename/2.sam --fq1 $samplename/reads1.fq --fq2 $samplename/reads2.fq --output $samplename/pe-reads.sam
