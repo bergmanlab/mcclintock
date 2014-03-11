@@ -2,10 +2,12 @@
 
 if (( $# > 0 ))
 then
-	perl splitforRetroSeq.pl $1
+	reference=${3##*/}
+	reference=${reference%%.*}
+	perl splitforRetroSeq.pl $1 $reference
 	samplename=`basename $2 .bam`
 	mkdir $samplename
-	bin/retroseq.pl -discover -bam $2 -eref elementlist -output $samplename/$samplename.discovery 
+	bin/retroseq.pl -discover -bam $2 -eref $reference"elementlist" -output $samplename/$samplename.discovery 
 	bin/retroseq.pl -call -bam $2 -input $samplename/$samplename.discovery -ref $3 -output $samplename/$samplename.calling -orientate yes
 	
 	# Extract the relevant results

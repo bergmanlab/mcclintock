@@ -2,6 +2,7 @@
 
 # Open the first (and only argument) - the fasta to split.
 open(FASTA, $ARGV[0]) or die("Could not open  file.");
+my $referencename = $ARGV[1];
 my $in_file = FALSE;
 
 # Create list for RetroSeq input
@@ -26,7 +27,7 @@ while(my $line = <FASTA>)
 		
 		# Add sequence name to list for RetroSeq
 		push (@seqname_list, $seqname);
-		$filename = $seqname.".fa";
+		$filename = $referencename."_".$seqname.".fa";
 		
 		# Create new file for output with 
 		open(OUT, ">>$filename");
@@ -51,9 +52,9 @@ while(my $line = <FASTA>)
 }
 
 # Print the element list required for RetroSeq
-open(LIST, ">>elementlist");
+open(LIST, ">".$referencename."_elementlist");
 foreach(@seqname_list)
 {
-	print LIST "$_\t$_.fa\n";
+	print LIST "$_\t${referencename}_$_.fa\n";
 }
 close LIST;
