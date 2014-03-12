@@ -38,9 +38,9 @@ sample=1
 while read line
 do 
         if [ $sample -eq 1 ]; then
-                qsub -V -cwd -N mck1 qsublaunch.sh $line        
+                qsub -V -cwd -N mck1 launchmcclintock.sh $line        
         else
-                qsub -l cores=4 -V -cwd -N mck$sample -hold_jid mck1 qsublaunch.sh $line
+                qsub -l cores=4 -V -cwd -N mck$sample -hold_jid mck1 launchmcclintock.sh $line
         fi
 
         sample=`expr $sample + 1`
