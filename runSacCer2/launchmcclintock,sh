@@ -1,0 +1,21 @@
+#!/bin/bash
+
+url=${1%%_1.f*}
+sample_name=${url##*/}
+
+# Either wget the fastq files, or change commenting to copy them if on kadmon.
+wget -q $url"_1.fastq.gz"
+wget -q $url"_2.fastq.gz"
+#cp /mnt/fls01-home01/mqbsscbf/scratch/yeastNGS/SRA/$sample_name"_1.fastq.gz" .
+#cp /mnt/fls01-home01/mqbsscbf/scratch/yeastNGS/SRA/$sample_name"_2.fastq.gz" .
+gunzip $sample_name"_1.fastq.gz"
+gunzip $sample_name"_2.fastq.gz"
+
+test_dir=`pwd`
+
+echo "About to launch mcclintock for $sample_name"
+cd ..
+./mcclintock.sh -r $test_dir/sacCer2.fa -c $test_dir/sac_cer_TE_seqs.fa -g $test_dir/reference_TE_locations.gff -t $test_dir/sac_cer_te_families.tsv -1 $test_dir/$sample_name"_1.fastq" -2 $test_dir/$sample_name"_2.fastq" -i -p 4
+
+# Remove the fastq files when analysis is complete.
+rm $test_dir/$sample_name"_1.fastq" $test_dir/$sample_name"_2.fastq"
