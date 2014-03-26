@@ -33,17 +33,20 @@ done
 
 awk -F'[\t;]' '{print $10}' sample_list > sample_1_urls.txt
 
-sample=1
+sample_no=1
 
 while read line
 do 
-        if [ $sample -eq 1 ]; then
-                qsub -V -cwd -N mck1 launchmcclintock.sh $line        
-        else
-                qsub -l cores=4 -V -cwd -N mck$sample -hold_jid mck1 launchmcclintock.sh $line
-        fi
+	url=${line%%_1.f*}
+	sample_name=${url##*/}
+	if [ $sample_no -eq 1 ]; then
+		first_sample=$sample_name
+		qsub -V -cwd -N $sample_name launchmcclintock.sh $line        
+	else
+		qsub -l cores=4 -V -cwd -N $sample_name -hold_jid $first_sample launchmcclintock.sh $line
+	fi
 
-        sample=`expr $sample + 1`
+	sample_no=`expr $sample + 1`
 done < sample_1_urls.txt
 
 
