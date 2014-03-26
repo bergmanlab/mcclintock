@@ -25,8 +25,8 @@ rm tmp
 projects=('SRA072302')
 for project in "${projects[@]}"
 do
-        wget -O $project "http://www.ebi.ac.uk/ena/data/warehouse/filereport?accession=$project&result=read_run&fields=study_accession,secondary_study_accession,sample_accession,secondary_sample_accession,experiment_accession,run_accession,scientific_name,instrument_model,library_layout,fastq_ftp,fastq_galaxy,submitted_ftp,col_tax_id,submitted_galaxy,col_scientific_name&download=text"
-		sed 1d $project >> sample_list
+	wget -O $project "http://www.ebi.ac.uk/ena/data/warehouse/filereport?accession=$project&result=read_run&fields=study_accession,secondary_study_accession,sample_accession,secondary_sample_accession,experiment_accession,run_accession,scientific_name,instrument_model,library_layout,fastq_ftp,fastq_galaxy,submitted_ftp,col_tax_id,submitted_galaxy,col_scientific_name&download=text"
+	sed 1d $project >> sample_list
 done
 
 # Run the pipeline
@@ -34,7 +34,7 @@ done
 awk -F'[\t;]' '{print $10}' sample_list > sample_1_urls.txt
 
 sample_no=1
-
+first_sample=empty
 while read line
 do 
 	url=${line%%_1.f*}
@@ -46,7 +46,6 @@ do
 		qsub -l cores=4 -V -cwd -N $sample_name -hold_jid $first_sample launchmcclintock.sh $line
 	fi
 
-	sample_no=`expr $sample + 1`
+	sample_no=`expr $sample_no + 1`
 done < sample_1_urls.txt
-
 
