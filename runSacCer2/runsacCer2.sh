@@ -41,7 +41,7 @@ do
 	sample_name=${url##*/}
 	if [ $sample_no -eq 1 ]; then
 		first_sample=$sample_name
-		qsub -V -cwd -N $sample_name launchmcclintock.sh $line        
+		qsub -l cores=4 -V -cwd -N $sample_name launchmcclintock.sh $line        
 	else
 		qsub -l cores=4 -V -cwd -N $sample_name -hold_jid $first_sample launchmcclintock.sh $line
 	fi
