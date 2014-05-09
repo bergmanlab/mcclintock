@@ -190,7 +190,7 @@ bash runngstemapper.sh $consensus_te_seqs $reference_genome $sample $fastq1 $fas
 printf "\nRunning RetroSeq pipeline...\n\n"
 
 cd ../RetroSeq
-bash runretroseq.sh $consensus_te_seqs $bam $reference_genome 
+bash runretroseq.sh $consensus_te_seqs $bam $reference_genome $relocate_te_locations
 
 # Run TE-locate
 
