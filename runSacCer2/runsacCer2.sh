@@ -37,15 +37,17 @@ sample_no=1
 first_sample=empty
 while read line
 do 
-	url=${line%%_1.f*}
-	sample_name=${url##*/}
 	if [ $sample_no -eq 1 ]; then
-		first_sample=$sample_name
-		qsub -l cores=4 -V -cwd -N $sample_name launchmcclintock.sh $line        
+		qsub -l cores=4 -V -cwd -N $sample_no launchmcclintock.sh $line
 	else
-		qsub -l cores=4 -V -cwd -N $sample_name -hold_jid $first_sample launchmcclintock.sh $line
-	fi
+        if [ $sample_no -lt 6 ]; then
+            qsub -l cores=4 -V -cwd -N $sample_no -hold_jid $1 launchmcclintock.sh $line
+        else
+            waitfor=$((sample_no-4))
+            qsub -l cores=4 -V -cwd -N $sample_no -hold_jid $waitfor launchmcclintock.sh $line
+        fi
+    fi
 
-	sample_no=`expr $sample_no + 1`
+	sample_no=$((sample_no+1))
 done < sample_1_urls.txt
 
