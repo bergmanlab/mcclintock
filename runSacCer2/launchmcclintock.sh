@@ -8,7 +8,7 @@ test_dir=`pwd`
 # If the sample folder exists this sample must have at least been launched
 if [ -d ../sacCer2/$sample_name/ ]; then
 	# If the results files exist then nothing needs to be done
-	if [[ -f ../sacCer2/$sample_name/results/$sample_name"_relocate.bed" || -f ../sacCer2/$sample_name/results/$sample_name"_ngs_te_mapper.bed" || -f ../sacCer2/$sample_name/results/$sample_name"_retroseq.bed" || -f ../sacCer2/$sample_name/results/$sample_name"_telocate.bed" || -f ../sacCer2/$sample_name/results/$sample_name"_popoolationte.bed" ]]; then
+	if [[ -f ../sacCer2/$sample_name/results/$sample_name"_relocate.bed" && -f ../sacCer2/$sample_name/results/$sample_name"_ngs_te_mapper.bed" && -f ../sacCer2/$sample_name/results/$sample_name"_retroseq.bed" && -f ../sacCer2/$sample_name/results/$sample_name"_telocate.bed" && -f ../sacCer2/$sample_name/results/$sample_name"_popoolationte.bed" ]]; then
 		echo "$sample_name has already been analysed"
 	# If they don't then the run must have been interrupted so files are cleaned up and the run is attempted again
 	else
