@@ -83,7 +83,7 @@ sample=${input1##*/}
 sample=${sample%%_1.f*}
 
 test_dir=`pwd`
-if [ ! -f $test_dir/$genome ]; then
+if [ ! -d $test_dir/$genome ]; then
 	mkdir $test_dir/$genome/
 	mkdir $test_dir/$genome/reference
 fi
