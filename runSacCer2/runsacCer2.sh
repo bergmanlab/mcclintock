@@ -33,6 +33,7 @@ done
 
 awk -F'[\t;]' '{print $10}' sample_list > sample_1_urls.txt
 
+# Only allow a maximum of 4 jobs to be submitted to the queue at one time.
 sample_no=1
 first_sample=empty
 while read line
