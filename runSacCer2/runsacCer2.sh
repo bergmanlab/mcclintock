@@ -38,13 +38,13 @@ first_sample=empty
 while read line
 do 
 	if [ $sample_no -eq 1 ]; then
-		qsub -l cores=4 -V -cwd -N $sample_no launchmcclintock.sh $line
+		qsub -l long -l cores=4 -V -cwd -N mcclintock$sample_no launchmcclintock.sh $line
 	else
         if [ $sample_no -lt 6 ]; then
-            qsub -l cores=4 -V -cwd -N $sample_no -hold_jid $1 launchmcclintock.sh $line
+            qsub -l long -l cores=4 -V -cwd -N mcclintock$sample_no -hold_jid mcclintock"1" launchmcclintock.sh $line
         else
             waitfor=$((sample_no-4))
-            qsub -l cores=4 -V -cwd -N $sample_no -hold_jid $waitfor launchmcclintock.sh $line
+            qsub -l long -l cores=4 -V -cwd -N mcclintock$sample_no -hold_jid mcclintock$waitfor launchmcclintock.sh $line
         fi
     fi
 
