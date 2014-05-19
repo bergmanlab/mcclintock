@@ -34,6 +34,9 @@ cp scripts/runretroseq.sh RetroSeq
 cp scripts/splitforRetroSeq.pl RetroSeq
 cp scripts/runrelocate.sh RelocaTE
 cp scripts/runtelocate.sh TE-locate
+cp scripts/mcclintock.sh .
+cp scripts/analysis.R runSacCer2
+cp scripts/concordancecalculation.pl runSacCer2
 
 # Change #! to make software more compatible with different environments
 sed -i 's/#!\/usr\/bin\/perl -w/#!\/usr\/bin\/env perl/' RelocaTE/scripts/*.pl
