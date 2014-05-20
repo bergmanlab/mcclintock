@@ -37,6 +37,7 @@ then
 	awk -F'[\t;]' '{print $1"\t"$2"\t"$3"\t"$6"_"$9"\t0\t"$5}' $projectdir/analysis/bed_tsd/$samplename"_"$fasta2"insertions.bed" > $projectdir/$3"_ngs_te_mapper_presort.bed"
 	echo -e "track name=\"$3"_ngs_te_mapper"\" description=\"$3"_ngs_te_mapper"\"" > $projectdir/$3"_ngs_te_mapper.bed"
 	bedtools sort -i $projectdir/$3"_ngs_te_mapper_presort.bed" >> $projectdir/$3"_ngs_te_mapper.bed"
+    sed -i -e 's/NA/./g' $projectdir/$3"_ngs_te_mapper.bed"
 	rm $projectdir/$3"_ngs_te_mapper_presort.bed"
 	
 else
