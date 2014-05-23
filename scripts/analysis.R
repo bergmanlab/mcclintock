@@ -1,7 +1,7 @@
 require(tools)
 library(xtable)
 
-bed.files<-list.files(Sys.glob("../sacCer2/*/results"),full.names=T)
+bed.files<-list.files(Sys.glob("../sacCer2/*/results"), full.names=T, pattern="*.bed$")
 
 for(i in 1:length(bed.files))
 {
@@ -46,11 +46,12 @@ popoolationte.new.density<-density(new.TE.counts.popoolationte)
 
 pdf('new.counts.pdf')
 
-plot(ngs_te_mapper.new.density,xlim=c(0,750))
+plot(ngs_te_mapper.new.density, main="Number of new predicted TE insertions per sample by each method",xlim=c(0,750),xlab="Number of predictions per sample",ylab="Density")
 lines(telocate.new.density, col = "blue")
 lines(relocate.new.density, col = "red")
 lines(retroseq.new.density, col = "green")
 lines(popoolationte.new.density, col = "purple")
+legend(430,0.13,c("ngs_te_mapper","TE-locate","RelocaTE","RetroSeq","PoPoolationTE"),lty=c(1,1),col=c("black","blue","red","green","purple"))
 
 dev.off()
 
@@ -72,10 +73,11 @@ popoolationte.old.density<-density(old.TE.counts.popoolationte)
 
 pdf('old.counts.pdf')
 
-plot(ngs_te_mapper.old.density,xlim=c(0,750))
+plot(ngs_te_mapper.old.density,main="Number of reference TEs detected per sample by each method",xlim=c(0,350),xlab="Number of predictions per sample",ylab="Density")
 lines(telocate.old.density, col = "blue")
 lines(relocate.old.density, col = "red")
 lines(popoolationte.old.density, col = "purple")
+legend(220,0.1,c("ngs_te_mapper","TE-locate","RelocaTE","PoPoolationTE"),lty=c(1,1),col=c("black","blue","red","purple"))
 
 dev.off()
 
