@@ -81,6 +81,7 @@ The pipeline is invoked by running the mcclintock.sh script in the main project 
 * -i : If this option is specified then all sample specific intermediate files will be removed, leaving only the overall results.
 * -1 : The absolute path of the first fastq file from a paired end read, this should be named ending _1.fastq.
 * -2 : The absolute path of the second fastq file from a paired end read, this should be named ending _2.fastq.
+* -p : The number of processors to use for parallel stages of the pipeline.
 * -h : Prints this help guide.
 
 Example pipeline run:
