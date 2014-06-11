@@ -81,12 +81,12 @@ The pipeline is invoked by running the mcclintock.sh script in the main project 
 * -i : If this option is specified then all sample specific intermediate files will be removed, leaving only the overall results.
 * -1 : The absolute path of the first fastq file from a paired end read, this should be named ending _1.fastq.
 * -2 : The absolute path of the second fastq file from a paired end read, this should be named ending _2.fastq.
-* -p : The number of processors to use for parallel stages of the pipeline.
+* -p : The number of processors to use for parallel stages of the pipeline. (Default is 1)
 * -h : Prints this help guide.
 
 Example pipeline run:
 ```
-sh mcclintock.sh -r reference.fasta -c te_consensus.fasta -g te_locations.gff -t te_families.tsv -1 sample_1.fastq -2 sample_2.fastq
+sh mcclintock.sh -r reference.fasta -c te_consensus.fasta -g te_locations.gff -t te_families.tsv -1 sample_1.fastq -2 sample_2.fastq -p 2
 ```
 
 Data created during pre-processing will be stored in a folder in the main directory named after the reference genome used with individual sub-directories for samples. 
