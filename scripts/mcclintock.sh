@@ -11,8 +11,10 @@ echo "     attribute for every entry. [Required]"
 echo "-t : A tab delimited file with one entry per ID in the GFF file and two columns: the first containing"
 echo "     the ID and the second containing the TE family it belongs to. The family should correspond to the"
 echo "     names of the sequences in the consensus fasta file. [Required]"
+echo "-b : Retain the sorted and indexed BAM file of the paired end data aligned to the reference genome."
 echo "-i : If this option is specified then all sample specific intermediate files will be removed, leaving only"
-echo "     the overall results."
+echo "     the overall results. The default is to leave sample specific intermediate files (may require large amounts"
+echo "     disk space)"
 echo "-1 : The absolute path of the first fastq file from a paired end read, this should be named ending _1.fastq. [Required]"
 echo "-2 : The absolute path of the second fastq file from a paired end read, this should be named ending _2.fastq. [Required]"
 echo "-p : The number of processors to use for parallel stages of the pipeline."
@@ -23,7 +25,7 @@ echo "-h : Prints this help guide."
 processors=1
 
 # Get the options supplied to the program
-while getopts ":r:c:g:t:1:2:p:hi" opt; do
+while getopts ":r:c:g:t:1:2:p:hib" opt; do
 	case $opt in
 		r)
 			inputr=$OPTARG
@@ -49,6 +51,9 @@ while getopts ":r:c:g:t:1:2:p:hi" opt; do
 		i)	
 			remove_intermediates=on
 			;;
+        b)
+            save_bam=on
+            ;;
 		h)
 			usage
 			exit 1
@@ -234,7 +239,10 @@ if [ "$remove_intermediates" = "on" ]
 then
 	printf "\nRemoving intermediate files\n\n"
 	rm -r $genome/$sample/reads
-	rm -r $genome/$sample/bam
+    # If the save bam option is specified then override the command to delete the bam files.
+    if [ "$save_bam" != "on"]
+        rm -r $genome/$sample/bam
+    fi
 	rm -r $genome/$sample/sam
 	rm -r RelocaTE/$sample
 	rm -r ngs_te_mapper/$sample
