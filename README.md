@@ -74,13 +74,14 @@ This script will download the UCSC sacCer2 yeast reference genome, an annotation
 
 ###Running the pipeline
 The pipeline is invoked by running the mcclintock.sh script in the main project folder. This script takes the following 6 input files, specified as options, and will run all five TE detection methods:
-* -r : A reference genome sequence in fasta format.
-* -c : The consensus sequences of the TEs for the species in fasta format.
-* -g : The locations of known TEs in the reference genome in GFF 3 format. This must include a unique ID attribute for every entry.
-* -t : A tab delimited file with one entry per ID in the GFF file and two columns: the first containing the ID and the second containing the TE family it belongs to. The family should correspond to the names of the sequences in the consensus fasta file.
-* -i : If this option is specified then all sample specific intermediate files will be removed, leaving only the overall results.
-* -1 : The absolute path of the first fastq file from a paired end read, this should be named ending _1.fastq.
-* -2 : The absolute path of the second fastq file from a paired end read, this should be named ending _2.fastq.
+* -r : A reference genome sequence in fasta format. (Required)
+* -c : The consensus sequences of the TEs for the species in fasta format. (Required)
+* -g : The locations of known TEs in the reference genome in GFF 3 format. This must include a unique ID attribute for every entry. (Required)
+* -t : A tab delimited file with one entry per ID in the GFF file and two columns: the first containing the ID and the second containing the TE family it belongs to. The family should correspond to the names of the sequences in the consensus fasta file. (Required)
+* -b : Retain the sorted and indexed BAM file of the paired end data aligned to the reference genome.
+* -i : If this option is specified then all sample specific intermediate files will be removed, leaving only the overall results. The default is to leave sample specific intermediate files (may require large amounts of disk space).
+* -1 : The absolute path of the first fastq file from a paired end read, this should be named ending _1.fastq. (Required)
+* -2 : The absolute path of the second fastq file from a paired end read, this should be named ending _2.fastq. (Required)
 * -p : The number of processors to use for parallel stages of the pipeline. (Default is 1)
 * -h : Prints this help guide.
 
