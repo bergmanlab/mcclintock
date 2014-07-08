@@ -1,6 +1,7 @@
 # Load the required packages
 require(tools)
 library(xtable)
+source("../ngs_te_mapper/sourceCode/ngs_te_mapper_functions.R")
 
 # List all the bed files within the sacCer2 results
 bed.files<-list.files(Sys.glob("../sacCer2/*/results"), full.names=T, pattern="*.bed$")
@@ -244,6 +245,25 @@ for (i in 1:length(old.methods))
 
 old.concordance.low.matrix.table<-xtable(old.concordance.low.matrix)
 print(old.concordance.low.matrix.table, floating=FALSE, file="old.concordance.low.tex")
+
+# Create sequence logos of TSDs and insertion sites
+reference<-../reference/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
