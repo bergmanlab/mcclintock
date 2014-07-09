@@ -241,6 +241,7 @@ then
 	rm -r $genome/$sample/reads
     # If the save bam option is specified then override the command to delete the bam files.
     if [ "$save_bam" != "on"]
+    then
         rm -r $genome/$sample/bam
     fi
 	rm -r $genome/$sample/sam
