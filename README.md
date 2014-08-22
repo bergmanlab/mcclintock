@@ -32,14 +32,6 @@ All of the software systems must be run on a unix based system with the software
   * [Blat](http://users.soe.ucsc.edu/~kent/src/) (v.35x1)
   * [Bowtie](http://bowtie-bio.sourceforge.net/index.shtml) (v.1.0.0)
   
- * TEMP
-  * [Perl](http://www.perl.org/get.html) (v.5.14.2)
-  * [BioPerl](http://www.bioperl.org/wiki/Getting_BioPerl) (v.1.006901)
-  * [BWA](http://sourceforge.net/projects/bio-bwa/files/) (v.0.7.2-r351)
-  * [SAMtools](http://sourceforge.net/projects/samtools/files/) (v.0.1.19-44428cd)
-  * [BEDTools](https://code.google.com/p/bedtools/downloads/list) (v.2.17.0)
-  * [twoBitToFa](http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/twoBitToFa)
-
  * TE-locate
   * [Perl](http://www.perl.org/get.html) (v.5.14.2)
   * [BWA](http://sourceforge.net/projects/bio-bwa/files/) (v.0.7.2-r351)
@@ -51,6 +43,14 @@ All of the software systems must be run on a unix based system with the software
   * [BCFTools](https://github.com/samtools/bcftools) (v.0.1.19-44428cd)
   * [Exonerate](http://www.ebi.ac.uk/~guy/exonerate/) (v.2.2.0)
   * [BWA](http://sourceforge.net/projects/bio-bwa/files/) (v.0.7.2-r351)
+
+* TEMP
+  * [Perl](http://www.perl.org/get.html) (v.5.14.2)
+  * [BioPerl](http://www.bioperl.org/wiki/Getting_BioPerl) (v.1.006901)
+  * [BWA](http://sourceforge.net/projects/bio-bwa/files/) (v.0.7.2-r351)
+  * [SAMtools](http://sourceforge.net/projects/samtools/files/) (v.0.1.19-44428cd)
+  * [BEDTools](https://code.google.com/p/bedtools/downloads/list) (v.2.17.0)
+  * [twoBitToFa](http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/twoBitToFa)
 
 How to run 
 ------
