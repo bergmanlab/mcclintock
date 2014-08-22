@@ -50,7 +50,7 @@ All of the software systems must be run on a unix based system with the software
   * [BWA](http://sourceforge.net/projects/bio-bwa/files/) (v.0.7.2-r351)
   * [SAMtools](http://sourceforge.net/projects/samtools/files/) (v.0.1.19-44428cd)
   * [BEDTools](https://code.google.com/p/bedtools/downloads/list) (v.2.17.0)
-  * [twoBitToFa](http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/twoBitToFa)
+  * [twoBitToFa](http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/twoBitToFa) (ucsc-tools v.294)
 
 How to run 
 ------
