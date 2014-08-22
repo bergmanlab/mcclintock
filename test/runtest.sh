@@ -6,8 +6,8 @@ test_dir=`pwd`
 
 printf "\nDownloading and extracting fastq files...\n\n"
 
-wget -nc ftp.sra.ebi.ac.uk/vol1/fastq/SRR800/SRR800842/SRR800842_1.fastq.gz
-wget -nc ftp.sra.ebi.ac.uk/vol1/fastq/SRR800/SRR800842/SRR800842_2.fastq.gz
+wget -nc -q ftp.sra.ebi.ac.uk/vol1/fastq/SRR800/SRR800842/SRR800842_1.fastq.gz
+wget -nc -q ftp.sra.ebi.ac.uk/vol1/fastq/SRR800/SRR800842/SRR800842_2.fastq.gz
 
 gunzip SRR800842_1.fastq.gz
 gunzip SRR800842_2.fastq.gz
@@ -16,14 +16,14 @@ gunzip SRR800842_2.fastq.gz
 
 printf "Downloading reference genome...\n\n"
 
-wget -nc http://hgdownload.soe.ucsc.edu/goldenPath/sacCer2/bigZips/chromFa.tar.gz
+wget -nc -q http://hgdownload.soe.ucsc.edu/goldenPath/sacCer2/bigZips/chromFa.tar.gz
 tar xvzf chromFa.tar.gz 
 rm chromFa.tar.gz
 cat chr*fa 2micron.fa > sacCer2.fa
 rm chr*fa 2micron.fa
 
 # Download gff locations of reference TE copies
-wget -nc http://files.figshare.com/287395/File_S2.txt
+wget -nc -q http://files.figshare.com/287395/File_S2.txt
 awk '{print $3"\treannotate\ttransposable_element\t"$4"\t"$5"\t.\t"$6"\t.\tID="$1;}' File_S2.txt > tmp
 sed '1d;$d' tmp > reference_TE_locations.gff
 rm File_S2.txt

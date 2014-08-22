@@ -1,6 +1,6 @@
 Introduction
 ------
-Many methods have been developed to detect transposable element (TE) insertions from whole genome shotgun next-generation sequencing (NGS) data, each of which has different dependencies, run interfaces, and output formats. Here, we have developed a meta-pipeline to run five available methods for detecting TE insertions in NGS data, which generates output in the UCSC Browser extensible data (BED) format.
+Many methods have been developed to detect transposable element (TE) insertions from whole genome shotgun next-generation sequencing (NGS) data, each of which has different dependencies, run interfaces, and output formats. Here, we have developed a meta-pipeline to download, install and run six available methods for detecting TE insertions in NGS data, which generates output in the UCSC Browser extensible data (BED) format.
 
 Software Methods
 ------
@@ -9,6 +9,7 @@ Software Methods
  * [RelocaTE](https://github.com/srobb1/RelocaTE "Click to go to download location") - [Robb *et al.* (2013)](http://www.g3journal.org/content/3/6/949.long "Click to go to paper location")
  * [TE-locate](http://zendto.gmi.oeaw.ac.at/pickup.php?claimID= Y3tZVfN5xipYyBDN&claimPasscode=NArXMbTjmkorWjSM&emailAddr=te_locate%40gmx.at "Click to go to download location") - [Platzer *et al.* (2012)](http://www.mdpi.com/2079-7737/1/2/395 "Click to go to paper location")
  * [RetroSeq](https://github.com/tk2/RetroSeq "Click to go to download location") - [Keane *et al.* (2012)](http://bioinformatics.oxfordjournals.org/content/29/3/389.long "Click to go to paper location")
+ * [TEMP](https://github.com/JialiUMassWengLab/TEMP "Click to go to download location") - [Zhuang *et al.* (2014)](http://nar.oxfordjournals.org/content/42/11/6826.full "Click to go to paper location")
 
 Software Dependencies
 ------
@@ -30,6 +31,14 @@ All of the software systems must be run on a unix based system with the software
   * [SAMtools](http://sourceforge.net/projects/samtools/files/) (v.0.1.19-44428cd)
   * [Blat](http://users.soe.ucsc.edu/~kent/src/) (v.35x1)
   * [Bowtie](http://bowtie-bio.sourceforge.net/index.shtml) (v.1.0.0)
+  
+ * TEMP
+  * [Perl](http://www.perl.org/get.html) (v.5.14.2)
+  * [BioPerl](http://www.bioperl.org/wiki/Getting_BioPerl) (v.1.006901)
+  * [BWA](http://sourceforge.net/projects/bio-bwa/files/) (v.0.7.2-r351)
+  * [SAMtools](http://sourceforge.net/projects/samtools/files/) (v.0.1.19-44428cd)
+  * [BEDTools](https://code.google.com/p/bedtools/downloads/list) (v.2.17.0)
+  * [twoBitToFa](http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/twoBitToFa)
 
  * TE-locate
   * [Perl](http://www.perl.org/get.html) (v.5.14.2)

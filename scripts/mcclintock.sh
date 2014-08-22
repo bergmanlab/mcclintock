@@ -149,7 +149,7 @@ all_te_seqs=$test_dir/$genome/reference/all_te_seqs.fasta
 
 printf "\nCreating bam alignment...\n\n"
 
-bwa mem -t $processors -v 0 $reference_genome $fastq1 $fastq2 > $test_dir/$genome/$sample/sam/$sample.sam
+bwa mem -a -t $processors -v 0 $reference_genome $fastq1 $fastq2 > $test_dir/$genome/$sample/sam/$sample.sam
 sort --temporary-directory=. $test_dir/$genome/$sample/sam/$sample.sam > $test_dir/$genome/$sample/sam/sorted$sample.sam
 rm $test_dir/$genome/$sample/sam/$sample.sam
 mv $test_dir/$genome/$sample/sam/sorted$sample.sam $test_dir/$genome/$sample/sam/$sample.sam 
@@ -162,6 +162,26 @@ rm $test_dir/$genome/$sample/bam/$sample.bam
 mv $test_dir/$genome/$sample/bam/sorted$sample.bam $test_dir/$genome/$sample/bam/$sample.bam 
 bam=$test_dir/$genome/$sample/bam/$sample.bam 
 samtools index $bam
+
+# Run TEMP
+printf "\nRunning TEMP pipeline...\n\n"
+
+awk -F["\t"\;=] '{print $1"\t"$4-1"\t"$5"\t"$10"\t.\t"$7}' $te_locations > $test_dir/$genome/reference/reference_TE_locations.bed
+
+cd TEMP
+mkdir $sample
+chmod 755 $sample
+
+# Create soft link to differently named files for TEMP
+cp -s $bam $sample/$sample.sorted.bam
+cp -s $bam.bai $sample/$sample.sorted.bam.bai
+
+bash scripts/TEMP_Insertion.sh -i $test_dir/TEMP/$sample/$sample.sorted.bam -s $test_dir/TEMP/scripts -r $consensus_te_seqs -t $test_dir/$genome/reference/reference_TE_locations.bed -u $te_families -m 3 -f 100 -c $processors -o $test_dir/TEMP/$sample
+
+echo -e "track name=\"$5"_TEMP"\" description=\"$5"_TEMP"\"" > $sample/$sample_"temp.presorted.bed"
+awk '{if ( $6 == "1p1"  && $10 > 0 && $12 > 0) {printf $1"\t"$2"\t"$3"\t"$4"_new\t0\t"; if ( $5 == "sense" ) print "+"; else print "-" } }' $sample/$sample.insertion.refined.bp.summary >> $sample/$sample_"temp.presorted.bed"
+bedtools sort -i $sample/$sample_"temp.presorted.bed" > $sample/$sample_"temp.bed"
+rm $sample/$sample_"temp.bed"
 
 # Run RelocaTE
 
@@ -179,7 +199,7 @@ if [ ! -f $test_dir/$genome/reference/relocate_te_locations.gff ]; then
 fi
 relocate_te_locations=$test_dir/$genome/reference/relocate_te_locations.gff
 
-cd RelocaTE
+cd ../RelocaTE
 bash runrelocate.sh $relocate_te_seqs $reference_genome $test_dir/$genome/$sample/reads $sample $relocate_te_locations
 
 # Run ngs_te_mapper pipeline
@@ -232,6 +252,7 @@ mv ngs_te_mapper/$sample/$sample"_ngs_te_mapper.bed" $test_dir/$genome/$sample/r
 mv RetroSeq/$sample/$sample"_retroseq.bed" $test_dir/$genome/$sample/results/
 mv TE-locate/$sample/$sample"_telocate.bed" $test_dir/$genome/$sample/results/
 mv popoolationte/$sample/$sample"_popoolationte.bed" $test_dir/$genome/$sample/results/
+mv TEMP/$sample/$sample"_temp.bed" $test_dir/$genome/$sample/results/
 
 # If cleanup intermediate files is specified then delete all intermediate files specific to the sample
 # i.e. leave any reusable species data behind.
@@ -250,6 +271,7 @@ then
 	rm -r RetroSeq/$sample
 	rm -r TE-locate/$sample
 	rm -r popoolationte/$sample
+	rm -r TEMP/$sample
 fi
 
 printf "\nPipeline Complete\n\n"

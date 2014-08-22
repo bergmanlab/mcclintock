@@ -7,6 +7,7 @@ wget --no-check-certificate https://github.com/bergmanlab/ngs_te_mapper/archive/
 wget --no-check-certificate https://github.com/tk2/RetroSeq/archive/700d4f76a3b996686652866f2b81fefc6f0241e0.zip -O RetroSeq.zip
 wget --no-check-certificate https://github.com/srobb1/RelocaTE/archive/9b3c89d03c1a8f163d6d2df937f9dc3f02e7e344.zip -O RelocaTE.zip
 wget -O TE-locate.tar http://sourceforge.net/projects/te-locate/files/latest/download?source=files
+wget --no-check-certificate https://github.com/JialiUMassWengLab/TEMP/archive/4dcd34b3279729bd24a7c2ead2ea9cf62f0900ef.zip -O TEMP.zip
 
 # Extract software and format folder layout.
 echo "Extracting pipelines..." 
@@ -24,6 +25,9 @@ rm RelocaTE.zip
 mkdir TE-locate
 tar -xvf TE-locate.tar -C TE-locate
 rm TE-locate.tar
+unzip TEMP.zip
+mv TEMP-4dcd34b3279729bd24a7c2ead2ea9cf62f0900ef TEMP
+rm TEMP.zip
 
 # Apply edits to software and custom run scripts.
 echo "Copying run scripts..."
@@ -34,6 +38,9 @@ cp scripts/runretroseq.sh RetroSeq
 cp scripts/splitforRetroSeq.pl RetroSeq
 cp scripts/runrelocate.sh RelocaTE
 cp scripts/runtelocate.sh TE-locate
+cp scripts/pickOverlapPair.in.pl TEMP
+cp scripts/pickUniqPairFastq.pl TEMP
+cp scripts/pickUniqPos.pl TEMP
 cp scripts/mcclintock.sh .
 cp scripts/analysis.R runSacCer2
 cp scripts/concordancecalculation.pl runSacCer2
@@ -43,7 +50,7 @@ sed -i 's/#!\/usr\/bin\/perl -w/#!\/usr\/bin\/env perl/' RelocaTE/scripts/*.pl
 
 # Check dependencies 
 echo "Testing dependencies..."
-dependencies="R RepeatMasker bedtools samtools bcftools bwa exonerate bowtie blat perl"
+dependencies="R RepeatMasker bedtools samtools bcftools bwa exonerate bowtie blat perl twoBitToFa"
 
 for dependency in $dependencies
 do 
