@@ -38,9 +38,9 @@ cp scripts/runretroseq.sh RetroSeq
 cp scripts/splitforRetroSeq.pl RetroSeq
 cp scripts/runrelocate.sh RelocaTE
 cp scripts/runtelocate.sh TE-locate
-cp scripts/pickOverlapPair.in.pl TEMP
-cp scripts/pickUniqPairFastq.pl TEMP
-cp scripts/pickUniqPos.pl TEMP
+cp scripts/pickOverlapPair.in.pl TEMP/scripts
+cp scripts/pickUniqPairFastq.pl TEMP/scripts
+cp scripts/pickUniqPos.pl TEMP/scripts
 cp scripts/mcclintock.sh .
 cp scripts/analysis.R runSacCer2
 cp scripts/concordancecalculation.pl runSacCer2
