@@ -97,6 +97,7 @@ mkdir $test_dir/$genome/$sample/reads
 mkdir $test_dir/$genome/$sample/bam
 mkdir $test_dir/$genome/$sample/sam
 mkdir $test_dir/$genome/$sample/results
+mkdir $test_dir/$genome/$sample/results/originalmethodresults
 
 # Copy input files in to sample directory (neccessary for RelocaTE)
 reference_genome_file=${inputr##*/}
@@ -246,13 +247,32 @@ cd ../popoolationte
 bash runpopoolationte.sh $reference_genome $all_te_seqs $te_hierarchy $fastq1 $fastq2 $te_locations $processors
 
 # Collate results from individual methods folders
+# Both the filtered bed file and the original method result file are retianed.
 cd $test_dir
+
 mv RelocaTE/$sample/$sample"_relocate.bed" $test_dir/$genome/$sample/results/
+mkdir $test_dir/$genome/$sample/results/originalmethodresults/RelocaTE
+cp -r RelocaTE/$sample/*/results $test_dir/$genome/$sample/results/originalmethodresults/RelocaTE
+
 mv ngs_te_mapper/$sample/$sample"_ngs_te_mapper.bed" $test_dir/$genome/$sample/results/
+mkdir $test_dir/$genome/$sample/results/originalmethodresults/ngs_te_mapper
+cp ngs_te_mapper/$sample/analysis/bed_tsd/*.bed $test_dir/$genome/$sample/results/originalmethodresults/ngs_te_mapper
+
 mv RetroSeq/$sample/$sample"_retroseq.bed" $test_dir/$genome/$sample/results/
+mkdir $test_dir/$genome/$sample/results/originalmethodresults/RetroSeq
+cp RetroSeq/$sample/$sample".calling.PE.vcf" $test_dir/$genome/$sample/results/originalmethodresults/RetroSeq
+
 mv TE-locate/$sample/$sample"_telocate.bed" $test_dir/$genome/$sample/results/
+mkdir $test_dir/$genome/$sample/results/originalmethodresults/TE-locate
+cp TE-locate/$sample/*.info $test_dir/$genome/$sample/results/originalmethodresults/TE-locate
+
 mv popoolationte/$sample/$sample"_popoolationte.bed" $test_dir/$genome/$sample/results/
+mkdir $test_dir/$genome/$sample/results/originalmethodresults/popoolationte
+cp popoolationte/$sample/te-polymorphism.txt $test_dir/$genome/$sample/results/originalmethodresults/popoolationte
+
 mv TEMP/$sample/$sample"_temp.bed" $test_dir/$genome/$sample/results/
+mkdir $test_dir/$genome/$sample/results/originalmethodresults/TEMP
+cp TEMP/$sample/$sample".insertion.refined.bp.summary" $test_dir/$genome/$sample/results/originalmethodresults/TEMP
 
 # If cleanup intermediate files is specified then delete all intermediate files specific to the sample
 # i.e. leave any reusable species data behind.
