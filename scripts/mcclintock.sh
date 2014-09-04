@@ -167,7 +167,10 @@ samtools index $bam
 # Run TEMP
 printf "\nRunning TEMP pipeline...\n\n"
 
-awk -F["\t"\;=] '{print $1"\t"$4-1"\t"$5"\t"$10"\t.\t"$7}' $te_locations > $test_dir/$genome/reference/reference_TE_locations.bed
+if [ ! -f $test_dir"/"$genome"/reference/reference_TE_locations.bed" ]; then
+    awk -F["\t"\;=] '{print $1"\t"$4-1"\t"$5"\t"$10"\t.\t"$7}' $te_locations > $test_dir/$genome/reference/reference_TE_locations.bed
+fi
+bed_te_locations_file=$test_dir/$genome/reference/reference_TE_locations.bed
 
 cd TEMP
 mkdir $sample
@@ -177,7 +180,7 @@ chmod 755 $sample
 cp -s $bam $sample/$sample.sorted.bam
 cp -s $bam.bai $sample/$sample.sorted.bam.bai
 
-bash scripts/TEMP_Insertion.sh -i $test_dir/TEMP/$sample/$sample.sorted.bam -s $test_dir/TEMP/scripts -r $consensus_te_seqs -t $test_dir/$genome/reference/reference_TE_locations.bed -u $te_families -m 3 -f 100 -c $processors -o $test_dir/TEMP/$sample
+bash scripts/TEMP_Insertion.sh -i $test_dir/TEMP/$sample/$sample.sorted.bam -s $test_dir/TEMP/scripts -r $consensus_te_seqs -t $bed_te_locations_file -u $te_families -m 3 -f 100 -c $processors -o $test_dir/TEMP/$sample
 
 echo -e "track name=\"$sample"_TEMP"\" description=\"$sample"_TEMP"\"" > $sample/$sample"_temp.bed"
 awk '{if ( $6 == "1p1"  && $10 > 0 && $12 > 0) {printf $1"\t"$2"\t"$3"\t"$4"_new\t0\t"; if ( $5 == "sense" ) print "+"; else print "-" } }' $sample/$sample.insertion.refined.bp.summary > $sample/$sample"_temp.presorted.bed"
@@ -216,7 +219,7 @@ bash runngstemapper.sh $consensus_te_seqs $reference_genome $sample $fastq1 $fas
 printf "\nRunning RetroSeq pipeline...\n\n"
 
 cd ../RetroSeq
-bash runretroseq.sh $consensus_te_seqs $bam $reference_genome $relocate_te_locations
+bash runretroseq.sh $consensus_te_seqs $bam $reference_genome $bed_te_locations_file $te_families
 
 # Run TE-locate
 
