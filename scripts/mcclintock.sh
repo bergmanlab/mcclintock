@@ -80,7 +80,7 @@ fi
 
 # Set up folder structure
 
-printf "\nCreating directory structure...\n\n"
+printf "\nCreating directory structure...\n\n" | tee /dev/stderr
 
 genome=${inputr##*/}
 genome=${genome%%.*}
@@ -148,7 +148,7 @@ all_te_seqs=$test_dir/$genome/reference/all_te_seqs.fasta
 
 # Create sam and bam files for input
 
-printf "\nCreating bam alignment...\n\n"
+printf "\nCreating bam alignment...\n\n" | tee /dev/stderr
 
 bwa mem -a -t $processors -v 0 $reference_genome $fastq1 $fastq2 > $test_dir/$genome/$sample/sam/$sample.sam
 sort --temporary-directory=. $test_dir/$genome/$sample/sam/$sample.sam > $test_dir/$genome/$sample/sam/sorted$sample.sam
@@ -165,7 +165,7 @@ bam=$test_dir/$genome/$sample/bam/$sample.bam
 samtools index $bam
 
 # Run TEMP
-printf "\nRunning TEMP pipeline...\n\n"
+printf "\nRunning TEMP pipeline...\n\n" | tee /dev/stderr
 
 if [ ! -f $test_dir"/"$genome"/reference/reference_TE_locations.bed" ]; then
     awk -F["\t"\;=] '{print $1"\t"$4-1"\t"$5"\t"$10"\t.\t"$7}' $te_locations > $test_dir/$genome/reference/reference_TE_locations.bed
@@ -189,7 +189,7 @@ rm $sample/$sample"_temp.presorted.bed"
 
 # Run RelocaTE
 
-printf "\nRunning RelocaTE pipeline...\n\n"
+printf "\nRunning RelocaTE pipeline...\n\n" | tee /dev/stderr
 
 # Add TSD lengths to consensus TE sequences
 if [ ! -f $test_dir/$genome/reference/relocate_te_seqs.fasta ]; then
@@ -208,7 +208,7 @@ bash runrelocate.sh $relocate_te_seqs $reference_genome $test_dir/$genome/$sampl
 
 # Run ngs_te_mapper pipeline
 
-printf "\nRunning ngs_te_mapper pipeline...\n\n"
+printf "\nRunning ngs_te_mapper pipeline...\n\n" | tee /dev/stderr
 
 cd ../ngs_te_mapper
 
@@ -216,14 +216,14 @@ bash runngstemapper.sh $consensus_te_seqs $reference_genome $sample $fastq1 $fas
 
 # Run RetroSeq
 
-printf "\nRunning RetroSeq pipeline...\n\n"
+printf "\nRunning RetroSeq pipeline...\n\n" | tee /dev/stderr
 
 cd ../RetroSeq
 bash runretroseq.sh $consensus_te_seqs $bam $reference_genome $bed_te_locations_file $te_families
 
 # Run TE-locate
 
-printf "\nRunning TE-locate pipeline...\n\n"
+printf "\nRunning TE-locate pipeline...\n\n" | tee /dev/stderr
 
 # Adjust hierachy levels
 cd ../TE-locate
@@ -237,7 +237,7 @@ bash runtelocate.sh $sam_folder $reference_genome $telocate_te_locations 2 $samp
 
 # Run PoPoolationTE
 
-printf "\nRunning PoPoolationTE pipeline...\n\n"
+printf "\nRunning PoPoolationTE pipeline...\n\n" | tee /dev/stderr
 
 # Create te_hierachy
 if [ ! -f $test_dir/$genome/reference/te_hierarchy ]; then
@@ -297,4 +297,4 @@ then
 	rm -r TEMP/$sample
 fi
 
-printf "\nPipeline Complete\n\n"
+printf "\nPipeline Complete\n\n" | tee /dev/stderr
