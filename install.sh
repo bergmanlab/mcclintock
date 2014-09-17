@@ -50,7 +50,7 @@ sed -i 's/#!\/usr\/bin\/perl -w/#!\/usr\/bin\/env perl/' RelocaTE/scripts/*.pl
 
 # Check dependencies 
 echo "Testing dependencies..."
-dependencies="R RepeatMasker bedtools samtools bcftools bwa exonerate bowtie blat perl twoBitToFa"
+dependencies="R RepeatMasker bedtools samtools bcftools bwa exonerate bowtie blat twoBitToFa perl"
 
 for dependency in $dependencies
 do 
@@ -67,7 +67,16 @@ done
 bioperltest=$(perl -e 'use Bio::Seq' 2>&1)
 if [ -n "$bioperltest" ]
 then
-  echo "BioPerl... NOT FOUND"
+	echo "BioPerl... NOT FOUND"
 else  
-  echo "BioPerl... FOUND"
-fi 
+	echo "BioPerl... FOUND"
+fi
+
+# Test for fastqc - not required but recommended
+location=`which fastqc`
+if test -z "$location"
+then
+	echo "fastqc... NOT FOUND (Not required but recommended)"
+else
+	echo "fastqc... FOUND"
+fi
