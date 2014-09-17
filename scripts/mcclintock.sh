@@ -129,6 +129,16 @@ te_families=$test_dir/$genome/reference/$te_families_file
 fastq1=$test_dir/$genome/$sample/reads/$fastq1_file
 fastq2=$test_dir/$genome/$sample/reads/$fastq2_file
 
+# If fastqc is installed then launch fastqc on the input fastqs
+location=`which fastqc`
+if test -z "$location"
+then
+	mkdir $test_dir/$genome/$sample/results/fastqc_analysis
+	fastqc $fastq1 $fastq2 -o $test_dir/$genome/$sample/results/fastqc_analysis
+else
+	printf "\nfastqc not installed, skipping input quality analysis...\n\n" | tee /dev/stderr
+fi
+
 # Create indexes of reference genome if not already made for this genome
 if [ ! -f $reference_genome".fai" ]; then 
 	samtools faidx $reference_genome
