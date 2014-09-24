@@ -73,6 +73,7 @@ else
 fi
 
 # Test for fastqc - not required but recommended
+echo "Testing optional dependencies..."
 location=`which fastqc`
 if test -z "$location"
 then

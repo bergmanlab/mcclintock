@@ -133,10 +133,10 @@ fastq2=$test_dir/$genome/$sample/reads/$fastq2_file
 location=`which fastqc`
 if test -z "$location"
 then
+	printf "\nfastqc not installed, skipping input quality analysis...\n\n" | tee /dev/stderr
+else
 	mkdir $test_dir/$genome/$sample/results/fastqc_analysis
 	fastqc $fastq1 $fastq2 -o $test_dir/$genome/$sample/results/fastqc_analysis
-else
-	printf "\nfastqc not installed, skipping input quality analysis...\n\n" | tee /dev/stderr
 fi
 
 # Create indexes of reference genome if not already made for this genome
