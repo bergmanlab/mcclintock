@@ -51,9 +51,9 @@ while getopts ":r:c:g:t:1:2:p:hib" opt; do
 		i)	
 			remove_intermediates=on
 			;;
-        b)
-            save_bam=on
-            ;;
+		b)
+			save_bam=on
+			;;
 		h)
 			usage
 			exit 1
@@ -229,7 +229,7 @@ bash runngstemapper.sh $consensus_te_seqs $reference_genome $sample $fastq1 $fas
 printf "\nRunning RetroSeq pipeline...\n\n" | tee -a /dev/stderr
 
 cd ../RetroSeq
-bash runretroseq.sh $consensus_te_seqs $bam $reference_genome $bed_te_locations_file $te_families_file
+bash runretroseq.sh $consensus_te_seqs $bam $reference_genome $bed_te_locations_file $te_families
 
 # Run TE-locate
 
