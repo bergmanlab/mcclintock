@@ -80,7 +80,7 @@ fi
 
 # Set up folder structure
 
-printf "\nCreating directory structure...\n\n" | tee /dev/stderr
+printf "\nCreating directory structure...\n\n" | tee -a /dev/stderr
 
 genome=${inputr##*/}
 genome=${genome%%.*}
@@ -133,10 +133,10 @@ fastq2=$test_dir/$genome/$sample/reads/$fastq2_file
 location=`which fastqc`
 if test -z "$location"
 then
-	printf "\nfastqc not installed, skipping input quality analysis...\n\n" | tee /dev/stderr
+	printf "\nfastqc not installed, skipping input quality analysis...\n\n" | tee -a /dev/stderr
 else
 	mkdir $test_dir/$genome/$sample/results/fastqc_analysis
-	fastqc $fastq1 $fastq2 -o $test_dir/$genome/$sample/results/fastqc_analysis
+	fastqc -t $processors $fastq1 $fastq2 -o $test_dir/$genome/$sample/results/fastqc_analysis
 fi
 
 # Create indexes of reference genome if not already made for this genome
@@ -158,7 +158,7 @@ all_te_seqs=$test_dir/$genome/reference/all_te_seqs.fasta
 
 # Create sam and bam files for input
 
-printf "\nCreating bam alignment...\n\n" | tee /dev/stderr
+printf "\nCreating bam alignment...\n\n" | tee -a /dev/stderr
 
 bwa mem -a -t $processors -v 0 $reference_genome $fastq1 $fastq2 > $test_dir/$genome/$sample/sam/$sample.sam
 sort --temporary-directory=. $test_dir/$genome/$sample/sam/$sample.sam > $test_dir/$genome/$sample/sam/sorted$sample.sam
@@ -175,7 +175,7 @@ bam=$test_dir/$genome/$sample/bam/$sample.bam
 samtools index $bam
 
 # Run TEMP
-printf "\nRunning TEMP pipeline...\n\n" | tee /dev/stderr
+printf "\nRunning TEMP pipeline...\n\n" | tee -a /dev/stderr
 
 if [ ! -f $test_dir"/"$genome"/reference/reference_TE_locations.bed" ]; then
     awk -F["\t"\;=] '{print $1"\t"$4-1"\t"$5"\t"$10"\t.\t"$7}' $te_locations > $test_dir/$genome/reference/reference_TE_locations.bed
@@ -199,7 +199,7 @@ rm $sample/$sample"_temp.presorted.bed"
 
 # Run RelocaTE
 
-printf "\nRunning RelocaTE pipeline...\n\n" | tee /dev/stderr
+printf "\nRunning RelocaTE pipeline...\n\n" | tee -a /dev/stderr
 
 # Add TSD lengths to consensus TE sequences
 if [ ! -f $test_dir/$genome/reference/relocate_te_seqs.fasta ]; then
@@ -218,7 +218,7 @@ bash runrelocate.sh $relocate_te_seqs $reference_genome $test_dir/$genome/$sampl
 
 # Run ngs_te_mapper pipeline
 
-printf "\nRunning ngs_te_mapper pipeline...\n\n" | tee /dev/stderr
+printf "\nRunning ngs_te_mapper pipeline...\n\n" | tee -a /dev/stderr
 
 cd ../ngs_te_mapper
 
@@ -226,14 +226,14 @@ bash runngstemapper.sh $consensus_te_seqs $reference_genome $sample $fastq1 $fas
 
 # Run RetroSeq
 
-printf "\nRunning RetroSeq pipeline...\n\n" | tee /dev/stderr
+printf "\nRunning RetroSeq pipeline...\n\n" | tee -a /dev/stderr
 
 cd ../RetroSeq
 bash runretroseq.sh $consensus_te_seqs $bam $reference_genome $bed_te_locations_file $te_families_file
 
 # Run TE-locate
 
-printf "\nRunning TE-locate pipeline...\n\n" | tee /dev/stderr
+printf "\nRunning TE-locate pipeline...\n\n" | tee -a /dev/stderr
 
 # Adjust hierachy levels
 cd ../TE-locate
@@ -247,7 +247,7 @@ bash runtelocate.sh $sam_folder $reference_genome $telocate_te_locations 2 $samp
 
 # Run PoPoolationTE
 
-printf "\nRunning PoPoolationTE pipeline...\n\n" | tee /dev/stderr
+printf "\nRunning PoPoolationTE pipeline...\n\n" | tee -a /dev/stderr
 
 # Create te_hierachy
 if [ ! -f $test_dir/$genome/reference/te_hierarchy ]; then
@@ -307,4 +307,4 @@ then
 	rm -r TEMP/$sample
 fi
 
-printf "\nPipeline Complete\n\n" | tee /dev/stderr
+printf "\nPipeline Complete\n\n" | tee -a /dev/stderr
