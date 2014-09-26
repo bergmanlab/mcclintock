@@ -14,14 +14,16 @@ then
 		awk -F".fa" '{print $1".bed"}' $reference"_elementlist" > $reference"_locationlist"
 
 		# Link individual inserts to the bed file they must be annotated in
-		join -1 2 -2 1 -o 1.1,2.2 -t $'\t' <(sort -k2 $5) <(sort $reference"_locationlist") > tmp
+		# env LC_COLLATE=C is added as there was inconsistency between the sorting order when run on certain machines.
+		# Errors from RetroSeq not finding TE specific bed files may originate here if these sorts fail.
+		join -1 2 -2 1 -o 1.1,2.2 -t $'\t' <(env LC_COLLATE=C sort -k2 $5) <(env LC_COLLATE=C sort $reference"_locationlist") > tmp
 
 		while read element file
 		do
-				grep -w $element $4 >> $file
+			grep -w $element $4 >> $file
 		done < tmp
 
-
+		rm tmp
 		rm list
 	fi
 
