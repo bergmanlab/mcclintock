@@ -13,7 +13,10 @@ Software Methods
 
 Software Dependencies
 ------
-All of the software systems must be run on a unix based system with the software dependencies listed per method below. The versions used to run this pipeline are indicated in parentheses and no guarantee is made that it will function using alternate versions.
+All of the software systems must be run on a unix based system with the software dependencies listed per method below. FastQC is an optional step, if the software is not present then mcclintock will skip the step and you will not receive a quality report for your fastq input in the results folder. The versions used to run this pipeline are indicated in parentheses and no guarantee is made that it will function using alternate versions.
+
+ * Optional software for the pipeline
+  * [FastQC](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/) (Command line installation v0.11.2)
 
  * ngs_te_mapper
   * [R](http://cran.r-project.org/) (v.3.0.2)
