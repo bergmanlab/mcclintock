@@ -1,4 +1,4 @@
-#!/bin/bash -l
+#! /bin/bash -l
 
 usage () 
 {
@@ -193,7 +193,7 @@ cp -s $bam.bai $sample/$sample.sorted.bam.bai
 bash scripts/TEMP_Insertion.sh -i $test_dir/TEMP/$sample/$sample.sorted.bam -s $test_dir/TEMP/scripts -r $consensus_te_seqs -t $bed_te_locations_file -u $te_families -m 3 -f 100 -c $processors -o $test_dir/TEMP/$sample
 
 echo -e "track name=\"$sample"_TEMP"\" description=\"$sample"_TEMP"\"" > $sample/$sample"_temp.bed"
-awk '{if ( $6 == "1p1"  && $10 > 0 && $12 > 0) {printf $1"\t"$2"\t"$3"\t"$4"_new\t0\t"; if ( $5 == "sense" ) print "+"; else print "-" } }' $sample/$sample.insertion.refined.bp.summary > $sample/$sample"_temp.presorted.bed"
+awk '{if ( $6 == "1p1"  && $10 > 0 && $12 > 0) {printf $1"\t"$9"\t"$11"\t"$4"_new\t0\t"; if ( $5 == "sense" ) print "+"; else print "-" } }' $sample/$sample.insertion.refined.bp.summary > $sample/$sample"_temp.presorted.bed"
 bedtools sort -i $sample/$sample"_temp.presorted.bed" >> $sample/$sample"_temp.bed"
 rm $sample/$sample"_temp.presorted.bed"
 
