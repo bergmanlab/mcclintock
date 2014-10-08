@@ -39,10 +39,10 @@ then
 
 	# Extract the relevant results
 	echo -e "track name=\"$samplename"_RetroSeq"\" description=\"$samplename"_RetroSeq"\"" > $samplename/$samplename"_retroseq.bed"
-	awk '$1!~/#/{print $0}' $samplename/$samplename.calling.PE.vcf >> tmp
-	awk -F'[=,\t:]' '{if ($20 >= 6) print $1"\t"$11"\t"$12"\t"$10"_new\t0\t."}' tmp >> $samplename/$samplename"_retroseq_presort.bed"
+	awk '$1!~/#/{print $0}' $samplename/$samplename.calling.PE.vcf >> $samplename/tmp
+	awk -F'[=,\t:]' '{if ($20 >= 6) print $1"\t"$11"\t"$12"\t"$10"_new\t0\t."}' $samplename/tmp >> $samplename/$samplename"_retroseq_presort.bed"
 	bedtools sort -i $samplename/$samplename"_retroseq_presort.bed" >> $samplename/$samplename"_retroseq.bed"
-	rm tmp $samplename/$samplename"_retroseq_presort.bed"
+	rm $samplename/tmp $samplename/$samplename"_retroseq_presort.bed"
 
 else
 	echo "Supply TE database as option 1"
