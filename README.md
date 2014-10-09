@@ -105,7 +105,8 @@ sh mcclintock.sh -r reference.fasta -c te_consensus.fasta -g te_locations.gff -t
 Data created during pre-processing will be stored in a folder in the main directory named after the reference genome used with individual sub-directories for samples. 
 
 ###Output format
-The output of the run scripts is a bed format file with the 4th column containing the name of the TE name and whether it is a novel insertion (new) or a TE shared with the reference (old). The outputs also include a header line for use with the UCSC genome browser. The final results files are located in a results folder saved in the specific sample folder within the directory named after the reference genome.
+The output of the run scripts is a bed format file with the 4th column containing the name of the TE name and whether it is a novel insertion (new) or a TE shared with the reference (old). The outputs also include a header line for use with the UCSC genome browser. The final results files are located in a results folder saved in the specific sample folder within the directory named after the reference genome. 
+If FastQC was present on the system then output of FastQC will be stored in the folder fastqc_analysis, within the results folder. It is also possible to view the original results files produced by each method, these are stored in the folder originalmethodresults, within the results folder.
 
 ###Running individual TE detection methods
 Each folder contains one of the TE detection methods tested in the review. In addition to the standard software there is also a file named runXXXX.sh. Running this file without arguments will explain to the user what input files should be used to execute the method. These arguments should be supplied after the script name with spaces in between, as follows:
