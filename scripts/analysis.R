@@ -45,6 +45,7 @@ new.TE.counts.relocate<-new.TE.counts[grep("relocate",names(new.TE.counts))]
 new.TE.counts.retroseq<-new.TE.counts[grep("retroseq",names(new.TE.counts))]
 new.TE.counts.popoolationte<-new.TE.counts[grep("popoolationte",names(new.TE.counts))]
 new.TE.counts.telocate<-new.TE.counts[grep("telocate",names(new.TE.counts))]
+new.TE.counts.temp<-new.TE.counts[grep("temp",names(new.TE.counts))]
 
 # Find the density for counts of novel TEs for each method
 retroseq.new.density<-density(new.TE.counts.retroseq)
@@ -52,6 +53,7 @@ telocate.new.density<-density(new.TE.counts.telocate)
 relocate.new.density<-density(new.TE.counts.relocate)
 ngs_te_mapper.new.density<-density(new.TE.counts.ngs_te_mapper)
 popoolationte.new.density<-density(new.TE.counts.popoolationte)
+temp.new.density<-density(new.TE.counts.temp)
 
 # Plot the density curves and output the graph including a legend
 pdf('new.counts.pdf')
@@ -61,7 +63,8 @@ lines(telocate.new.density, col = "blue")
 lines(relocate.new.density, col = "red")
 lines(retroseq.new.density, col = "green")
 lines(popoolationte.new.density, col = "purple")
-legend(430,0.13,c("ngs_te_mapper","TE-locate","RelocaTE","RetroSeq","PoPoolationTE"),lty=c(1,1),col=c("black","blue","red","green","purple"))
+lines(temp.new.density, col = "orange")
+legend(430,0.13,c("ngs_te_mapper","TE-locate","RelocaTE","RetroSeq","PoPoolationTE","TEMP"),lty=c(1,1),col=c("black","blue","red","green","purple","orange"))
 
 dev.off()
 
@@ -149,7 +152,7 @@ new.concordance$Method.1<-gsub(" ", "", new.concordance$Method.1)
 new.concordance$Method.2<-gsub(" ", "", new.concordance$Method.2)
 
 # Create and print the latex table for the concordance of novel insertions as a proportion of the highest total predictions in each pair.
-new.concordance.high.matrix<-matrix(data = NA, ncol = 5, nrow = 5, dimnames= list(names(table(new.concordance$Method.1)), names(table(new.concordance$Method.1))))
+new.concordance.high.matrix<-matrix(data = NA, ncol = 6, nrow = 6, dimnames= list(names(table(new.concordance$Method.1)), names(table(new.concordance$Method.1))))
 new.methods<-names(table(new.concordance$Method.1))
 
 for (i in 1:length(new.methods))
@@ -170,7 +173,7 @@ new.concordance.high.matrix.table<-xtable(new.concordance.high.matrix)
 print(new.concordance.high.matrix.table, floating=FALSE, file="new.concordance.high.tex")
 
 # Create and print the latex table for the concordance of novel insertions as a proportion of the lowest total predictions in each pair.
-new.concordance.low.matrix<-matrix(data = NA, ncol = 5, nrow = 5, dimnames= list(names(table(new.concordance$Method.1)), names(table(new.concordance$Method.1))))
+new.concordance.low.matrix<-matrix(data = NA, ncol = 6, nrow = 6, dimnames= list(names(table(new.concordance$Method.1)), names(table(new.concordance$Method.1))))
 new.methods<-names(table(new.concordance$Method.1))
 
 for (i in 1:length(new.methods))
@@ -203,6 +206,7 @@ colnames(old.concordance)<-c("Method.1", "Method.2", "Mean.high", "Mean.low", "S
 
 old.concordance$Method.1<-gsub(" ", "", old.concordance$Method.1)
 old.concordance$Method.2<-gsub(" ", "", old.concordance$Method.2)
+
 
 # Create and print the latex table for the concordance of detected reference insertions as a proportion of the highest total predictions in each pair.
 old.concordance.high.matrix<-matrix(data = NA, ncol = 4, nrow = 4, dimnames= list(names(table(old.concordance$Method.1)), names(table(old.concordance$Method.1))))
