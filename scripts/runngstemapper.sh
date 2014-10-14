@@ -30,8 +30,6 @@ then
 	# Run ngs_te_mapper
 	R --no-save < sourceCode/ngs_te_mapper.R "$4;$5" $projectdir 1 20
 
-	R --no-save < sourceCode/ngs_te_logo.R $projectdir 25
-	
 	# Extract only the relevant data from the output file and sort the results
 	# Name and description for use with the UCSC genome browser are added to output here.
 	awk -F'[\t;]' '{print $1"\t"$2"\t"$3"\t"$6"_"$9"\t0\t"$5}' $projectdir/analysis/bed_tsd/$samplename"_"$fasta2"insertions.bed" > $projectdir/$3"_ngs_te_mapper_presort.bed"
