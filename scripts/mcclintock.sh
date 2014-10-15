@@ -246,7 +246,7 @@ if [ ! -f $telocate_te_locations ]; then
 	perl TE_hierarchy.pl $te_locations $te_families Alias
 fi
 
-bash runtelocate.sh $sam_folder $reference_genome $telocate_te_locations 2 $sample
+bash runtelocate.sh $sam_folder $reference_genome $telocate_te_locations 2 $sample $median_insertsize
 
 # Run PoPoolationTE
 
