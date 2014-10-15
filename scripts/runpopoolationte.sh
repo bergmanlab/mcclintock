@@ -46,10 +46,11 @@ then
 	awk -F'[\t=;]' '{if($7=="-")print $1"\tF\t"$5"\t"$10"\n"$1"\tR\t"$4"\t"$10; else print $1"\tF\t"$4"\t"$10"\n"$1"\tR\t"$5"\t"$10}' $6 > $samplename/known-te-insertions.txt
 	perl update-teinserts-with-knowntes.pl --known $samplename/known-te-insertions.txt --output $samplename/te-insertions.updated.txt --te-hierarchy-file $3 --te-hierarchy-level family --max-dist 300 --te-insertions $samplename/te-inserts.txt --single-site-shift 100
 	perl estimate-polymorphism.pl --sam-file $samplename/pe-reads.sorted.sam --te-insert-file $samplename/te-insertions.updated.txt --te-hierarchy-file $3 --te-hierarchy-level family --min-map-qual 15 --output $samplename/te-polymorphism.txt
+	perl filter-teinserts.pl --te-insertions $samplename/te-polymorphism.txt --output $samplename/te-poly-filtered.txt --discard-overlapping --min-count 10
 
 	# Create an output file in BED format selecting only the relevant inserts.
 	# Name and description for use with the UCSC genome browser are added to output here.
-	awk -F"\t" '{if($3=="FR" && $7!~/-/)print $1"\t"$2"\t"$2"\t"$4"_old\t0\t."; else if($3=="FR") print $1"\t"$2"\t"$2"\t"$4"_new\t0\t."}' $samplename/te-polymorphism.txt >> $samplename/$samplename"_popoolationte_presort.bed"
+	awk -F"\t" '{if($3=="FR" && $7!~/-/)print $1"\t"$2"\t"$2"\t"$4"_old\t0\t."; else if($3=="FR") print $1"\t"$2"\t"$2"\t"$4"_new\t0\t."}' $samplename/te-poly-filtered.txt >> $samplename/$samplename"_popoolationte_presort.bed"
 	echo -e "track name=\"$samplename"_PoPoolationTE"\" description=\"$samplename"_PoPoolationTE"\"" > $samplename/$samplename"_popoolationte.bed"
 	sort -k1,1 -k2,2n $samplename/$samplename"_popoolationte_presort.bed" >> $samplename/$samplename"_popoolationte.bed"
 	rm $samplename/$samplename"_popoolationte_presort.bed"

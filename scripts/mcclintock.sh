@@ -281,7 +281,7 @@ cp TE-locate/$sample/*.info $test_dir/$genome/$sample/results/originalmethodresu
 
 mv popoolationte/$sample/$sample"_popoolationte.bed" $test_dir/$genome/$sample/results/
 mkdir $test_dir/$genome/$sample/results/originalmethodresults/popoolationte
-cp popoolationte/$sample/te-polymorphism.txt $test_dir/$genome/$sample/results/originalmethodresults/popoolationte
+cp popoolationte/$sample/te-poly-filtered.txt $test_dir/$genome/$sample/results/originalmethodresults/popoolationte
 
 mv TEMP/$sample/$sample"_temp.bed" $test_dir/$genome/$sample/results/
 mkdir $test_dir/$genome/$sample/results/originalmethodresults/TEMP
