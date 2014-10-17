@@ -20,13 +20,13 @@ All of the software systems must be run on a unix based system with the software
 
  * ngs_te_mapper
   * [R](http://cran.r-project.org/) (v.3.0.2)
-  * [BWA](http://sourceforge.net/projects/bio-bwa/files/) (v.0.7.2-r351)
+  * [BWA](https://github.com/lh3/bwa/commit/c14aaad1ce72f5784bfe04df757a6b12fe07b7ea) (v.0.7.4-r385)
 
  * PoPoolationTE
   * [Perl](http://www.perl.org/get.html) (v.5.14.2)
   * [RepeatMasker](http://www.repeatmasker.org/RMDownload.html) (v.4.0.2)
   * [SAMtools](http://sourceforge.net/projects/samtools/files/) (v.0.1.19-44428cd)
-  * [BWA](http://sourceforge.net/projects/bio-bwa/files/) (v.0.7.2-r351)
+  * [BWA](https://github.com/lh3/bwa/commit/c14aaad1ce72f5784bfe04df757a6b12fe07b7ea) (v.0.7.4-r385)
 
  * RelocaTE
   * [Perl](http://www.perl.org/get.html) (v.5.14.2)
@@ -37,7 +37,7 @@ All of the software systems must be run on a unix based system with the software
   
  * TE-locate
   * [Perl](http://www.perl.org/get.html) (v.5.14.2)
-  * [BWA](http://sourceforge.net/projects/bio-bwa/files/) (v.0.7.2-r351)
+  * [BWA](https://github.com/lh3/bwa/commit/c14aaad1ce72f5784bfe04df757a6b12fe07b7ea) (v.00.7.4-r385)
 
  * RetroSeq
   * [Perl](http://www.perl.org/get.html) (v.5.14.2)
@@ -45,12 +45,12 @@ All of the software systems must be run on a unix based system with the software
   * [SAMtools](http://sourceforge.net/projects/samtools/files/) (v.0.1.19-44428cd)
   * [BCFTools](https://github.com/samtools/bcftools) (v.0.1.19-44428cd)
   * [Exonerate](http://www.ebi.ac.uk/~guy/exonerate/) (v.2.2.0)
-  * [BWA](http://sourceforge.net/projects/bio-bwa/files/) (v.0.7.2-r351)
+  * [BWA](https://github.com/lh3/bwa/commit/c14aaad1ce72f5784bfe04df757a6b12fe07b7ea) (v.0.7.4-r385)
 
 * TEMP
   * [Perl](http://www.perl.org/get.html) (v.5.14.2)
   * [BioPerl](http://www.bioperl.org/wiki/Getting_BioPerl) (v.1.006901)
-  * [BWA](http://sourceforge.net/projects/bio-bwa/files/) (v.0.7.2-r351)
+  * [BWA](https://github.com/lh3/bwa/commit/c14aaad1ce72f5784bfe04df757a6b12fe07b7ea) (v.0.7.4-r385)
   * [SAMtools](http://sourceforge.net/projects/samtools/files/) (v.0.1.19-44428cd)
   * [BEDTools](https://code.google.com/p/bedtools/downloads/list) (v.2.17.0)
   * [twoBitToFa](http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/twoBitToFa) (ucsc-tools v.294)
