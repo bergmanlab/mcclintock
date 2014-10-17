@@ -26,7 +26,7 @@ mkdir TE-locate
 tar -xvf TE-locate.tar -C TE-locate
 rm TE-locate.tar
 unzip TEMP.zip
-mv TEMP-4dcd34b3279729bd24a7c2ead2ea9cf62f0900ef TEMP
+mv TEMP-3a7d14b5b07cb48eab0c0da46a87c3734a75c16b TEMP
 rm TEMP.zip
 
 # Apply edits to software and custom run scripts.
