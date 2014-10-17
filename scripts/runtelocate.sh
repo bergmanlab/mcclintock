@@ -7,7 +7,7 @@ then
 	# Run the TE locate pipeline.
 	perl TE_locate.pl $4 $1 $3 $2 $5/ $distance 3 1
 	# Extract the relevant data from the output file 
-	sed -e '1,2d' $5/"_"$6"_reads3_acc1.info" > $5/$5"tmpfile"
+	sed -e '1,2d' $5/"_"$distance"_reads3_acc1.info" > $5/$5"tmpfile"
 	
 	#Name and description for use with the UCSC genome browser are added to output here.
 	echo -e "track name=\"$5"_TE-locate"\" description=\"$5"_TE-locate"\"" > $5/$5"_telocate.bed"
