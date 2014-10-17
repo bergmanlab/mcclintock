@@ -35,21 +35,16 @@ awk -F'[\t;]' '{print $10}' sample_list > sample_1_urls.txt
 
 # Only allow a maximum of 4 jobs to be submitted to the queue at one time.
 sample_no=1
-first_sample=empty
+
 while read line
 do 
 	if [ $sample_no -eq 1 ]; then
 		qsub -l long -l cores=4 -V -cwd -N mcclintock$sample_no launchmcclintock.sh $line
 		echo -e "$line\tmcclintock$sample_no" > job_key
 	else
-        if [ $sample_no -lt 6 ]; then
-            qsub -l long -l cores=4 -V -cwd -N mcclintock$sample_no -hold_jid mcclintock"1" launchmcclintock.sh $line
-        else
-            waitfor=$((sample_no-4))
-            qsub -l long -l cores=4 -V -cwd -N mcclintock$sample_no -hold_jid mcclintock$waitfor launchmcclintock.sh $line
-        fi
-		echo -e "$line\tmcclintock$sample_no" >> job_key
+        qsub -l long -l cores=4 -V -cwd -N mcclintock$sample_no -hold_jid mcclintock"1" launchmcclintock.sh $line
+        echo -e "$line\tmcclintock$sample_no" >> job_key
     fi
-	sample_no=$((sample_no+1))
+    sample_no=$((sample_no+1))
 done < sample_1_urls.txt
 
