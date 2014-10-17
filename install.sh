@@ -7,7 +7,7 @@ wget --no-check-certificate https://github.com/bergmanlab/ngs_te_mapper/archive/
 wget --no-check-certificate https://github.com/tk2/RetroSeq/archive/700d4f76a3b996686652866f2b81fefc6f0241e0.zip -O RetroSeq.zip
 wget --no-check-certificate https://github.com/srobb1/RelocaTE/archive/9b3c89d03c1a8f163d6d2df937f9dc3f02e7e344.zip -O RelocaTE.zip
 wget -O TE-locate.tar http://sourceforge.net/projects/te-locate/files/latest/download?source=files
-wget --no-check-certificate https://github.com/JialiUMassWengLab/TEMP/archive/4dcd34b3279729bd24a7c2ead2ea9cf62f0900ef.zip -O TEMP.zip
+wget --no-check-certificate https://github.com/JialiUMassWengLab/TEMP/archive/3a7d14b5b07cb48eab0c0da46a87c3734a75c16b.zip -O TEMP.zip
 
 # Extract software and format folder layout.
 echo "Extracting pipelines..." 
@@ -38,9 +38,6 @@ cp scripts/runretroseq.sh RetroSeq
 cp scripts/splitforRetroSeq.pl RetroSeq
 cp scripts/runrelocate.sh RelocaTE
 cp scripts/runtelocate.sh TE-locate
-cp scripts/pickOverlapPair.in.pl TEMP/scripts
-cp scripts/pickUniqPairFastq.pl TEMP/scripts
-cp scripts/pickUniqPos.pl TEMP/scripts
 cp scripts/mcclintock.sh .
 cp scripts/analysis.R runSacCer2
 cp scripts/concordancecalculation.pl runSacCer2

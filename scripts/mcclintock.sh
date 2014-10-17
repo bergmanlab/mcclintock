@@ -169,6 +169,7 @@ sam_folder=$test_dir/$genome/$sample/sam
 
 # Calculate the median insert size of the sample
 median_insertsize=`cut -f9 $sam | sort -n | awk '{if ($1 > 0) ins[reads++]=$1; } END { print ins[int(reads/2)]; }'`
+printf "\nMedian insert size = $median_insertsize\n\n" | tee -a /dev/stderr
 
 samtools view -Sb $sam > $test_dir/$genome/$sample/bam/$sample.bam
 samtools sort $test_dir/$genome/$sample/bam/$sample.bam $test_dir/$genome/$sample/bam/sorted$sample
@@ -189,9 +190,20 @@ cd TEMP
 mkdir $sample
 chmod 755 $sample
 
+# Have to use bwa aln for TEMP - this can be replaced with the commented lines below if fixed:
+
+bwa aln -t $processors $reference_genome $fastq1 > $sample/1.sai
+bwa aln -t $processors $reference_genome $fastq2 > $sample/2.sai
+
+bwa sampe $reference_genome $sample/1.sai $sample/2.sai $fastq1 $fastq2 > $sample/$sample.sam
+samtools view -Sb $sample/$sample.sam > $sample/$sample.bam
+rm $sample/$sample.sam
+samtools sort $sample/$sample.bam $sample/$sample.sorted
+samtools index $sample/$sample.sorted
+
 # Create soft link to differently named files for TEMP
-cp -s $bam $sample/$sample.sorted.bam
-cp -s $bam.bai $sample/$sample.sorted.bam.bai
+#cp -s $bam $sample/$sample.sorted.bam
+#cp -s $bam.bai $sample/$sample.sorted.bam.bai
 
 bash scripts/TEMP_Insertion.sh -i $test_dir/TEMP/$sample/$sample.sorted.bam -s $test_dir/TEMP/scripts -r $consensus_te_seqs -t $bed_te_locations_file -u $te_families -m 1 -f $median_insertsize -c $processors -o $test_dir/TEMP/$sample
 
