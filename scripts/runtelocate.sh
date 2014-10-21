@@ -11,7 +11,7 @@ then
 	
 	#Name and description for use with the UCSC genome browser are added to output here.
 	echo -e "track name=\"$5"_TE-locate"\" description=\"$5"_TE-locate"\"" > $5/$5"_telocate.bed"
-	awk -F'[\t/]' '{printf $1"\t"; if($17=="old") printf $2-1"\t"$2+$3"\t"$5"_"$17"\t0"; else if($17=="new") printf $2-1"\t"$2"\t"$5"_"$17"\t0"; if($14=="parallel") print "\t+"; else if($14 =="uncertain") print "\t."; else print "\t-";}' $5/$5"tmpfile" >> $5/$5"_telocate_presort.bed"
+	awk -F'[\t/]' '{printf $1"\t"; if($17=="old") printf $2-1"\t"$2"\t"$5"_"$17"\t0"; else if($17=="new") printf $2-1"\t"$2"\t"$5"_"$17"\t0"; if($14=="parallel") print "\t+"; else if($14 =="uncertain") print "\t."; else print "\t-";}' $5/$5"tmpfile" >> $5/$5"_telocate_presort.bed"
 	bedtools sort -i $5/$5"_telocate_presort.bed" >> $5/$5"_telocate.bed"
 	rm $5/$5"tmpfile" $5/$5"_telocate_presort.bed"
 else
