@@ -39,10 +39,10 @@ sample_no=1
 while read line
 do 
 	if [ $sample_no -eq 1 ]; then
-		qsub -l long -l cores=4 -V -cwd -N mcclintock$sample_no launchmcclintock.sh $line
+		qsub -l long -l cores=4 -V -cwd -N mcclintock$sample_no launchMcClintock.sh $line
 		echo -e "$line\tmcclintock$sample_no" > job_key
 	else
-        qsub -l long -l cores=4 -V -cwd -N mcclintock$sample_no -hold_jid mcclintock"1" launchmcclintock.sh $line
+        qsub -l long -l cores=4 -V -cwd -N mcclintock$sample_no -hold_jid mcclintock"1" launchMcClintock.sh $line
         echo -e "$line\tmcclintock$sample_no" >> job_key
     fi
     sample_no=$((sample_no+1))

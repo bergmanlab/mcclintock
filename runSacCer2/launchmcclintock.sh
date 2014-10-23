@@ -3,7 +3,7 @@
 url=${1%%_1.f*}
 sample_name=${url##*/}
 
-test_dir=`pwd`
+run_dir=`pwd`
 
 # If the sample folder exists this sample must have at least been launched
 if [ -d ../sacCer2/$sample_name/ ]; then
@@ -31,10 +31,10 @@ if [ -d ../sacCer2/$sample_name/ ]; then
 		cd ..
 		
 		echo "About to launch mcclintock for $sample_name"
-		./mcclintock.sh -r $test_dir/sacCer2.fa -c $test_dir/sac_cer_TE_seqs.fa -g $test_dir/reference_TE_locations.gff -t $test_dir/sac_cer_te_families.tsv -1 $test_dir/$sample_name"_1.fastq" -2 $test_dir/$sample_name"_2.fastq" -i -p 4
+		./mcclintock.sh -r $run_dir/sacCer2.fa -c $run_dir/../test/sac_cer_TE_seqs.fa -g $run_dir/reference_TE_locations.gff -t $run_dir/../test/sac_cer_te_families.tsv -1 $run_dir/$sample_name"_1.fastq" -2 $run_dir/$sample_name"_2.fastq" -i -p 4
 	
 		# Remove the fastq files when analysis is complete.
-		rm $test_dir/$sample_name"_1.fastq" $test_dir/$sample_name"_2.fastq"
+		rm $run_dir/$sample_name"_1.fastq" $run_dir/$sample_name"_2.fastq"
 	fi
 else
 	# wget the fastq files
@@ -47,8 +47,8 @@ else
 	cd ..
 		
 	echo "About to launch mcclintock for $sample_name"
-	./mcclintock.sh -r $test_dir/sacCer2.fa -c $test_dir/sac_cer_TE_seqs.fa -g $test_dir/reference_TE_locations.gff -t $test_dir/sac_cer_te_families.tsv -1 $test_dir/$sample_name"_1.fastq" -2 $test_dir/$sample_name"_2.fastq" -i -p 4
+	./mcclintock.sh -r $run_dir/sacCer2.fa -c $run_dir/sac_cer_TE_seqs.fa -g $run_dir/reference_TE_locations.gff -t $run_dir/sac_cer_te_families.tsv -1 $run_dir/$sample_name"_1.fastq" -2 $run_dir/$sample_name"_2.fastq" -i -p 4
 	
 	# Remove the fastq files when analysis is complete.
-	rm $test_dir/$sample_name"_1.fastq" $test_dir/$sample_name"_2.fastq"
+	rm $run_dir/$sample_name"_1.fastq" $run_dir/$sample_name"_2.fastq"
 fi
