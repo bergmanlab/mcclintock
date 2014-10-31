@@ -195,11 +195,13 @@ chmod 755 $sample
 bwa aln -t $processors $reference_genome $fastq1 > $sample/1.sai
 bwa aln -t $processors $reference_genome $fastq2 > $sample/2.sai
 
-bwa sampe $reference_genome $sample/1.sai $sample/2.sai $fastq1 $fastq2 > $sample/$sample.sam
+bwa sampe $reference_genome $sample/1.sai $sample/2.sai $fastq1 $fastq2 | ../scripts/samtest.pl > $sample/$sample.sam 
+
 samtools view -Sb $sample/$sample.sam > $sample/$sample.bam
+
 rm $sample/$sample.sam
 samtools sort $sample/$sample.bam $sample/$sample.sorted
-samtools index $sample/$sample.sorted
+samtools index $sample/$sample.sorted.bam
 
 # Create soft link to differently named files for TEMP
 #cp -s $bam $sample/$sample.sorted.bam
