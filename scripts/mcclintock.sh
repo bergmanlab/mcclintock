@@ -157,7 +157,6 @@ fi
 all_te_seqs=$test_dir/$genome/reference/all_te_seqs.fasta
 
 # Create sam and bam files for input
-
 printf "\nCreating bam alignment...\n\n" | tee -a /dev/stderr
 
 bwa mem -a -t $processors -v 0 $reference_genome $fastq1 $fastq2 > $test_dir/$genome/$sample/sam/$sample.sam
@@ -204,15 +203,22 @@ samtools sort $sample/$sample.bam $sample/$sample.sorted
 samtools index $sample/$sample.sorted.bam
 
 # Create soft link to differently named files for TEMP
-#cp -s $bam $sample/$sample.sorted.bam
-#cp -s $bam.bai $sample/$sample.sorted.bam.bai
+# cp -s $bam $sample/$sample.sorted.bam
+# cp -s $bam.bai $sample/$sample.sorted.bam.bai
 
 bash scripts/TEMP_Insertion.sh -i $test_dir/TEMP/$sample/$sample.sorted.bam -s $test_dir/TEMP/scripts -r $consensus_te_seqs -t $bed_te_locations_file -u $te_families -m 1 -f $median_insertsize -c $processors -o $test_dir/TEMP/$sample
 
+echo -e "track name=\"$sample"_TEMP"\" description=\"$sample"_TEMP"\"" > $sample/$sample"_temp_unfiltered.bed"
+echo -e "track name=\"$sample"_TEMP"\" description=\"$sample"_TEMP"\"" > $sample/$sample"_temp_duplicated.bed"
 echo -e "track name=\"$sample"_TEMP"\" description=\"$sample"_TEMP"\"" > $sample/$sample"_temp.bed"
-awk '{if ( $6 == "1p1"  && $10 > 0 && $12 > 0) {printf $1"\t"$9"\t"$11"\t"$4"_new\t0\t"; if ( $5 == "sense" ) print "+"; else print "-" } }' $sample/$sample.insertion.refined.bp.summary > $sample/$sample"_temp.presorted.bed"
-bedtools sort -i $sample/$sample"_temp.presorted.bed" >> $sample/$sample"_temp.bed"
-rm $sample/$sample"_temp.presorted.bed"
+
+awk sample=$sample '{if ( $6 == "1p1"  && $10 > 0 && $12 > 0) {printf $1"\t"$9"\t"$11"\t"$4"_new_"sample"_temp_sr\t0\t"; if ( $5 == "sense" ) print "+"; else print "-" } }' $sample/$sample.insertion.refined.bp.summary > $sample/$sample"_temp.presorted.bed"
+awk sample=$sample '{if ( $6 == "1p1" && ( $10 == 0 || $12 == 0 ) ) {printf $1"\t"$9"\t"$11"\t"$4"_new_"sample"_temp_rp\t0\t"; if ( $5 == "sense" ) print "+"; else print "-" } }' $sample/$sample.insertion.refined.bp.summary >> $sample/$sample"_temp.presorted.bed"
+
+sort -k1,3 -k4rn $sample/$sample"_temp.presorted.bed" | sort -u -k1,3 | cut -f1-3,5- > $sample/tmp
+bedtools sort -i $sample/tmp >> $sample/$sample"_temp.bed"
+bedtools sort -i $sample/$sample"_temp.presorted.bed" >> $sample/$sample"_temp_duplicated.bed"
+rm $sample/$sample"_temp.presorted.bed" $sample/tmp
 
 # Run RelocaTE
 

@@ -38,10 +38,16 @@ then
 	bin/retroseq.pl -call -bam $2 -input $samplename/$samplename.discovery -filter $reference"_locationlist" -ref $3 -output $samplename/$samplename.calling -orientate yes
 
 	# Extract the relevant results
-	echo -e "track name=\"$samplename"_RetroSeq"\" description=\"$samplename"_RetroSeq"\"" > $samplename/$samplename"_retroseq.bed"
+	echo -e "track name=\"$samplename"_RetroSeq"\" description=\"$samplename"_RetroSeq"\"" > $samplename/$samplename"_retroseq_unfiltered.bed"
+    echo -e "track name=\"$samplename"_RetroSeq"\" description=\"$samplename"_RetroSeq"\"" > $samplename/$samplename"_retroseq_duplicated.bed"
+    echo -e "track name=\"$samplename"_RetroSeq"\" description=\"$samplename"_RetroSeq"\"" > $samplename/$samplename"_retroseq.bed"
+
 	awk '$1!~/#/{print $0}' $samplename/$samplename.calling.PE.vcf >> $samplename/tmp
-	awk -F'[=,\t:]' '{if ($21 >= 6) print $1"\t"$11"\t"$12"\t"$10"_new\t0\t."}' $samplename/tmp >> $samplename/$samplename"_retroseq_presort.bed"
-	bedtools sort -i $samplename/$samplename"_retroseq_presort.bed" >> $samplename/$samplename"_retroseq.bed"
+	awk -F'[=,\t:]' sample=$samplename '{if ($21 >= 6) print $1"\t"$11"\t"$12"\t"$10"_new_"sample"_retroseq_rp\t0\t."}' $samplename/tmp >> $samplename/$samplename"_retroseq_presort.bed"
+    sort -k1,3 -k4rn $samplename/$samplename"_retroseq_presort.bed" | sort -u -k1,3 | cut -f1-3,5- > $samplename/tmp
+
+	bedtools sort -i $samplename/$samplename"_retroseq_presort.bed" >> $samplename/$samplename"_retroseq_duplicated.bed"
+    bedtools sort -i $samplename/tmp >> $samplename/$samplename"_retroseq.bed"
 	rm $samplename/tmp $samplename/$samplename"_retroseq_presort.bed"
 
 else
