@@ -14,8 +14,8 @@ then
 	# Name and description for use with the UCSC genome browser are added to output here.
 	for file in $4/*/results/*.gff 
 	do
-		awk -F'[\t=;]' sample=$4 '$14~/Shared/{print $1"\t"$4"\t"$5"\t"$12"_old_"sample"_relocate_sr\t0\t."}' $file >> $4/$4_relocate_presort.bed
-		awk -F'[\t=;.]' sample=$4 '$18~/Non-reference/{print $1"\t"$5"\t"$6"\t"$13"_new_"sample"_relocate_sr\t0\t"$9}' $file >> $4/$4_relocate_presort.bed
+		awk -F'[\t=;]' -v sample=$4 '$14~/Shared/{print $1"\t"$4"\t"$5"\t"$12"_old_"sample"_relocate_sr\t0\t."}' $file >> $4/$4_relocate_presort.bed
+		awk -F'[\t=;.]' -v sample=$4 '$18~/Non-reference/{print $1"\t"$5"\t"$6"\t"$13"_new_"sample"_relocate_sr\t0\t"$9}' $file >> $4/$4_relocate_presort.bed
 	done
 
     echo -e "track name=\"$4"_RelocaTE"\" description=\"$4"_RelocaTE"\"" > $4/$4_relocate.bed

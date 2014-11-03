@@ -43,7 +43,7 @@ then
     echo -e "track name=\"$samplename"_RetroSeq"\" description=\"$samplename"_RetroSeq"\"" > $samplename/$samplename"_retroseq.bed"
 
 	awk '$1!~/#/{print $0}' $samplename/$samplename.calling.PE.vcf >> $samplename/tmp
-	awk -F'[=,\t:]' sample=$samplename '{if ($21 >= 6) print $1"\t"$11"\t"$12"\t"$10"_new_"sample"_retroseq_rp\t0\t."}' $samplename/tmp >> $samplename/$samplename"_retroseq_presort.bed"
+	awk -F'[=,\t:]' -v sample=$samplename '{if ($21 >= 6) print $1"\t"$11"\t"$12"\t"$10"_new_"sample"_retroseq_rp\t0\t."}' $samplename/tmp >> $samplename/$samplename"_retroseq_presort.bed"
     sort -k1,3 -k4rn $samplename/$samplename"_retroseq_presort.bed" | sort -u -k1,3 | cut -f1-3,5- > $samplename/tmp
 
 	bedtools sort -i $samplename/$samplename"_retroseq_presort.bed" >> $samplename/$samplename"_retroseq_duplicated.bed"

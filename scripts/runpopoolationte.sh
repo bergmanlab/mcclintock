@@ -50,16 +50,16 @@ then
 
 	# Create an output file in BED format selecting only the relevant inserts.
 	# Name and description for use with the UCSC genome browser are added to output here.
-	echo -e "track name=\"$samplename"_PoPoolationTE"\" description=\"$samplename"_PoPoolationTE"\"" > $samplename/$samplename"_popoolationte_unfiltered.bed"
-	echo -e "track name=\"$samplename"_PoPoolationTE"\" description=\"$samplename"_PoPoolationTE"\"" > $samplename/$samplename"_popoolationte_duplicated.bed"
-	echo -e "track name=\"$samplename"_PoPoolationTE"\" description=\"$samplename"_PoPoolationTE"\"" > $samplename/$samplename"_popoolationte.bed"
+	echo -e "track name=\"$samplename"_PoPoolationTE"\" description=\"$samplename"_PoPoolationTE"\"" > $samplename/$samplename"_popoolationte_raw.bed"
+	echo -e "track name=\"$samplename"_PoPoolationTE"\" description=\"$samplename"_PoPoolationTE"\"" > $samplename/$samplename"_popoolationte_redundant.bed"
+	echo -e "track name=\"$samplename"_PoPoolationTE"\" description=\"$samplename"_PoPoolationTE"\"" > $samplename/$samplename"_popoolationte_nonredundant.bed"
 
 	# Convert results to bed with no filtering
-	awk -F"\t" sample=$samplename '{if($7!~/-/) printf "%s\t%d\t%d\t%d\t%s%s%s%s\t0\t.\n",$1,$2,$2,$13+$20,$4,"_old_",sample,"_popoolationte_rp"; else printf "%s\t%d\t%d\t%d\t%s%s%s%s\t0\t.\n",$1,$2,$2,$13+$20,$4,"_new_",sample,"_popoolationte_rp"}' $samplename/te-poly-filtered.txt >> $samplename/$samplename"_popoolationte_presort_unfiltered.bed"
+	awk -F"\t" -v sample=$samplename '{if($7!~/-/) printf "%s\t%d\t%d\t%d\t%s%s%s%s\t0\t.\n",$1,$2,$2,$13+$20,$4,"_old_",sample,"_popoolationte_rp"; else printf "%s\t%d\t%d\t%d\t%s%s%s%s\t0\t.\n",$1,$2,$2,$13+$20,$4,"_new_",sample,"_popoolationte_rp"}' $samplename/te-poly-filtered.txt >> $samplename/$samplename"_popoolationte_presort_unfiltered.bed"
     sort -k1,1 -k2,2n $samplename/$samplename"_popoolationte_presort_unfiltered.bed" >> $samplename/$samplename"_popoolationte_unfiltered.bed"
 
     # Convert results to bed after filtering for inserts with support for both ends
-	awk -F"\t" sample=$samplename '{if($3=="FR" && $7!~/-/) printf "%s\t%d\t%d\t%d\t%s%s%s%s\t0\t.\n",$1,$2,$2,$13+$20,$4,"_old_",sample,"_popoolationte_rp"; else if($3=="FR") printf "%s\t%d\t%d\t%d\t%s%s%s%s\t0\t.\n",$1,$2,$2,$13+$20,$4,"_new_",sample,"_popoolationte_rp"}' $samplename/te-poly-filtered.txt >> $samplename/$samplename"_popoolationte_presort.bed"
+	awk -F"\t" -v sample=$samplename '{if($3=="FR" && $7!~/-/) printf "%s\t%d\t%d\t%d\t%s%s%s%s\t0\t.\n",$1,$2,$2,$13+$20,$4,"_old_",sample,"_popoolationte_rp"; else if($3=="FR") printf "%s\t%d\t%d\t%d\t%s%s%s%s\t0\t.\n",$1,$2,$2,$13+$20,$4,"_new_",sample,"_popoolationte_rp"}' $samplename/te-poly-filtered.txt >> $samplename/$samplename"_popoolationte_presort.bed"
     sort -k1,1 -k2,2n $samplename/$samplename"_popoolationte_presort.bed" >> $samplename/$samplename"_popoolationte_duplicated.bed"
 
 	sort -k1,3 -k4rn $samplename/$samplename"_popoolationte_presort.bed" | sort -u -k1,3 | cut -f1-3,5- > $samplename/tmp
