@@ -97,6 +97,7 @@ mkdir $test_dir/$genome/$sample/reads
 mkdir $test_dir/$genome/$sample/bam
 mkdir $test_dir/$genome/$sample/sam
 mkdir $test_dir/$genome/$sample/results
+mkdir $test_dir/$genome/$sample/results/qualitycontrol
 mkdir $test_dir/$genome/$sample/results/originalmethodresults
 
 # Copy input files in to sample directory (neccessary for RelocaTE)
@@ -135,8 +136,8 @@ if test -z "$location"
 then
 	printf "\nfastqc not installed, skipping input quality analysis...\n\n" | tee -a /dev/stderr
 else
-	mkdir $test_dir/$genome/$sample/results/fastqc_analysis
-	fastqc -t $processors $fastq1 $fastq2 -o $test_dir/$genome/$sample/results/fastqc_analysis
+	mkdir $test_dir/$genome/$sample/results/qualitycontrol/fastqc_analysis
+	fastqc -t $processors $fastq1 $fastq2 -o $test_dir/$genome/$sample/results/qualitycontrol/fastqc_analysis
 fi
 
 # Create indexes of reference genome if not already made for this genome
@@ -177,6 +178,9 @@ mv $test_dir/$genome/$sample/bam/sorted$sample.bam $test_dir/$genome/$sample/bam
 bam=$test_dir/$genome/$sample/bam/$sample.bam 
 samtools index $bam
 
+# Get stats of bam file from samtools
+samtools flagstat $bam > $test_dir/$genome/$sample/results/qualitycontrol/bwamem_bamstats.txt
+
 # Run TEMP
 printf "\nRunning TEMP pipeline...\n\n" | tee -a /dev/stderr
 
@@ -198,6 +202,8 @@ bwa sampe $reference_genome $sample/1.sai $sample/2.sai $fastq1 $fastq2 | ../scr
 
 samtools view -Sb $sample/$sample.sam > $sample/$sample.bam
 
+samtools flagstat $sample.bam > $test_dir/$genome/$sample/results/qualitycontrol/bwaaln_bamstats.txt
+
 rm $sample/$sample.sam
 samtools sort $sample/$sample.bam $sample/$sample.sorted
 samtools index $sample/$sample.sorted.bam
@@ -212,8 +218,8 @@ echo -e "track name=\"$sample"_TEMP"\" description=\"$sample"_TEMP"\"" > $sample
 echo -e "track name=\"$sample"_TEMP"\" description=\"$sample"_TEMP"\"" > $sample/$sample"_temp_duplicated.bed"
 echo -e "track name=\"$sample"_TEMP"\" description=\"$sample"_TEMP"\"" > $sample/$sample"_temp.bed"
 
-awk sample=$sample '{if ( $6 == "1p1"  && $10 > 0 && $12 > 0) {printf $1"\t"$9"\t"$11"\t"$4"_new_"sample"_temp_sr\t0\t"; if ( $5 == "sense" ) print "+"; else print "-" } }' $sample/$sample.insertion.refined.bp.summary > $sample/$sample"_temp.presorted.bed"
-awk sample=$sample '{if ( $6 == "1p1" && ( $10 == 0 || $12 == 0 ) ) {printf $1"\t"$9"\t"$11"\t"$4"_new_"sample"_temp_rp\t0\t"; if ( $5 == "sense" ) print "+"; else print "-" } }' $sample/$sample.insertion.refined.bp.summary >> $sample/$sample"_temp.presorted.bed"
+awk -v sample=$sample '{if ( $6 == "1p1"  && $10 > 0 && $12 > 0) {printf $1"\t"$9"\t"$11"\t"$4"_new_"sample"_temp_sr\t0\t"; if ( $5 == "sense" ) print "+"; else print "-" } }' $sample/$sample.insertion.refined.bp.summary > $sample/$sample"_temp.presorted.bed"
+awk -v sample=$sample '{if ( $6 == "1p1" && ( $10 == 0 || $12 == 0 ) ) {printf $1"\t"$9"\t"$11"\t"$4"_new_"sample"_temp_rp\t0\t"; if ( $5 == "sense" ) print "+"; else print "-" } }' $sample/$sample.insertion.refined.bp.summary >> $sample/$sample"_temp.presorted.bed"
 
 sort -k1,3 -k4rn $sample/$sample"_temp.presorted.bed" | sort -u -k1,3 | cut -f1-3,5- > $sample/tmp
 bedtools sort -i $sample/tmp >> $sample/$sample"_temp.bed"
