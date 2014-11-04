@@ -55,17 +55,21 @@ then
 	echo -e "track name=\"$samplename"_PoPoolationTE"\" description=\"$samplename"_PoPoolationTE"\"" > $samplename/$samplename"_popoolationte_nonredundant.bed"
 
 	# Convert results to bed with no filtering
-	awk -F"\t" -v sample=$samplename '{if($7!~/-/) printf "%s\t%d\t%d\t%d\t%s%s%s%s\t0\t.\n",$1,$2,$2,$13+$20,$4,"_old_",sample,"_popoolationte_rp"; else printf "%s\t%d\t%d\t%d\t%s%s%s%s\t0\t.\n",$1,$2,$2,$13+$20,$4,"_new_",sample,"_popoolationte_rp"}' $samplename/te-poly-filtered.txt >> $samplename/$samplename"_popoolationte_presort_unfiltered.bed"
-    sort -k1,1 -k2,2n $samplename/$samplename"_popoolationte_presort_unfiltered.bed" >> $samplename/$samplename"_popoolationte_unfiltered.bed"
+	awk -F"\t" -v sample=$samplename '{if($7!~/-/) printf "%s\t%d\t%d\t%d\t%s%s%s%s\t0\t.\t%s\n",$1,$2,$2,$13+$20,$4,"_old_",sample,"_popoolationte_rp_",$3; else printf "%s\t%d\t%d\t%d\t%s%s%s%s\t0\t.\t%s\n",$1,$2,$2,$13+$20,$4,"_new_",sample,"_popoolationte_rp_",$3}' $samplename/te-poly-filtered.txt > $samplename/$samplename"_popoolationte_presort_raw.txt"
+    sort -k1,1 -k2,2n $samplename/$samplename"_popoolationte_presort_raw.txt" $samplename/$samplename"_popoolationte_precut_raw.txt" > $samplename/$samplename"_popoolationte_precut_raw.txt"
+	awk '{print $1"\t"$2"\t"$3"\t"$4"\t"$5NR"\t"$6"\t"$7"\t"$8}' $samplename/$samplename"_popoolationte_precut_raw.txt" > $samplename/$samplename"_popoolationte_counted_precut_raw.txt"
+	cut -f1-3,5-7 $samplename/$samplename"_popoolationte_counted_precut_raw.txt" >> $samplename/$samplename"_popoolationte_raw.bed"
 
-    # Convert results to bed after filtering for inserts with support for both ends
-	awk -F"\t" -v sample=$samplename '{if($3=="FR" && $7!~/-/) printf "%s\t%d\t%d\t%d\t%s%s%s%s\t0\t.\n",$1,$2,$2,$13+$20,$4,"_old_",sample,"_popoolationte_rp"; else if($3=="FR") printf "%s\t%d\t%d\t%d\t%s%s%s%s\t0\t.\n",$1,$2,$2,$13+$20,$4,"_new_",sample,"_popoolationte_rp"}' $samplename/te-poly-filtered.txt >> $samplename/$samplename"_popoolationte_presort.bed"
-    sort -k1,1 -k2,2n $samplename/$samplename"_popoolationte_presort.bed" >> $samplename/$samplename"_popoolationte_duplicated.bed"
+	# Filtering for inserts with support for both ends
+	awk '{if($8=="FR") print $0}' $samplename/$samplename"_popoolationte_counted_precut_raw.txt" > $samplename/$samplename"_popoolationte_counted_precut_redundant.txt"
+	cut -f1-3,5-7 $samplename/$samplename"_popoolationte_counted_precut_redundant.txt" >> $samplename/$samplename"_popoolationte_redundant.bed"
 
-	sort -k1,3 -k4rn $samplename/$samplename"_popoolationte_presort.bed" | sort -u -k1,3 | cut -f1-3,5- > $samplename/tmp
+	# Filtering out redundant insertions
+	sort -k1,3 -k4rn $samplename/$samplename"_popoolationte_counted_precut_redundant.txt" | sort -u -k1,3 | cut -f1-3,5-7 > $samplename/tmp
+	sort -k1,1 -k2,2n $samplename/tmp >> $samplename/$samplename"_popoolationte_nonredundant.bed"
 
-	sort -k1,1 -k2,2n $samplename/tmp >> $samplename/$samplename"_popoolationte.bed"
-	rm $samplename/$samplename"_popoolationte_presort.bed" $samplename/tmp $samplename/$samplename"_popoolationte_presort_unfiltered.bed"
+	# Clean up intermediate files
+	rm $samplename/tmp $samplename/$samplename"_popoolationte_counted_precut_raw.txt" $samplename/$samplename"_popoolationte_counted_precut_redundant.txt" $samplename/$samplename"_popoolationte_precut_raw.txt" $samplename/$samplename"_popoolationte_presort_raw.txt"
 
 else
 	echo "Supply fasta reference file as option 1"
