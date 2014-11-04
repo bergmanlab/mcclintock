@@ -32,8 +32,8 @@ rm TEMP.zip
 
 # Apply edits to software and custom run scripts.
 echo "Copying run scripts..."
-cp scripts/runpopoolationte.sh popoolationte
-cp scripts/samro.pl popoolationte
+cp scripts/runpopoolationte.sh PoPoolationTE
+cp scripts/samro.pl PoPoolationTE
 cp scripts/runngstemapper.sh ngs_te_mapper
 cp scripts/runretroseq.sh RetroSeq
 cp scripts/splitforRetroSeq.pl RetroSeq
