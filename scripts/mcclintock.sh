@@ -181,9 +181,11 @@ samtools index $bam
 # Get stats of bam file from samtools
 samtools flagstat $bam > $test_dir/$genome/$sample/results/qualitycontrol/bwamem_bamstats.txt
 
-# Run TEMP
+################################## Run TEMP ##################################
+
 printf "\nRunning TEMP pipeline...\n\n" | tee -a /dev/stderr
 
+# Create bed file of reference TE locations
 if [ ! -f $test_dir"/"$genome"/reference/reference_TE_locations.bed" ]; then
     awk -F["\t"\;=] '{print $1"\t"$4-1"\t"$5"\t"$10"\t.\t"$7}' $te_locations > $test_dir/$genome/reference/reference_TE_locations.bed
 fi
@@ -194,7 +196,6 @@ mkdir $sample
 chmod 755 $sample
 
 # Have to use bwa aln for TEMP - this can be replaced with the commented lines below if fixed:
-
 bwa aln -t $processors $reference_genome $fastq1 > $sample/1.sai
 bwa aln -t $processors $reference_genome $fastq2 > $sample/2.sai
 
@@ -214,19 +215,30 @@ samtools index $sample/$sample.sorted.bam
 
 bash scripts/TEMP_Insertion.sh -i $test_dir/TEMP/$sample/$sample.sorted.bam -s $test_dir/TEMP/scripts -r $consensus_te_seqs -t $bed_te_locations_file -u $te_families -m 1 -f $median_insertsize -c $processors -o $test_dir/TEMP/$sample
 
-echo -e "track name=\"$sample"_TEMP"\" description=\"$sample"_TEMP"\"" > $sample/$sample"_temp_unfiltered.bed"
-echo -e "track name=\"$sample"_TEMP"\" description=\"$sample"_TEMP"\"" > $sample/$sample"_temp_duplicated.bed"
-echo -e "track name=\"$sample"_TEMP"\" description=\"$sample"_TEMP"\"" > $sample/$sample"_temp.bed"
+echo -e "track name=\"$sample"_TEMP"\" description=\"$sample"_TEMP"\"" > $sample/$sample"_temp_raw.bed"
+echo -e "track name=\"$sample"_TEMP"\" description=\"$sample"_TEMP"\"" > $sample/$sample"_temp_redundant.bed"
+echo -e "track name=\"$sample"_TEMP"\" description=\"$sample"_TEMP"\"" > $sample/$sample"_temp_nonredundant.bed"
 
-awk -v sample=$sample '{if ( $6 == "1p1"  && $10 > 0 && $12 > 0) {printf $1"\t"$9"\t"$11"\t"$4"_new_"sample"_temp_sr\t0\t"; if ( $5 == "sense" ) print "+"; else print "-" } }' $sample/$sample.insertion.refined.bp.summary > $sample/$sample"_temp.presorted.bed"
-awk -v sample=$sample '{if ( $6 == "1p1" && ( $10 == 0 || $12 == 0 ) ) {printf $1"\t"$9"\t"$11"\t"$4"_new_"sample"_temp_rp\t0\t"; if ( $5 == "sense" ) print "+"; else print "-" } }' $sample/$sample.insertion.refined.bp.summary >> $sample/$sample"_temp.presorted.bed"
+sed '1d' $sample/$sample.insertion.refined.bp.summary | awk '{if ($4 == "sense" || $4 == "antisense"); else print $0}' | awk -v sample=$sample '{ printf $1"\t"$9"\t"$11"\t"$7"\t"$4"_new_"sample"_temp_\t0\t"; if ( $5 == "sense" ) printf "+"; else printf "-"; print "\t"$6"\t"$10"\t"$12}' > $sample/$sample"_temp_presort_raw.txt"
 
-sort -k1,3 -k4rn $sample/$sample"_temp.presorted.bed" | sort -u -k1,3 | cut -f1-3,5- > $sample/tmp
-bedtools sort -i $sample/tmp >> $sample/$sample"_temp.bed"
-bedtools sort -i $sample/$sample"_temp.presorted.bed" >> $sample/$sample"_temp_duplicated.bed"
-rm $sample/$sample"_temp.presorted.bed" $sample/tmp
+bedtools sort -i $sample/$sample"_temp_presort_raw.txt" > $sample/$sample"_temp_sorted_raw.txt"
 
-# Run RelocaTE
+awk '{ printf $1"\t"$2"\t"$3"\t"$4"\t"$5; if ($9 > 0 && $10 > 0) printf "sr_"; else printf "rp_"; print NR"\t"$6"\t"$7"\t"$8"\t"$9"\t"$10}' $sample/$sample"_temp_sorted_raw.txt" > $sample/$sample"_temp_sorted_precut_raw.txt"
+
+cut -f1-3,5-7 $sample/$sample"_temp_sorted_precut_raw.txt" >> $sample/$sample"_temp_raw.bed"
+
+# Filter for insertions with support for both ends
+awk '{if ($8 == "1p1") print $0}' $sample/$sample"_temp_sorted_precut_raw.txt" > $sample/$sample"_temp_sorted_redundant.txt"
+
+cut -f1-3,5-7 $sample/$sample"_temp_sorted_redundant.txt" >> $sample/$sample"_temp_redundant.bed"
+
+# Filter out redundant insertions
+sort -k1,3 -k4rn $sample/$sample"_temp_sorted_redundant.txt" | sort -u -k1,3 | cut -f1-3,5-7 > $sample/tmp
+bedtools sort -i $sample/tmp >> $sample/$sample"_temp_nonredundant.bed"
+
+rm $sample/tmp $sample/$sample"_temp_sorted_redundant.txt" $sample/$sample"_temp_presort_raw.txt" $sample/$sample"_temp_sorted_raw.txt" $sample/$sample"_temp_sorted_precut_raw.txt"
+
+################################## Run RelocaTE ##################################
 
 printf "\nRunning RelocaTE pipeline...\n\n" | tee -a /dev/stderr
 
@@ -245,7 +257,7 @@ relocate_te_locations=$test_dir/$genome/reference/relocate_te_locations.gff
 cd ../RelocaTE
 bash runrelocate.sh $relocate_te_seqs $reference_genome $test_dir/$genome/$sample/reads $sample $relocate_te_locations
 
-# Run ngs_te_mapper pipeline
+################################## Run ngs_te_mapper ##################################
 
 printf "\nRunning ngs_te_mapper pipeline...\n\n" | tee -a /dev/stderr
 
@@ -253,14 +265,14 @@ cd ../ngs_te_mapper
 
 bash runngstemapper.sh $consensus_te_seqs $reference_genome $sample $fastq1 $fastq2 
 
-# Run RetroSeq
+################################## Run RetroSeq ##################################
 
 printf "\nRunning RetroSeq pipeline...\n\n" | tee -a /dev/stderr
 
 cd ../RetroSeq
 bash runretroseq.sh $consensus_te_seqs $bam $reference_genome $bed_te_locations_file $te_families
 
-# Run TE-locate
+################################## Run TE-locate ##################################
 
 printf "\nRunning TE-locate pipeline...\n\n" | tee -a /dev/stderr
 
@@ -274,7 +286,7 @@ fi
 
 bash runtelocate.sh $sam_folder $reference_genome $telocate_te_locations 2 $sample $median_insertsize
 
-# Run PoPoolationTE
+################################## Run PoPoolationTE ##################################
 
 printf "\nRunning PoPoolationTE pipeline...\n\n" | tee -a /dev/stderr
 
@@ -300,11 +312,11 @@ mv ngs_te_mapper/$sample/$sample"_ngs_te_mapper_nonredundant.bed" $test_dir/$gen
 mkdir $test_dir/$genome/$sample/results/originalmethodresults/ngs_te_mapper
 cp ngs_te_mapper/$sample/analysis/bed_tsd/*.bed $test_dir/$genome/$sample/results/originalmethodresults/ngs_te_mapper
 
-mv RetroSeq/$sample/$sample"_retroseq.bed" $test_dir/$genome/$sample/results/
+mv RetroSeq/$sample/$sample"_retroseq"* $test_dir/$genome/$sample/results/
 mkdir $test_dir/$genome/$sample/results/originalmethodresults/RetroSeq
 cp RetroSeq/$sample/$sample".calling.PE.vcf" $test_dir/$genome/$sample/results/originalmethodresults/RetroSeq
 
-mv TE-locate/$sample/$sample"_telocate.bed" $test_dir/$genome/$sample/results/
+mv TE-locate/$sample/$sample"_telocate"* $test_dir/$genome/$sample/results/
 mkdir $test_dir/$genome/$sample/results/originalmethodresults/TE-locate
 cp TE-locate/$sample/*.info $test_dir/$genome/$sample/results/originalmethodresults/TE-locate
 
@@ -312,7 +324,7 @@ mv PoPoolationTE/$sample/$sample"_popoolationte"* $test_dir/$genome/$sample/resu
 mkdir $test_dir/$genome/$sample/results/originalmethodresults/PoPoolationTE
 cp PoPoolationTE/$sample/te-poly-filtered.txt $test_dir/$genome/$sample/results/originalmethodresults/PoPoolationTE
 
-mv TEMP/$sample/$sample"_temp.bed" $test_dir/$genome/$sample/results/
+mv TEMP/$sample/$sample"_temp"* $test_dir/$genome/$sample/results/
 mkdir $test_dir/$genome/$sample/results/originalmethodresults/TEMP
 cp TEMP/$sample/$sample".insertion.refined.bp.summary" $test_dir/$genome/$sample/results/originalmethodresults/TEMP
 

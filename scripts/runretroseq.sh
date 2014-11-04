@@ -38,17 +38,25 @@ then
 	bin/retroseq.pl -call -bam $2 -input $samplename/$samplename.discovery -filter $reference"_locationlist" -ref $3 -output $samplename/$samplename.calling -orientate yes
 
 	# Extract the relevant results
-	echo -e "track name=\"$samplename"_RetroSeq"\" description=\"$samplename"_RetroSeq"\"" > $samplename/$samplename"_retroseq_unfiltered.bed"
-    echo -e "track name=\"$samplename"_RetroSeq"\" description=\"$samplename"_RetroSeq"\"" > $samplename/$samplename"_retroseq_duplicated.bed"
-    echo -e "track name=\"$samplename"_RetroSeq"\" description=\"$samplename"_RetroSeq"\"" > $samplename/$samplename"_retroseq.bed"
+	echo -e "track name=\"$samplename"_RetroSeq"\" description=\"$samplename"_RetroSeq"\"" > $samplename/$samplename"_retroseq_raw.bed"
+    echo -e "track name=\"$samplename"_RetroSeq"\" description=\"$samplename"_RetroSeq"\"" > $samplename/$samplename"_retroseq_redundant.bed"
+    echo -e "track name=\"$samplename"_RetroSeq"\" description=\"$samplename"_RetroSeq"\"" > $samplename/$samplename"_retroseq_nonredundant.bed"
 
-	awk '$1!~/#/{print $0}' $samplename/$samplename.calling.PE.vcf >> $samplename/tmp
-	awk -F'[=,\t:]' -v sample=$samplename '{if ($21 >= 6) print $1"\t"$11"\t"$12"\t"$10"_new_"sample"_retroseq_rp\t0\t."}' $samplename/tmp >> $samplename/$samplename"_retroseq_presort.bed"
-    sort -k1,3 -k4rn $samplename/$samplename"_retroseq_presort.bed" | sort -u -k1,3 | cut -f1-3,5- > $samplename/tmp
+	awk '$1!~/#/{print $0}' $samplename/$samplename.calling.PE.vcf > $samplename/tmp
+    awk -F'[=,\t:]' -v sample=$samplename '{print $1"\t"$11"\t"$12"\t"$6"\t"$10"_new_"sample"_retroseq_rp_\t0\t.\t"$21}' $samplename/tmp > $samplename/$samplename"_retroseq_presort.txt"
+    bedtools sort -i $samplename/$samplename"_retroseq_presort.txt" > $samplename/$samplename"_retroseq_sorted_raw.txt"
+    awk '{print $1"\t"$2"\t"$3"\t"$4"\t"$5NR"\t"$6"\t"$7"\t"$8}' $samplename/$samplename"_retroseq_sorted_raw.txt" > $samplename/$samplename"_retroseq_sorted_counted_raw.txt"
+    cut -f1-3,5-7 $samplename/$samplename"_retroseq_sorted_counted_raw.txt" >> $samplename/$samplename"_retroseq_raw.bed"
 
-	bedtools sort -i $samplename/$samplename"_retroseq_presort.bed" >> $samplename/$samplename"_retroseq_duplicated.bed"
-    bedtools sort -i $samplename/tmp >> $samplename/$samplename"_retroseq.bed"
-	rm $samplename/tmp $samplename/$samplename"_retroseq_presort.bed"
+    # Filter results
+    awk '{if ($8 >= 6) print $0}' $samplename/$samplename"_retroseq_sorted_counted_raw.txt" > $samplename/$samplename"_retroseq_redundant.txt"
+    cut -f1-3,5-7 $samplename/$samplename"_retroseq_redundant.txt" >> $samplename/$samplename"_retroseq_redundant.bed"
+
+    # Filter for redundant predictions
+    sort -k1,3 -k4rn $samplename/$samplename"_retroseq_redundant.txt" | sort -u -k1,3 | cut -f1-3,5-7 > $samplename/tmp
+    bedtools sort -i $samplename/tmp >> $samplename/$samplename"_retroseq_nonredundant.bed"
+
+	rm $samplename/tmp $samplename/$samplename"_retroseq_redundant.txt" $samplename/$samplename"_retroseq_sorted_counted_raw.txt" $samplename/$samplename"_retroseq_sorted_raw.txt" $samplename/$samplename"_retroseq_presort.txt"
 
 else
 	echo "Supply TE database as option 1"
