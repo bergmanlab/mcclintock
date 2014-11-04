@@ -31,10 +31,10 @@ then
 
 	# Extract only the relevant data from the output file and sort the results
 	# Name and description for use with the UCSC genome browser are added to output here.
-	awk -F'[\t;]' -v sample=$3 '{print $1"\t"$2"\t"$3"\t"$6"_"$9"_"sample"_ngs_te_mapper_sr\t0\t"$5}' $projectdir/analysis/bed_tsd/$samplename"_"$fasta2"insertions.bed" > $projectdir/$3"_ngs_te_mapper_presort.bed"
-	echo -e "track name=\"$3"_ngs_te_mapper"\" description=\"$3"_ngs_te_mapper"\"" > $projectdir/$3"_ngs_te_mapper.bed"
+	awk -F'[\t;]' -v sample=$3 '{print $1"\t"$2"\t"$3"\t"$6"_"$9"_"sample"_ngs_te_mapper_sr_"NR"\t0\t"$5}' $projectdir/analysis/bed_tsd/$samplename"_"$fasta2"insertions.bed" > $projectdir/$3"_ngs_te_mapper_presort.bed"
+	echo -e "track name=\"$3"_ngs_te_mapper"\" description=\"$3"_ngs_te_mapper"\"" > $projectdir/$3"_ngs_te_mapper_nonredundant.bed"
 	bedtools sort -i $projectdir/$3"_ngs_te_mapper_presort.bed" >> $projectdir/$3"_ngs_te_mapper.bed.tmp"
-    sed 's/NA/./g' $projectdir/$3"_ngs_te_mapper.bed.tmp" >> $projectdir/$3"_ngs_te_mapper.bed"
+    sed 's/NA/./g' $projectdir/$3"_ngs_te_mapper.bed.tmp" >> $projectdir/$3"_ngs_te_mapper_nonredundant.bed"
 	rm $projectdir/$3"_ngs_te_mapper_presort.bed" $projectdir/$3"_ngs_te_mapper.bed.tmp"
 	
 else
