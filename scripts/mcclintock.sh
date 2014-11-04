@@ -285,18 +285,18 @@ if [ ! -f $test_dir/$genome/reference/te_hierarchy ]; then
 fi
 te_hierarchy=$test_dir/$genome/reference/te_hierarchy
 
-cd ../popoolationte
+cd ../PoPoolationTE
 bash runpopoolationte.sh $reference_genome $all_te_seqs $te_hierarchy $fastq1 $fastq2 $te_locations $processors
 
 # Collate results from individual methods folders
 # Both the filtered bed file and the original method result file are retianed.
 cd $test_dir
 
-mv RelocaTE/$sample/$sample"_relocate.bed" $test_dir/$genome/$sample/results/
+mv RelocaTE/$sample/$sample"_relocate"* $test_dir/$genome/$sample/results/
 mkdir $test_dir/$genome/$sample/results/originalmethodresults/RelocaTE
 cp -r RelocaTE/$sample/*/results $test_dir/$genome/$sample/results/originalmethodresults/RelocaTE
 
-mv ngs_te_mapper/$sample/$sample"_ngs_te_mapper.bed" $test_dir/$genome/$sample/results/
+mv ngs_te_mapper/$sample/$sample"_ngs_te_mapper_nonredundant.bed" $test_dir/$genome/$sample/results/
 mkdir $test_dir/$genome/$sample/results/originalmethodresults/ngs_te_mapper
 cp ngs_te_mapper/$sample/analysis/bed_tsd/*.bed $test_dir/$genome/$sample/results/originalmethodresults/ngs_te_mapper
 
@@ -308,9 +308,9 @@ mv TE-locate/$sample/$sample"_telocate.bed" $test_dir/$genome/$sample/results/
 mkdir $test_dir/$genome/$sample/results/originalmethodresults/TE-locate
 cp TE-locate/$sample/*.info $test_dir/$genome/$sample/results/originalmethodresults/TE-locate
 
-mv popoolationte/$sample/$sample"_popoolationte.bed" $test_dir/$genome/$sample/results/
-mkdir $test_dir/$genome/$sample/results/originalmethodresults/popoolationte
-cp popoolationte/$sample/te-poly-filtered.txt $test_dir/$genome/$sample/results/originalmethodresults/popoolationte
+mv PoPoolationTE/$sample/$sample"_popoolationte"* $test_dir/$genome/$sample/results/
+mkdir $test_dir/$genome/$sample/results/originalmethodresults/PoPoolationTE
+cp PoPoolationTE/$sample/te-poly-filtered.txt $test_dir/$genome/$sample/results/originalmethodresults/PoPoolationTE
 
 mv TEMP/$sample/$sample"_temp.bed" $test_dir/$genome/$sample/results/
 mkdir $test_dir/$genome/$sample/results/originalmethodresults/TEMP
@@ -332,7 +332,7 @@ then
 	rm -r ngs_te_mapper/$sample
 	rm -r RetroSeq/$sample
 	rm -r TE-locate/$sample
-	rm -r popoolationte/$sample
+	rm -r PoPoolationTE/$sample
 	rm -r TEMP/$sample
 fi
 
