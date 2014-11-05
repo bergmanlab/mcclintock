@@ -203,7 +203,7 @@ bwa sampe $reference_genome $sample/1.sai $sample/2.sai $fastq1 $fastq2 | ../scr
 
 samtools view -Sb $sample/$sample.sam > $sample/$sample.bam
 
-samtools flagstat $sample.bam > $test_dir/$genome/$sample/results/qualitycontrol/bwaaln_bamstats.txt
+samtools flagstat $sample/$sample.bam > $test_dir/$genome/$sample/results/qualitycontrol/bwaaln_bamstats.txt
 
 rm $sample/$sample.sam
 samtools sort $sample/$sample.bam $sample/$sample.sorted
