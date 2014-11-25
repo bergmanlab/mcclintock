@@ -44,6 +44,11 @@ cp scripts/mcclintock.sh .
 
 # Change #! to make software more compatible with different environments
 sed -i 's/#!\/usr\/bin\/perl -w/#!\/usr\/bin\/env perl/' RelocaTE/scripts/*.pl
+# Remove deprecated use of defined from RelocaTE to reduce errors
+for f in RelocaTE/scripts/*.pl
+do
+	sed -i 's/defined @/@/g' $f
+done
 
 # Check dependencies 
 echo "Testing dependencies..."
