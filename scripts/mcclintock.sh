@@ -121,7 +121,8 @@ fi
 consensus_te_seqs_file=${inputc##*/}
 if [ ! -f $test_dir/$genome/reference/$consensus_te_seqs_file ];
 then
-	cp -n $inputc $test_dir/$genome/reference/$consensus_te_seqs_file
+	# Use script to fix the line length of reference input to 80 characters (needed for samtools index)
+	perl scripts/fixfastalinelength.pl $inputc 80 $test_dir/$genome/reference/$consensus_te_seqs_file
 fi
 
 te_locations_file=${inputg##*/}
