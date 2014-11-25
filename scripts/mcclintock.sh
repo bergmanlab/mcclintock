@@ -205,10 +205,7 @@ then
 	then
 		# Create bam files for input
 		printf "\nCreating bam alignment files...\n\n" | tee -a /dev/stderr
-		samtools view -Sb $sam > $test_dir/$genome/$sample/bam/$sample.bam
-		samtools sort $test_dir/$genome/$sample/bam/$sample.bam $test_dir/$genome/$sample/bam/sorted$sample
-		rm $test_dir/$genome/$sample/bam/$sample.bam
-		mv $test_dir/$genome/$sample/bam/sorted$sample.bam $test_dir/$genome/$sample/bam/$sample.bam
+		samtools view -Sb $sam | samtools sort - $test_dir/$genome/$sample/bam/$sample.bam
 		bam=$test_dir/$genome/$sample/bam/$sample.bam
 		samtools index $bam
 
