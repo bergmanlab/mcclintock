@@ -29,8 +29,8 @@ then
 	cut -f1-3,5-7 $sample/$sample"_relocate_counted_precut_redundant.txt" >> $sample/$sample"_relocate_redundant.bed"
 
 	# Filtering out redundant insertions
-    sort -k1,3 -k4rn $sample/$sample"_relocate_counted_precut_redundant.txt" | sort -u -k1,3 | cut -f1-3,5- > $sample/tmp
-    bedtools sort -i $sample/tmp >> $sample/$sample"_relocate_nonredundant.bed"
+	sort -k1,3 -k4rn $sample/$sample"_relocate_counted_precut_redundant.txt" | sort -u -k1,3 | cut -f1-3,5- > $sample/tmp
+	bedtools sort -i $sample/tmp >> $sample/$sample"_relocate_nonredundant.bed"
 
 	# Clean up intermediate files
 	rm $sample/$sample"_relocate_counted_precut_redundant.txt" $sample/$sample"_relocate_precut_redundant.txt" $sample/$sample"_relocate_presort_redundant.txt" $sample/tmp

@@ -17,14 +17,14 @@ then
 
 
 	awk -F'[\t/]' -v sample=$sample '{printf $1"\t"; if($17=="old") printf $2-1"\t"$2"\t"$8"\t"$5"_"$17"_"sample"_telocate_rp_\t0"; else if($17=="new") printf $2-1"\t"$2"\t"$8"\t"$5"_"$17"_"sample"_telocate_rp_\t0"; if($14=="parallel") print "\t+"; else if($14 =="uncertain") print "\t."; else print "\t-";}' $sample/$sample"tmpfile" > $sample/$sample"_telocate_presort.txt"
-    bedtools sort -i $sample/$sample"_telocate_presort.txt" > $sample/$sample"_telocate_sorted_redundant.txt"
+	bedtools sort -i $sample/$sample"_telocate_presort.txt" > $sample/$sample"_telocate_sorted_redundant.txt"
 
-    awk '{print $1"\t"$2"\t"$3"\t"$4"\t"$5NR"\t"$6"\t"$7}' $sample/$sample"_telocate_sorted_redundant.txt" > $sample/$sample"_telocate_counted_redundant.txt"
-    cut -f1-3,5-7 $sample/$sample"_telocate_counted_redundant.txt" >> $sample/$sample"_telocate_redundant.bed"
+	awk '{print $1"\t"$2"\t"$3"\t"$4"\t"$5NR"\t"$6"\t"$7}' $sample/$sample"_telocate_sorted_redundant.txt" > $sample/$sample"_telocate_counted_redundant.txt"
+	cut -f1-3,5-7 $sample/$sample"_telocate_counted_redundant.txt" >> $sample/$sample"_telocate_redundant.bed"
 
-    # Filter redundant predictions
-    sort -k1,3 -k4rn $sample/$sample"_telocate_counted_redundant.txt" | sort -u -k1,3 | cut -f1-3,5-7 > $sample/$sample"tmpfile"
-    bedtools sort -i $sample/$sample"tmpfile" >> $sample/$sample"_telocate_nonredundant.bed"
+	# Filter redundant predictions
+	sort -k1,3 -k4rn $sample/$sample"_telocate_counted_redundant.txt" | sort -u -k1,3 | cut -f1-3,5-7 > $sample/$sample"tmpfile"
+	bedtools sort -i $sample/$sample"tmpfile" >> $sample/$sample"_telocate_nonredundant.bed"
 
 	rm $sample/$sample"tmpfile" $sample/$sample"_telocate_presort.txt" $sample/$sample"_telocate_counted_redundant.txt" $sample/$sample"_telocate_sorted_redundant.txt"
 

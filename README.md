@@ -85,7 +85,8 @@ sh runtest.sh
 This script will download the UCSC sacCer2 yeast reference genome, an annotation of TEs in the yeast reference genome from [Carr, Bensasson and Bergman (2012)](http://www.plosone.org/article/info%3Adoi%2F10.1371%2Fjournal.pone.0050978), and a pair of fastq files from SRA, then run the full pipeline.
 
 ###Running the pipeline
-The pipeline is invoked by running the mcclintock.sh script in the main project folder. This script takes the following 6 input files, specified as options, and will run all five TE detection methods:
+The pipeline is invoked by running the mcclintock.sh script in the main project folder. This script takes the following 6 input files, specified as options:
+* -m : The methods that the user wishes to run (for example adding -m "RelocaTE TEMP ngs_te_mapper" will launch only those three methods). The default behaviour is to run all six methods
 * -r : A reference genome sequence in fasta format. (Required)
 * -c : The consensus sequences of the TEs for the species in fasta format. (Required)
 * -g : The locations of known TEs in the reference genome in GFF 3 format. This must include a unique ID attribute for every entry. (Required)
@@ -99,7 +100,7 @@ The pipeline is invoked by running the mcclintock.sh script in the main project 
 
 Example pipeline run:
 ```
-sh mcclintock.sh -r reference.fasta -c te_consensus.fasta -g te_locations.gff -t te_families.tsv -1 sample_1.fastq -2 sample_2.fastq -p 2
+sh mcclintock.sh -m "RelocaTE TEMP ngs_te_mapper" -r reference.fasta -c te_consensus.fasta -g te_locations.gff -t te_families.tsv -1 sample_1.fastq -2 sample_2.fastq -p 2 -i -b
 ```
 
 Data created during pre-processing will be stored in a folder in the main directory named after the reference genome used with individual sub-directories for samples. 

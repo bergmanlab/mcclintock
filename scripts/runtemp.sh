@@ -23,6 +23,11 @@ then
 
 	bwa sampe $reference_genome $sample/1.sai $sample/2.sai $fastq1 $fastq2 | ../scripts/samtest.pl > $test_dir/$sample/$sample.sam
 
+	if [[ $median_insertsize == "none" ]]
+	then
+		median_insertsize=`cut -f9 $sam | sort -n | awk '{if ($1 > 0) ins[reads++]=$1; } END { print ins[int(reads/2)]; }'`
+	fi
+
 	samtools view -Sb $test_dir/$sample/$sample.sam > $test_dir/$sample/$sample.bam
 	rm $test_dir/$sample/$sample.sam
 
@@ -33,7 +38,7 @@ then
 	rm $test_dir/$sample/$sample.bam
 	samtools index $test_dir/$sample/$sample.sorted.bam
 
-	# Lines to uncomment if TEMP switches to bwa mem - also need to move bam deletion to after TEMP
+	# Lines to uncomment if TEMP switches to bwa mem - also need to move bam deletion to after TEMP, also resolve median insert size calc
 	# Create soft link to differently named files for TEMP
 	# cp -s $bam $sample/$sample.sorted.bam
 	# cp -s $bam.bai $sample/$sample.sorted.bam.bai

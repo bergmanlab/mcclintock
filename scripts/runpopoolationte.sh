@@ -29,13 +29,13 @@ then
 	# Combine each alignment using included script.
 	perl samro.pl --sam1 $samplename/1.sam --sam2 $samplename/2.sam --fq1 $samplename/reads1.fq --fq2 $samplename/reads2.fq --output $samplename/pe-reads.sam
 
+	rm $samplename/reads1.fq
+	rm $samplename/reads2.fq
+
 	# Sort the alignment and remove intermediate files to save space.
-	#rm 1.sam
-	#rm 2.sam
 	samtools view -Sb $samplename/pe-reads.sam | samtools sort - $samplename/pe-reads.sorted
-	#rm pe-reads.sam
+	rm $samplename/pe-reads.sam
 	samtools view $samplename/pe-reads.sorted.bam > $samplename/pe-reads.sorted.sam
-	#rm pe-reads.bam
 
 	# Perform the rest of the PoPoolationTE workflow
 	perl identify-te-insertsites.pl --input $samplename/pe-reads.sorted.sam --te-hierarchy-file $3 --te-hierarchy-level family --narrow-range 75 --min-count 3 --min-map-qual 15 --output $samplename/te-fwd-rev.txt
@@ -69,7 +69,7 @@ then
 	sort -k1,1 -k2,2n $samplename/tmp >> $samplename/$samplename"_popoolationte_nonredundant.bed"
 
 	# Clean up intermediate files
-	rm $samplename/tmp $samplename/$samplename"_popoolationte_counted_precut_raw.txt" $samplename/$samplename"_popoolationte_counted_precut_redundant.txt" $samplename/$samplename"_popoolationte_precut_raw.txt" $samplename/$samplename"_popoolationte_presort_raw.txt"
+	rm $samplename/tmp $samplename/$samplename"_popoolationte_counted_precut_raw.txt" $samplename/$samplename"_popoolationte_counted_precut_redundant.txt" $samplename/$samplename"_popoolationte_precut_raw.txt" $samplename/$samplename"_popoolationte_presort_raw.txt" $samplename/1.sam $samplename/2.sam $samplename/pe-reads.sorted.bam
 
 else
 	echo "Supply fasta reference file as option 1"
