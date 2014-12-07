@@ -8,11 +8,11 @@ open (GFFIN, $ARGV[0]);
 # Open the TE Fasta consensus sequence database used with RepeatMasker
 open (FASTAIN, $ARGV[1]);
 # Open a Gff to be the output GFF file with corrected IDs
-open (GFFOUT, ">ID_$ARGV[0]");
+open (GFFOUT, ">$ARGV[0]_ID");
 # Open a file that will contain a ready made hierachy file for McClintock
 open (HIERARCHY, ">$ARGV[2]");
-# Open a Gff to be the output GFF file with corrected IDs
-open (FASTAOUT, ">ID_$ARGV[1]");
+# Open a Fasta to be the output Fasta file with corrected IDs
+open (FASTAOUT, ">$ARGV[1]_ID");
 
 # For each line in the fasta file
 while (my $TE = <FASTAIN>)
