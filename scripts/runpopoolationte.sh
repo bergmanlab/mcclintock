@@ -9,22 +9,14 @@ then
 	mkdir $samplename
 	
 	processors=$7
-	
-	# Mask any copies of the TE present in the reference genome.
-	if [ ! -f $1.masked ]; then
-		RepeatMasker -no_is -nolow -norna --lib $2 -pa $processors $1
-		cat $1.masked $2 > combinedref.fa
-		mv combinedref.fa $1.masked
-		bwa index $1.masked
-	fi
 
 	# Remove any spaces in the names of reads to prevent errors.
 	tr -d ' ' < $4 > $samplename/reads1.fq
 	tr -d ' ' < $5 > $samplename/reads2.fq	
 
 	# Perform 2 bwa alignments.
-	bwa bwasw -t $processors $1.masked $samplename/reads1.fq > $samplename/1.sam
-	bwa bwasw -t $processors $1.masked $samplename/reads2.fq > $samplename/2.sam
+	bwa bwasw -t $processors $1 $samplename/reads1.fq > $samplename/1.sam
+	bwa bwasw -t $processors $1  $samplename/reads2.fq > $samplename/2.sam
 
 	# Combine each alignment using included script.
 	perl samro.pl --sam1 $samplename/1.sam --sam2 $samplename/2.sam --fq1 $samplename/reads1.fq --fq2 $samplename/reads2.fq --output $samplename/pe-reads.sam
@@ -39,7 +31,7 @@ then
 
 	# Perform the rest of the PoPoolationTE workflow
 	perl identify-te-insertsites.pl --input $samplename/pe-reads.sorted.sam --te-hierarchy-file $3 --te-hierarchy-level family --narrow-range 75 --min-count 3 --min-map-qual 15 --output $samplename/te-fwd-rev.txt
-	perl genomic-N-2gtf.pl --input $1.masked > $samplename/poly_n.gtf
+	perl genomic-N-2gtf.pl --input $1 > $samplename/poly_n.gtf
 	perl crosslink-te-sites.pl --directional-insertions $samplename/te-fwd-rev.txt --min-dist 74 --max-dist 250 --output $samplename/te-inserts.txt --single-site-shift 100 --poly-n $samplename/poly_n.gtf --te-hierarchy $3 --te-hier-level family
 
 	# Convert the gff format to a format that PoPoolationTE understads.
