@@ -29,13 +29,6 @@ sed '1d;$d' tmp > reference_TE_locations.gff
 rm File_S2.txt
 rm tmp
 
-# Add the locations of the sequences of the consensus TEs to the genome annotation
-awk -F">" '/^>/ {if (seqlen){print seqlen}; printf $2"\t" ;seqlen=0;next; } { seqlen = seqlen +length($0)}END{print seqlen}' sac_cer_TE_seqs.fa > TE-lengths
-while read TE length
-do
-    echo -e "$TE\treannotate\ttransposable_element\t1\t$length\t.\t+\t.\tID=$TE" >> reference_TE_locations.gff
-done < TE-lengths
-
 # The TE families file and consensus TE fasta file are included in this folder
 
 # Run the pipeline 
