@@ -10,7 +10,7 @@ then
 	reference=${3##*/}
 	reference=${reference%%.*}
     bed_te_location=$4
-    te_hierachy=$5
+    te_hierarchy=$5
 
 	if [ ! -d $reference ]
 	then
