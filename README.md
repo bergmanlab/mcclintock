@@ -2,6 +2,8 @@ Introduction
 ------
 Many methods have been developed to detect transposable element (TE) insertions from whole genome shotgun next-generation sequencing (NGS) data, each of which has different dependencies, run interfaces, and output formats. Here, we have developed a meta-pipeline to download, install and run six available methods for detecting TE insertions in NGS data, which generates output in the UCSC Browser extensible data (BED) format.
 
+The pipeline requires a fasta reference genome, a fasta consensus set of TE sequences present in the organism and fastq paired end sequencing reads. Optionally if detailed annotation of the reference TE sequences has been performed, a GFF file with the locations of known TEs present in the reference genome and a tab delimited hierarchy file linking these individual insertions to the consensus they belong to (an example of this file is included in the test folder as sac_cer_te_families.tsv) can be supplied.
+
 Software Methods
 ------
  * [ngs_te_mapper](https://github.com/bergmanlab/ngs_te_mapper "Click to go to download location") - [Linheiro and Bergman (2012)](http://www.plosone.org/article/info%3Adoi%2F10.1371/journal.pone.0030008 "Click to go to paper location")
@@ -89,8 +91,8 @@ The pipeline is invoked by running the mcclintock.sh script in the main project 
 * -m : The methods that the user wishes to run (for example adding -m "RelocaTE TEMP ngs_te_mapper" will launch only those three methods). The default behaviour is to run all six methods
 * -r : A reference genome sequence in fasta format. (Required)
 * -c : The consensus sequences of the TEs for the species in fasta format. (Required)
-* -g : The locations of known TEs in the reference genome in GFF 3 format. This must include a unique ID attribute for every entry. (Required)
-* -t : A tab delimited file with one entry per ID in the GFF file and two columns: the first containing the ID and the second containing the TE family it belongs to. The family should correspond to the names of the sequences in the consensus fasta file. (Required)
+* -g : The locations of known TEs in the reference genome in GFF 3 format. This must include a unique ID attribute for every entry. (Optional)
+* -t : A tab delimited file with one entry per ID in the GFF file and two columns: the first containing the ID and the second containing the TE family it belongs to. The family should correspond to the names of the sequences in the consensus fasta file. (Optional - required if GFF (option -g) is supplied)
 * -b : Retain the sorted and indexed BAM file of the paired end data aligned to the reference genome.
 * -i : If this option is specified then all sample specific intermediate files will be removed, leaving only the overall results. The default is to leave sample specific intermediate files (may require large amounts of disk space).
 * -1 : The absolute path of the first fastq file from a paired end read, this should be named ending _1.fastq. (Required)
