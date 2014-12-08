@@ -2,11 +2,18 @@
 
 if (( $# > 0 ))
 then
+
+    # Establish variables
+    sam_file=$1
+    reference_genome=$2
+    gff_te_locations=$3
+    max_memory=$4
     sample=$5
+    distance="$(($6 * 5))"
+
 	mkdir $sample
-	distance="$(($6 * 5))"
 	# Run the TE locate pipeline.
-	perl TE_locate.pl $4 $1 $3 $2 $sample/ $distance 3 1
+	perl TE_locate.pl $max_memory $sam_file $gff_te_locations $reference_genome $sample/ $distance 3 1
 	# Extract the relevant data from the output file 
 	sed -e '1,2d' $sample/"_"$distance"_reads3_acc1.info" > $sample/$sample"tmpfile"
 	
@@ -33,7 +40,7 @@ else
 	echo "Supply fasta reference file as option 2"
 	echo "Supply gff3 annotation of TEs inserts in reference as option 3"
 	echo "Supply maximum memory (GB) for the software to use as option 4"
-	echo "Supply output folder name as option 5"
+	echo "Supply sample name as option 5"
 	echo "Supply library insert size as option 6"
 fi
 

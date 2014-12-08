@@ -3,6 +3,7 @@
 if (( $# > 0 ))
 then
 
+    # Establish variables
 	test_dir=`pwd`
 	reference_genome=$1
 	fastq1=$2

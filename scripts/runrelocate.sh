@@ -2,14 +2,21 @@
 
 if (( $# > 0 ))
 then
+
+    # Establish variables
+    relocate_te_sequences=$1
+    reference_genome=$2
 	reference=${2##*/}
 	reference=${reference%%.*}
+    fastq_directory=$3
 	sample=$4
+    gff_te_locations=$5
+
 	# Run the relocaTE pipeline
 	if [ ! -f $reference"annotation" ]; then
-		awk -F'[\t]' '{print $3"\t"$1":"$4".."$5}' $5 > $reference"annotation"
+		awk -F'[\t]' '{print $3"\t"$1":"$4".."$5}' $gff_te_locations > $reference"annotation"
 	fi
-	perl scripts/relocaTE.pl -t $1 -d $3 -g $2 -1 _1 -2 _2 -o $sample -r $reference"annotation"
+	perl scripts/relocaTE.pl -t $relocate_te_sequences -d $fastq_directory -g $reference_genome -1 _1 -2 _2 -o $sample -r $reference"annotation"
 	
 
 	# Name and description for use with the UCSC genome browser are added to output here.

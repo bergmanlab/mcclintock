@@ -2,35 +2,42 @@
 
 if (( $# > 0 ))
 then
+
+    # Establish variables
+    consensus_te_sequences=$1
+    bam_file=$2
+    reference_genome=$3
 	reference=${3##*/}
 	reference=${reference%%.*}
+    bed_te_location=$4
+    te_hierachy=$5
 
 	if [ ! -d $reference ]
 	then
 		mkdir $reference
 		# Create the individual input files required
-		perl splitforRetroSeq.pl $1 $reference
+		perl splitforRetroSeq.pl $consensus_te_sequences $reference
 		awk -F".fa" '{print $1".bed"}' $reference"_elementlist" > $reference"_locationlist"
 
 		while read element file
 		do
-			awk -v element=$element '{if ($2==element) print $1}' $5 > intfile
+			awk -v element=$element '{if ($2==element) print $1}' $te_hierarchy > intfile
 			while read insert
 			do
-				grep -w $insert $4 >> $file
+				grep -w $insert $bed_te_location >> $file
 			done < intfile
 		done < $reference"_locationlist"
 	fi
 
-	samplename=`basename $2 .bam`
+	samplename=`basename $bam_file .bam`
 	mkdir $samplename
 
 	# To run RetroSeq with the more computationally expensive Exonerate step uncomment the next line
 	# and comment the alternate discovery step below it
-	# bin/retroseq.pl -discover -bam $2 -eref $reference"_elementlist" -output $samplename/$samplename.discovery
-	bin/retroseq.pl -discover -bam $2 -refTEs $reference"_locationlist" -output $samplename/$samplename.discovery
+	# bin/retroseq.pl -discover -bam $bam_file -eref $reference"_elementlist" -output $samplename/$samplename.discovery
+	bin/retroseq.pl -discover -bam $bam_file -refTEs $reference"_locationlist" -output $samplename/$samplename.discovery
 
-	bin/retroseq.pl -call -bam $2 -input $samplename/$samplename.discovery -filter $reference"_locationlist" -ref $3 -output $samplename/$samplename.calling -orientate yes
+	bin/retroseq.pl -call -bam $bam_file -input $samplename/$samplename.discovery -filter $reference"_locationlist" -ref $reference_genome -output $samplename/$samplename.calling -orientate yes
 
 	# Extract the relevant results
 	echo -e "track name=\"$samplename"_RetroSeq"\" description=\"$samplename"_RetroSeq"\"" > $samplename/$samplename"_retroseq_raw.bed"
