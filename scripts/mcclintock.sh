@@ -535,7 +535,7 @@ then
 	te_hierarchy=$test_dir/$genome/reference/te_hierarchy
 
 	cd PoPoolationTE
-	bash runpopoolationte.sh $popoolationte_reference_genome $consensus_te_seqs $te_hierarchy $fastq1 $fastq2 $te_locations $processors
+	bash runpopoolationte.sh $popoolationte_reference_genome $te_hierarchy $fastq1 $fastq2 $te_locations $processors
 
 	# Save the original result file and the bed files filtered by mcclintock
 	mv $sample/$sample"_popoolationte"* $test_dir/$genome/$sample/results/
