@@ -19,6 +19,7 @@ All of the software systems must be run on a unix based system with the software
 
  * Optional software for the pipeline
   * [FastQC](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/) (Command line installation v0.11.2)
+  * [RepeatMasker](http://www.repeatmasker.org/RMDownload.html) (v.4.0.2) (Necessary if no GFF is supplied)
 
  * ngs_te_mapper
   * [R](http://cran.r-project.org/) (v.3.0.2)
