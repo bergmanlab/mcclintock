@@ -40,6 +40,7 @@ All of the software systems must be run on a unix based system with the software
   
  * TE-locate
   * [Perl](http://www.perl.org/get.html) (v.5.14.2)
+  * [Java](http://www.oracle.com/technetwork/java/javase/downloads/index.html) (v.1.6.0_24)
   * [BWA](https://github.com/lh3/bwa/commit/c14aaad1ce72f5784bfe04df757a6b12fe07b7ea) (v.00.7.4-r385)
 
  * RetroSeq
