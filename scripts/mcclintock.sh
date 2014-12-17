@@ -17,6 +17,9 @@ usage ()
 	echo "     of disk space)"
 	echo "-1 : The absolute path of the first fastq file from a paired end read, this should be named ending _1.fastq. [Required]"
 	echo "-2 : The absolute path of the second fastq file from a paired end read, this should be named ending _2.fastq. [Required]"
+	echo "-C : This option will include the consensus TE sequences as extra chromosomes in the reference file (useful if the "
+    echo "     organism is known to have TEs that are not present in the reference strain).
+	echo "-R : This option will include the reference TE sequences as extra chromosomes in the reference file"
 	echo "-m : A string containing the list of software you want the pipeline to use for analysis (if left blank all methods"
 	echo "     will run) e.g. \"-m relocate TEMP ngs_te_mapper\" will launch only those three methods"
 	echo "-p : The number of processors to use for parallel stages of the pipeline."
@@ -29,7 +32,7 @@ processors=1
 methods="ngs_te_mapper RelocaTE TEMP RetroSeq PoPoolationTE TE-locate"
 
 # Get the options supplied to the program
-while getopts ":r:c:g:t:1:2:p:m:hib" opt;
+while getopts ":r:c:g:t:1:2:p:m:hibCR" opt;
 do
 	case $opt in
 		r)
@@ -56,7 +59,13 @@ do
 		m)
 			methods=$OPTARG
 			;;
-		i)	
+		C)
+			addconsensus=on
+			;;
+		R)
+			addrefcopies=on
+			;;
+		i)
 			remove_intermediates=on
 			;;
 		b)
@@ -179,43 +188,75 @@ then
 	# Cut first line if it begins with #
 	if [[ ! -f $test_dir/$genome/reference/all_te_seqs.fasta ]]
 	then
-		grep -v '^#' $te_locations | awk -F'[\t=;]' 'BEGIN {OFS = "\t"}; {printf $1"\t"$2"\t"; for(x=1;x<=NF;x++) if ($x~"ID") printf $(x+1); print "\t"$4,$5,$6,$7,$8,"ID="}' | awk -F'\t' '{print $0$3";Name="$3";Alias="$3}' > edited.gff
-		mv edited.gff $te_locations
-		bedtools getfasta -name -fi $reference_genome -bed $te_locations -fo $test_dir/$genome/reference/all_te_seqs.fasta
+		if [[ "$addrefcopies" = "on" ]]
+		then
+			bedtools getfasta -name -fi $reference_genome -bed $te_locations -fo $test_dir/$genome/reference/ref_te_seqs.fasta
+			te_seqs=$test_dir/$genome/reference/ref_te_seqs.fasta
+		fi
+		if [[ "$addconsensus" = "on" ]]
+		then
+			cat $consensus_te_seqs $test_dir/$genome/reference/ref_te_seqs.fasta > $test_dir/$genome/reference/all_te_seqs2.fasta
+			te_seqs=$test_dir/$genome/reference/all_te_seqs2.fasta
+		fi
 		# Use script to fix the line length of reference input to 80 characters (needed for samtools index)
-		perl scripts/fixfastalinelength.pl $test_dir/$genome/reference/all_te_seqs.fasta 80 $test_dir/$genome/reference/all_te_seqs2.fasta
-		cat $consensus_te_seqs $test_dir/$genome/reference/all_te_seqs2.fasta > $test_dir/$genome/reference/all_te_seqs.fasta
-		rm $test_dir/$genome/reference/all_te_seqs2.fasta
+		perl scripts/fixfastalinelength.pl $te_seqs 80 $test_dir/$genome/reference/all_te_seqs.fasta
+		rm $test_dir/$genome/reference/all_te_seqs2.fasta $test_dir/$genome/reference/ref_te_seqs.fasta
+
+		# PoPoolationTE always needs the full TE sequences
+		bedtools getfasta -name -fi $reference_genome -bed $te_locations -fo $test_dir/$genome/reference/popool_ref_te_seqs.fasta
+		cat $consensus_te_seqs $test_dir/$genome/reference/popool_ref_te_seqs.fasta > $test_dir/$genome/reference/popool_all_te_seqs_tmp.fasta
+		perl scripts/fixfastalinelength.pl $test_dir/$genome/reference/popool_all_te_seqs_tmp.fasta 80 $test_dir/$genome/reference/popool_all_te_seqs.fasta
+		rm $test_dir/$genome/reference/popool_all_te_seqs_tmp.fasta $test_dir/$genome/reference/popool_ref_te_seqs.fasta
 	fi
 	all_te_seqs=$test_dir/$genome/reference/all_te_seqs.fasta
+	popool_te_seqs=$test_dir/$genome/reference/popool_all_te_seqs.fasta
 
 	# The pipeline functions most comprehensively (i.e. dealing with insertions with no copies in the reference genome) if
 	# the sequences of TEs are added to the end of the genome and reflected in the annotation
 	if [[ ! -f $test_dir/$genome/reference/full_reference.fa ]]
 	then
-		cat $reference_genome $all_te_seqs > $test_dir/$genome/reference/full_reference.fa
-		cp $test_dir/$genome/reference/full_reference.fa $test_dir/$genome/reference/$genome".fa"
+		if [[ "$addconsensus" = "on" ||  "$addrefcopies" = "on" ]]
+		then
+			cat $reference_genome $all_te_seqs > $test_dir/$genome/reference/full_reference.fa
+			mv $test_dir/$genome/reference/full_reference.fa $test_dir/$genome/reference/$genome".fa"
+		fi
 	fi
 	reference_genome=$test_dir/$genome/reference/$genome".fa"
 
+	# PoPoolationTE always needs the full combination reference
 	if [[ ! -f $test_dir/$genome/reference/"popoolationte_full_"$genome".fa" ]]
 	then
-		cat $popoolationte_reference_genome $all_te_seqs > $test_dir/$genome/reference/"popoolationte_full_"$genome".fa"
+			cat $popoolationte_reference_genome $popool_te_seqs > $test_dir/$genome/reference/"popoolationte_full_"$genome".fa"
 	fi
 	popoolationte_reference_genome=$test_dir/$genome/reference/"popoolationte_full_"$genome".fa"
 
 	# Add the locations of the sequences of the consensus TEs to the genome annotation
 	if [[ ! -f $test_dir/$genome/reference/TE-lengths ]]
 	then
-		awk -F">" '/^>/ {if (seqlen){print seqlen}; printf $2"\t" ;seqlen=0;next; } { seqlen = seqlen +length($0)}END{print seqlen}' $all_te_seqs > $test_dir/$genome/reference/TE-lengths
-		cp $te_families $test_dir/$genome/reference/tmp
+		awk -F">" '/^>/ {print $2"\t"$2}' $consensus_te_seqs > $test_dir/$genome/reference/tmp
+		cat $te_families >> $test_dir/$genome/reference/tmp
+		cp $te_families $test_dir/$genome/reference/"popool_"$te_families_file
+		cp $te_locations $test_dir/$genome/reference/"popool_"$te_locations_file
+		if [[ "$addconsensus" = "on" ||  "$addrefcopies" = "on" ]]
+		then
+			awk -F">" '/^>/ {if (seqlen){print seqlen}; printf $2"\t" ;seqlen=0;next; } { seqlen = seqlen +length($0)}END{print seqlen}' $all_te_seqs > $test_dir/$genome/reference/TE-lengths
+			while read TE length
+			do
+				echo -e "$TE\treannotate\ttransposable_element\t1\t$length\t.\t+\t.\tID=instance$TE;Name=instance$TE;Alias=instance$TE" >> $te_locations
+				awk -vTE=$TE '{ if(TE==$1) print "instance"TE"\t"$2; }' $test_dir/$genome/reference/tmp >> $te_families
+			done < $test_dir/$genome/reference/TE-lengths
+		fi
+		# PoPoolationTE always needs the full family file and annotation
+		awk -F">" '/^>/ {if (seqlen){print seqlen}; printf $2"\t" ;seqlen=0;next; } { seqlen = seqlen +length($0)}END{print seqlen}' $popool_te_seqs > $test_dir/$genome/reference/TE-lengths
 		while read TE length
 		do
-			echo -e "$TE\treannotate\ttransposable_element\t1\t$length\t.\t+\t.\tID=instance$TE;Name=instance$TE;Alias=instance$TE" >> $te_locations
-			awk -vTE=$TE '{ if(TE==$1) print "instance"TE"\t"$2; }' $test_dir/$genome/reference/tmp >> $te_families
+			echo -e "$TE\treannotate\ttransposable_element\t1\t$length\t.\t+\t.\tID=instance$TE;Name=instance$TE;Alias=instance$TE" >> $test_dir/$genome/reference/"popool_"$te_locations_file
+			awk -vTE=$TE '{ if(TE==$1) print "instance"TE"\t"$2; }' $test_dir/$genome/reference/tmp >> $test_dir/$genome/reference/"popool_"$te_families_file
 		done < $test_dir/$genome/reference/TE-lengths
 		rm $test_dir/$genome/reference/tmp
 	fi
+	popool_te_locations=$test_dir/$genome/reference/"popool_"$te_locations_file
+	popool_te_families=$test_dir/$genome/reference/"popool_"$te_families_file
 
 # The GFF input is optional, if it is not supplied then RepeatMasker is run to generate the necessary inputs
 else
@@ -227,6 +268,8 @@ else
 		# Drosophila, more rules like this may be needed for other reference genomes
 		sed "s/McClintock-int/McClintock/g" $reference_genome".out.gff" > $test_dir/$genome/reference/tmp
 		sed "s/POGON1/pogo/g" $test_dir/$genome/reference/tmp > $reference_genome".out.gff"
+        perl scripts/fixfastalinelength.pl $reference_genome".masked" 80 $reference_genome".masked2"
+        mv $reference_genome".masked2" $reference_genome".masked"
 	fi
 	popoolationte_reference_genome=$reference_genome".masked"
 	te_locations=$reference_genome".out.gff"
@@ -254,42 +297,69 @@ else
 	fi
 	reference_te_seqs=$test_dir/$genome/reference/reference_te_seqs.fasta
 
-	if [[ ! -f $test_dir/$genome/reference/all_te_seqs.fasta ]]
+	if [[ ! -f $test_dir/$genome/reference/popool_te_seqs.fasta ]]
 	then
-		cat $consensus_te_seqs $reference_te_seqs > $test_dir/$genome/reference/all_te_seqs.fasta
+		if [[ "$addconsensus" = "on" ]]
+		then
+			cat $consensus_te_seqs > $test_dir/$genome/reference/all_te_seqs.fasta
+		fi
+		if [[ "$addrefcopies" = "on" ]]
+		then
+			cat $reference_te_seqs >> $test_dir/$genome/reference/all_te_seqs.fasta
+		fi
+		cat $consensus_te_seqs $reference_te_seqs > $test_dir/$genome/reference/popool_te_seqs.fasta
 	fi
 	all_te_seqs=$test_dir/$genome/reference/all_te_seqs.fasta
+	popool_te_seqs=$test_dir/$genome/reference/popool_te_seqs.fasta
 
 	# Add the locations of the sequences of the consensus TEs to the genome annotation
 	if [[ ! -f $test_dir/$genome/reference/TE-lengths ]]
 	then
-		awk -F">" '/^>/ {if (seqlen){print seqlen}; printf $2"\t" ;seqlen=0;next; } { seqlen = seqlen +length($0)}END{print seqlen}' $all_te_seqs > $test_dir/$genome/reference/TE-lengths
-		awk -F">" '/^>/ {print $2"\t"$2}' $consensus_te_seqs > $test_dir/$genome/reference/tmp
-		cat $test_dir/$genome/reference/tmp $te_families > $test_dir/$genome/reference/te-list
+        awk -F">" '/^>/ {print $2"\t"$2}' $consensus_te_seqs > $test_dir/$genome/reference/tmp
+        cat $te_families >> $test_dir/$genome/reference/tmp
+        cp $te_families $test_dir/$genome/reference/"popool_hierarchy.tsv"
+        cp $te_locations $test_dir/$genome/reference/"popool_te_locations.gff"
+        if [[ "$addconsensus" = "on" ||  "$addrefcopies" = "on" ]]
+        then
+            awk -F">" '/^>/ {if (seqlen){print seqlen}; printf $2"\t" ;seqlen=0;next; } { seqlen = seqlen +length($0)}END{print seqlen}' $all_te_seqs > $test_dir/$genome/reference/TE-lengths
+            while read TE length
+            do
+                echo -e "$TE\treannotate\ttransposable_element\t1\t$length\t.\t+\t.\tID=instance$TE;Name=instance$TE;Alias=instance$TE" >> $te_locations
+                awk -vTE=$TE '{ if(TE==$1) print "instance"TE"\t"$2; }' $test_dir/$genome/reference/tmp >> $te_families
+            done < $test_dir/$genome/reference/TE-lengths
+        fi
+		# PoPoolationTE always needs the full family file and annotation
+		awk -F">" '/^>/ {if (seqlen){print seqlen}; printf $2"\t" ;seqlen=0;next; } { seqlen = seqlen +length($0)}END{print seqlen}' $popool_te_seqs > $test_dir/$genome/reference/TE-lengths
 		while read TE length
 		do
-			echo -e "$TE\tRepeatMasker\ttransposable_element\t1\t$length\t.\t+\t.\tID=instance$TE;Name=instance$TE;Alias=instance$TE" >> $te_locations
-			awk -vTE=$TE '{ if(TE==$1) print "instance"TE"\t"$2; }' $test_dir/$genome/reference/te-list >> $te_families
+			echo -e "$TE\treannotate\ttransposable_element\t1\t$length\t.\t+\t.\tID=instance$TE;Name=instance$TE;Alias=instance$TE" >> $test_dir/$genome/reference/"popool_te_locations.gff"
+			awk -vTE=$TE '{ if(TE==$1) print "instance"TE"\t"$2; }' $test_dir/$genome/reference/tmp >> $test_dir/$genome/reference/"popool_hierarchy.tsv"
 		done < $test_dir/$genome/reference/TE-lengths
-		#rm $test_dir/$genome/reference/te-list
+		rm $test_dir/$genome/reference/tmp
 	fi
+	popool_te_locations=$test_dir/$genome/reference/"popool_te_locations.gff"
+	popool_te_families=$test_dir/$genome/reference/"popool_hierarchy.tsv"
 
 	# The pipeline functions most comprehensively (i.e. dealing with insertions with no copies in the reference genome) if
 	# the sequences of TEs are added to the end of the genome and reflected in the annotation
 	if [[ ! -f $test_dir/$genome/reference/full_reference.fa ]]
 	then
-		cat $reference_genome $all_te_seqs > $test_dir/$genome/reference/full_reference.fa
-		cp $test_dir/$genome/reference/full_reference.fa $test_dir/$genome/reference/$genome".fa"
+        if [[ "$addconsensus" = "on" ||  "$addrefcopies" = "on" ]]
+        then
+            cat $reference_genome $all_te_seqs > $test_dir/$genome/reference/full_reference.fa
+            mv $test_dir/$genome/reference/full_reference.fa $test_dir/$genome/reference/$genome".fa"
+        fi
 	fi
 	reference_genome=$test_dir/$genome/reference/$genome".fa"
 
+	# PoPoolationTE always needs the full combination reference
 	if [[ ! -f $test_dir/$genome/reference/popoolationte_full_reference.fa ]]
 	then
-		cat $popoolationte_reference_genome $all_te_seqs > $test_dir/$genome/reference/"popoolationte_full_"$sample".fa"
+            cat $popoolationte_reference_genome $popool_te_seqs > $test_dir/$genome/reference/"popoolationte_full_"$genome".fa"
 	fi
-	popoolationte_reference_genome=$test_dir/$genome/reference/"popoolationte_full_"$sample".fa"
+	popoolationte_reference_genome=$test_dir/$genome/reference/"popoolationte_full_"$genome".fa"
 fi
-
+exit 1
 # If FastQC is installed then launch FastQC on the input fastqs
 location=`which fastqc`
 if [[ -z "$location" ]]
@@ -530,12 +600,12 @@ then
 	if [[ ! -f $test_dir/$genome/reference/te_hierarchy ]]
 	then
 		printf "insert\tid\tfamily\tsuperfamily\tsuborder\torder\tclass\tproblem\n" > $test_dir/$genome/reference/te_hierarchy
-		awk '{printf $0"\t"$2"\t"$2"\tna\tna\tna\t0\n"}' $te_families >> $test_dir/$genome/reference/te_hierarchy
+		awk '{printf $0"\t"$2"\t"$2"\tna\tna\tna\t0\n"}' $popool_te_families >> $test_dir/$genome/reference/te_hierarchy
 	fi
 	te_hierarchy=$test_dir/$genome/reference/te_hierarchy
 
 	cd PoPoolationTE
-	bash runpopoolationte.sh $popoolationte_reference_genome $te_hierarchy $fastq1 $fastq2 $te_locations $processors
+	bash runpopoolationte.sh $popoolationte_reference_genome $te_hierarchy $fastq1 $fastq2 $popool_te_locations $processors
 
 	# Save the original result file and the bed files filtered by mcclintock
 	mv $sample/$sample"_popoolationte"* $test_dir/$genome/$sample/results/

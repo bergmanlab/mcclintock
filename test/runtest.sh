@@ -19,7 +19,7 @@ wget -nc -q http://hgdownload.soe.ucsc.edu/goldenPath/sacCer2/bigZips/chromFa.ta
 tar xvzf chromFa.tar.gz 
 rm chromFa.tar.gz
 # Combine the chromosomes together with the TE sequences
-cat chr*fa 2micron.fa sac_cer_TE_seqs.fa > sacCer2.fa
+cat chr*fa 2micron.fa > sacCer2.fa
 rm chr*fa 2micron.fa
 
 # Download gff locations of reference TE copies
@@ -33,4 +33,4 @@ rm tmp
 
 # Run the pipeline 
 cd ..
-bash mcclintock.sh -r $run_dir/sacCer2.fa -c $run_dir/sac_cer_TE_seqs.fa -g $run_dir/reference_TE_locations.gff -t $run_dir/sac_cer_te_families.tsv -1 $run_dir/SRR800842_1.fastq -2 $run_dir/SRR800842_2.fastq -p 1
+bash mcclintock.sh -r $run_dir/sacCer2.fa -c $run_dir/sac_cer_TE_seqs.fa -g $run_dir/reference_TE_locations.gff -t $run_dir/sac_cer_te_families.tsv -1 $run_dir/SRR800842_1.fastq -2 $run_dir/SRR800842_2.fastq -p 4
