@@ -359,7 +359,7 @@ else
 	fi
 	popoolationte_reference_genome=$test_dir/$genome/reference/"popoolationte_full_"$genome".fa"
 fi
-exit 1
+
 # If FastQC is installed then launch FastQC on the input fastqs
 location=`which fastqc`
 if [[ -z "$location" ]]
