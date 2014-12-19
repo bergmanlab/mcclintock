@@ -18,7 +18,7 @@ usage ()
 	echo "-1 : The absolute path of the first fastq file from a paired end read, this should be named ending _1.fastq. [Required]"
 	echo "-2 : The absolute path of the second fastq file from a paired end read, this should be named ending _2.fastq. [Required]"
 	echo "-C : This option will include the consensus TE sequences as extra chromosomes in the reference file (useful if the "
-    echo "     organism is known to have TEs that are not present in the reference strain).
+    echo "     organism is known to have TEs that are not present in the reference strain)."
 	echo "-R : This option will include the reference TE sequences as extra chromosomes in the reference file"
 	echo "-m : A string containing the list of software you want the pipeline to use for analysis (if left blank all methods"
 	echo "     will run) e.g. \"-m relocate TEMP ngs_te_mapper\" will launch only those three methods"
