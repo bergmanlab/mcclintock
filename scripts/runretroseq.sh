@@ -27,6 +27,7 @@ then
 				grep -w $insert $bed_te_location >> $file
 			done < intfile
 		done < $reference"_locationlist"
+		rm intfile
 	fi
 
 	samplename=`basename $bam_file .bam`
