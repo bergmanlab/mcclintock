@@ -414,7 +414,7 @@ then
 	then
 		# Create bam files for input
 		printf "\nCreating bam alignment files...\n\n" | tee -a /dev/stderr
-		samtools view -Sb $sam | samtools sort - $test_dir/$genome/$sample/bam/$sample
+		samtools view -Sb -t $reference_genome".fai" $sam | samtools sort - $test_dir/$genome/$sample/bam/$sample
 		bam=$test_dir/$genome/$sample/bam/$sample.bam
 		samtools index $bam
 

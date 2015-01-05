@@ -17,9 +17,9 @@ then
     # Create a directory for analysis files
     mkdir $samplename
 
-	# Remove any spaces in the names of reads to prevent errors.
-	tr -d ' ' < $fastq1 > $samplename/reads1.fq
-	tr -d ' ' < $fastq2 > $samplename/reads2.fq	
+	# Change the labels of reads in the fastq files to ensure there are no spaces and they end in /1 or /2
+    awk -v sample=$samplename '{if(NR%4==1) $0=sprintf("@"sample".%d/1",(1+i++)); print;}' $fastq1 > $samplename/reads1.fq
+    awk -v sample=$samplename '{if(NR%4==1) $0=sprintf("@"sample".%d/2",(1+i++)); print;}' $fastq2 > $samplename/reads2.fq
 
 	# Perform 2 bwa alignments.
 	bwa bwasw -t $processors $reference_genome $samplename/reads1.fq > $samplename/1.sam
@@ -32,7 +32,7 @@ then
 	rm $samplename/reads2.fq
 
 	# Sort the alignment and remove intermediate files to save space.
-	samtools view -Sb $samplename/pe-reads.sam | samtools sort - $samplename/pe-reads.sorted
+	samtools view -t $reference_genome".fai" -Sb $samplename/pe-reads.sam | samtools sort - $samplename/pe-reads.sorted
 	rm $samplename/pe-reads.sam
 	samtools view $samplename/pe-reads.sorted.bam > $samplename/pe-reads.sorted.sam
 
