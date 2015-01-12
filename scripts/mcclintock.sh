@@ -200,7 +200,6 @@ then
 		fi
 		# Use script to fix the line length of reference input to 80 characters (needed for samtools index)
 		perl scripts/fixfastalinelength.pl $te_seqs 80 $test_dir/$genome/reference/all_te_seqs.fasta
-		rm $test_dir/$genome/reference/all_te_seqs2.fasta $test_dir/$genome/reference/ref_te_seqs.fasta
 
 		# PoPoolationTE always needs the full TE sequences
 		bedtools getfasta -name -fi $reference_genome -bed $te_locations -fo $test_dir/$genome/reference/popool_ref_te_seqs.fasta
@@ -392,12 +391,12 @@ bed_te_locations_file=$test_dir/$genome/reference/reference_TE_locations.bed
 
 # Allow case insensitivity for method names
 shopt -s nocasematch
-if [[ $methods == *TE-locate* || $methods == *TElocate* || $methods == *RetroSeq* ]]
+if [[ $methods == *TE-locate* || $methods == *TElocate* || $methods == *RetroSeq* || $methods == *TEMP* ]]
 then
 	# Create sam files for input
 	printf "\nCreating sam alignment...\n\n" | tee -a /dev/stderr
 
-	bwa mem -a -t $processors -v 0 $reference_genome $fastq1 $fastq2 > $test_dir/$genome/$sample/sam/$sample.sam
+	bwa mem -t $processors -v 0 $reference_genome $fastq1 $fastq2 > $test_dir/$genome/$sample/sam/$sample.sam
 	sort --temporary-directory=$test_dir/$genome/$sample/sam/ $test_dir/$genome/$sample/sam/$sample.sam > $test_dir/$genome/$sample/sam/sorted$sample.sam
 	rm $test_dir/$genome/$sample/sam/$sample.sam
 	mv $test_dir/$genome/$sample/sam/sorted$sample.sam $test_dir/$genome/$sample/sam/$sample.sam
@@ -410,7 +409,7 @@ then
 	printf "\nMedian insert size = $median_insertsize\n\n" | tee -a /dev/stderr
 	echo $median_insertsize > $test_dir/$genome/$sample/results/qualitycontrol/median_insertsize
 
-	if [[ $methods == *RetroSeq* ]]
+	if [[ $methods == *RetroSeq* || $methods == TEMP ]]
 	then
 		# Create bam files for input
 		printf "\nCreating bam alignment files...\n\n" | tee -a /dev/stderr
@@ -499,12 +498,8 @@ then
 	printf "\nRunning TEMP pipeline...\n\n" | tee -a /dev/stderr
 
 	cd TEMP
-	if [[ -z "$median_insertsize" ]]
-	then
-		median_insertsize="none"
-	fi
 
-	bash runtemp.sh $reference_genome $fastq1 $fastq2 $consensus_te_seqs $bed_te_locations_file $te_families $median_insertsize $sample $processors
+	bash runtemp.sh $bam $sam $consensus_te_seqs $bed_te_locations_file $te_families $median_insertsize $sample $processors
 
 	# Save the original result file and the bed files filtered by mcclintock
 	mv $sample/$sample"_temp"* $test_dir/$genome/$sample/results/

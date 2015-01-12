@@ -7,7 +7,7 @@ wget --no-check-certificate https://github.com/bergmanlab/ngs_te_mapper/archive/
 wget --no-check-certificate https://github.com/tk2/RetroSeq/archive/700d4f76a3b996686652866f2b81fefc6f0241e0.zip -O RetroSeq.zip
 wget --no-check-certificate https://github.com/srobb1/RelocaTE/archive/ce3a2066e15f5c14e2887fdf8dce0485e1750e5b.zip -O RelocaTE.zip
 wget -O TE-locate.tar http://sourceforge.net/projects/te-locate/files/latest/download?source=files
-wget --no-check-certificate https://github.com/JialiUMassWengLab/TEMP/archive/e40c9293dfa627b7da56ec35e7603f49009b9095.zip -O TEMP.zip
+wget --no-check-certificate https://github.com/JialiUMassWengLab/TEMP/archive/d2500b904e2020d6a1075347b398525ede5feae1.zip -O TEMP.zip
 
 # Extract software and format folder layout.
 echo "Extracting pipelines..." 
@@ -27,7 +27,7 @@ mkdir TE-locate
 tar -xvf TE-locate.tar -C TE-locate
 rm TE-locate.tar
 unzip TEMP.zip
-mv TEMP-e40c9293dfa627b7da56ec35e7603f49009b9095 TEMP
+mv TEMP-d2500b904e2020d6a1075347b398525ede5feae1 TEMP
 rm TEMP.zip
 
 # Apply edits to software and custom run scripts.
