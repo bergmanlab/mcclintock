@@ -19,12 +19,12 @@ then
 	mkdir $samplename
 
 	# Change the labels of reads in the fastq files to ensure there are no spaces and they end in /1 or /2
-	awk -v sample=$samplename '{if(NR%4==1) $0=sprintf("@"sample".%d/1",(1+i++)); print;}' $fastq1 > $samplename/reads1.fq
-	awk -v sample=$samplename '{if(NR%4==1) $0=sprintf("@"sample".%d/2",(1+i++)); print;}' $fastq2 > $samplename/reads2.fq
+	awk -v samplen=$samplename '{if(NR%4==1) $0=sprintf("@"samplen".%d/1",(1+i++)); print;}' $fastq1 > $samplename/reads1.fq
+	awk -v samplen=$samplename '{if(NR%4==1) $0=sprintf("@"samplen".%d/2",(1+i++)); print;}' $fastq2 > $samplename/reads2.fq
 
 	# Perform 2 bwa alignments.
 	bwa bwasw -t $processors $reference_genome $samplename/reads1.fq > $samplename/1.sam
-	bwa bwasw -t $processors $reference_genome  $samplename/reads2.fq > $samplename/2.sam
+	bwa bwasw -t $processors $reference_genome $samplename/reads2.fq > $samplename/2.sam
 
 	# Combine each alignment using included script.
 	perl samro.pl --sam1 $samplename/1.sam --sam2 $samplename/2.sam --fq1 $samplename/reads1.fq --fq2 $samplename/reads2.fq --output $samplename/pe-reads.sam

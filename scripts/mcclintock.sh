@@ -205,7 +205,7 @@ then
 		bedtools getfasta -name -fi $reference_genome -bed $te_locations -fo $test_dir/$genome/reference/popool_ref_te_seqs.fasta
 		cat $consensus_te_seqs $test_dir/$genome/reference/popool_ref_te_seqs.fasta > $test_dir/$genome/reference/popool_all_te_seqs_tmp.fasta
 		perl scripts/fixfastalinelength.pl $test_dir/$genome/reference/popool_all_te_seqs_tmp.fasta 80 $test_dir/$genome/reference/popool_all_te_seqs.fasta
-		rm $test_dir/$genome/reference/popool_all_te_seqs_tmp.fasta $test_dir/$genome/reference/popool_ref_te_seqs.fasta
+		rm $test_dir/$genome/reference/popool_all_te_seqs_tmp.fasta $test_dir/$genome/reference/popool_ref_te_seqs.fasta $reference_genome".fai"
 	fi
 	all_te_seqs=$test_dir/$genome/reference/all_te_seqs.fasta
 	popool_te_seqs=$test_dir/$genome/reference/popool_all_te_seqs.fasta
@@ -292,7 +292,7 @@ else
 		bedtools getfasta -name -fi $reference_genome -bed $te_locations -fo $test_dir/$genome/reference/reference_te_seqs.fasta
 		# Use script to fix the line length of reference input to 80 characters (needed for samtools index)
 		perl scripts/fixfastalinelength.pl $test_dir/$genome/reference/reference_te_seqs.fasta 80 $test_dir/$genome/reference/reference_te_seqs2.fasta
-		mv $test_dir/$genome/reference/reference_te_seqs2.fasta $test_dir/$genome/reference/reference_te_seqs.fasta
+		mv $test_dir/$genome/reference/reference_te_seqs2.fasta $test_dir/$genome/reference/reference_te_seqs.fasta $reference_genome".fai"
 	fi
 	reference_te_seqs=$test_dir/$genome/reference/reference_te_seqs.fasta
 
@@ -409,7 +409,7 @@ then
 	printf "\nMedian insert size = $median_insertsize\n\n" | tee -a /dev/stderr
 	echo $median_insertsize > $test_dir/$genome/$sample/results/qualitycontrol/median_insertsize
 
-	if [[ $methods == *RetroSeq* || $methods == TEMP ]]
+	if [[ $methods == *RetroSeq* || $methods == *TEMP* ]]
 	then
 		# Create bam files for input
 		printf "\nCreating bam alignment files...\n\n" | tee -a /dev/stderr
