@@ -51,7 +51,7 @@ All of the software systems must be run on a unix based system with the software
   * [Exonerate](http://www.ebi.ac.uk/~guy/exonerate/) (v.2.2.0)
   * [BWA](https://github.com/lh3/bwa/commit/c14aaad1ce72f5784bfe04df757a6b12fe07b7ea) (v.0.7.4-r385)
 
-* TEMP
+ * TEMP
   * [Perl](http://www.perl.org/get.html) (v.5.14.2)
   * [BioPerl](http://www.bioperl.org/wiki/Getting_BioPerl) (v.1.006901)
   * [BWA](https://github.com/lh3/bwa/commit/c14aaad1ce72f5784bfe04df757a6b12fe07b7ea) (v.0.7.4-r385)
