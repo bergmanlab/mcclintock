@@ -3,7 +3,7 @@
 if (( $# > 0 ))
 then
 
-    # Establish variables
+	# Establish variables
 	test_dir=`pwd`
 	bam=$1
 	sam=$2
@@ -32,7 +32,7 @@ then
 	echo -e "track name=\"$sample"_TEMP"\" description=\"$sample"_TEMP"\"" > $sample/$sample"_temp_redundant.bed"
 	echo -e "track name=\"$sample"_TEMP"\" description=\"$sample"_TEMP"\"" > $sample/$sample"_temp_nonredundant.bed"
 
-	sed '1d' $sample/$sample.insertion.refined.bp.summary | awk '{if ($4 == "sense" || $4 == "antisense"); else print $0}' | awk -v sample=$sample '{ printf $1"\t"$9"\t"$11"\t"$7"\t"$4"_new_"sample"_temp_\t0\t"; if ( $5 == "sense" ) printf "+"; else printf "-"; print "\t"$6"\t"$10"\t"$12}' > $sample/$sample"_temp_presort_raw.txt"
+	sed '1d' $sample/$sample".insertion.refined.bp.summary" | awk '{if ($4 == "sense" || $4 == "antisense"); else print $0}' | awk -v sample=$sample '{ printf $1"\t"$9"\t"$11"\t"$7"\t"$4"_new_"sample"_temp_\t0\t"; if ( $5 == "sense" ) printf "+"; else printf "-"; print "\t"$6"\t"$10"\t"$12}' > $sample/$sample"_temp_presort_raw.txt"
 
 	bedtools sort -i $sample/$sample"_temp_presort_raw.txt" > $sample/$sample"_temp_sorted_raw.txt"
 

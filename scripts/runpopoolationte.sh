@@ -3,23 +3,24 @@
 if (( $# > 0 ))
 then
 
-    # Establish variables
-    reference_genome=$1
-    te_hierarchy=$2
-    fastq1=$3
-    fastq2=$4
-    gff_te_locations=$5
+	# Establish variables
+	reference_genome=$1
+	te_hierarchy=$2
+	fastq1=$3
+	fastq2=$4
+	gff_te_locations=$5
 	processors=$6
 
-    # Get the name of the sample being analysed.
-    samplename=`basename $fastq1 _1.fastq`
+	# Get the name of the sample being analysed (catch either fq or fastq extensions).
+	sample=`basename $fastq1 _1.fastq`
+	samplename=`basename $sample _1.fq`
 
-    # Create a directory for analysis files
-    mkdir $samplename
+	# Create a directory for analysis files
+	mkdir $samplename
 
 	# Change the labels of reads in the fastq files to ensure there are no spaces and they end in /1 or /2
-    awk -v sample=$samplename '{if(NR%4==1) $0=sprintf("@"sample".%d/1",(1+i++)); print;}' $fastq1 > $samplename/reads1.fq
-    awk -v sample=$samplename '{if(NR%4==1) $0=sprintf("@"sample".%d/2",(1+i++)); print;}' $fastq2 > $samplename/reads2.fq
+	awk -v sample=$samplename '{if(NR%4==1) $0=sprintf("@"sample".%d/1",(1+i++)); print;}' $fastq1 > $samplename/reads1.fq
+	awk -v sample=$samplename '{if(NR%4==1) $0=sprintf("@"sample".%d/2",(1+i++)); print;}' $fastq2 > $samplename/reads2.fq
 
 	# Perform 2 bwa alignments.
 	bwa bwasw -t $processors $reference_genome $samplename/reads1.fq > $samplename/1.sam
