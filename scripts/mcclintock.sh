@@ -397,11 +397,8 @@ then
 	printf "\nCreating sam alignment...\n\n" | tee -a /dev/stderr
 
 	bwa mem -t $processors -v 0 $reference_genome $fastq1 $fastq2 > $test_dir/$genome/$sample/sam/$sample.sam
-	sort --temporary-directory=$test_dir/$genome/$sample/sam/ $test_dir/$genome/$sample/sam/$sample.sam > $test_dir/$genome/$sample/sam/sorted$sample.sam
-	rm $test_dir/$genome/$sample/sam/$sample.sam
-	mv $test_dir/$genome/$sample/sam/sorted$sample.sam $test_dir/$genome/$sample/sam/$sample.sam
+
 	sam=$test_dir/$genome/$sample/sam/$sample.sam
-	sam_folder=$test_dir/$genome/$sample/sam
 
 	# Calculate the median insert size of the sample
 	printf "\nCalculating median insert size...\n\n" | tee -a /dev/stderr
@@ -421,6 +418,12 @@ then
 		samtools flagstat $bam > $test_dir/$genome/$sample/results/qualitycontrol/bwamem_bamstats.txt
 	fi
 	shopt -u nocasematch
+	# Sort the sam file lexically for TE-locate
+	sort --temporary-directory=$test_dir/$genome/$sample/sam/ $test_dir/$genome/$sample/sam/$sample.sam > $test_dir/$genome/$sample/sam/sorted$sample.sam
+	rm $test_dir/$genome/$sample/sam/$sample.sam
+	mv $test_dir/$genome/$sample/sam/sorted$sample.sam $test_dir/$genome/$sample/sam/$sample.sam
+	sam=$test_dir/$genome/$sample/sam/$sample.sam
+	sam_folder=$test_dir/$genome/$sample/sam
 fi
 
 shopt -s nocasematch
