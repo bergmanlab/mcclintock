@@ -5,6 +5,7 @@ open(FASTA, $ARGV[0]) or die("Could not open  file.");
 
 # The second argument should be the name of the reference sequence
 my $referencename = $ARGV[1];
+my $outputfolder = $ARGV[2];
 my $in_file = FALSE;
 
 # Create list for RetroSeq input
@@ -37,7 +38,7 @@ while(my $line = <FASTA>)
         $filename=~s/\//_/g;
         
         # Create new file for output with
-        open(OUT, ">$referencename/$filename");
+        open(OUT, ">$outputfolder/$referencename/$filename");
         $in_file = TRUE;
         
         # Write the name of the sequence in the new file
@@ -59,10 +60,10 @@ while(my $line = <FASTA>)
 }
 
 # Print the element list required for RetroSeq
-open(LIST, ">".$referencename."_elementlist");
+open(LIST, ">".$outputfolder."/".$referencename."_elementlist");
 foreach(@seqname_list)
 {
-    print LIST "$_\t$referencename/${referencename}_";
+    print LIST "$_\t$outputfolder/$referencename/${referencename}_";
     # In case of any slashes present in fasta names, convert these to
     # underscores for the filenames (situation can occur using
     # RepeatMasker output)
