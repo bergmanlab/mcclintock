@@ -13,6 +13,8 @@ then
 	gff_te_locations=$5
 	outputfolder=$6
 
+	mkdir $outputfolder
+
 	# Run the relocaTE pipeline
 	if [ ! -f $outputfolder/$reference"annotation" ]; then
 		awk -F'[\t]' '{print $3"\t"$1":"$4".."$5}' $gff_te_locations > $outputfolder/$reference"annotation"
