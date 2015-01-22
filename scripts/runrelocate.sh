@@ -13,14 +13,15 @@ then
 	gff_te_locations=$5
 	outputfolder=$6
 
-	mkdir $outputfolder
+	mkdir -p $outputfolder
 
 	# Run the relocaTE pipeline
 	if [ ! -f $outputfolder/$reference"annotation" ]; then
 		awk -F'[\t]' '{print $3"\t"$1":"$4".."$5}' $gff_te_locations > $outputfolder/$reference"annotation"
 	fi
-	perl scripts/relocaTE.pl -t $relocate_te_sequences -d $fastq_directory -g $reference_genome -1 _1 -2 _2 -o $outputfolder/$sample -r $outputfolder/$reference"annotation"
-	
+	cd $outputfolder
+	perl ../scripts/relocaTE.pl -t $relocate_te_sequences -d $fastq_directory -g $reference_genome -1 _1 -2 _2 -o $sample -r $reference"annotation"
+	cd ..
 
 	# Name and description for use with the UCSC genome browser are added to output here.
 	echo -e "track name=\"$sample"_RelocaTE"\" description=\"$sample"_RelocaTE"\"" > $outputfolder/$sample/$sample"_relocate_redundant.bed"

@@ -300,7 +300,8 @@ else
 		bedtools getfasta -name -fi $reference_genome -bed $te_locations -fo $test_dir/$outputfolder/$genome/reference/reference_te_seqs.fasta
 		# Use script to fix the line length of reference input to 80 characters (needed for samtools index)
 		perl scripts/fixfastalinelength.pl $test_dir/$outputfolder/$genome/reference/reference_te_seqs.fasta 80 $test_dir/$outputfolder/$genome/reference/reference_te_seqs2.fasta
-		mv $test_dir/$outputfolder/$genome/reference/reference_te_seqs2.fasta $test_dir/$outputfolder/$genome/reference/reference_te_seqs.fasta $reference_genome".fai"
+		mv $test_dir/$outputfolder/$genome/reference/reference_te_seqs2.fasta $test_dir/$outputfolder/$genome/reference/reference_te_seqs.fasta
+		$reference_genome".fai"
 	fi
 	reference_te_seqs=$test_dir/$outputfolder/$genome/reference/reference_te_seqs.fasta
 
