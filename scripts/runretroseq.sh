@@ -13,9 +13,9 @@ then
 	te_hierarchy=$5
 	outputfolder=$6
 
-	if [ ! -d $outputfolder$reference ]
+	if [ ! -d $outputfolder/$reference ]
 	then
-		mkdir $outputfolder
+		mkdir -p $outputfolder
 		mkdir $outputfolder/$reference
 		# Create the individual input files required
 		perl splitforRetroSeq.pl $consensus_te_sequences $reference $outputfolder

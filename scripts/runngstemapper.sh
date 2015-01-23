@@ -10,9 +10,10 @@ then
 	fasta1_file=$4
 	fasta2_file=$5
 	outputfolder=$6
+	test_dir=`pwd`
 
 	# Set up base directory for project
-	mkdir $outputfolder
+	mkdir -p $outputfolder
 	mkdir $outputfolder/$sample/
 	mkdir $outputfolder/$sample/samples
 	mkdir $outputfolder/$sample/samples/fasta
@@ -29,20 +30,21 @@ then
 	
 	base2=`basename $fasta2_file`
 	fasta2=${base2%.*}
-	
-	cp $consensus_te_seqs $outputfolder/$sample/reference/te
-	cp $reference_genome $outputfolder/$sample/reference/genome
+	cd $outputfolder
+
+	cp $consensus_te_seqs $sample/reference/te
+	cp $reference_genome $sample/reference/genome
 
 	# Run ngs_te_mapper
-	R --no-save < sourceCode/ngs_te_mapper.R "$fasta1_file;$fasta2_file" $outputfolder/$sample 1 20
+	R --no-save < $test_dir/sourceCode/ngs_te_mapper.R "$fasta1_file;$fasta2_file" $sample 1 20
 
 	# Extract only the relevant data from the output file and sort the results
 	# Name and description for use with the UCSC genome browser are added to output here.
-	awk -F'[\t;]' -v sample=$sample '{print $1"\t"$2"\t"$3"\t"$6"_"$9"_"sample"_ngs_te_mapper_sr_"NR"\t0\t"$5}' $outputfolder/$sample/analysis/bed_tsd/$sample"_1_"$fasta2"insertions.bed" > $outputfolder/$sample/$sample"_ngs_te_mapper_presort.bed"
-	echo -e "track name=\"$sample"_ngs_te_mapper"\" description=\"$sample"_ngs_te_mapper"\"" > $outputfolder/$sample/$sample"_ngs_te_mapper_nonredundant.bed"
-	bedtools sort -i $outputfolder/$sample/$sample"_ngs_te_mapper_presort.bed" >> $outputfolder/$sample/$sample"_ngs_te_mapper.bed.tmp"
-    sed 's/NA/./g' $outputfolder/$sample/$sample"_ngs_te_mapper.bed.tmp" >> $outputfolder/$sample/$sample"_ngs_te_mapper_nonredundant.bed"
-	rm $outputfolder/$sample/$sample"_ngs_te_mapper_presort.bed" $outputfolder/$sample/$sample"_ngs_te_mapper.bed.tmp"
+	awk -F'[\t;]' -v sample=$sample '{print $1"\t"$2"\t"$3"\t"$6"_"$9"_"sample"_ngs_te_mapper_sr_"NR"\t0\t"$5}' $sample/analysis/bed_tsd/$sample"_1_"$fasta2"insertions.bed" > $sample/$sample"_ngs_te_mapper_presort.bed"
+	echo -e "track name=\"$sample"_ngs_te_mapper"\" description=\"$sample"_ngs_te_mapper"\"" > $sample/$sample"_ngs_te_mapper_nonredundant.bed"
+	bedtools sort -i $sample/$sample"_ngs_te_mapper_presort.bed" >> $sample/$sample"_ngs_te_mapper.bed.tmp"
+    sed 's/NA/./g' $sample/$sample"_ngs_te_mapper.bed.tmp" >> $sample/$sample"_ngs_te_mapper_nonredundant.bed"
+	rm $sample/$sample"_ngs_te_mapper_presort.bed" $sample/$sample"_ngs_te_mapper.bed.tmp"
 	
 else
 	echo "Supply TE database as option 1"

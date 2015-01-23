@@ -15,7 +15,7 @@ then
 	processors=$8
 	outputfolder=$9
 
-	mkdir $outputfolder
+	mkdir -p $outputfolder
 	mkdir $outputfolder/$sample
 	chmod 755 $outputfolder/ $outputfolder/$sample
 

@@ -12,6 +12,7 @@ then
 	sample=$4
 	gff_te_locations=$5
 	outputfolder=$6
+	test_dir=`pwd`
 
 	mkdir -p $outputfolder
 
@@ -20,7 +21,7 @@ then
 		awk -F'[\t]' '{print $3"\t"$1":"$4".."$5}' $gff_te_locations > $outputfolder/$reference"annotation"
 	fi
 	cd $outputfolder
-	perl ../scripts/relocaTE.pl -t $relocate_te_sequences -d $fastq_directory -g $reference_genome -1 _1 -2 _2 -o $sample -r $reference"annotation"
+	perl $test_dir/scripts/relocaTE.pl -t $relocate_te_sequences -d $fastq_directory -g $reference_genome -1 _1 -2 _2 -o $sample -r $reference"annotation"
 	cd ..
 
 	# Name and description for use with the UCSC genome browser are added to output here.

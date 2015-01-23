@@ -12,7 +12,7 @@ then
 	distance="$(($6 * 5))"
 	outputfolder=$7
 
-	mkdir $outputfolder
+	mkdir -p $outputfolder
 	mkdir $outputfolder/$sample
 
 	# Run the TE locate pipeline.

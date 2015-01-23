@@ -17,7 +17,7 @@ then
 	sample=`basename $samplename _1.fq`
 
 	# Create a directory for analysis files
-	mkdir $outputfolder
+	mkdir -p $outputfolder
 	mkdir $outputfolder/$sample
 
 	# Change the labels of reads in the fastq files to ensure there are no spaces and they end in /1 or /2
