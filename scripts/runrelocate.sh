@@ -22,7 +22,7 @@ then
 	fi
 	cd $outputfolder
 	perl $test_dir/scripts/relocaTE.pl -t $relocate_te_sequences -d $fastq_directory -g $reference_genome -1 _1 -2 _2 -o $sample -r $reference"annotation"
-	cd ..
+	cd $test_dir
 
 	# Name and description for use with the UCSC genome browser are added to output here.
 	echo -e "track name=\"$sample"_RelocaTE"\" description=\"$sample"_RelocaTE"\"" > $outputfolder/$sample/$sample"_relocate_redundant.bed"
