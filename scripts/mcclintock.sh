@@ -584,7 +584,7 @@ then
 	# Save the original result file and the bed file filtered by mcclintock
 	mv $outputfolder/$sample/$sample"_ngs_te_mapper_nonredundant.bed" $test_dir/$outputfolder/$genome/$sample/results/
 	mkdir $test_dir/$outputfolder/$genome/$sample/results/originalmethodresults/ngs_te_mapper
-	cp $outputfolder/$sample/analysis/bed_tsd/*.bed $test_dir/$outputfolder/$genome/$sample/results/originalmethodresults/ngs_te_mapper
+	cp $outputfolder/$sample/bed_tsd/*.bed $test_dir/$outputfolder/$genome/$sample/results/originalmethodresults/ngs_te_mapper
 
 	# If cleanup intermediate files is specified then delete all intermediate files specific to the sample
 	# i.e. leave any reusable species data behind.
