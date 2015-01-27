@@ -3,7 +3,6 @@
 run_dir=`pwd`
 
 # Download fastq sequencing data from EBI
-
 printf "\nDownloading and extracting fastq files...\n\n"
 
 wget -nc -q ftp.sra.ebi.ac.uk/vol1/fastq/SRR800/SRR800842/SRR800842_1.fastq.gz
@@ -18,7 +17,7 @@ printf "Downloading reference genome...\n\n"
 wget -nc -q http://hgdownload.soe.ucsc.edu/goldenPath/sacCer2/bigZips/chromFa.tar.gz
 tar xvzf chromFa.tar.gz 
 rm chromFa.tar.gz
-# Combine the chromosomes together with the TE sequences
+# Combine the chromosomes together
 cat chr*fa 2micron.fa > sacCer2.fa
 rm chr*fa 2micron.fa
 
