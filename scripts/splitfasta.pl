@@ -21,7 +21,7 @@ while(my $line = <FASTA>)
 		my $seqname = substr $line, 1;
 		chomp $seqname;
 		$seqname =~ s/\s+$//;	
-		$filename = $seqname.".fa";
+		$filename = $seqname.".fasta";
 		
 		# Create new file for output with 
 		open(OUT, ">>$filename");

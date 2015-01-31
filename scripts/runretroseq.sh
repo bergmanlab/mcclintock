@@ -19,7 +19,7 @@ then
 		mkdir $outputfolder/$reference
 		# Create the individual input files required
 		perl splitforRetroSeq.pl $consensus_te_sequences $reference $outputfolder
-		awk -F".fa" '{print $1".bed"}' $outputfolder/$reference"_elementlist" > $outputfolder/$reference"_locationlist"
+		awk -F".fasta" '{print $1".bed"}' $outputfolder/$reference"_elementlist" > $outputfolder/$reference"_locationlist"
 
 		while read element file
 		do

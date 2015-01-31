@@ -21,18 +21,18 @@ then
 	mkdir $outputfolder/$sample
 
 	# Change the labels of reads in the fastq files to ensure there are no spaces and they end in /1 or /2
-	awk -v samplen=$sample '{if(NR%4==1) $0=sprintf("@"samplen".%d/1",(1+i++)); print;}' $fastq1 > $outputfolder/$sample/reads1.fq
-	awk -v samplen=$sample '{if(NR%4==1) $0=sprintf("@"samplen".%d/2",(1+i++)); print;}' $fastq2 > $outputfolder/$sample/reads2.fq
+	awk -v samplen=$sample '{if(NR%4==1) $0=sprintf("@"samplen".%d/1",(1+i++)); print;}' $fastq1 > $outputfolder/$sample/reads1.fastq
+	awk -v samplen=$sample '{if(NR%4==1) $0=sprintf("@"samplen".%d/2",(1+i++)); print;}' $fastq2 > $outputfolder/$sample/reads2.fastq
 
 	# Perform 2 bwa alignments.
-	bwa bwasw -t $processors $reference_genome $outputfolder/$sample/reads1.fq > $outputfolder/$sample/1.sam
-	bwa bwasw -t $processors $reference_genome $outputfolder/$sample/reads2.fq > $outputfolder/$sample/2.sam
+	bwa bwasw -t $processors $reference_genome $outputfolder/$sample/reads1.fastq > $outputfolder/$sample/1.sam
+	bwa bwasw -t $processors $reference_genome $outputfolder/$sample/reads2.fastq > $outputfolder/$sample/2.sam
 
 	# Combine each alignment using included script.
-	perl samro.pl --sam1 $outputfolder/$sample/1.sam --sam2 $outputfolder/$sample/2.sam --fq1 $outputfolder/$sample/reads1.fq --fq2 $outputfolder/$sample/reads2.fq --output $outputfolder/$sample/pe-reads.sam
+	perl samro.pl --sam1 $outputfolder/$sample/1.sam --sam2 $outputfolder/$sample/2.sam --fq1 $outputfolder/$sample/reads1.fastq --fq2 $outputfolder/$sample/reads2.fastq --output $outputfolder/$sample/pe-reads.sam
 
-	rm $outputfolder/$sample/reads1.fq
-	rm $outputfolder/$sample/reads2.fq
+	rm $outputfolder/$sample/reads1.fastq
+	rm $outputfolder/$sample/reads2.fastq
 
 	# Sort the alignment and remove intermediate files to save space.
 	samtools view -t $reference_genome".fai" -Sb $outputfolder/$sample/pe-reads.sam | samtools sort - $outputfolder/$sample/pe-reads.sorted

@@ -126,7 +126,7 @@ sample=${sample%%_1.f*}
 test_dir=`pwd`
 if [[ ! -d $test_dir/$outputfolder/$genome ]]
 then
-	mkdir $test_dir/$outputfolder/
+	mkdir -p $test_dir/$outputfolder/
 	mkdir $test_dir/$outputfolder/$genome/
 	mkdir $test_dir/$outputfolder/$genome/reference
 fi
@@ -186,11 +186,11 @@ then
 	te_families=$test_dir/$outputfolder/$genome/reference/$te_families_file
 
 	# Use the GFF to create input for the rest of the pipeline
-	if [[ ! -f $test_dir/$outputfolder/$genome/reference/"popoolationte_"$genome".fa" ]]
+	if [[ ! -f $test_dir/$outputfolder/$genome/reference/"popoolationte_"$genome".fasta" ]]
 	then
-		bedtools maskfasta -fi $reference_genome -fo $test_dir/$outputfolder/$genome/reference/"popoolationte_"$genome".fa" -bed $te_locations
+		bedtools maskfasta -fi $reference_genome -fo $test_dir/$outputfolder/$genome/reference/"popoolationte_"$genome".fasta" -bed $te_locations
 	fi
-	popoolationte_reference_genome=$test_dir/$outputfolder/$genome/reference/"popoolationte_"$genome".fa"
+	popoolationte_reference_genome=$test_dir/$outputfolder/$genome/reference/"popoolationte_"$genome".fasta"
 
 	# Extract sequence of all reference TE copies if this has not already been done
 	# Cut first line if it begins with #
@@ -220,22 +220,22 @@ then
 
 	# The pipeline functions most comprehensively (i.e. dealing with insertions with no copies in the reference genome) if
 	# the sequences of TEs are added to the end of the genome and reflected in the annotation
-	if [[ ! -f $test_dir/$outputfolder/$genome/reference/full_reference.fa ]]
+	if [[ ! -f $test_dir/$outputfolder/$genome/reference/full_reference.fasta ]]
 	then
 		if [[ "$addconsensus" = "on" ||  "$addrefcopies" = "on" ]]
 		then
-			cat $reference_genome $all_te_seqs > $test_dir/$outputfolder/$genome/reference/full_reference.fa
-			mv $test_dir/$outputfolder/$genome/reference/full_reference.fa $test_dir/$outputfolder/$genome/reference/$genome".fa"
+			cat $reference_genome $all_te_seqs > $test_dir/$outputfolder/$genome/reference/full_reference.fasta
+			mv $test_dir/$outputfolder/$genome/reference/full_reference.fasta $test_dir/$outputfolder/$genome/reference/$genome".fasta"
 		fi
 	fi
-	reference_genome=$test_dir/$outputfolder/$genome/reference/$genome".fa"
+	reference_genome=$test_dir/$outputfolder/$genome/reference/$genome".fasta"
 
 	# PoPoolationTE always needs the full combination reference
-	if [[ ! -f $test_dir/$outputfolder/$genome/reference/"popoolationte_full_"$genome".fa" ]]
+	if [[ ! -f $test_dir/$outputfolder/$genome/reference/"popoolationte_full_"$genome".fasta" ]]
 	then
-			cat $popoolationte_reference_genome $popool_te_seqs > $test_dir/$outputfolder/$genome/reference/"popoolationte_full_"$genome".fa"
+			cat $popoolationte_reference_genome $popool_te_seqs > $test_dir/$outputfolder/$genome/reference/"popoolationte_full_"$genome".fasta"
 	fi
-	popoolationte_reference_genome=$test_dir/$outputfolder/$genome/reference/"popoolationte_full_"$genome".fa"
+	popoolationte_reference_genome=$test_dir/$outputfolder/$genome/reference/"popoolationte_full_"$genome".fasta"
 
 	# Add the locations of the sequences of the consensus TEs to the genome annotation
 	if [[ ! -f $test_dir/$outputfolder/$genome/reference/TE-lengths ]]
@@ -282,7 +282,7 @@ else
 	te_locations=$reference_genome".out.gff"
 
 	# Run the perl script to create a hierarchy file that corresponds to the RepeatMasker GFF file.
-	# (The RepeatMasker file is edited and renamed ID_... in the process)
+	# (The RepeatMasker file is edited and renamed ..._ID in the process)
 	if [[ ! -f $test_dir/$outputfolder/$genome/reference/hierarchy.tsv ]]
 	then
 		perl scripts/hierarchyfromrepeatmasked.pl $te_locations $consensus_te_seqs $test_dir/$outputfolder/$genome/reference/hierarchy.tsv
@@ -301,7 +301,7 @@ else
 		# Use script to fix the line length of reference input to 80 characters (needed for samtools index)
 		perl scripts/fixfastalinelength.pl $test_dir/$outputfolder/$genome/reference/reference_te_seqs.fasta 80 $test_dir/$outputfolder/$genome/reference/reference_te_seqs2.fasta
 		mv $test_dir/$outputfolder/$genome/reference/reference_te_seqs2.fasta $test_dir/$outputfolder/$genome/reference/reference_te_seqs.fasta
-		$reference_genome".fai"
+		rm $reference_genome".fai"
 	fi
 	reference_te_seqs=$test_dir/$outputfolder/$genome/reference/reference_te_seqs.fasta
 
@@ -350,22 +350,22 @@ else
 
 	# The pipeline functions most comprehensively (i.e. dealing with insertions with no copies in the reference genome) if
 	# the sequences of TEs are added to the end of the genome and reflected in the annotation
-	if [[ ! -f $test_dir/$outputfolder/$genome/reference/full_reference.fa ]]
+	if [[ ! -f $test_dir/$outputfolder/$genome/reference/full_reference.fasta ]]
 	then
         if [[ "$addconsensus" = "on" ||  "$addrefcopies" = "on" ]]
         then
-            cat $reference_genome $all_te_seqs > $test_dir/$outputfolder/$genome/reference/full_reference.fa
-            mv $test_dir/$outputfolder/$genome/reference/full_reference.fa $test_dir/$outputfolder/$genome/reference/$genome".fa"
+            cat $reference_genome $all_te_seqs > $test_dir/$outputfolder/$genome/reference/full_reference.fasta
+            cp $test_dir/$outputfolder/$genome/reference/full_reference.fasta $test_dir/$outputfolder/$genome/reference/$genome".fasta"
         fi
 	fi
-	reference_genome=$test_dir/$outputfolder/$genome/reference/$genome".fa"
+	reference_genome=$test_dir/$outputfolder/$genome/reference/$genome".fasta"
 
 	# PoPoolationTE always needs the full combination reference
-	if [[ ! -f $test_dir/$outputfolder/$genome/reference/popoolationte_full_reference.fa ]]
+	if [[ ! -f $test_dir/$outputfolder/$genome/reference/"popoolationte_full_"$genome".fasta" ]]
 	then
-            cat $popoolationte_reference_genome $popool_te_seqs > $test_dir/$outputfolder/$genome/reference/"popoolationte_full_"$genome".fa"
+            cat $popoolationte_reference_genome $popool_te_seqs > $test_dir/$outputfolder/$genome/reference/"popoolationte_full_"$genome".fasta"
 	fi
-	popoolationte_reference_genome=$test_dir/$outputfolder/$genome/reference/"popoolationte_full_"$genome".fa"
+	popoolationte_reference_genome=$test_dir/$outputfolder/$genome/reference/"popoolationte_full_"$genome".fasta"
 fi
 
 # If FastQC is installed then launch FastQC on the input fastqs
@@ -392,7 +392,7 @@ then
 fi
 
 # Create bed file of reference TE locations
-if [[ ! -f $test_dir"/"$genome"/reference/reference_TE_locations.bed" ]]
+if [[ ! -f $test_dir/$outputfolder/$genome"/reference/reference_TE_locations.bed" ]]
 then
 	awk -F["\t"\;=] '{print $1"\t"$4-1"\t"$5"\t"$10"\t.\t"$7}' $te_locations > $test_dir/$outputfolder/$genome/reference/reference_TE_locations.bed
 fi

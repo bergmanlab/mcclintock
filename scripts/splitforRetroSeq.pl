@@ -30,7 +30,7 @@ while(my $line = <FASTA>)
         
         # Add sequence name to list for RetroSeq
         push (@seqname_list, $seqname);
-        $filename = $referencename."_".$seqname.".fa";
+        $filename = $referencename."_".$seqname.".fasta";
         
         # In case of any slashes present in fasta names, convert these to
         # underscores for the filenames (situation can occur using
@@ -68,6 +68,6 @@ foreach(@seqname_list)
     # underscores for the filenames (situation can occur using
     # RepeatMasker output)
     $_=~s/\//_/g;
-    print LIST "$_.fa\n";
+    print LIST "$_.fasta\n";
 }
 close LIST;
