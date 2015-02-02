@@ -194,7 +194,7 @@ then
 
 	# Extract sequence of all reference TE copies if this has not already been done
 	# Cut first line if it begins with #
-	if [[ ! -f $test_dir/$outputfolder/$genome/reference/all_te_seqs.fasta ]]
+	if [[ ! -f $test_dir/$outputfolder/$genome/reference/popool_all_te_seqs.fasta ]]
 	then
 		if [[ "$addrefcopies" = "on" ]]
 		then
@@ -225,7 +225,7 @@ then
 		if [[ "$addconsensus" = "on" ||  "$addrefcopies" = "on" ]]
 		then
 			cat $reference_genome $all_te_seqs > $test_dir/$outputfolder/$genome/reference/full_reference.fasta
-			mv $test_dir/$outputfolder/$genome/reference/full_reference.fasta $test_dir/$outputfolder/$genome/reference/$genome".fasta"
+			cp $test_dir/$outputfolder/$genome/reference/full_reference.fasta $test_dir/$outputfolder/$genome/reference/$genome".fasta"
 		fi
 	fi
 	reference_genome=$test_dir/$outputfolder/$genome/reference/$genome".fasta"
