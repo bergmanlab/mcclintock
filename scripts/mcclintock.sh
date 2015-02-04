@@ -491,12 +491,17 @@ then
 	# i.e. leave any reusable species data behind.
 	if [[ "$remove_intermediates" = "on" ]]
 	then
-		printf "\nRemoving RetroSeq intermediate files\n\n"
 		# If the save bam option is specified then override the command to delete the bam files.
 		if [[ "$save_bam" != "on" ]]
 		then
-			rm -r $test_dir/$outputfolder/$genome/$sample/bam
+			shopt -s nocasematch
+			if [[ $methods != *TEMP* ]]
+			then
+				shopt -u nocasematch
+				rm -r $test_dir/$outputfolder/$genome/$sample/bam
+			fi
 		fi
+		printf "\nRemoving RetroSeq intermediate files\n\n"
 		rm -r $outputfolder/$sample
 	fi
 	cd ..
@@ -523,6 +528,11 @@ then
 	# i.e. leave any reusable species data behind.
 	if [[ "$remove_intermediates" = "on" ]]
 	then
+		# If the save bam option is specified then override the command to delete the bam files.
+		if [[ "$save_bam" != "on" ]]
+		then
+			rm -r $test_dir/$outputfolder/$genome/$sample/bam
+		fi
 		printf "\nRemoving TEMP intermediate files\n\n"
 		rm -r $outputfolder/$sample
 	fi
