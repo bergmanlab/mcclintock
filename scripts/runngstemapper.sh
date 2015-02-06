@@ -12,18 +12,18 @@ then
 	outputfolder=$6
 	test_dir=`pwd`
 	
-	mkdir -p $outputfolder
+	mkdir -p $outputfolder/ngs_te_mapper
 
 	# Run ngs_te_mapper
-	$test_dir/sourceCode/ngs_te_mapper.R sample=$fasta1_file\;$fasta2_file genome=$reference_genome teFile=$consensus_te_seqs tsd=20 output=$outputfolder/$sample sourceCodeFolder=$test_dir/sourceCode	
+	$test_dir/sourceCode/ngs_te_mapper.R sample=$fasta1_file\;$fasta2_file genome=$reference_genome teFile=$consensus_te_seqs tsd=20 output=$outputfolder/ngs_te_mapper sourceCodeFolder=$test_dir/sourceCode
 
 	# Extract only the relevant data from the output file and sort the results
 	# Name and description for use with the UCSC genome browser are added to output here.
-	awk -F'[\t;]' -v sample=$sample '{print $1"\t"$2"\t"$3"\t"$6"_"$9"_"sample"_ngs_te_mapper_sr_"NR"\t0\t"$5}' $outputfolder/$sample/bed_tsd/$sample"_1_"$sample"_2insertions.bed" > $outputfolder/$sample/$sample"_ngs_te_mapper_presort.bed"
-	echo -e "track name=\"$sample"_ngs_te_mapper"\" description=\"$sample"_ngs_te_mapper"\"" > $outputfolder/$sample/$sample"_ngs_te_mapper_nonredundant.bed"
-	bedtools sort -i $outputfolder/$sample/$sample"_ngs_te_mapper_presort.bed" >> $outputfolder/$sample/$sample"_ngs_te_mapper.bed.tmp"
-	sed 's/NA/./g' $outputfolder/$sample/$sample"_ngs_te_mapper.bed.tmp" >> $outputfolder/$sample/$sample"_ngs_te_mapper_nonredundant.bed"
-	rm $outputfolder/$sample/$sample"_ngs_te_mapper_presort.bed" $outputfolder/$sample/$sample"_ngs_te_mapper.bed.tmp"
+	awk -F'[\t;]' -v sample=$sample '{if($9=="old") print $1"\t"$2"\t"$3"\t"$6"_reference_"sample"_ngs_te_mapper_sr_"NR"\t0\t"$5; else print $1"\t"$2"\t"$3"\t"$6"_non-reference_"sample"_ngs_te_mapper_sr_"NR"\t0\t"$5;}' $outputfolder/ngs_te_mapper/bed_tsd/$sample"_1_"$sample"_2insertions.bed" > $outputfolder/ngs_te_mapper/$sample"_ngs_te_mapper_presort.bed"
+	echo -e "track name=\"$sample"_ngs_te_mapper"\" description=\"$sample"_ngs_te_mapper"\"" > $outputfolder/ngs_te_mapper/$sample"_ngs_te_mapper_nonredundant.bed"
+	bedtools sort -i $outputfolder/ngs_te_mapper/$sample"_ngs_te_mapper_presort.bed" >> $outputfolder/ngs_te_mapper/$sample"_ngs_te_mapper.bed.tmp"
+	sed 's/NA/./g' $outputfolder/ngs_te_mapper/$sample"_ngs_te_mapper.bed.tmp" >> $outputfolder/ngs_te_mapper/$sample"_ngs_te_mapper_nonredundant.bed"
+	rm $outputfolder/ngs_te_mapper/$sample"_ngs_te_mapper_presort.bed" $outputfolder/ngs_te_mapper/$sample"_ngs_te_mapper.bed.tmp"
 	
 else
 	echo "Supply TE database as option 1"

@@ -15,9 +15,8 @@ then
 	processors=$8
 	outputfolder=$9
 
-	mkdir -p $outputfolder
-	mkdir $outputfolder/$sample
-	chmod 755 $outputfolder/ $outputfolder/$sample
+	mkdir $outputfolder/TEMP
+	chmod 755 $outputfolder/ $outputfolder/TEMP
 
 	if [[ $median_insertsize == "none" ]]
 	then
@@ -25,33 +24,33 @@ then
 	fi
 
 	# Create soft link to differently named files for TEMP
-	cp -s $bam $outputfolder/$sample/$sample.sorted.bam
-	cp -s $bam.bai $outputfolder/$sample/$sample.sorted.bam.bai
+	cp -s $bam $outputfolder/TEMP/$sample.sorted.bam
+	cp -s $bam.bai $outputfolder/TEMP/$sample.sorted.bam.bai
 
-	bash $test_dir/scripts/TEMP_Insertion.sh -x 30 -i $test_dir/$outputfolder/$sample/$sample.sorted.bam -s $test_dir/scripts -r $consensus_te_seqs -t $bed_te_locations_file -u $te_families -m 1 -f $median_insertsize -c $processors -o $test_dir/$outputfolder/$sample
+	bash $test_dir/scripts/TEMP_Insertion.sh -x 30 -i $outputfolder/TEMP/$sample.sorted.bam -s $test_dir/scripts -r $consensus_te_seqs -t $bed_te_locations_file -u $te_families -m 1 -f $median_insertsize -c $processors -o $outputfolder/TEMP
 
-	echo -e "track name=\"$sample"_TEMP"\" description=\"$sample"_TEMP"\"" > $outputfolder/$sample/$sample"_temp_raw.bed"
-	echo -e "track name=\"$sample"_TEMP"\" description=\"$sample"_TEMP"\"" > $outputfolder/$sample/$sample"_temp_redundant.bed"
-	echo -e "track name=\"$sample"_TEMP"\" description=\"$sample"_TEMP"\"" > $outputfolder/$sample/$sample"_temp_nonredundant.bed"
+	echo -e "track name=\"$sample"_TEMP"\" description=\"$sample"_TEMP"\"" > $outputfolder/TEMP/$sample"_temp_raw.bed"
+	echo -e "track name=\"$sample"_TEMP"\" description=\"$sample"_TEMP"\"" > $outputfolder/TEMP/$sample"_temp_redundant.bed"
+	echo -e "track name=\"$sample"_TEMP"\" description=\"$sample"_TEMP"\"" > $outputfolder/TEMP/$sample"_temp_nonredundant.bed"
 
-	sed '1d' $outputfolder/$sample/$sample".insertion.refined.bp.summary" | awk '{if ($4 == "sense" || $4 == "antisense"); else print $0}' | awk -v sample=$sample '{ printf $1"\t"$9"\t"$11"\t"$7"\t"$4"_new_"sample"_temp_\t0\t"; if ( $5 == "sense" ) printf "+"; else printf "-"; print "\t"$6"\t"$10"\t"$12}' > $outputfolder/$sample/$sample"_temp_presort_raw.txt"
+	sed '1d' $outputfolder/TEMP/$sample".insertion.refined.bp.summary" | awk '{if ($4 == "sense" || $4 == "antisense"); else print $0}' | awk -v sample=$sample '{ printf $1"\t"$9"\t"$11"\t"$7"\t"$4"_non-reference_"sample"_temp_\t0\t"; if ( $5 == "sense" ) printf "+"; else printf "-"; print "\t"$6"\t"$10"\t"$12}' > $outputfolder/TEMP/$sample"_temp_presort_raw.txt"
 
-	bedtools sort -i $outputfolder/$sample/$sample"_temp_presort_raw.txt" > $outputfolder/$sample/$sample"_temp_sorted_raw.txt"
+	bedtools sort -i $outputfolder/TEMP/$sample"_temp_presort_raw.txt" > $outputfolder/TEMP/$sample"_temp_sorted_raw.txt"
 
-	awk '{ printf $1"\t"$2"\t"$3"\t"$4"\t"$5; if ($9 > 0 && $10 > 0) printf "sr_"; else printf "rp_"; print NR"\t"$6"\t"$7"\t"$8"\t"$9"\t"$10}' $outputfolder/$sample/$sample"_temp_sorted_raw.txt" > $outputfolder/$sample/$sample"_temp_sorted_precut_raw.txt"
+	awk '{ printf $1"\t"$2"\t"$3"\t"$4"\t"$5; if ($9 > 0 && $10 > 0) printf "sr_"; else printf "rp_"; print NR"\t"$6"\t"$7"\t"$8"\t"$9"\t"$10}' $outputfolder/TEMP/$sample"_temp_sorted_raw.txt" > $outputfolder/TEMP/$sample"_temp_sorted_precut_raw.txt"
 
-	cut -f1-3,5-7 $outputfolder/$sample/$sample"_temp_sorted_precut_raw.txt" >> $outputfolder/$sample/$sample"_temp_raw.bed"
+	cut -f1-3,5-7 $outputfolder/TEMP/$sample"_temp_sorted_precut_raw.txt" >> $outputfolder/TEMP/$sample"_temp_raw.bed"
 
 	# Filter for insertions with support for both ends
-	awk '{if ($8 == "1p1") print $0}' $outputfolder/$sample/$sample"_temp_sorted_precut_raw.txt" > $outputfolder/$sample/$sample"_temp_sorted_redundant.txt"
+	awk '{if ($8 == "1p1") print $0}' $outputfolder/TEMP/$sample"_temp_sorted_precut_raw.txt" > $outputfolder/TEMP/$sample"_temp_sorted_redundant.txt"
 
-	cut -f1-3,5-7 $outputfolder/$sample/$sample"_temp_sorted_redundant.txt" >> $outputfolder/$sample/$sample"_temp_redundant.bed"
+	cut -f1-3,5-7 $outputfolder/TEMP/$sample"_temp_sorted_redundant.txt" >> $outputfolder/TEMP/$sample"_temp_redundant.bed"
 
 	# Filter out redundant insertions
-	sort -k1,3 -k4rn $outputfolder/$sample/$sample"_temp_sorted_redundant.txt" | sort -u -k1,3 | cut -f1-3,5-7 > $outputfolder/$sample/tmp
-	bedtools sort -i $outputfolder/$sample/tmp >> $outputfolder/$sample/$sample"_temp_nonredundant.bed"
+	sort -k1,3 -k4rn $outputfolder/TEMP/$sample"_temp_sorted_redundant.txt" | sort -u -k1,3 | cut -f1-3,5-7 > $outputfolder/TEMP/tmp
+	bedtools sort -i $outputfolder/TEMP/tmp >> $outputfolder/TEMP/$sample"_temp_nonredundant.bed"
 
-	rm $outputfolder/$sample/tmp $outputfolder/$sample/$sample"_temp_sorted_redundant.txt" $outputfolder/$sample/$sample"_temp_presort_raw.txt" $outputfolder/$sample/$sample"_temp_sorted_raw.txt" $outputfolder/$sample/$sample"_temp_sorted_precut_raw.txt"
+	rm $outputfolder/TEMP/tmp $outputfolder/TEMP/$sample"_temp_sorted_redundant.txt" $outputfolder/TEMP/$sample"_temp_presort_raw.txt" $outputfolder/TEMP/$sample"_temp_sorted_raw.txt" $outputfolder/TEMP/$sample"_temp_sorted_precut_raw.txt"
 
 else
 	echo "Supply a bam file created by bwa mem as option 1"
