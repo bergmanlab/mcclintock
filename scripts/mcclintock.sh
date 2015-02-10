@@ -39,6 +39,7 @@ methods="ngs_te_mapper RelocaTE TEMP RetroSeq PoPoolationTE TE-locate"
 outputfolder=`pwd`
 # Save the location of mcclintock
 mcclintock_location="$( cd "$(dirname "$0")" ; pwd -P )"
+cd $mcclintock_location/
 
 # Get the options supplied to the program
 while getopts ":r:c:g:t:1:2:o:p:m:hibCR" opt;
