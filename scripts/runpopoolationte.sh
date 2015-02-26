@@ -57,7 +57,7 @@ then
 
 	# Convert results to bed with no filtering
 	awk -F"\t" -v sample=$sample '{if($7!~/-/) printf "%s\t%d\t%d\t%d\t%s%s%s%s\t0\t.\t%s\n",$1,$2,$2,$13+$20,$4,"_reference_",sample,"_popoolationte_rp_",$3; else printf "%s\t%d\t%d\t%d\t%s%s%s%s\t0\t.\t%s\n",$1,$2,$2,$13+$20,$4,"_non-reference_",sample,"_popoolationte_rp_",$3}' $outputfolder/PoPoolationTE/te-poly-filtered.txt > $outputfolder/PoPoolationTE/$sample"_popoolationte_presort_raw.txt"
-    sort -k1,1 -k2,2n $outputfolder/PoPoolationTE/$sample"_popoolationte_presort_raw.txt" $outputfolder/PoPoolationTE/$sample"_popoolationte_precut_raw.txt" > $outputfolder/PoPoolationTE/$sample"_popoolationte_precut_raw.txt"
+	sort -k1,1 -k2,2n $outputfolder/PoPoolationTE/$sample"_popoolationte_presort_raw.txt" $outputfolder/PoPoolationTE/$sample"_popoolationte_precut_raw.txt" > $outputfolder/PoPoolationTE/$sample"_popoolationte_precut_raw.txt"
 	awk '{print $1"\t"$2"\t"$3"\t"$4"\t"$5NR"\t"$6"\t"$7"\t"$8}' $outputfolder/PoPoolationTE/$sample"_popoolationte_precut_raw.txt" > $outputfolder/PoPoolationTE/$sample"_popoolationte_counted_precut_raw.txt"
 	cut -f1-3,5-7 $outputfolder/PoPoolationTE/$sample"_popoolationte_counted_precut_raw.txt" >> $outputfolder/PoPoolationTE/$sample"_popoolationte_raw.bed"
 
@@ -73,7 +73,7 @@ then
 	rm $outputfolder/PoPoolationTE/tmp $outputfolder/PoPoolationTE/$sample"_popoolationte_counted_precut_raw.txt" $outputfolder/PoPoolationTE/$sample"_popoolationte_counted_precut_redundant.txt" $outputfolder/PoPoolationTE/$sample"_popoolationte_precut_raw.txt" $outputfolder/PoPoolationTE/$sample"_popoolationte_presort_raw.txt" $outputfolder/PoPoolationTE/1.sam $outputfolder/PoPoolationTE/2.sam $outputfolder/PoPoolationTE/pe-reads.sorted.bam
 
 else
-	echo "Supply fasta reference file as option 1"
+	echo "Supply TE masked fasta reference file with consensus TE sequences used to mask added as separate chromosomes as option 1"
 	echo "Supply TE hierarchy file as option 2"
 	echo "Supply fastq1 as option 3"
 	echo "Supply fastq2 as option 4"
