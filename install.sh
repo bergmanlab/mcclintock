@@ -33,7 +33,8 @@ rm TEMP.zip
 # Apply edits to software and custom run scripts.
 echo "Copying run scripts..."
 cp scripts/runpopoolationte.sh PoPoolationTE
-cp scripts/samro.pl PoPoolationTE
+patch PoPoolationTE/Modules/TEInsertUtility.pm < scripts/TEInsertUtility.patch
+patch PoPoolationTE/samro.pl < scripts/samro.patch
 cp scripts/runngstemapper.sh ngs_te_mapper
 cp scripts/runretroseq.sh RetroSeq
 cp scripts/splitforRetroSeq.pl RetroSeq
@@ -62,12 +63,21 @@ do
 		echo "$dependency... NOT FOUND"
 	else 
 		echo "$dependency... FOUND"
-        fi
+		if [[ $dependency == "bwa" ]]
+		then
+			version=`bwa 2>&1 >/dev/null | grep "Version:"`
+			if [[ $version != "Version: 0.7.4-r385" ]]
+			then
+				echo "CAUTION McClintock requires version 0.7.4-r385 to work correctly with all methods"
+				echo "You currently have $version installed."
+			fi
+		fi
+	fi
 done
 
 # Test BioPerl
 bioperltest=$(perl -e 'use Bio::Seq' 2>&1)
-if [ -n "$bioperltest" ]
+if [[ -n "$bioperltest" ]]
 then
 	echo "BioPerl... NOT FOUND"
 else  
