@@ -209,9 +209,14 @@ then
 	# Cut first line if it begins with #
 	if [[ ! -f $referencefolder/popool_all_te_seqs.fasta ]]
 	then
+		# PoPoolationTE always needs the full TE sequences
+		bedtools getfasta -name -fi $reference_genome -bed $te_locations -fo $referencefolder/ref_te_seqs.fasta
+		cat $consensus_te_seqs $referencefolder/ref_te_seqs.fasta > $referencefolder/popool_te_seqs.fasta
+		perl $mcclintock_location/scripts/fixfastalinelength.pl $referencefolder/popool_te_seqs.fasta 80 $referencefolder/popool_all_te_seqs.fasta
+		rm $referencefolder/popool_te_seqs.fasta
+
 		if [[ "$addrefcopies" = "on" ]]
 		then
-			bedtools getfasta -name -fi $reference_genome -bed $te_locations -fo $referencefolder/ref_te_seqs.fasta
 			te_seqs=$referencefolder/ref_te_seqs.fasta
 		fi
 		if [[ "$addconsensus" = "on" ]]
@@ -221,12 +226,7 @@ then
 		fi
 		# Use script to fix the line length of reference input to 80 characters (needed for samtools index)
 		perl $mcclintock_location/scripts/fixfastalinelength.pl $te_seqs 80 $referencefolder/all_te_seqs.fasta
-
-		# PoPoolationTE always needs the full TE sequences
-		bedtools getfasta -name -fi $reference_genome -bed $te_locations -fo $referencefolder/popool_ref_te_seqs.fasta
-		cat $consensus_te_seqs $referencefolder/popool_ref_te_seqs.fasta > $referencefolder/popool_all_te_seqs_tmp.fasta
-		perl $mcclintock_location/scripts/fixfastalinelength.pl $referencefolder/popool_all_te_seqs_tmp.fasta 80 $referencefolder/popool_all_te_seqs.fasta
-		rm $referencefolder/popool_all_te_seqs_tmp.fasta $referencefolder/popool_ref_te_seqs.fasta $reference_genome".fai"
+		rm $reference_genome".fai"
 	fi
 	all_te_seqs=$referencefolder/all_te_seqs.fasta
 	popool_te_seqs=$referencefolder/popool_all_te_seqs.fasta
@@ -239,9 +239,9 @@ then
 		then
 			cat $reference_genome $all_te_seqs > $referencefolder/full_reference.fasta
 			cp $referencefolder/full_reference.fasta $referencefolder/$genome".fasta"
+			reference_genome=$referencefolder/$genome".fasta"
 		fi
 	fi
-	reference_genome=$referencefolder/$genome".fasta"
 
 	# PoPoolationTE always needs the full combination reference
 	if [[ ! -f $referencefolder/"popoolationte_full_"$genome".fasta" ]]
@@ -266,13 +266,10 @@ then
 				awk -vTE=$TE '{ if(TE==$1) print "instance"TE"\t"$2; }' $referencefolder/tmp >> $te_families
 			done < $referencefolder/TE-lengths
 		fi
+
 		# PoPoolationTE always needs the full family file and annotation
-		awk -F">" '/^>/ {if (seqlen){print seqlen}; printf $2"\t" ;seqlen=0;next; } { seqlen = seqlen +length($0)}END{print seqlen}' $popool_te_seqs > $referencefolder/TE-lengths
-		while read TE length
-		do
-			echo -e "$TE\treannotate\ttransposable_element\t1\t$length\t.\t+\t.\tID=instance$TE;Name=instance$TE;Alias=instance$TE" >> $referencefolder/"popool_"$te_locations_file
-			awk -vTE=$TE '{ if(TE==$1) print "instance"TE"\t"$2; }' $referencefolder/tmp >> $referencefolder/"popool_"$te_families_file
-		done < $referencefolder/TE-lengths
+		awk -F">" '/^>/ {print $2}' $consensus_te_seqs > $referencefolder/TE-names
+		awk '{ print $1"\t"$1 }' $referencefolder/TE-names >> $referencefolder/"popool_"$te_families_file
 		rm $referencefolder/tmp
 	fi
 	popool_te_locations=$referencefolder/"popool_"$te_locations_file
@@ -328,6 +325,7 @@ else
 		then
 			cat $reference_te_seqs >> $referencefolder/all_te_seqs.fasta
 		fi
+		# PoPoolationTE always needs the full TE sequences
 		cat $consensus_te_seqs $reference_te_seqs > $referencefolder/popool_te_seqs.fasta
 	fi
 	all_te_seqs=$referencefolder/all_te_seqs.fasta
@@ -338,8 +336,8 @@ else
 	then
 		awk -F">" '/^>/ {print $2"\t"$2}' $consensus_te_seqs > $referencefolder/tmp
 		cat $te_families >> $referencefolder/tmp
-		cp $te_families $referencefolder/"popool_hierarchy.tsv"
-		cp $te_locations $referencefolder/"popool_te_locations.gff"
+		cp $te_families $referencefolder/popool_hierarchy.tsv
+		cp $te_locations $referencefolder/popool_te_locations.gff
 		if [[ "$addconsensus" = "on" ||  "$addrefcopies" = "on" ]]
 		then
 			awk -F">" '/^>/ {if (seqlen){print seqlen}; printf $2"\t" ;seqlen=0;next; } { seqlen = seqlen +length($0)}END{print seqlen}' $all_te_seqs > $referencefolder/TE-lengths
@@ -349,17 +347,14 @@ else
 				awk -vTE=$TE '{ if(TE==$1) print "instance"TE"\t"$2; }' $referencefolder/tmp >> $te_families
 			done < $referencefolder/TE-lengths
 		fi
+
 		# PoPoolationTE always needs the full family file and annotation
-		awk -F">" '/^>/ {if (seqlen){print seqlen}; printf $2"\t" ;seqlen=0;next; } { seqlen = seqlen +length($0)}END{print seqlen}' $popool_te_seqs > $referencefolder/TE-lengths
-		while read TE length
-		do
-			echo -e "$TE\treannotate\ttransposable_element\t1\t$length\t.\t+\t.\tID=instance$TE;Name=instance$TE;Alias=instance$TE" >> $referencefolder/"popool_te_locations.gff"
-			awk -vTE=$TE '{ if(TE==$1) print "instance"TE"\t"$2; }' $referencefolder/tmp >> $referencefolder/"popool_hierarchy.tsv"
-		done < $referencefolder/TE-lengths
+		awk -F">" '/^>/ {print $2}' $consensus_te_seqs > $referencefolder/TE-names
+		awk '{ print $1"\t"$1 }' $referencefolder/TE-names >> $referencefolder/popool_hierarchy.tsv
 		rm $referencefolder/tmp
 	fi
-	popool_te_locations=$referencefolder/"popool_te_locations.gff"
-	popool_te_families=$referencefolder/"popool_hierarchy.tsv"
+	popool_te_locations=$referencefolder/popool_te_locations.gff
+	popool_te_families=$referencefolder/popool_hierarchy.tsv
 
 	# The pipeline functions most comprehensively (i.e. dealing with insertions with no copies in the reference genome) if
 	# the sequences of TEs are added to the end of the genome and reflected in the annotation
@@ -369,9 +364,9 @@ else
 		then
 			cat $reference_genome $all_te_seqs > $referencefolder/full_reference.fasta
 			cp $referencefolder/full_reference.fasta $referencefolder/$genome".fasta"
+			reference_genome=$referencefolder/$genome".fasta"
 		fi
 	fi
-	reference_genome=$referencefolder/$genome".fasta"
 
 	# PoPoolationTE always needs the full combination reference
 	if [[ ! -f $referencefolder/"popoolationte_full_"$genome".fasta" ]]
@@ -415,6 +410,7 @@ bed_te_locations_file=$referencefolder/reference_TE_locations.bed
 shopt -s nocasematch
 if [[ $methods == *TE-locate* || $methods == *TElocate* || $methods == *RetroSeq* || $methods == *TEMP* ]]
 then
+	shopt -u nocasematch
 	# Create sam files for input
 	printf "\nCreating sam alignment...\n\n" | tee -a /dev/stderr
 
@@ -422,15 +418,24 @@ then
 
 	sam=$samplefolder/sam/$sample.sam
 
-	# Calculate the median insert size of the sample
-	printf "\nCalculating median insert size...\n\n" | tee -a /dev/stderr
-	median_insertsize=`cut -f9 $sam | sort -n | awk '{if ($1 > 0) ins[reads++]=$1; } END { print ins[int(reads/2)]; }'`
-	printf "\nMedian insert size = $median_insertsize\n\n" | tee -a /dev/stderr
-	mkdir -p $samplefolder/results/qualitycontrol
-	echo $median_insertsize > $samplefolder/results/qualitycontrol/median_insertsize
+	# Allow case insensitivity for method names
+	shopt -s nocasematch
+	if [[ $methods == *TE-locate* || $methods == *TElocate* || $methods == *TEMP* ]]
+	then
+		shopt -u nocasematch
+		# Calculate the median insert size of the sample
+		printf "\nCalculating median insert size...\n\n" | tee -a /dev/stderr
+		median_insertsize=`cut -f9 $sam | sort -n | awk '{if ($1 > 0) ins[reads++]=$1; } END { print ins[int(reads/2)]; }'`
+		printf "\nMedian insert size = $median_insertsize\n\n" | tee -a /dev/stderr
+		mkdir -p $samplefolder/results/qualitycontrol
+		echo $median_insertsize > $samplefolder/results/qualitycontrol/median_insertsize
+	fi
 
+	# Allow case insensitivity for method names
+	shopt -s nocasematch
 	if [[ $methods == *RetroSeq* || $methods == *TEMP* ]]
 	then
+		shopt -u nocasematch
 		# Create bam files for input
 		printf "\nCreating bam alignment files...\n\n" | tee -a /dev/stderr
 		samtools view -Sb -t $reference_genome".fai" $sam | samtools sort - $samplefolder/bam/$sample
@@ -440,7 +445,6 @@ then
 		# Get stats of bam file from samtools
 		samtools flagstat $bam > $samplefolder/results/qualitycontrol/bwamem_bamstats.txt
 	fi
-	shopt -u nocasematch
 	# Sort the sam file lexically for TE-locate
 	printf "\nSorting sam alignment...\n\n" | tee -a /dev/stderr
 	sort --temporary-directory=$samplefolder/sam/ $samplefolder/sam/$sample.sam > $samplefolder/sam/sorted$sample.sam
@@ -450,6 +454,7 @@ then
 	sam_folder=$samplefolder/sam
 fi
 
+# Allow case insensitivity for method names
 shopt -s nocasematch
 if [[ $methods == *TE-locate* || $methods == *TElocate* ]]
 then
@@ -485,6 +490,7 @@ then
 	cd $mcclintock_location/
 fi
 
+# Allow case insensitivity for method names
 shopt -s nocasematch
 if [[ $methods == *RetroSeq* ]]
 then
@@ -521,6 +527,7 @@ then
 	cd $mcclintock_location/
 fi
 
+# Allow case insensitivity for method names
 shopt -s nocasematch
 if [[ $methods == *TEMP* ]]
 then
@@ -553,6 +560,7 @@ then
 	cd $mcclintock_location/
 fi
 
+# Allow case insensitivity for method names
 shopt -s nocasematch
 if [[ $methods == *RelocaTE* ]]
 then
@@ -593,6 +601,7 @@ then
 	cd $mcclintock_location/
 fi
 
+# Allow case insensitivity for method names
 shopt -s nocasematch
 if [[ $methods == *ngs_te_mapper* || $methods == *ngstemapper* ]]
 then
@@ -620,6 +629,7 @@ then
 	cd $mcclintock_location/
 fi
 
+# Allow case insensitivity for method names
 shopt -s nocasematch
 if [[ $methods == *popoolationte* ]]
 then
