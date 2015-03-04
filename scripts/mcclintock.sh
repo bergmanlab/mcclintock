@@ -659,7 +659,7 @@ then
 	if [[ "$remove_intermediates" = "on" ]]
 	then
 		printf "\nRemoving PoPoolationTE intermediate files\n\n" | tee -a /dev/stderr
-		rm -r $samplefolder/PoPoolationTE/$sample
+		rm -r $samplefolder/PoPoolationTE
 	fi
 	cd $mcclintock_location/
 fi
