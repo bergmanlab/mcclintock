@@ -13,7 +13,7 @@ usage ()
 	echo "     the ID and the second containing the TE family it belongs to. The family should correspond to the"
 	echo "     names of the sequences in the consensus fasta file. [Optional - required if GFF (option -g) is supplied]"
 	echo "-1 : The absolute path of the first fastq file from a paired end read, this should be named ending _1.fastq. [Required]"
-	echo "-2 : The absolute path of the second fastq file from a paired end read, this should be named ending _2.fastq. [Required]"
+	echo "-2 : The absolute path of the second fastq file from a paired end read, this should be named ending _2.fastq. [Optional]"
 	echo "-o : An output folder for the run. This should be the absolute path. If not supplied then the directory mcclintock"
 	echo "     is launched from will be used. [Optional]"
 	echo "-b : Retain the sorted and indexed BAM file of the paired end data aligned to the reference genome."
@@ -120,11 +120,6 @@ then
 	fi
 fi
 
-genome=${inputr##*/}
-genome=${genome%%.*}
-sample=${input1##*/}
-sample=${sample%%_1.f*}
-
 # Output Version number and date
 
 date=`date +%d_%m_%y`
@@ -132,13 +127,24 @@ printf "\nRunning McClintock version: " | tee -a /dev/stderr
 git rev-parse HEAD | tee -a /dev/stderr
 printf "\n\nDate of run is $date\n\n" | tee -a /dev/stderr
 
-
 # If only one fastq has been supplied assume this is single ended data and launch only ngs_te_mapper
 if [[ "$input1" && -z "$input2" ]]
 then
 	echo "Assuming single ended data and launching only ngs_te_mapper"
 	methods="ngs_te_mapper"
 	single_end="true"
+fi
+
+genome=${inputr##*/}
+genome=${genome%%.*}
+
+if [[ $single_end != "true" ]]
+then
+	sample=${input1##*/}
+	sample=${sample%%_1.f*}
+else
+	sample=${input1##*/}
+	sample=${sample%%.f*}
 fi
 
 # Set up folder structure

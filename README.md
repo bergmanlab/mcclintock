@@ -2,7 +2,7 @@ Introduction
 ------
 Many methods have been developed to detect transposable element (TE) insertions from whole genome shotgun next-generation sequencing (NGS) data, each of which has different dependencies, run interfaces, and output formats. Here, we have developed a meta-pipeline to download, install and run six available methods for detecting TE insertions in NGS data, which generates output in the UCSC Browser extensible data (BED) format.
 
-The pipeline requires a fasta reference genome, a fasta consensus set of TE sequences present in the organism and fastq paired end sequencing reads. Optionally if detailed annotation of the reference TE sequences has been performed, a GFF file with the locations of known TEs present in the reference genome and a tab delimited hierarchy file linking these individual insertions to the consensus they belong to (an example of this file is included in the test folder as sac_cer_te_families.tsv) can be supplied.
+The complete pipeline requires a fasta reference genome, a fasta consensus set of TE sequences present in the organism and fastq paired end sequencing reads. Optionally if detailed annotation of the reference TE sequences has been performed, a GFF file with the locations of known TEs present in the reference genome and a tab delimited hierarchy file linking these individual insertions to the consensus they belong to (an example of this file is included in the test folder as sac_cer_te_families.tsv) can be supplied. If only single ended sequencing data are available then this can be supplied as option -1 however only ngs_te_mapper will run as this is the only method that handles it.
 
 Software Methods
 ------
@@ -96,7 +96,7 @@ The pipeline is invoked by running the mcclintock.sh script in the main project 
 * -g : The locations of known TEs in the reference genome in GFF 3 format. This must include a unique ID attribute for every entry. [Optional]
 * -t : A tab delimited file with one entry per ID in the GFF file and two columns: the first containing the ID and the second containing the TE family it belongs to. The family should correspond to the names of the sequences in the consensus fasta file. [Optional - required if GFF (option -g) is supplied]
 * -1 : The absolute path of the first fastq file from a paired end read, this should be named ending _1.fastq. [Required]
-* -2 : The absolute path of the second fastq file from a paired end read, this should be named ending _2.fastq. [Required]
+* -2 : The absolute path of the second fastq file from a paired end read, this should be named ending _2.fastq. [Optional]
 * -o : An output folder for the run. If not supplied then the reference genome name will be used. [Optional]
 * -b : Retain the sorted and indexed BAM file of the paired end data aligned to the reference genome.
 * -i : If this option is specified then all sample specific intermediate files will be removed, leaving only the overall results. The default is to leave sample specific intermediate files (may require large amounts of disk space)
@@ -115,10 +115,3 @@ Data created during processing will be stored in a folder in the output folder (
 ###Output format
 The output of the run scripts is a bed format file with the 4th column containing the name of the TE name and whether it is a novel insertion (new) or a TE shared with the reference (old). The outputs also include a header line for use with the UCSC genome browser. The final results files are located in a results folder saved in the specific sample folder within the directory named after the reference genome. 
 If FastQC was present on the system then output of FastQC will be stored in the folder fastqc_analysis, within the results folder. It is also possible to view the original results files produced by each method, these are stored in the folder originalmethodresults, within the results folder.
-
-###Running individual TE detection methods
-It is possible to launch individual TE detection methods without launching the main pipeline. Each method is contained in a folder titled for that method. In addition to the standard software there is also a file named runXXXX.sh. Running this file without arguments will explain to the user what input files should be used to execute the method. These arguments should be supplied after the script name with spaces in between, as follows:
-```
-sh runXXXX.sh argument1 argument2 argument3 ...
-```
-
