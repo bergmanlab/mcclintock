@@ -3,7 +3,7 @@
 # Download all of the software methods.
 echo "Downloading pipelines..."
 wget --no-check-certificate https://popoolationte.googlecode.com/files/popoolationte_1.02.zip -O PoPoolationTE.zip 
-wget --no-check-certificate https://github.com/bergmanlab/ngs_te_mapper/archive/76c0f6f3370945501709b5987e4d53a5a425fbad.zip -O ngs_te_mapper.zip
+wget --no-check-certificate https://github.com/bergmanlab/ngs_te_mapper/archive/79ef861f1d52cdd08eb2d51f145223fad0b2363c.zip -O ngs_te_mapper.zip
 wget --no-check-certificate https://github.com/tk2/RetroSeq/archive/700d4f76a3b996686652866f2b81fefc6f0241e0.zip -O RetroSeq.zip
 wget --no-check-certificate https://github.com/srobb1/RelocaTE/archive/ce3a2066e15f5c14e2887fdf8dce0485e1750e5b.zip -O RelocaTE.zip
 wget -O TE-locate.tar http://sourceforge.net/projects/te-locate/files/latest/download?source=files
@@ -15,7 +15,7 @@ unzip PoPoolationTE.zip
 mv popoolationte PoPoolationTE
 rm PoPoolationTE.zip
 unzip ngs_te_mapper.zip
-mv ngs_te_mapper-76c0f6f3370945501709b5987e4d53a5a425fbad ngs_te_mapper
+mv ngs_te_mapper-79ef861f1d52cdd08eb2d51f145223fad0b2363c ngs_te_mapper
 rm ngs_te_mapper.zip
 unzip RetroSeq.zip
 mv RetroSeq-700d4f76a3b996686652866f2b81fefc6f0241e0 RetroSeq
