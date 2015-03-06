@@ -102,7 +102,7 @@ do
 done
 
 # Test for presence of required arguments
-if [[ -z "$inputr" || -z "$inputc" || -z "$input1" || -z "$input2" ]]
+if [[ -z "$inputr" || -z "$inputc" || -z "$input1" ]]
 then
 	echo "A required parameter is missing"
 	usage
@@ -131,6 +131,15 @@ date=`date +%d_%m_%y`
 printf "\nRunning McClintock version: " | tee -a /dev/stderr
 git rev-parse HEAD | tee -a /dev/stderr
 printf "\n\nDate of run is $date\n\n" | tee -a /dev/stderr
+
+
+# If only one fastq has been supplied assume this is single ended data and launch only ngs_te_mapper
+if [[ "$input1" && -z "$input2" ]]
+then
+	echo "Assuming single ended data and launching only ngs_te_mapper"
+	methods="ngs_te_mapper"
+	single_end="true"
+fi
 
 # Set up folder structure
 printf "\nCreating directory structure...\n\n" | tee -a /dev/stderr
@@ -174,9 +183,12 @@ consensus_te_seqs=$referencefolder/$consensus_te_seqs_file
 fastq1_file=${input1##*/}
 cp -s $input1 $samplefolder/reads/$fastq1_file
 fastq1=$samplefolder/reads/$fastq1_file
-fastq2_file=${input2##*/}
-cp -s $input2 $samplefolder/reads/$fastq2_file
-fastq2=$samplefolder/reads/$fastq2_file
+if [[ $single_end != "true" ]]
+then
+	fastq2_file=${input2##*/}
+	cp -s $input2 $samplefolder/reads/$fastq2_file
+	fastq2=$samplefolder/reads/$fastq2_file
+fi
 
 # If a GFF is supplied then run the analysis using the GFF and TE hierarchy as input
 if [[ $inputg ]]
@@ -384,7 +396,12 @@ then
 else
 	printf "\nPerforming FastQC analysis...\n\n" | tee -a /dev/stderr
 	mkdir $samplefolder/results/qualitycontrol/fastqc_analysis
-	fastqc -t $processors $fastq1 $fastq2 -o $samplefolder/results/qualitycontrol/fastqc_analysis
+	if [[ $single_end == "true" ]]
+	then
+		fastqc -t $processors $fastq1 -o $samplefolder/results/qualitycontrol/fastqc_analysis
+	else
+		fastqc -t $processors $fastq1 $fastq2 -o $samplefolder/results/qualitycontrol/fastqc_analysis
+	fi
 fi
 
 # Create indexes of reference genome if not already made for this genome
@@ -611,6 +628,12 @@ then
 	printf "\nRunning ngs_te_mapper pipeline...\n\n" | tee -a /dev/stderr
 
 	cd $mcclintock_location/ngs_te_mapper
+
+	# If the data is only single ended then pass the message "false" to ngs_te_mapper
+	if [[ $single_end == "true" ]]
+	then
+		fastq2="false"
+	fi
 
 	bash runngstemapper.sh $consensus_te_seqs $reference_genome $sample $fastq1 $fastq2 $samplefolder
 
