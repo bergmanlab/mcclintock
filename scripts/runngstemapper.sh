@@ -29,7 +29,7 @@ then
 	# Name and description for use with the UCSC genome browser are added to output here.
 	if [[ $fasta2_file == "false" ]]
 	then
-		awk -F'[\t;]' -v sample=$sample '{print $1"\t"$2"\t"$3"\t"$6"_"$9"_"sample"_ngs_te_mapper_sr_"NR"\t0\t"$5}' $outputfolder/ngs_te_mapper/bed_tsd/samplename"insertions.bed" > $outputfolder/ngs_te_mapper/$sample"_ngs_te_mapper_presort.bed"
+		awk -F'[\t;]' -v sample=$sample '{print $1"\t"$2"\t"$3"\t"$6"_"$9"_"sample"_ngs_te_mapper_sr_"NR"\t0\t"$5}' $outputfolder/ngs_te_mapper/bed_tsd/$samplename"insertions.bed" > $outputfolder/ngs_te_mapper/$sample"_ngs_te_mapper_presort.bed"
 	else
 		awk -F'[\t;]' -v sample=$sample '{print $1"\t"$2"\t"$3"\t"$6"_"$9"_"sample"_ngs_te_mapper_sr_"NR"\t0\t"$5}' $outputfolder/ngs_te_mapper/bed_tsd/$sample"_1_"$sample"_2insertions.bed" > $outputfolder/ngs_te_mapper/$sample"_ngs_te_mapper_presort.bed"
 	fi
