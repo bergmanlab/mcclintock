@@ -40,6 +40,10 @@ cp scripts/runretroseq.sh RetroSeq
 cp scripts/splitforRetroSeq.pl RetroSeq
 cp scripts/runrelocate.sh RelocaTE
 cp scripts/runtelocate.sh TE-locate
+mv scripts/genomes1001_data_processing/Functions.class TE-locate
+cd TE-locate
+jar uf TE_locate_core.jar genomes1001_data_processing/Functions.class
+cd ..
 cp scripts/runtemp.sh TEMP
 cp scripts/mcclintock.sh .
 
