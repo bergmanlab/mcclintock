@@ -57,7 +57,7 @@ done
 
 # Check dependencies 
 echo "Testing dependencies..."
-dependencies="R RepeatMasker bedtools samtools bcftools bwa exonerate bowtie blat twoBitToFa perl"
+dependencies="R RepeatMasker bedtools samtools bcftools bwa exonerate bowtie blat twoBitToFa java perl"
 
 for dependency in $dependencies
 do 
