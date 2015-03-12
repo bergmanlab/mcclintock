@@ -28,11 +28,13 @@ usage ()
 	echo "-m : A string containing the list of software you want the pipeline to use for analysis e.g. \"-m relocate TEMP "
 	echo "     ngs_te_mapper\" will launch only those three methods [Optional: default is to run all methods]"
 	echo "-p : The number of processors to use for parallel stages of the pipeline. [Optional: default = 1]"
+	echo "-M : The amount of memory available for the pipeline in GB. [Optional: default = 2]"
 	echo "-h : Prints this help guide."
 }
 
 # Set default value for processors in case it is not supplied
 processors=1
+memory=8
 # Default behaviour is to run all methods if no option is supplied
 methods="ngs_te_mapper RelocaTE TEMP RetroSeq PoPoolationTE TE-locate"
 # If an output folder is not specified then default to th current directory
@@ -42,7 +44,7 @@ mcclintock_location="$( cd "$(dirname "$0")" ; pwd -P )"
 cd $mcclintock_location/
 
 # Get the options supplied to the program
-while getopts ":r:c:g:t:1:2:o:p:m:hibCR" opt;
+while getopts ":r:c:g:t:1:2:o:p:M:m:hibCR" opt;
 do
 	case $opt in
 		r)
@@ -68,6 +70,9 @@ do
 			;;
 		p)
 			processors=$OPTARG
+			;;
+		M)
+			memory=$OPTARG
 			;;
 		m)
 			methods=$OPTARG
@@ -448,7 +453,7 @@ then
 		shopt -u nocasematch
 		# Calculate the median insert size of the sample
 		printf "\nCalculating median insert size...\n\n" | tee -a /dev/stderr
-		median_insertsize=`cut -f9 $sam | sort -n | awk '{if ($1 > 0) ins[reads++]=$1; } END { print ins[int(reads/2)]; }'`
+		median_insertsize=`cut -f9 $sam | sort -S $memory -n | awk '{if ($1 > 0) ins[reads++]=$1; } END { print ins[int(reads/2)]; }'`
 		printf "\nMedian insert size = $median_insertsize\n\n" | tee -a /dev/stderr
 		mkdir -p $samplefolder/results/qualitycontrol
 		echo $median_insertsize > $samplefolder/results/qualitycontrol/median_insertsize
@@ -470,7 +475,7 @@ then
 	fi
 	# Sort the sam file lexically for TE-locate
 	printf "\nSorting sam alignment...\n\n" | tee -a /dev/stderr
-	sort --temporary-directory=$samplefolder/sam/ $samplefolder/sam/$sample.sam > $samplefolder/sam/sorted$sample.sam
+	sort -S $memory --temporary-directory=$samplefolder/sam/ $samplefolder/sam/$sample.sam > $samplefolder/sam/sorted$sample.sam
 	rm $samplefolder/sam/$sample.sam
 	mv $samplefolder/sam/sorted$sample.sam $samplefolder/sam/$sample.sam
 	sam=$samplefolder/sam/$sample.sam
@@ -495,7 +500,7 @@ then
 		perl TE_hierarchy.pl $te_locations $te_families Alias
 	fi
 
-	bash runtelocate.sh $sam_folder $reference_genome $telocate_te_locations 2 $sample $median_insertsize $samplefolder
+	bash runtelocate.sh $sam_folder $reference_genome $telocate_te_locations $memory $sample $median_insertsize $samplefolder
 
 	# Save the original result file and the bed files filtered by mcclintock
 	mv $samplefolder/TE-locate/$sample"_telocate"* $samplefolder/results/
