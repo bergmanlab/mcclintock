@@ -319,9 +319,9 @@ else
 	if [[ ! -f $referencefolder/hierarchy.tsv ]]
 	then
 		perl $mcclintock_location/scripts/hierarchyfromrepeatmasked.pl $te_locations $consensus_te_seqs $referencefolder/hierarchy.tsv
+		mv $te_locations"_ID" $te_locations
 	fi
 	te_families=$referencefolder/hierarchy.tsv
-	mv $te_locations"_ID" $te_locations
 	consensus_te_seqs=$consensus_te_seqs"_ID"
 
 	# Extract sequence of all reference TE copies if this has not already been done
