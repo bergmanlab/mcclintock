@@ -178,8 +178,10 @@ if [[ ! -f $referencefolder/$reference_genome_file ]]
 then
 	# Use script to fix the line length of reference input to 80 characters (needed for samtools index)
 	perl $mcclintock_location/scripts/fixfastalinelength.pl $inputr 80 $referencefolder/$reference_genome_file
+	grep \> $referencefolder/$reference_genome_file | cut -d\> -f2 > $referencefolder/chromosome_names
 fi
 reference_genome=$referencefolder/$reference_genome_file
+chromosome_names=$referencefolder/chromosome_names
 
 # Copy the TE consesnus fasta file to the run folder
 consensus_te_seqs_file=${inputc##*/}
@@ -700,11 +702,27 @@ fi
 
 #########################################################################################
 
+# If a user has used an altered genome then insertions in false chromosomes may exist
+# These can be because of a real nested insertion or self similarity
+# These results are removed to prevent errors in later analysis (e.g. genome browsing) but are saved in a folder
+if [[ "$addconsensus" = "on" || "$addrefcopies" = "on" ]]
+then
+	mkdir $samplefolder/results/non-ref_chromosome_results
+	for result_file in $samplefolder/results/*.bed
+	do
+		result_file_name=`basename $result_file`
+		grep  -w -v -F -f $chromosome_names $result_file > $samplefolder/results/non-ref_chromosome_results/$result_file_name
+		head -1 $result_file > $samplefolder/results/reference_chr_results
+		grep  -w -F -f $chromosome_names $result_file >> $samplefolder/results/reference_chr_results
+		mv $samplefolder/results/reference_chr_results $result_file
+	done
+fi
+
 # If cleanup intermediate files is specified then delete all intermediate files specific to the sample
 # i.e. leave any reusable species data behind.
 if [[ "$remove_intermediates" = "on" ]]
 then
-	printf "\nRemoving McClintock intermediate files\n\n"
+	printf "\nRemoving McClintock intermediate files\n\n" | tee -a /dev/stderr
 	rm -r $samplefolder/reads
 fi
 
