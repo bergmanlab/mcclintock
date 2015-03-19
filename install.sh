@@ -6,7 +6,7 @@ wget --no-check-certificate https://popoolationte.googlecode.com/files/popoolati
 wget --no-check-certificate https://github.com/bergmanlab/ngs_te_mapper/archive/79ef861f1d52cdd08eb2d51f145223fad0b2363c.zip -O ngs_te_mapper.zip
 wget --no-check-certificate https://github.com/tk2/RetroSeq/archive/700d4f76a3b996686652866f2b81fefc6f0241e0.zip -O RetroSeq.zip
 wget --no-check-certificate https://github.com/srobb1/RelocaTE/archive/ce3a2066e15f5c14e2887fdf8dce0485e1750e5b.zip -O RelocaTE.zip
-wget -O TE-locate.tar http://sourceforge.net/projects/te-locate/files/latest/download?source=files
+wget http://sourceforge.net/projects/te-locate/files/TE-locate.tar/download -O TE-locate.tar
 wget --no-check-certificate https://github.com/JialiUMassWengLab/TEMP/archive/d2500b904e2020d6a1075347b398525ede5feae1.zip -O TEMP.zip
 
 # Extract software and format folder layout.
@@ -40,10 +40,10 @@ cp scripts/runretroseq.sh RetroSeq
 cp scripts/splitforRetroSeq.pl RetroSeq
 cp scripts/runrelocate.sh RelocaTE
 cp scripts/runtelocate.sh TE-locate
-mv scripts/genomes1001_data_processing TE-locate
-cd TE-locate
-jar uf TE_locate_core.jar genomes1001_data_processing/Functions.class
-cd ..
+#mv scripts/genomes1001_data_processing TE-locate
+#cd TE-locate
+#jar uf TE_locate_core.jar genomes1001_data_processing/Functions.class
+#cd ..
 cp scripts/runtemp.sh TEMP
 cp scripts/mcclintock.sh .
 
