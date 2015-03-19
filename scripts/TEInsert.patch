@@ -1,0 +1,18 @@
+--- TEInsert.pm	2015-03-19 21:25:25.660207558 +0000
++++ TEInsert.pm.new	2015-03-19 21:25:06.427154882 +0000
+@@ -45,13 +45,13 @@
+             $popfreq=($fpopfreq+$rpopfreq)/2 if(defined($fpopfreq) and defined($rpopfreq));
+             $sitesupport="FR";
+         }
+-        elsif($frstart)
++        elsif($frstart || $frstart==0)
+         {
+             $popfreq=$fpopfreq;
+             $sitesupport="F";
+             
+         }
+-        elsif($rrstart)
++        elsif($rrstart || $rrstart==0)
+         {
+             $popfreq=$rpopfreq;
+             $sitesupport="R";

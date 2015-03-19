@@ -1,19 +1,11 @@
---- PoPoolationTE/Modules/TEInsertUtility.pm	2012-01-27 09:30:15.000000000 +0000
-+++ scripts/TEInsertUtility.pm	2015-02-26 14:14:56.262872000 +0000
-@@ -64,7 +64,6 @@
-     $order eq "-"   and $order =undef;
-     $fbid eq "-"    and $fbid=undef;
-     $comment eq "-" and $comment=undef;
--    
-     $frstart eq "-" and $frstart=undef;
-     $frend eq "-"   and $frend=undef;
-     $fpres eq "-"   and $fpres=undef;
-@@ -78,7 +77,7 @@
+--- TEInsertUtility.pm	2015-03-19 21:56:19.803561825 +0000
++++ TEInsertUtility.pm.new	2015-03-19 21:55:37.862766962 +0000
+@@ -77,7 +77,7 @@
      $roverlap eq "-"and $roverlap=undef;
      
      die "Invalid TE Insertion $l\n" unless $chr;
 -    die "Invalid TE Insertion $l\n" unless $inspos;
-+    die "Invalid TE Insertion $l\n" unless ($inspos || $inspos==0);
++    die "Invalid TE Insertion $l\n" unless defined($inspos);
      die "Invalid TE Insertion $l\n" unless $sitesupport;
      die "Invalid TE Insertion $l\n" unless $teid;
      die "Invalid TE Insertion $l\n" unless ($frstart or $rrstart);

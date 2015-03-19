@@ -34,6 +34,7 @@ rm TEMP.zip
 echo "Copying run scripts..."
 cp scripts/runpopoolationte.sh PoPoolationTE
 patch PoPoolationTE/Modules/TEInsertUtility.pm < scripts/TEInsertUtility.patch
+patch PoPoolationTE/Modules/TEInsert.pm < scripts/TEInsert.patch
 patch PoPoolationTE/samro.pl < scripts/samro.patch
 cp scripts/runngstemapper.sh ngs_te_mapper
 cp scripts/runretroseq.sh RetroSeq
