@@ -1,18 +1,25 @@
---- TEInsert.pm	2015-03-19 21:25:25.660207558 +0000
-+++ TEInsert.pm.new	2015-03-19 21:25:06.427154882 +0000
+--- TEInsert.pm	2012-01-27 09:30:15.000000000 +0000
++++ TEInsert.pm.fixed	2015-03-20 23:30:30.912995797 +0000
 @@ -45,13 +45,13 @@
              $popfreq=($fpopfreq+$rpopfreq)/2 if(defined($fpopfreq) and defined($rpopfreq));
              $sitesupport="FR";
          }
 -        elsif($frstart)
-+        elsif($frstart || $frstart==0)
++        elsif(defined($frstart))
          {
              $popfreq=$fpopfreq;
              $sitesupport="F";
              
          }
 -        elsif($rrstart)
-+        elsif($rrstart || $rrstart==0)
++        elsif(defined($rrstart))
          {
              $popfreq=$rpopfreq;
              $sitesupport="R";
+@@ -230,4 +230,4 @@
+     }
+     
+ }
+-1;
+\ No newline at end of file
++1;

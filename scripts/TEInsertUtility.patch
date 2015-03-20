@@ -1,6 +1,6 @@
---- TEInsertUtility.pm	2015-03-20 21:14:20.087554546 +0000
-+++ TEInsertUtility.pm.new	2015-03-20 21:15:02.950995463 +0000
-@@ -78,7 +78,7 @@
+--- TEInsertUtility.pm	2012-01-27 09:30:15.000000000 +0000
++++ TEInsertUtility.pm.fixed	2015-03-20 23:30:30.919853536 +0000
+@@ -78,10 +78,10 @@
      $roverlap eq "-"and $roverlap=undef;
      
      die "Invalid TE Insertion $l\n" unless $chr;
@@ -8,4 +8,8 @@
 +    die "Invalid TE Insertion $l\n" unless ($inspos || $inspos==0);
      die "Invalid TE Insertion $l\n" unless $sitesupport;
      die "Invalid TE Insertion $l\n" unless $teid;
-     die "Invalid TE Insertion $l\n" unless ($frstart or $rrstart);
+-    die "Invalid TE Insertion $l\n" unless ($frstart or $rrstart);
++    die "Invalid TE Insertion $l\n" unless (defined($frstart) or defined($rrstart));
+     
+     return TEInsert->new($chr,$inspos,$teid,$order,$fbid,$comment, $frstart,$frend,$fpres,$fabs,$foverlap,$rrstart,$rrend,$rpres,$rabs,$roverlap);
+     # INT: chr, inspos, teid, order, fbid, comment, frstart, frend, fpres, fabs, foverlap, rrstart, rrend, rpres, rabs, roverlap
