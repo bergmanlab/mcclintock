@@ -1,5 +1,5 @@
 --- TEInsert.pm	2012-01-27 09:30:15.000000000 +0000
-+++ TEInsert.pm.fixed	2015-03-20 23:30:30.912995797 +0000
++++ TEInsert.pm.fixed	2015-03-21 18:44:05.000000000 +0000
 @@ -45,13 +45,13 @@
              $popfreq=($fpopfreq+$rpopfreq)/2 if(defined($fpopfreq) and defined($rpopfreq));
              $sitesupport="FR";
@@ -16,7 +16,15 @@
          {
              $popfreq=$rpopfreq;
              $sitesupport="R";
-@@ -230,4 +230,4 @@
+@@ -224,10 +224,11 @@
+         }
+         else
+         {
+-            die "impossible";
++		return undef;
++            #die "impossible";
+         }
+         
      }
      
  }
