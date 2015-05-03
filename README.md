@@ -1,3 +1,7 @@
+<p align="center">
+    <img src="https://github.com/bergmanlab/mcclintock/blob/master/img/mcclintock.jpg?raw=true" alt="McClintock in action"/>
+</p>
+
 Introduction
 ------
 Many methods have been developed to detect transposable element (TE) insertions from whole genome shotgun next-generation sequencing (NGS) data, each of which has different dependencies, run interfaces, and output formats. Here, we have developed a meta-pipeline to download, install and run six available methods for detecting TE insertions in NGS data, which generates output in the UCSC Browser extensible data (BED) format.
