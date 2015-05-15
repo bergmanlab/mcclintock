@@ -23,7 +23,7 @@ then
 	echo -e "track name=\"$sample"_TE-locate"\" description=\"$sample"_TE-locate"\"" > $outputfolder/TE-locate/$sample"_telocate_redundant.bed"
 	echo -e "track name=\"$sample"_TE-locate"\" description=\"$sample"_TE-locate"\"" > $outputfolder/TE-locate/$sample"_telocate_nonredundant.bed"
 
-	awk -F'[\t/]' -v sample=$sample '{printf $1"\t"; if($17=="old") printf $2-1"\t"$2"\t"$8"\t"$5"_reference_"sample"_telocate_rp_\t0"; else if($17=="new") printf $2-1"\t"$2"\t"$8"\t"$5"_non-reference_"sample"_telocate_rp_\t0"; if($14=="parallel") print "\t+"; else if($14 =="uncertain") print "\t."; else print "\t-";}' $outputfolder/TE-locate/$sample"tmpfile" > $outputfolder/TE-locate/$sample"_telocate_presort.txt"
+	awk -F'[\t/]' -v sample=$sample '{printf $1"\t"; if($17=="old") printf $2"\t"$2+$3"\t"$8"\t"$5"_reference_"sample"_telocate_rp_\t0"; else if($17=="new") printf $2"\t"$2"\t"$8"\t"$5"_non-reference_"sample"_telocate_rp_\t0"; if($14=="parallel") print "\t+"; else if($14 =="uncertain") print "\t."; else print "\t-";}' $outputfolder/TE-locate/$sample"tmpfile" > $outputfolder/TE-locate/$sample"_telocate_presort.txt"
 	bedtools sort -i $outputfolder/TE-locate/$sample"_telocate_presort.txt" > $outputfolder/TE-locate/$sample"_telocate_sorted_redundant.txt"
 
 	awk '{print $1"\t"$2"\t"$3"\t"$4"\t"$5NR"\t"$6"\t"$7}' $outputfolder/TE-locate/$sample"_telocate_sorted_redundant.txt" > $outputfolder/TE-locate/$sample"_telocate_counted_redundant.txt"
