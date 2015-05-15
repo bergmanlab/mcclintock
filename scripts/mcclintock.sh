@@ -133,10 +133,11 @@ git rev-parse HEAD | tee -a /dev/stderr
 printf "\n\nDate of run is $date\n\n" | tee -a /dev/stderr
 
 # If only one fastq has been supplied assume this is single ended data and launch only ngs_te_mapper
+single_end="false"
 if [[ "$input1" && -z "$input2" ]]
 then
-	echo "Assuming single ended data and launching only ngs_te_mapper"
-	methods="ngs_te_mapper"
+	echo "Assuming single ended data and launching only ngs_te_mapper and RelocaTE"
+	methods="ngs_te_mapper RelocaTE"
 	single_end="true"
 fi
 
@@ -201,6 +202,8 @@ then
 	fastq2_file=${input2##*/}
 	cp -s $input2 $samplefolder/reads/$fastq2_file
 	fastq2=$samplefolder/reads/$fastq2_file
+else
+	cp -s $input1 $samplefolder/reads/$sample.unPaired.fastq
 fi
 
 # If a GFF is supplied then run the analysis using the GFF and TE hierarchy as input
@@ -246,7 +249,7 @@ then
 		fi
 		if [[ "$addconsensus" = "on" ]]
 		then
-			cat $consensus_te_seqs $referencefolder/ref_te_seqs.fasta > $referencefolder/all_te_seqs2.fasta
+			cat $consensus_te_seqs $te_seqs > $referencefolder/all_te_seqs2.fasta
 			te_seqs=$referencefolder/all_te_seqs2.fasta
 		fi
 		# Use script to fix the line length of reference input to 80 characters (needed for samtools index)
@@ -276,7 +279,7 @@ then
 	popoolationte_reference_genome=$referencefolder/"popoolationte_full_"$genome".fasta"
 
 	# Add the locations of the sequences of the consensus TEs to the genome annotation
-	if [[ ! -f $referencefolder/TE-lengths ]]
+	if [[ ! -f $referencefolder/TE-names ]]
 	then
 		awk -F">" '/^>/ {print $2"\t"$2}' $consensus_te_seqs > $referencefolder/tmp
 		cat $te_families >> $referencefolder/tmp
@@ -614,7 +617,7 @@ then
 	relocate_te_locations=$referencefolder/relocate_te_locations.gff
 
 	cd $mcclintock_location/RelocaTE
-	bash runrelocate.sh $relocate_te_seqs $reference_genome $samplefolder/reads $sample $relocate_te_locations $samplefolder
+	bash runrelocate.sh $relocate_te_seqs $reference_genome $samplefolder/reads $sample $relocate_te_locations $samplefolder $single_end
 
 	# Save the original result file and the bed files filtered by mcclintock
 	mv $samplefolder/RelocaTE/$sample"_relocate"* $samplefolder/results/

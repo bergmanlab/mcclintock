@@ -12,16 +12,25 @@ then
 	sample=$4
 	gff_te_locations=$5
 	outputfolder=$6
+	single_end=$7
 	test_dir=`pwd`
 
 	mkdir -p $outputfolder
 
 	# Run the relocaTE pipeline
-	if [ ! -f $outputfolder/../reference/$reference"annotation" ]; then
+	if [[ ! -f $outputfolder/../reference/$reference"annotation" ]]
+	then
 		awk -F'[\t]' '{print $3"\t"$1":"$4".."$5}' $gff_te_locations > $outputfolder/../reference/$reference"annotation"
 	fi
 	cd $outputfolder/
-	perl $test_dir/scripts/relocaTE.pl -t $relocate_te_sequences -d $fastq_directory -g $reference_genome -1 _1 -2 _2 -o RelocaTE -r ../reference/$reference"annotation"
+
+	if [[ $single_end == "true" ]]
+	then
+		perl $test_dir/scripts/relocaTE.pl -t $relocate_te_sequences -d $fastq_directory -g $reference_genome -u unPaired -o RelocaTE -r ../reference/$reference"annotation"
+	else
+		perl $test_dir/scripts/relocaTE.pl -t $relocate_te_sequences -d $fastq_directory -g $reference_genome -1 _1 -2 _2 -o RelocaTE -r ../reference/$reference"annotation"
+	fi
+
 	cd $test_dir
 
 	# Name and description for use with the UCSC genome browser are added to output here.
@@ -54,4 +63,5 @@ else
 	echo "Supply an output directory name as option 4"
 	echo "Supply reference insertion locations in gff format as option 5"
 	echo "Supply output folder as option 6"
+	echo "Supply true if data is single ended"
 fi
