@@ -40,7 +40,7 @@ then
 	# Extract the relevant information from the output files for each TE and collate them.
 	for file in $outputfolder/RelocaTE/*/results/*.gff
 	do
-		awk -F'[\t=;]' -v sample=$sample '$14~/Shared/{print $1"\t"$4"\t"$5"\t"$16+$18"\t"$12"_reference_"sample"_relocate_sr_\t0\t."}' $file >> $outputfolder/RelocaTE/$sample"_relocate_presort_redundant.txt"
+		awk -F'[\t=;]' -v sample=$sample '$14~/Shared/{print $1"\t"$4-1"\t"$5"\t"$16+$18"\t"$12"_reference_"sample"_relocate_sr_\t0\t."}' $file >> $outputfolder/RelocaTE/$sample"_relocate_presort_redundant.txt"
 		awk -F'[\t=;.]' -v sample=$sample '$18~/Non-reference/{print $1"\t"$5-1"\t"$6"\t"$20+$22"\t"$13"_non-reference_"sample"_relocate_sr_\t0\t"$9}' $file >> $outputfolder/RelocaTE/$sample"_relocate_presort_redundant.txt"
 	done
 

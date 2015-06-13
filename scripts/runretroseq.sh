@@ -47,9 +47,9 @@ then
 	echo -e "track name=\"$sample"_RetroSeq"\" description=\"$sample"_RetroSeq"\"" > $outputfolder/RetroSeq/$sample"_retroseq_nonredundant.bed"
 
 	awk '$1!~/#/{print $0}' $outputfolder/RetroSeq/$sample.calling.PE.vcf > $outputfolder/RetroSeq/tmp
-	awk -F'[=,\t:]' -v samplename=$sample '{print $1"\t"$11"\t"$12"\t"$6"\t"$10"_non-reference_"samplename"_retroseq_rp_\t0\t.\t"$21}' $outputfolder/RetroSeq/tmp > $outputfolder/RetroSeq/$sample"_retroseq_presort.txt"
+	awk -F'[=,\t:]' -v samplename=$sample '{print $1"\t"$11-1"\t"$12"\t"$7"\t"$10"_non-reference_"samplename"_retroseq_rp_\t0\t.\t"$21}' $outputfolder/RetroSeq/tmp > $outputfolder/RetroSeq/$sample"_retroseq_presort.txt"
 	bedtools sort -i $outputfolder/RetroSeq/$sample"_retroseq_presort.txt" > $outputfolder/RetroSeq/$sample"_retroseq_sorted_raw.txt"
-	awk '{print $1"\t"$2"\t"$3"\t"$4"\t"$5NR"\t"$6"\t"$7"\t"$8}' $outputfolder/RetroSeq/$sample"_retroseq_sorted_raw.txt" > $outputfolder/RetroSeq/$sample"_retroseq_sorted_counted_raw.txt"
+	awk '{print $1"\t"$2"\t"$3"\t"$4"\t"$5NR"\t"$6"\t"$7"\t"$8"\t"$9}' $outputfolder/RetroSeq/$sample"_retroseq_sorted_raw.txt" > $outputfolder/RetroSeq/$sample"_retroseq_sorted_counted_raw.txt"
 	cut -f1-3,5-7 $outputfolder/RetroSeq/$sample"_retroseq_sorted_counted_raw.txt" >> $outputfolder/RetroSeq/$sample"_retroseq_raw.bed"
 
 	# Filter results

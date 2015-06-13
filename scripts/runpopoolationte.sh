@@ -55,14 +55,14 @@ then
 	echo -e "track name=\"$sample"_PoPoolationTE"\" description=\"$sample"_PoPoolationTE"\"" > $outputfolder/PoPoolationTE/$sample"_popoolationte_redundant.bed"
 	echo -e "track name=\"$sample"_PoPoolationTE"\" description=\"$sample"_PoPoolationTE"\"" > $outputfolder/PoPoolationTE/$sample"_popoolationte_nonredundant.bed"
 
-	# Convert results to bed with no filtering
-	awk -F"\t" -v sample=$sample '{if($7!~/-/) printf "%s\t%d\t%d\t%d\t%s%s%s%s\t0\t.\t%s\n",$1,$2,$2,$13+$20,$4,"_reference_",sample,"_popoolationte_rp_",$3; else printf "%s\t%d\t%d\t%d\t%s%s%s%s\t0\t.\t%s\n",$1,$2,$2,$13+$20,$4,"_non-reference_",sample,"_popoolationte_rp_",$3}' $outputfolder/PoPoolationTE/te-poly-filtered.txt > $outputfolder/PoPoolationTE/$sample"_popoolationte_presort_raw.txt"
-	sort -k1,1 -k2,2n $outputfolder/PoPoolationTE/$sample"_popoolationte_presort_raw.txt" $outputfolder/PoPoolationTE/$sample"_popoolationte_precut_raw.txt" > $outputfolder/PoPoolationTE/$sample"_popoolationte_precut_raw.txt"
-	awk '{print $1"\t"$2"\t"$3"\t"$4"\t"$5NR"\t"$6"\t"$7"\t"$8}' $outputfolder/PoPoolationTE/$sample"_popoolationte_precut_raw.txt" > $outputfolder/PoPoolationTE/$sample"_popoolationte_counted_precut_raw.txt"
+	awk -F"\t" -v sample=$sample '{if($9~/-/) {printf "%s\t%d\t%d",$1,$2-1,$16; printf "\t"$13+$20"\t"$4;} else if($16~/-/) {printf "%s\t%d\t%d",$1,$10-1,$2; printf "\t"$13+$20"\t"$4;} else {printf "%s\t%d\t%d",$1,$10-1,$16; printf "\t"$13+$20"\t"$4;} if($7!~/-/) print "_reference_"sample"_popoolationte_rp_\t0\t.\t"$3"\t"$11"\t"$18; else print "_non-reference_"sample"_popoolationte_rp_\t0\t.\t"$3"\t"$11"\t"$18}' $outputfolder/PoPoolationTE/te-poly-filtered.txt > $outputfolder/PoPoolationTE/$sample"_popoolationte_presort_raw.txt"
+
+	sort -k1,1 -k2,2n $outputfolder/PoPoolationTE/$sample"_popoolationte_presort_raw.txt" > $outputfolder/PoPoolationTE/$sample"_popoolationte_precut_raw.txt"
+	awk '{print $1"\t"$2"\t"$3"\t"$4"\t"$5NR"\t"$6"\t"$7"\t"$8"\t"$9"\t"$10}' $outputfolder/PoPoolationTE/$sample"_popoolationte_precut_raw.txt" > $outputfolder/PoPoolationTE/$sample"_popoolationte_counted_precut_raw.txt"
 	cut -f1-3,5-7 $outputfolder/PoPoolationTE/$sample"_popoolationte_counted_precut_raw.txt" >> $outputfolder/PoPoolationTE/$sample"_popoolationte_raw.bed"
 
-	# Filtering for inserts with support for both ends
-	awk '{if($8=="FR") print $0}' $outputfolder/PoPoolationTE/$sample"_popoolationte_counted_precut_raw.txt" > $outputfolder/PoPoolationTE/$sample"_popoolationte_counted_precut_redundant.txt"
+	# Filtering for inserts with support for both ends and more than 50% of reads support an insert for at least one end
+	awk -v proportion=$proportion '{if($8=="FR" && ($9>=proportion || $10>=proportion)) print $0}' $outputfolder/PoPoolationTE/$sample"_popoolationte_counted_precut_raw.txt" > $outputfolder/PoPoolationTE/$sample"_popoolationte_counted_precut_redundant.txt"
 	cut -f1-3,5-7 $outputfolder/PoPoolationTE/$sample"_popoolationte_counted_precut_redundant.txt" >> $outputfolder/PoPoolationTE/$sample"_popoolationte_redundant.bed"
 
 	# Filtering out redundant insertions

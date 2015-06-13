@@ -478,13 +478,26 @@ then
 		# Get stats of bam file from samtools
 		samtools flagstat $bam > $samplefolder/results/qualitycontrol/bwamem_bamstats.txt
 	fi
-	# Sort the sam file lexically for TE-locate
-	printf "\nSorting sam alignment...\n\n" | tee -a /dev/stderr
-	sort -S $memory"G" --temporary-directory=$samplefolder/sam/ $samplefolder/sam/$sample.sam > $samplefolder/sam/sorted$sample.sam
-	rm $samplefolder/sam/$sample.sam
-	mv $samplefolder/sam/sorted$sample.sam $samplefolder/sam/$sample.sam
-	sam=$samplefolder/sam/$sample.sam
-	sam_folder=$samplefolder/sam
+
+	# Allow case insensitivity for method names
+	shopt -s nocasematch
+	if [[ $methods == *TE-locate* || $methods == *TElocate* ]]
+	then
+		shopt -u nocasematch
+		# Sort the sam file lexically for TE-locate
+		printf "\nSorting sam alignment...\n\n" | tee -a /dev/stderr
+		sort -S $memory"G" --temporary-directory=$samplefolder/sam/ $samplefolder/sam/$sample.sam > $samplefolder/sam/sorted$sample.sam
+		rm $samplefolder/sam/$sample.sam
+		mv $samplefolder/sam/sorted$sample.sam $samplefolder/sam/$sample.sam
+		sam=$samplefolder/sam/$sample.sam
+		sam_folder=$samplefolder/sam
+	else
+		# If TE-locate isn't going to be launched then the SAM file is no longer needed
+		if [[ "$remove_intermediates" = "on" ]]
+		then
+			rm -r $sam_folder
+		fi
+	fi
 fi
 
 # Allow case insensitivity for method names
@@ -569,14 +582,21 @@ then
 
 	printf "\nRunning TEMP pipeline...\n\n" | tee -a /dev/stderr
 
+	if [[ ! -f $referencefolder/$genome.2bit ]]
+	then
+		faToTwoBit $reference_genome $referencefolder/$genome.2bit
+	fi
+	twobitreference=$referencefolder/$genome.2bit
+
 	cd $mcclintock_location/TEMP
 
-	bash runtemp.sh $bam $sam $consensus_te_seqs $bed_te_locations_file $te_families $median_insertsize $sample $processors $samplefolder
+	bash runtemp.sh $bam $twobitreference $consensus_te_seqs $bed_te_locations_file $te_families $median_insertsize $sample $processors $samplefolder
 
 	# Save the original result file and the bed files filtered by mcclintock
 	mv $samplefolder/TEMP/$sample"_temp"* $samplefolder/results/
 	mkdir $samplefolder/results/originalmethodresults/TEMP
 	cp $samplefolder/TEMP/$sample".insertion.refined.bp.summary" $samplefolder/results/originalmethodresults/TEMP
+	cp $samplefolder/TEMP/$sample".absence.refined.bp.summary" $samplefolder/results/originalmethodresults/TEMP
 
 	# If cleanup intermediate files is specified then delete all intermediate files specific to the sample
 	# i.e. leave any reusable species data behind.
