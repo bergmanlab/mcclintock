@@ -179,6 +179,7 @@ if [[ ! -f $referencefolder/$reference_genome_file ]]
 then
 	# Use script to fix the line length of reference input to 80 characters (needed for samtools index)
 	perl $mcclintock_location/scripts/fixfastalinelength.pl $inputr 80 $referencefolder/$reference_genome_file
+	samtools faidx $referencefolder/$reference_genome_file
 	grep \> $referencefolder/$reference_genome_file | cut -d\> -f2 > $referencefolder/chromosome_names
 fi
 reference_genome=$referencefolder/$reference_genome_file
@@ -439,6 +440,15 @@ then
 fi
 bed_te_locations_file=$referencefolder/reference_TE_locations.bed
 
+
+# Adjust hierachy levels for TE-locate and TEMP output
+telocate_te_locations=${te_locations%.*}
+telocate_te_locations=$telocate_te_locations"_HL.gff"
+if [[ ! -f $telocate_te_locations ]]
+then
+	perl $mcclintock_location/TE-locate/TE_hierarchy.pl $te_locations $te_families Alias
+fi
+
 # Allow case insensitivity for method names
 shopt -s nocasematch
 if [[ $methods == *TE-locate* || $methods == *TElocate* || $methods == *RetroSeq* || $methods == *TEMP* ]]
@@ -509,16 +519,26 @@ then
 
 	printf "\nRunning TE-locate pipeline...\n\n" | tee -a /dev/stderr
 
-	# Adjust hierachy levels
-	cd $mcclintock_location/TE-locate
-	telocate_te_locations=${te_locations%.*}
-	telocate_te_locations=$telocate_te_locations"_HL.gff"
-	if [[ ! -f $telocate_te_locations ]]
+	# If there are not at least five chromosomes in the reference genome then TE-locate will fail
+	telocate_reference_genome=$referencefolder/$genome"TElocate.fasta"
+	if [[ ! -f $telocate_reference_genome ]]
 	then
-		perl TE_hierarchy.pl $te_locations $te_families Alias
+		cp $reference_genome $telocate_reference_genome
+		# If there are less than 5 chromosomes, top them up to 5 with short false ones
+		chromosomes=`wc -l $chromosome_names | awk '{print $1}'`
+		if [[ $chromosomes < 5 ]]
+		then
+			needed=$((5 - $chromosomes))
+			for i in `seq 1 $needed`
+			do
+				echo ">fixforTElocate"$i >> $telocate_reference_genome
+				echo "ACGT" >> $telocate_reference_genome
+			done
+		fi
 	fi
 
-	bash runtelocate.sh $sam_folder $reference_genome $telocate_te_locations $memory $sample $median_insertsize $samplefolder
+	cd $mcclintock_location/TE-locate
+	bash runtelocate.sh $sam_folder $telocate_reference_genome $telocate_te_locations $memory $sample $median_insertsize $samplefolder
 
 	# Save the original result file and the bed files filtered by mcclintock
 	mv $samplefolder/TE-locate/$sample"_telocate"* $samplefolder/results/
@@ -590,7 +610,7 @@ then
 
 	cd $mcclintock_location/TEMP
 
-	bash runtemp.sh $bam $twobitreference $consensus_te_seqs $bed_te_locations_file $te_families $median_insertsize $sample $processors $samplefolder
+	bash runtemp.sh $bam $twobitreference $consensus_te_seqs $bed_te_locations_file $te_families $median_insertsize $sample $processors $samplefolder $telocate_te_locations
 
 	# Save the original result file and the bed files filtered by mcclintock
 	mv $samplefolder/TEMP/$sample"_temp"* $samplefolder/results/
