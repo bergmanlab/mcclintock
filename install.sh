@@ -36,15 +36,22 @@ cp scripts/runpopoolationte.sh PoPoolationTE
 patch PoPoolationTE/Modules/TEInsertUtility.pm < scripts/TEInsertUtility.patch
 patch PoPoolationTE/Modules/TEInsert.pm < scripts/TEInsert.patch
 patch PoPoolationTE/samro.pl < scripts/samro.patch
+
 cp scripts/runngstemapper.sh ngs_te_mapper
+
 cp scripts/runretroseq.sh RetroSeq
 cp scripts/splitforRetroSeq.pl RetroSeq
+
 cp scripts/runrelocate.sh RelocaTE
+patch RelocaTE/scripts/relocaTE_insertionFinder.pl < scripts/relocaTE_insertionFinder.patch
+
 cp scripts/runtelocate.sh TE-locate
+# These fixes are now built in to TE-locate
 #mv scripts/genomes1001_data_processing TE-locate
 #cd TE-locate
 #jar uf TE_locate_core.jar genomes1001_data_processing/Functions.class
 #cd ..
+
 cp scripts/runtemp.sh TEMP
 cp scripts/mcclintock.sh .
 
