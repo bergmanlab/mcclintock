@@ -4,7 +4,7 @@ if (( $# > 0 ))
 then
 
 	# Establish variables
-	sam_file=$1
+	sam_folder=$1
 	reference_genome=$2
 	gff_te_locations=$3
 	max_memory=$4
@@ -15,7 +15,7 @@ then
 	mkdir -p $outputfolder/TE-locate
 
 	# Run the TE locate pipeline.
-	perl TE_locate.pl $max_memory $sam_file $gff_te_locations $reference_genome $outputfolder/TE-locate/ $distance 3 1
+	perl TE_locate.pl $max_memory $sam_folder $gff_te_locations $reference_genome $outputfolder/TE-locate/ $distance 3 1
 	# Extract the relevant data from the output file 
 	sed -e '1,2d' $outputfolder/TE-locate/"_"$distance"_reads3_acc1.info" > $outputfolder/TE-locate/$sample"tmpfile"
 	
@@ -35,7 +35,8 @@ then
 	# Filter "old" predictions that aren't actually in the reference
 	grep "_reference" $outputfolder/TE-locate/$sample"_telocate_counted_raw.txt" > $outputfolder/TE-locate/$sample"_telocate_only_reference.txt"
 	grep "non-reference" $outputfolder/TE-locate/$sample"_telocate_counted_raw.txt" > $outputfolder/TE-locate/$sample"_telocate_only_non-reference.txt"
-	awk 'NR==FNR{c[$1$4]++;next};c[$1$2+1] > 0' $gff_te_locations $outputfolder/TE-locate/$sample"_telocate_only_reference.txt" > $outputfolder/TE-locate/$sample"_telocate_filtered_reference.txt"
+	# Filter only coordinates that are in the reference annotation and add the orientation
+	awk 'NR==FNR{c[$1$4]++;a[$1$4]=$7;next}; {if (c[$1$2+1] > 0) print $1"\t"$2"\t"$3"\t"$4"\t"$5"\t"0"\t"a[$1$2+1]}' $gff_te_locations $outputfolder/TE-locate/$sample"_telocate_only_reference.txt" > $outputfolder/TE-locate/$sample"_telocate_filtered_reference.txt"
 
 	cat $outputfolder/TE-locate/$sample"_telocate_filtered_reference.txt" $outputfolder/TE-locate/$sample"_telocate_only_non-reference.txt" > $outputfolder/TE-locate/$sample"_telocate_filtered.txt"
 	bedtools sort -i $outputfolder/TE-locate/$sample"_telocate_filtered.txt" > $outputfolder/TE-locate/$sample"_telocate_redundant.txt"
