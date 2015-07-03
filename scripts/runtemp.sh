@@ -38,7 +38,7 @@ then
 
 	# Take the absent TEs and inverse them for
 	cut -f1-3 $outputfolder/TEMP/$sample".absence.refined.bp.summary" | sed '1d' > $outputfolder/TEMP/$sample".absent.bed"
-	bedtools subtract -A -a $gff_te_locations -b $outputfolder/TEMP/$sample".absent.bed" | awk -F'[\t=;]' -v sample=$sample '{print $1"\t"$4-1"\t"$5"\t!\t"$10"_reference_"sample"_temp_nonab_\t0\t"$7"\t!\t!\t!\t!\t!"}' >> $outputfolder/TEMP/$sample"_temp_presort_raw.txt"
+	bedtools subtract -A -a $gff_te_locations -b $outputfolder/TEMP/$sample".absent.bed" | awk -F'[\t=;]' -v sample=$sample '{print $1"\t"$4-1"\t"$5"\t!\t"$10"_reference_"sample"_temp_nonab_\t0\t"$7"\t!\t!\t!\t!\t!\t!"}' >> $outputfolder/TEMP/$sample"_temp_presort_raw.txt"
 
 	bedtools sort -i $outputfolder/TEMP/$sample"_temp_presort_raw.txt" > $outputfolder/TEMP/$sample"_temp_sorted_raw.txt"
 
