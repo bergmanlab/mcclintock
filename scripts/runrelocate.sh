@@ -40,9 +40,12 @@ then
 	# Extract the relevant information from the output files for each TE and collate them.
 	for file in $outputfolder/RelocaTE/*/results/*.gff
 	do
-		awk -F'[\t=;]' -v sample=$sample '$14~/Shared/{print $1"\t"$4-1"\t"$5"\t"$16+$18"\t"$12"_reference_"sample"_relocate_sr_\t0\t."}' $file >> $outputfolder/RelocaTE/$sample"_relocate_presort_redundant.txt"
+		awk -F'[\t=;]' -v sample=$sample '$14~/Shared/{print $1"\t"$4-1"\t"$5"\t"$16+$18"\t"$12"_reference_"sample"_relocate_sr_\t0"}' $file >> $outputfolder/RelocaTE/$sample"_relocate_ref_presort_redundant.txt"
 		awk -F'[\t=;.]' -v sample=$sample '$18~/Non-reference/{print $1"\t"$5-1"\t"$6"\t"$20+$22"\t"$13"_non-reference_"sample"_relocate_sr_\t0\t"$9}' $file >> $outputfolder/RelocaTE/$sample"_relocate_presort_redundant.txt"
 	done
+
+	# Add the orientation from GFF input to the reference results
+	awk 'NR==FNR{c[$1$4]++;a[$1$4]=$7;next}; {print $1"\t"$2"\t"$3"\t"$4"\t"$5"\t"$6"\t"a[$1$2+1]}' $gff_te_locations $outputfolder/RelocaTE/$sample"_relocate_ref_presort_redundant.txt" >> $outputfolder/RelocaTE/$sample"_relocate_presort_redundant.txt"
 
 	bedtools sort -i $outputfolder/RelocaTE/$sample"_relocate_presort_redundant.txt" > $outputfolder/RelocaTE/$sample"_relocate_precut_redundant.txt"
 	awk '{print $1"\t"$2"\t"$3"\t"$4"\t"$5NR"\t"$6"\t"$7}' $outputfolder/RelocaTE/$sample"_relocate_precut_redundant.txt" > $outputfolder/RelocaTE/$sample"_relocate_counted_precut_redundant.txt"
@@ -54,7 +57,7 @@ then
 	bedtools sort -i $outputfolder/RelocaTE/tmp >> $outputfolder/RelocaTE/$sample"_relocate_nonredundant.bed"
 
 	# Clean up intermediate files
-	rm $outputfolder/RelocaTE/$sample"_relocate_counted_precut_redundant.txt" $outputfolder/RelocaTE/$sample"_relocate_precut_redundant.txt" $outputfolder/RelocaTE/$sample"_relocate_presort_redundant.txt" $outputfolder/RelocaTE/tmp
+	rm $outputfolder/RelocaTE/$sample"_relocate_counted_precut_redundant.txt" $outputfolder/RelocaTE/$sample"_relocate_precut_redundant.txt" $outputfolder/RelocaTE/$sample"_relocate_presort_redundant.txt" $outputfolder/RelocaTE/tmp $outputfolder/RelocaTE/$sample"_relocate_ref_presort_redundant.txt"
 	
 else
 	echo "Supply TE sequence with TSD information in description (format 'TSD=....') as option 1"
