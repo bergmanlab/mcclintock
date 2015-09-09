@@ -53,6 +53,8 @@ cp scripts/runtelocate.sh TE-locate
 #cd ..
 
 cp scripts/runtemp.sh TEMP
+patch TEMP/scripts/TEMP_Absense.sh < TEMP_Absence.patch
+
 cp scripts/mcclintock.sh .
 
 # Change #! to make software more compatible with different environments

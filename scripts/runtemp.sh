@@ -33,8 +33,8 @@ then
 	echo -e "track name=\"$sample"_TEMP"\" description=\"$sample"_TEMP"\"" > $outputfolder/TEMP/$sample"_temp_redundant.bed"
 	echo -e "track name=\"$sample"_TEMP"\" description=\"$sample"_TEMP"\"" > $outputfolder/TEMP/$sample"_temp_nonredundant.bed"
 
-	# Deal with predictions that have no TE call and begin to convert data
-	sed '1d' $outputfolder/TEMP/$sample".insertion.refined.bp.summary" | awk '{if ($4 == "sense" || $4 == "antisense"); else print $0}' | awk -v sample=$sample '{ printf $1"\t"$2"\t"$3"\t"$7"\t"$4"_non-reference_"sample"_temp_\t0\t"; if ( $5 == "sense" ) printf "+"; else printf "-"; print "\t"$6"\t"$10"\t"$12"\t"$9"\t"$11"\t"$8}' > $outputfolder/TEMP/$sample"_temp_presort_raw.txt"
+	# Deal with malformed predictions and predictions that have no TE call and begin to convert data
+	awk '{if ($3>=$2 && $3 > 0 && $2 > 0) print $0}'  $outputfolder/TEMP/$sample".insertion.refined.bp.summary" | awk '{if ($4 == "sense" || $4 == "antisense"); else print $0}' | awk -v sample=$sample '{ printf $1"\t"$2"\t"$3"\t"$7"\t"$4"_non-reference_"sample"_temp_\t0\t"; if ( $5 == "sense" ) printf "+"; else printf "-"; print "\t"$6"\t"$10"\t"$12"\t"$9"\t"$11"\t"$8}' > $outputfolder/TEMP/$sample"_temp_presort_raw.txt"
 
 	# Take the absent TEs and inverse them to report those TEs with no evidence of absence
 	cut -f1-3 $outputfolder/TEMP/$sample".absence.refined.bp.summary" | sed '1d' > $outputfolder/TEMP/$sample".absent.bed"
