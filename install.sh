@@ -36,6 +36,7 @@ cp scripts/runpopoolationte.sh PoPoolationTE
 patch PoPoolationTE/Modules/TEInsertUtility.pm < scripts/TEInsertUtility.patch
 patch PoPoolationTE/Modules/TEInsert.pm < scripts/TEInsert.patch
 patch PoPoolationTE/samro.pl < scripts/samro.patch
+patch PoPoolationTE/identify-te-insertsites.pl < scripts/identify-te-insertsites.patch
 
 cp scripts/runngstemapper.sh ngs_te_mapper
 

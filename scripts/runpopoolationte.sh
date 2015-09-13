@@ -23,12 +23,20 @@ then
 	awk -v samplen=$sample '{if(NR%4==1) $0=sprintf("@"samplen".%d/1",(1+i++)); print;}' $fastq1 > $outputfolder/PoPoolationTE/reads1.fastq
 	awk -v samplen=$sample '{if(NR%4==1) $0=sprintf("@"samplen".%d/2",(1+i++)); print;}' $fastq2 > $outputfolder/PoPoolationTE/reads2.fastq
 
+	# Get the read length
+	readlength=`sed '2q;d' $outputfolder/PoPoolationTE/reads1.fastq | wc | awk '{print $3-1}'`
+
 	# Perform 2 bwa alignments.
 	bwa bwasw -t $processors $reference_genome $outputfolder/PoPoolationTE/reads1.fastq > $outputfolder/PoPoolationTE/1.sam
 	bwa bwasw -t $processors $reference_genome $outputfolder/PoPoolationTE/reads2.fastq > $outputfolder/PoPoolationTE/2.sam
 
 	# Combine each alignment using included script.
 	perl samro.pl --sam1 $outputfolder/PoPoolationTE/1.sam --sam2 $outputfolder/PoPoolationTE/2.sam --fq1 $outputfolder/PoPoolationTE/reads1.fastq --fq2 $outputfolder/PoPoolationTE/reads2.fastq --output $outputfolder/PoPoolationTE/pe-reads.sam
+
+	median_insertsize=`cut -f9 $outputfolder/PoPoolationTE/pe-reads.sam | sort -S $memory"G" -n | awk '{if ($1 > 0) ins[reads++]=$1; } END { print ins[int(reads/2)]; }'`
+	printf "\nMedian insert size = $median_insertsize\n\n" | tee -a /dev/stderr
+
+	maxdist="$(($median_insertsize * 3))"
 
 	rm $outputfolder/PoPoolationTE/reads1.fastq
 	rm $outputfolder/PoPoolationTE/reads2.fastq
@@ -39,15 +47,15 @@ then
 	samtools view $outputfolder/PoPoolationTE/pe-reads.sorted.bam > $outputfolder/PoPoolationTE/pe-reads.sorted.sam
 
 	# Perform the rest of the PoPoolationTE workflow
-	perl identify-te-insertsites.pl --input $outputfolder/PoPoolationTE/pe-reads.sorted.sam --te-hierarchy-file $te_hierarchy --te-hierarchy-level family --narrow-range 75 --min-count 3 --min-map-qual 15 --output $outputfolder/PoPoolationTE/te-fwd-rev.txt
+	perl identify-te-insertsites.pl --input $outputfolder/PoPoolationTE/pe-reads.sorted.sam --te-hierarchy-file $te_hierarchy --te-hierarchy-level family --narrow-range $readlength --min-count 3 --min-map-qual 15 --output $outputfolder/PoPoolationTE/te-fwd-rev.txt --insert-distance $median_insertsize --read-length $readlength
 	perl genomic-N-2gtf.pl --input $reference_genome > $outputfolder/PoPoolationTE/poly_n.gtf
-	perl crosslink-te-sites.pl --directional-insertions $outputfolder/PoPoolationTE/te-fwd-rev.txt --min-dist 74 --max-dist 250 --output $outputfolder/PoPoolationTE/te-inserts.txt --single-site-shift 100 --poly-n $outputfolder/PoPoolationTE/poly_n.gtf --te-hierarchy $te_hierarchy --te-hier-level family
+	perl crosslink-te-sites.pl --directional-insertions $outputfolder/PoPoolationTE/te-fwd-rev.txt --min-dist $readlength --max-dist $maxdist --output $outputfolder/PoPoolationTE/te-inserts.txt --single-site-shift 100 --poly-n $outputfolder/PoPoolationTE/poly_n.gtf --te-hierarchy $te_hierarchy --te-hier-level family
 
 	# Convert the gff format to a format that PoPoolationTE understands.
 	awk -F'[\t=;]' '{if($7=="-")print $1"\tF\t"$5"\t"$10"\n"$1"\tR\t"$4"\t"$10; else print $1"\tF\t"$4"\t"$10"\n"$1"\tR\t"$5"\t"$10}' $gff_te_locations > $outputfolder/PoPoolationTE/known-te-insertions.txt
-	perl update-teinserts-with-knowntes.pl --known $outputfolder/PoPoolationTE/known-te-insertions.txt --output $outputfolder/PoPoolationTE/te-insertions.updated.txt --te-hierarchy-file $te_hierarchy --te-hierarchy-level family --max-dist 300 --te-insertions $outputfolder/PoPoolationTE/te-inserts.txt --single-site-shift 100
+	perl update-teinserts-with-knowntes.pl --known $outputfolder/PoPoolationTE/known-te-insertions.txt --output $outputfolder/PoPoolationTE/te-insertions.updated.txt --te-hierarchy-file $te_hierarchy --te-hierarchy-level family --max-dist $maxdist --te-insertions $outputfolder/PoPoolationTE/te-inserts.txt --single-site-shift 100
 	perl estimate-polymorphism.pl --sam-file $outputfolder/PoPoolationTE/pe-reads.sorted.sam --te-insert-file $outputfolder/PoPoolationTE/te-insertions.updated.txt --te-hierarchy-file $te_hierarchy --te-hierarchy-level family --min-map-qual 15 --output $outputfolder/PoPoolationTE/te-polymorphism.txt
-	perl filter-teinserts.pl --te-insertions $outputfolder/PoPoolationTE/te-polymorphism.txt --output $outputfolder/PoPoolationTE/te-poly-filtered.txt --discard-overlapping --min-count 10
+	perl filter-teinserts.pl --te-insertions $outputfolder/PoPoolationTE/te-polymorphism.txt --output $outputfolder/PoPoolationTE/te-poly-filtered.txt --discard-overlapping --min-count 5
 
 	# Create an output file in BED format selecting only the relevant inserts.
 	# Name and description for use with the UCSC genome browser are added to output here.
@@ -62,7 +70,7 @@ then
 	cut -f1-3,5-7 $outputfolder/PoPoolationTE/$sample"_popoolationte_counted_precut_raw.txt" >> $outputfolder/PoPoolationTE/$sample"_popoolationte_raw.bed"
 
 	# Filtering for inserts with support for both ends and more than 10% of reads support an insert for at least one end
-	awk -v proportion=$proportion '{if($8=="FR" && $9>=0.1 && $10>=0.1) print $0}' $outputfolder/PoPoolationTE/$sample"_popoolationte_counted_precut_raw.txt" > $outputfolder/PoPoolationTE/$sample"_popoolationte_counted_precut_redundant.txt"
+	awk '{if($8=="FR" && ($9>=0.1 || $10>=0.1)) print $0}' $outputfolder/PoPoolationTE/$sample"_popoolationte_counted_precut_raw.txt" > $outputfolder/PoPoolationTE/$sample"_popoolationte_counted_precut_redundant.txt"
 	cut -f1-3,5-7 $outputfolder/PoPoolationTE/$sample"_popoolationte_counted_precut_redundant.txt" >> $outputfolder/PoPoolationTE/$sample"_popoolationte_redundant.bed"
 
 	# Filtering out redundant insertions
