@@ -36,7 +36,7 @@ then
 	median_insertsize=`cut -f9 $outputfolder/PoPoolationTE/pe-reads.sam | sort -S $memory"G" -n | awk '{if ($1 > 0) ins[reads++]=$1; } END { print ins[int(reads/2)]; }'`
 	printf "\nMedian insert size = $median_insertsize\n\n" | tee -a /dev/stderr
 
-	maxdist="$(($median_insertsize * 3))"
+	maxdist="$(($median_insertsize * 3 + $readlength))"
 
 	rm $outputfolder/PoPoolationTE/reads1.fastq
 	rm $outputfolder/PoPoolationTE/reads2.fastq
