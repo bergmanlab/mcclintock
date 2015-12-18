@@ -23,8 +23,10 @@ then
 	awk -v samplen=$sample '{if(NR%4==1) $0=sprintf("@"samplen".%d/1",(1+i++)); print;}' $fastq1 > $outputfolder/PoPoolationTE/reads1.fastq
 	awk -v samplen=$sample '{if(NR%4==1) $0=sprintf("@"samplen".%d/2",(1+i++)); print;}' $fastq2 > $outputfolder/PoPoolationTE/reads2.fastq
 
-	# Get the read length
+	# Get the read length - get average of read lengths in case of differing lengths
 	readlength=`sed '2q;d' $outputfolder/PoPoolationTE/reads1.fastq | wc | awk '{print $3-1}'`
+	readlength2=`sed '2q;d' $outputfolder/PoPoolationTE/reads2.fastq | wc | awk '{print $3-1}'`
+	readlength=$((($readlength + $readlength2) / 2))
 
 	# Perform 2 bwa alignments.
 	bwa bwasw -t $processors $reference_genome $outputfolder/PoPoolationTE/reads1.fastq > $outputfolder/PoPoolationTE/1.sam
