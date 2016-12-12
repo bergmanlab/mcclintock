@@ -2,7 +2,7 @@
 
 # Download all of the software methods.
 echo "Downloading pipelines..."
-wget --no-check-certificate https://popoolationte.googlecode.com/files/popoolationte_1.02.zip -O PoPoolationTE.zip 
+wget --no-check-certificate http://downloads.sourceforge.net/project/popoolationte/popoolationte_1.02.zip -O PoPoolationTE.zip 
 wget --no-check-certificate https://github.com/bergmanlab/ngs_te_mapper/archive/79ef861f1d52cdd08eb2d51f145223fad0b2363c.zip -O ngs_te_mapper.zip
 wget --no-check-certificate https://github.com/tk2/RetroSeq/archive/700d4f76a3b996686652866f2b81fefc6f0241e0.zip -O RetroSeq.zip
 wget --no-check-certificate https://github.com/srobb1/RelocaTE/archive/ce3a2066e15f5c14e2887fdf8dce0485e1750e5b.zip -O RelocaTE.zip
