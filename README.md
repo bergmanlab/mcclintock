@@ -132,3 +132,14 @@ Individual methods output predictions in different annotation frameworks, which 
  * For TE-locate, non-reference ("new") and reference ("old") TEs are annotated as 1-based positions plus the length of the inserted TE. Strand information is present, where available, for non-reference TEs. For non-reference TEs the single 1-based coordinate is decreased by one for the start of the insertion and used directly for the end on 0-based coordinates in the *redundant.bed and *nonredundant.bed files. For reference TEs the single 1-based coordinate is decreased by one for the start of the insertion and increased by the length of the inserted TE for the end on 0-based coordinates in the *redundant.bed and *nonredundant.bed files. 
  
 The 4th column of *nonredundant.bed files contains a string with the name of the TE family, whether it is a non-reference or reference insertion, the sample name, the method name, the evidence type (sr = split-read, rp = read pair), and a numerical index of the prediction in the *raw.bed or *redundant.bed file. The final *nonredundant.bed output file also includes a header line for use with the UCSC genome browser. 
+
+License
+------
+Copyright 2014-2017 Michael G. Nelson and Casey M. Bergman
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
