@@ -4,18 +4,18 @@
 
 Introduction
 ------
-Many methods have been developed to detect transposable element (TE) insertions from whole genome shotgun next-generation sequencing (NGS) data, each of which has different dependencies, run interfaces, and output formats. Here, we have developed a meta-pipeline to install and run six methods for detecting TE insertions in NGS data, which generates output in the UCSC Browser extensible data (BED) format. A detailed description of the McClintock pipeline is available as a preprint [here](http://biorxiv.org/content/early/2017/02/14/095372).
+Many methods have been developed to detect transposable element (TE) insertions from whole genome shotgun next-generation sequencing (NGS) data, each of which has different dependencies, run interfaces, and output formats. Here, we have developed a meta-pipeline to install and run six methods for detecting TE insertions in NGS data, which generates output in the UCSC Browser extensible data (BED) format. A detailed description of the McClintock pipeline and evaluation of McClintock component methods on the yeast genome can be found in [Nelson, Linheiro and Bergman (2017) *G3* 7:2763-2778](http://www.g3journal.org/content/7/8/2763).
 
 The complete pipeline requires a fasta reference genome, a fasta consensus set of TE sequences present in the organism and fastq paired end sequencing reads. Optionally if detailed annotation of the reference TE sequences has been performed, a GFF file with the locations of known TEs present in the reference genome and a tab delimited hierarchy file linking these individual insertions to the consensus they belong to (an example of this file is included in the test directory as sac_cer_te_families.tsv) can be supplied. If only single ended sequencing data are available then this can be supplied as option -1 however only ngs_te_mapper and RelocaTE will run as these are the only methods that handle it.
 
 Software Methods
 ------
- * [ngs_te_mapper](https://github.com/bergmanlab/ngs_te_mapper "Click to go to download location") - [Linheiro and Bergman (2012)](http://www.plosone.org/article/info%3Adoi%2F10.1371/journal.pone.0030008 "Click to go to paper location")
- * [RelocaTE](https://github.com/srobb1/RelocaTE "Click to go to download location") - [Robb *et al.* (2013)](http://www.g3journal.org/content/3/6/949.long "Click to go to paper location")
- * [TEMP](https://github.com/JialiUMassWengLab/TEMP "Click to go to download location") - [Zhuang *et al.* (2014)](http://nar.oxfordjournals.org/content/42/11/6826.full "Click to go to paper location")
- * [RetroSeq](https://github.com/tk2/RetroSeq "Click to go to download location") - [Keane *et al.* (2012)](http://bioinformatics.oxfordjournals.org/content/29/3/389.long "Click to go to paper location")
- * [PoPoolationTE](https://code.google.com/p/popoolationte/ "Click to go to download location") - [Kofler *et al.* (2012)](http://www.plosgenetics.org/article/info%3Adoi%2F10.1371%2Fjournal.pgen.1002487;jsessionid=2CFC9BF7DEF785D90070915204B5F846 "Click to go to paper location")
- * [TE-locate](http://zendto.gmi.oeaw.ac.at/pickup.php?claimID= Y3tZVfN5xipYyBDN&claimPasscode=NArXMbTjmkorWjSM&emailAddr=te_locate%40gmx.at "Click to go to download location") - [Platzer *et al.* (2012)](http://www.mdpi.com/2079-7737/1/2/395 "Click to go to paper location")
+ * [ngs_te_mapper](https://github.com/bergmanlab/ngs_te_mapper) - [Linheiro and Bergman (2012)](http://www.plosone.org/article/info%3Adoi%2F10.1371/journal.pone.0030008)
+ * [RelocaTE](https://github.com/srobb1/RelocaTE) - [Robb *et al.* (2013)](http://www.g3journal.org/content/3/6/949.long)
+ * [TEMP](https://github.com/JialiUMassWengLab/TEMP) - [Zhuang *et al.* (2014)](http://nar.oxfordjournals.org/content/42/11/6826.full)
+ * [RetroSeq](https://github.com/tk2/RetroSeq) - [Keane *et al.* (2012)](http://bioinformatics.oxfordjournals.org/content/29/3/389.long)
+ * [PoPoolationTE](https://code.google.com/p/popoolationte/) - [Kofler *et al.* (2012)](http://www.plosgenetics.org/article/info%3Adoi%2F10.1371%2Fjournal.pgen.1002487;jsessionid=2CFC9BF7DEF785D90070915204B5F846)
+ * [TE-locate](http://zendto.gmi.oeaw.ac.at/pickup.php?claimID=Y3tZVfN5xipYyBDN&claimPasscode=NArXMbTjmkorWjSM&emailAddr=te_locate%40gmx.at) - [Platzer *et al.* (2012)](http://www.mdpi.com/2079-7737/1/2/395)
 
 Software Dependencies
 ------
