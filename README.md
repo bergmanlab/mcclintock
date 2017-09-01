@@ -66,7 +66,7 @@ All of the software systems must be run on a unix based system with the software
 How to run 
 ------
 
-###Installation
+### Installation
 To install the software, from the main pipeline directory, first clone the repository:
 
 ```
@@ -82,7 +82,7 @@ sh install.sh
 
 This will download and unpack all of the TE detection pipelines and check that the required dependencies are available in your path. Missing dependencies will be reported and you must install or make sure these are available to run the full pipeline.
 
-###Running on a test dataset
+### Running on a test dataset
 A script is included to run the full pipeline on a test Illumina resequencing dataset from the yeast genome. To run this test script change directory into the directory named test and run the script runttest.sh. 
 
 ```
@@ -92,7 +92,7 @@ sh runtest.sh
 
 This script will download the UCSC sacCer2 yeast reference genome, an annotation of TEs in the yeast reference genome from [Carr, Bensasson and Bergman (2012)](http://www.plosone.org/article/info%3Adoi%2F10.1371%2Fjournal.pone.0050978), and a pair of fastq files from SRA, then run the full pipeline.
 
-###Running the pipeline
+### Running the pipeline
 The pipeline is invoked by running the mcclintock.sh script in the main project directory. This script takes the following 6 input files, specified as options:
 * -m : A string containing the list of software you want the pipeline to use for analysis e.g. \"-m relocate TEMP ngs_te_mapper\" will launch only those three methods [Optional: default is to run all methods]
 * -r : A reference genome sequence in fasta format. [Required]
@@ -116,7 +116,7 @@ sh mcclintock.sh -m "RelocaTE TEMP ngs_te_mapper" -r reference.fasta -c te_conse
 
 Data created during processing will be stored in a directory in the output directory (if one is specified) within main directory named after the reference genome used with individual sub-directories for samples. 
 
-###Output
+### Output
 Output files for a full McClintock run or individual components are located in a directory named with the following path structure /reference_genome/sample_name/results/. All directories referred to below are contained within this parent directory.
 
 If FastQC was present on the system, then output of FastQC will be stored in the directory /qualitycontrol/fastqc_analysis. The qualitycontrol directory also includes a file with the output of bamstats and a file with the estimated median insert size of the library for paired-end samples.
