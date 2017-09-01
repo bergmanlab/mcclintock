@@ -94,20 +94,20 @@ This script will download the UCSC sacCer2 yeast reference genome, an annotation
 
 ### Running the pipeline
 The pipeline is invoked by running the mcclintock.sh script in the main project directory. This script takes the following 6 input files, specified as options:
-* -m : A string containing the list of software you want the pipeline to use for analysis e.g. \"-m relocate TEMP ngs_te_mapper\" will launch only those three methods [Optional: default is to run all methods]
-* -r : A reference genome sequence in fasta format. [Required]
-* -c : The consensus sequences of the TEs for the species in fasta format. [Required]
-* -g : The locations of known TEs in the reference genome in GFF 3 format. This must include a unique ID attribute for every entry. [Optional]
-* -t : A tab delimited file with one entry per ID in the GFF file and two columns: the first containing the ID and the second containing the TE family it belongs to. The family should correspond to the names of the sequences in the consensus fasta file. [Optional - required if GFF (option -g) is supplied]
-* -1 : The absolute path of the first fastq file from a paired end read, this should be named ending _1.fastq. [Required]
-* -2 : The absolute path of the second fastq file from a paired end read, this should be named ending _2.fastq. [Optional]
-* -o : An output directory for the run. If not supplied then the reference genome name will be used. [Optional]
-* -b : Retain the sorted and indexed BAM file of the paired end data aligned to the reference genome.
-* -i : If this option is specified then all sample specific intermediate files will be removed, leaving only the overall results. The default is to leave sample specific intermediate files (may require large amounts of disk space)
-* -C : This option will include the consensus TE sequences as extra chromosomes in the reference file (useful if the organism is known to have TEs that are not present in the reference strain). [Optional: default will not include this]
-* -R : This option will include the reference TE sequences as extra chromosomes in the reference file [Optional: default will not include this]
-* -p : The number of processors to use for parallel stages of the pipeline. [Optional: default = 1]
-* -h : Prints this help guide.
+* `-m` : A string containing the list of software you want the pipeline to use for analysis e.g. \"-m relocate TEMP ngs_te_mapper\" will launch only those three methods [Optional: default is to run all methods]
+* `-r` : A reference genome sequence in fasta format. [Required]
+* `-c` : The consensus sequences of the TEs for the species in fasta format. [Required]
+* `-g` : The locations of known TEs in the reference genome in GFF 3 format. This must include a unique ID attribute for every entry. [Optional]
+* `-t` : A tab delimited file with one entry per ID in the GFF file and two columns: the first containing the ID and the second containing the TE family it belongs to. The family should correspond to the names of the sequences in the consensus fasta file. [Optional - required if GFF (option -g) is supplied]
+* `-1` : The absolute path of the first fastq file from a paired end read, this should be named ending _1.fastq. [Required]
+* `-2` : The absolute path of the second fastq file from a paired end read, this should be named ending _2.fastq. [Optional]
+* `-o` : An output directory for the run. If not supplied then the reference genome name will be used. [Optional]
+* `-b` : Retain the sorted and indexed BAM file of the paired end data aligned to the reference genome.
+* `-i` : If this option is specified then all sample specific intermediate files will be removed, leaving only the overall results. The default is to leave sample specific intermediate files (may require large amounts of disk space)
+* `-C` : This option will include the consensus TE sequences as extra chromosomes in the reference file (useful if the organism is known to have TEs that are not present in the reference strain). [Optional: default will not include this]
+* `-R` : This option will include the reference TE sequences as extra chromosomes in the reference file [Optional: default will not include this]
+* `-p` : The number of processors to use for parallel stages of the pipeline. [Optional: default = 1]
+* `-h` : Prints this help guide.
 
 Example pipeline run:
 ```
@@ -117,11 +117,11 @@ sh mcclintock.sh -m "RelocaTE TEMP ngs_te_mapper" -r reference.fasta -c te_conse
 Data created during processing will be stored in a directory in the output directory (if one is specified) within main directory named after the reference genome used with individual sub-directories for samples. 
 
 ### Output
-Output files for a full McClintock run or individual components are located in a directory named with the following path structure /reference_genome/sample_name/results/. All directories referred to below are contained within this parent directory.
+Output files for a full McClintock run or individual components are located in a directory named with the following path structure `/reference_genome/sample_name/results/`. All directories referred to below are contained within this parent directory.
 
-If FastQC was present on the system, then output of FastQC will be stored in the directory /qualitycontrol/fastqc_analysis. The qualitycontrol directory also includes a file with the output of bamstats and a file with the estimated median insert size of the library for paired-end samples.
+If FastQC was present on the system, then output of FastQC will be stored in the directory `/qualitycontrol/fastqc_analysis`. The `/qualitycontrol` directory also includes a file with the output of bamstats and a file with the estimated median insert size of the library for paired-end samples.
 
-Original result files for non-reference and (when available) reference predictions produced by each method are stored in the directory /originalmethodresults, containing one sub-directory for each method. Original non-reference and (when available) reference files are then merged and filtered to create 0-based .bed6 format files. For TEMP, Retroseq, and PoPoolationTE, original files are converted into \*raw.bed files that contain all unfiltered predictions for non-reference predictions plus reference TE predictions if provided by the method. Score (Retroseq, ≥6), read support (TEMP and PopoolationTE, reads found for both ends)  and sample frequency (TEMP, >10%) are used to filter raw prediction to create \*redundant.bed files. For RelocaTE, original files from individual families are merged and used to create \*redundant.bed files. For TE-locate, original files are used to create \*redundant.bed directly. \*redundant.bed are filtered to remove predictions that have the identical coordinates for different TE families, with the prediction having the greatest read support (RelocaTE, TEMP, PopoolationTE, TE-locate) or call status (Retroseq) being retained. Non-identical overlapping predictions are retained. The final output file of the run scripts for individual methods after merging reference and non-reference predictions and filtering is \*nonredundant.bed. For ngs_te_mapper, no filtering or merging is needed, and thus \*nonredundant.bed files are created directly.
+Original result files for non-reference and (when available) reference predictions produced by each method are stored in the directory `/originalmethodresults`, containing one sub-directory for each method. Original non-reference and (when available) reference files are then merged and filtered to create 0-based .bed6 format files. For TEMP, Retroseq, and PoPoolationTE, original files are converted into \*raw.bed files that contain all unfiltered predictions for non-reference predictions plus reference TE predictions if provided by the method. Score (Retroseq, ≥6), read support (TEMP and PopoolationTE, reads found for both ends)  and sample frequency (TEMP, >10%) are used to filter raw prediction to create \*redundant.bed files. For RelocaTE, original files from individual families are merged and used to create \*redundant.bed files. For TE-locate, original files are used to create \*redundant.bed directly. \*redundant.bed are filtered to remove predictions that have the identical coordinates for different TE families, with the prediction having the greatest read support (RelocaTE, TEMP, PopoolationTE, TE-locate) or call status (Retroseq) being retained. Non-identical overlapping predictions are retained. The final output file of the run scripts for individual methods after merging reference and non-reference predictions and filtering is \*nonredundant.bed. For ngs_te_mapper, no filtering or merging is needed, and thus \*nonredundant.bed files are created directly.
 
 Individual methods output predictions in different annotation frameworks, which are standardized in \*nonredundant.bed as follows: 
  * For ngs_te_mapper, non-reference TEs are annotated as 0-based TSDs. Reference TEs are annotated as 0-based intervals which are inferred from the data, not from the reference TE annotation. Strand information is present for both non-reference and reference TEs. No filtering or coordinate conversions are needed to create 0-based predictions in \*nonredundant.bed files. 
