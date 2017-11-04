@@ -15,7 +15,7 @@ unzip PoPoolationTE.zip
 mv popoolationte PoPoolationTE
 rm PoPoolationTE.zip
 unzip ngs_te_mapper.zip
-mv ngs_te_mapper-79ef861f1d52cdd08eb2d51f145223fad0b2363c ngs_te_mapper
+mv ngs_te_mapper-145fd73bdef836e10597b3ff5cb1355ca8f91b57 ngs_te_mapper
 rm ngs_te_mapper.zip
 unzip RetroSeq.zip
 mv RetroSeq-700d4f76a3b996686652866f2b81fefc6f0241e0 RetroSeq
