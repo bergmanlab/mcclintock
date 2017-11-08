@@ -58,8 +58,10 @@ patch TEMP/scripts/TEMP_Absence.sh < scripts/TEMP_Absence.patch
 
 cp scripts/mcclintock.sh .
 
-# Change #! to make software more compatible with different environments
-sed -i 's/#!\/usr\/bin\/perl -w/#!\/usr\/bin\/env perl/' RelocaTE/scripts/*.pl
+# Change #! to make software compatible with sapelo environments, perl module should be loaded before executing this script
+perlPath=$(which perl | sed 's/\//\\\//g')
+sed -i 's/\/usr\/bin\/perl -w/'"$perlPath"'/' RelocaTE/scripts/*.pl
+#sed -i 's/#!\/usr\/bin\/perl -w/#!\/usr\/bin\/env perl/' RelocaTE/scripts/*.pl
 # Remove deprecated use of defined from RelocaTE to reduce errors
 for f in RelocaTE/scripts/*.pl
 do
