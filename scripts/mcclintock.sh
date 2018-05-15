@@ -457,7 +457,7 @@ then
 	# Create sam files for input
 	printf "\nCreating sam alignment...\n\n" | tee -a /dev/stderr
 
-	bwa mem -t $processors -v 0 -R '@RG\tID:'$sample'\tSM:'$sample $reference_genome $fastq1 $fastq2 > $samplefolder/sam/$sample.sam
+	bwa mem -C -t $processors -v 0 -R '@RG\tID:'$sample'\tSM:'$sample $reference_genome $fastq1 $fastq2 > $samplefolder/sam/$sample.sam
 
 	sam=$samplefolder/sam/$sample.sam
 
