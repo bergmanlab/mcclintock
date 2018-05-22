@@ -152,6 +152,7 @@ if [[ $single_end != "true" ]]
 then
 	sample=${input1##*/}
 	sample=${sample%%_1.f*}
+	sample=${sample%%.f*}
 else
 	sample=${input1##*/}
 	sample=${sample%%.f*}
