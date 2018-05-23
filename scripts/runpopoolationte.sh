@@ -13,8 +13,8 @@ then
 	outputfolder=$7
 
 	# Get the name of the sample being analysed (catch either fq or fastq extensions).
-	samplename=`basename $fastq1 _1.fastq`
-	sample=`basename $samplename _1.fq`
+	samplename=`basename $fastq1`
+	sample=${samplename%%.f*}
 
 	# Create a directory for analysis files
 	mkdir $outputfolder/PoPoolationTE
