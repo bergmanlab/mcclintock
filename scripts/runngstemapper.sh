@@ -32,11 +32,11 @@ then
 		awk -F'[\t;]' -v sample=$sample '{print $1"\t"$2"\t"$3"\t"$6"_"$9"_"sample"_ngs_te_mapper_sr_"NR"\t0\t"$5}' $outputfolder/ngs_te_mapper/bed_tsd/$samplename"insertions.bed" > $outputfolder/ngs_te_mapper/$sample"_ngs_te_mapper_presort.bed"
 	else
 		base1=`basename $fasta1_file`
-		samplename=${base1%%_1.f*}
-		samplename=${samplename%%.f*}
+		samplename1=${base1%%_1.f*}
+		samplename1=${samplename%%.f*}
 		base2=`basename $fasta2_file`
-		samplename=${base2%%_1.f*}
-		samplename=${samplename%%.f*}
+		samplename2=${base2%%_1.f*}
+		samplename2=${samplename%%.f*}
 		awk -F'[\t;]' -v sample=$sample '{print $1"\t"$2"\t"$3"\t"$6"_"$9"_"sample"_ngs_te_mapper_sr_"NR"\t0\t"$5}' $outputfolder/ngs_te_mapper/bed_tsd/$samplename1"_"$samplename2"insertions.bed" > $outputfolder/ngs_te_mapper/$sample"_ngs_te_mapper_presort.bed"
 	fi
 
