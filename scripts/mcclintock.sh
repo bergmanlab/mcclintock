@@ -16,7 +16,8 @@ usage ()
 	echo "-2 : The absolute path of the second fastq file from a paired end read, this should be named ending _2.fastq. [Optional]"
 	echo "-o : An output folder for the run. This should be the absolute path. If not supplied then the directory mcclintock"
 	echo "     is launched from will be used. [Optional]"
-	echo "-T : If this option is specified then the fastq comment (e.g. barcode) will be appended to SAM output. The default is not 			   appending the fastq comment to SAM"
+	echo "-T : If this option is specified then the fastq comment (e.g. barcode) will be appended to SAM output"
+	echo "	   . The default is not appending the fastq comment to SAM"
 	echo "-b : Retain the sorted and indexed BAM file of the paired end data aligned to the reference genome."
 	echo "-i : If this option is specified then all sample specific intermediate files will be removed, leaving only"
 	echo "     the overall results. The default is to leave sample specific intermediate files (may require large amounts"
@@ -45,7 +46,7 @@ mcclintock_location="$( cd "$(dirname "$0")" ; pwd -P )"
 cd $mcclintock_location/
 
 # Get the options supplied to the program
-while getopts ":r:c:g:t:1:2:o:p:M:m:hibCR" opt;
+while getopts ":r:c:g:t:1:2:o:p:M:m:hiTbCR" opt;
 do
 	case $opt in
 		r)
