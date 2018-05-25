@@ -17,7 +17,7 @@ then
 	if [[ $fasta2_file == "false" ]]
 	then
 		base1=`basename $fasta1_file`
-		samplename=${base1%%.f*}
+		samplename=${base1%%.*}
 		# Run ngs_te_mapper on single end data
 		Rscript --vanilla $test_dir/sourceCode/ngs_te_mapper.R sample=$fasta1_file genome=$reference_genome teFile=$consensus_te_seqs tsd=20 output=$outputfolder/ngs_te_mapper sourceCodeFolder=$test_dir/sourceCode
 	else
@@ -33,10 +33,10 @@ then
 	else
 		base1=`basename $fasta1_file`
 		samplename1=${base1%%_1.f*}
-		samplename1=${samplename1%%.f*}
+		samplename1=${samplename1%%.*}
 		base2=`basename $fasta2_file`
 		samplename2=${base2%%_1.f*}
-		samplename2=${samplename2%%.f*}
+		samplename2=${samplename2%%.*}
 		awk -F'[\t;]' -v sample=$sample '{print $1"\t"$2"\t"$3"\t"$6"_"$9"_"sample"_ngs_te_mapper_sr_"NR"\t0\t"$5}' $outputfolder/ngs_te_mapper/bed_tsd/$samplename1"_"$samplename2"insertions.bed" > $outputfolder/ngs_te_mapper/$sample"_ngs_te_mapper_presort.bed"
 	fi
 
