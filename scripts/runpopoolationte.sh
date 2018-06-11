@@ -13,7 +13,7 @@ then
 	outputfolder=$7
 
 	# Get the name of the sample being analysed (catch either fq or fastq extensions).
-	samplename=`basename $fastq1`
+	samplename=`basename $fastq1 | sed 's/_1\.f.*//g'`
 	sample=${samplename%%.f*}
 
 	# Create a directory for analysis files
