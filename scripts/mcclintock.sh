@@ -18,6 +18,8 @@ usage ()
 	echo "     is launched from will be used. [Optional]"
 	echo "-T : If this option is specified then fastq comments (e.g. barcode) will be incorporated to SAM output. Warning: do not"
 	echo "     use this option if the input fastq files do not have comments."
+	echo "-d : If this option is specified then McClintock will perform depth of coverage analysis for every TE. Note: Doing"
+	echo "     TE-based coverage analysis will result in longer running time."
 	echo "	   . The default is not appending the fastq comment to SAM"
 	echo "-b : Retain the sorted and indexed BAM file of the paired end data aligned to the reference genome."
 	echo "-i : If this option is specified then all sample specific intermediate files will be removed, leaving only"
@@ -91,6 +93,9 @@ do
 			;;
 		T)
 			save_tag=on
+			;;
+		d)
+			te_cov=on
 			;;
 		b)
 			save_bam=on
@@ -454,6 +459,15 @@ telocate_te_locations=$telocate_te_locations"_HL.gff"
 if [[ ! -f $telocate_te_locations ]]
 then
 	perl $mcclintock_location/TE-locate/TE_hierarchy.pl $te_locations $te_families Alias
+fi
+
+# Coverage analysis for each TE
+if [[ "$te_cov" == "on" ]]
+then
+	printf "\nCalculating normalized average coverage for TEs...\n\n" | tee -a /dev/stderr
+	mkdir -p $samplefolder/results/te_coverage
+	te_cov_dir=$samplefolder/results/te_coverage
+	sh coverage_unit.sh $sample $referencefolder $te_cov_dir $fastq1 $fastq2 $reference_genome $consensus_te_seqs $processors
 fi
 
 # Allow case insensitivity for method names
