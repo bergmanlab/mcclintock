@@ -49,7 +49,7 @@ mcclintock_location="$( cd "$(dirname "$0")" ; pwd -P )"
 cd $mcclintock_location/
 
 # Get the options supplied to the program
-while getopts ":r:c:g:t:1:2:o:p:M:m:hiTbCR" opt;
+while getopts ":r:c:g:t:1:2:o:p:M:m:hiTdbCR" opt;
 do
 	case $opt in
 		r)
