@@ -468,7 +468,7 @@ then
 	mkdir -p $samplefolder/results/te_coverage
 	te_cov_dir=$samplefolder/results/te_coverage
 	normal_ref_genome=$referencefolder/$reference_genome_file
-	sh coverage_unit.sh $sample $referencefolder $te_cov_dir $fastq1 $fastq2 $normal_ref_genome $consensus_te_seqs $processors
+	sh te_coverage.sh $sample $referencefolder $te_cov_dir $fastq1 $fastq2 $normal_ref_genome $consensus_te_seqs $processors
 fi
 
 # Allow case insensitivity for method names
