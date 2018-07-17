@@ -467,7 +467,8 @@ then
 	printf "\nCalculating normalized average coverage for TEs...\n\n" | tee -a /dev/stderr
 	mkdir -p $samplefolder/results/te_coverage
 	te_cov_dir=$samplefolder/results/te_coverage
-	sh coverage_unit.sh $sample $referencefolder $te_cov_dir $fastq1 $fastq2 $reference_genome $consensus_te_seqs $processors
+	normal_ref_genome=$referencefolder/$reference_genome_file
+	sh coverage_unit.sh $sample $referencefolder $te_cov_dir $fastq1 $fastq2 $normal_ref_genome $consensus_te_seqs $processors
 fi
 
 # Allow case insensitivity for method names
