@@ -1,4 +1,15 @@
 #!/bin/bash
+
+# Establish variables
+sample=$1
+referencefolder=$2
+te_cov_dir=$3
+fastq1=$4
+fastq2=$5
+reference_genome=$6
+consensus_te_seqs=$7
+processors=$8
+
 # create tmp folder for intermediate files
 tmp_dir=$referencefolder/te_cov_tmp
 mkdir -p $tmp_dir
