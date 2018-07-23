@@ -769,6 +769,142 @@ then
 	cd $mcclintock_location/
 fi
 
+# Generate final report
+## McClintock version and invoke command
+report=$samplefolder/results/qualitycontrol/report.txt
+echo "McClintock version: `git rev-parse HEAD`" > $report
+echo "McClintock was called as follows:" >> $report
+invocation="$(printf %q "$BASH_SOURCE")$((($#)) && printf ' %q' "$@")"
+echo "$invocation" >> $report
+
+## read length
+if [[ -n "$location" ]]
+then
+	fastqc_dir=$samplefolder/results/qualitycontrol/fastqc_analysis
+	cd $fastqc_dir
+	unzip '*.zip'
+	r1_fastqc="$fastqc_dir/$sample"_1_fastqc/fastqc_data.txt
+	r2_fastqc="$fastqc_dir/$sample"_2_fastqc/fastqc_data.txt
+	if [[ -e "$r2_fastqc" ]]
+	then
+	r1_len=`grep "Sequence length" $r1_fastqc | sed "s/Sequence length/read1 sequence length:/g"`
+	r2_len=`grep "Sequence length" $r2_fastqc | sed "s/Sequence length/read2 sequence length:/g"`
+	echo "$r1_len" >> $report
+	echo "$r2_len" >> $report
+	rm -rf "$fastqc_dir/$sample"_1_fastqc
+	rm -rf "$fastqc_dir/$sample"_2_fastqc
+	else
+	r1_len=`grep "Sequence length" $r1_fastqc | sed "s/Sequence length/sequence length:/g"`
+	echo "$r1_len" >> $report
+	rm -rf "$fastqc_dir/$sample"_1_fastqc
+	fi
+fi
+
+## read count
+bamstat=$samplefolder/results/qualitycontrol/bwamem_bamstats.txt
+if [[ -e "$bamstat" ]]
+then
+	r1_count=`grep "read1" $bamstat | sed 's/\s.*//g'`
+	r2_count=`grep "read2" $bamstat | sed 's/\s.*//g'`
+	if [[ -z "$r2_count" ]]
+	then
+		echo "Number of reads: $r1_count" >> $report
+	else
+		echo "Number of reads in read1: $r1_count" >> $report
+		echo "Number of reads in read2: $r2_count" >> $report
+	fi
+fi
+
+## median insert size
+median_insertsize=$samplefolder/results/qualitycontrol/median_insertsize
+if [[ -e "$median_insertsize" ]]
+then
+	median_ins=`cat $median_insertsize`
+	echo "median insert size: $median_ins" >> $report
+fi
+
+## average genome coverage
+if [[ -e "$bam" ]]
+then
+	normal_ref_genome=$referencefolder/$reference_genome_file
+	if [[ ! -f $referencefolder/dm6.sorted.genome ]]
+	then
+		grep chr $normal_ref_genome.fai | cut -f1,2 | sort > $referencefolder/dm6.sorted.genome
+		bedtools slop -i $bed_te_locations_file -g $referencefolder/dm6.sorted.genome -l 1 -r 0 > $referencefolder/dm6.fasta.out.zero.bed
+		bedtools complement -i $referencefolder/dm6.fasta.out.zero.bed -g $referencefolder/dm6.sorted.genome | grep -v chrM > $referencefolder/dm6.fasta.out.complement.bed
+		bed_nonte=$referencefolder/dm6.fasta.out.complement.bed
+	fi
+	genome_avg_depth=`samtools depth -b  $bed_nonte $bam | awk '{ total += $3 } END { print total/NR }'`
+	echo "average genome coverage: $genome_avg_depth" >> $report
+fi
+
+# per sample number of insertions (ref and non-ref)
+ngs_out="$samplefolder/results/$sample"_ngs_te_mapper_nonredundant.bed
+if [[ -e $ngs_out ]]
+then
+	te_all=`tail -n +2 $ngs_out | wc -l`
+	te_non_ref=`grep -c "non-ref" $ngs_out`
+	te_ref=`tail -n +2 $ngs_out | grep -v -c "non-ref"`
+	echo "TEs detected by ngs_te_mapper (all): $te_all"
+	echo "TEs detected by ngs_te_mapper (non-reference): $te_non_ref"
+	echo "TEs detected by ngs_te_mapper (reference): $te_ref"
+fi
+
+relocate_out="$samplefolder/results/$sample"_relocate_nonredundant.bed
+if [[ -e $relocate_out ]]
+then
+	te_all=`tail -n +2 $relocate_out | wc -l`
+	te_non_ref=`grep -c "non-ref" $relocate_out`
+	te_ref=`tail -n +2 $relocate_out | grep -v -c "non-ref"`
+	echo "TEs detected by RelocaTE (all): $te_all"
+	echo "TEs detected by RelocaTE (non-reference): $te_non_ref"
+	echo "TEs detected by RelocaTE (reference): $te_ref"
+fi
+
+temp_out="$samplefolder/results/$sample"_temp_nonredundant.bed
+if [[ -e $ngs_out ]]
+then
+	te_all=`tail -n +2 $temp_out | wc -l`
+	te_non_ref=`grep -c "non-ref" $temp_out`
+	te_ref=`tail -n +2 $temp_out | grep -v -c "non-ref"`
+	echo "TEs detected by TEMP (all): $te_all"
+	echo "TEs detected by TEMP (non-reference): $te_non_ref"
+	echo "TEs detected by TEMP (reference): $te_ref"
+fi
+
+popoolationte_out="$samplefolder/results/$sample"_popoolationte_nonredundant.bed
+if [[ -e $ngs_out ]]
+then
+	te_all=`tail -n +2 $popoolationte_out | wc -l`
+	te_non_ref=`grep -c "non-ref" $popoolationte_out`
+	te_ref=`tail -n +2 $popoolationte_out | grep -v -c "non-ref"`
+	echo "TEs detected by PoPoolationTE (all): $te_all"
+	echo "TEs detected by PoPoolationTE (non-reference): $te_non_ref"
+	echo "TEs detected by PoPoolationTE (reference): $te_ref"
+fi
+
+retroseq_out="$samplefolder/results/$sample"_retroseq_nonredundant.bed
+if [[ -e $retroseq_out ]]
+then
+	te_all=`tail -n +2 $retroseq_out | wc -l`
+	te_non_ref=`grep -c "non-ref" $retroseq_out`
+	te_ref=`tail -n +2 $retroseq_out | grep -v -c "non-ref"`
+	echo "TEs detected by RetroSeq (all): $te_all"
+	echo "TEs detected by RetroSeq (non-reference): $te_non_ref"
+	echo "TEs detected by RetroSeq (reference): $te_ref"
+fi
+
+telocate_out="$samplefolder/results/$sample"_telocate_nonredundant.bed
+if [[ -e $retroseq_out ]]
+then
+	te_all=`tail -n +2 $telocate_out | wc -l`
+	te_non_ref=`grep -c "non-ref" $telocate_out`
+	te_ref=`tail -n +2 $telocate_out | grep -v -c "non-ref"`
+	echo "TEs detected by TE-locate (all): $te_all"
+	echo "TEs detected by TE-locate (non-reference): $te_non_ref"
+	echo "TEs detected by TE-locate (reference): $te_ref"
+fi
+
 #########################################################################################
 
 # If a user has used an altered genome then insertions in false chromosomes may exist
