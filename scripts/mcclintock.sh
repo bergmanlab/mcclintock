@@ -845,9 +845,9 @@ then
 	te_all=`tail -n +2 $ngs_out | wc -l`
 	te_non_ref=`grep -c "non-ref" $ngs_out`
 	te_ref=`tail -n +2 $ngs_out | grep -v -c "non-ref"`
-	echo "TEs detected by ngs_te_mapper (all): $te_all"
-	echo "TEs detected by ngs_te_mapper (non-reference): $te_non_ref"
-	echo "TEs detected by ngs_te_mapper (reference): $te_ref"
+	echo "TEs detected by ngs_te_mapper (all): $te_all" >> $report
+	echo "TEs detected by ngs_te_mapper (non-reference): $te_non_ref" >> $report
+	echo "TEs detected by ngs_te_mapper (reference): $te_ref" >> $report
 fi
 
 relocate_out="$samplefolder/results/$sample"_relocate_nonredundant.bed
@@ -856,9 +856,9 @@ then
 	te_all=`tail -n +2 $relocate_out | wc -l`
 	te_non_ref=`grep -c "non-ref" $relocate_out`
 	te_ref=`tail -n +2 $relocate_out | grep -v -c "non-ref"`
-	echo "TEs detected by RelocaTE (all): $te_all"
-	echo "TEs detected by RelocaTE (non-reference): $te_non_ref"
-	echo "TEs detected by RelocaTE (reference): $te_ref"
+	echo "TEs detected by RelocaTE (all): $te_all" >> $report
+	echo "TEs detected by RelocaTE (non-reference): $te_non_ref" >> $report
+	echo "TEs detected by RelocaTE (reference): $te_ref" >> $report
 fi
 
 temp_out="$samplefolder/results/$sample"_temp_nonredundant.bed
@@ -867,9 +867,9 @@ then
 	te_all=`tail -n +2 $temp_out | wc -l`
 	te_non_ref=`grep -c "non-ref" $temp_out`
 	te_ref=`tail -n +2 $temp_out | grep -v -c "non-ref"`
-	echo "TEs detected by TEMP (all): $te_all"
-	echo "TEs detected by TEMP (non-reference): $te_non_ref"
-	echo "TEs detected by TEMP (reference): $te_ref"
+	echo "TEs detected by TEMP (all): $te_all" >> $report
+	echo "TEs detected by TEMP (non-reference): $te_non_ref" >> $report
+	echo "TEs detected by TEMP (reference): $te_ref" >> $report
 fi
 
 popoolationte_out="$samplefolder/results/$sample"_popoolationte_nonredundant.bed
@@ -878,9 +878,9 @@ then
 	te_all=`tail -n +2 $popoolationte_out | wc -l`
 	te_non_ref=`grep -c "non-ref" $popoolationte_out`
 	te_ref=`tail -n +2 $popoolationte_out | grep -v -c "non-ref"`
-	echo "TEs detected by PoPoolationTE (all): $te_all"
-	echo "TEs detected by PoPoolationTE (non-reference): $te_non_ref"
-	echo "TEs detected by PoPoolationTE (reference): $te_ref"
+	echo "TEs detected by PoPoolationTE (all): $te_all" >> $report
+	echo "TEs detected by PoPoolationTE (non-reference): $te_non_ref" >> $report
+	echo "TEs detected by PoPoolationTE (reference): $te_ref" >> $report
 fi
 
 retroseq_out="$samplefolder/results/$sample"_retroseq_nonredundant.bed
@@ -889,9 +889,9 @@ then
 	te_all=`tail -n +2 $retroseq_out | wc -l`
 	te_non_ref=`grep -c "non-ref" $retroseq_out`
 	te_ref=`tail -n +2 $retroseq_out | grep -v -c "non-ref"`
-	echo "TEs detected by RetroSeq (all): $te_all"
-	echo "TEs detected by RetroSeq (non-reference): $te_non_ref"
-	echo "TEs detected by RetroSeq (reference): $te_ref"
+	echo "TEs detected by RetroSeq (all): $te_all" >> $report
+	echo "TEs detected by RetroSeq (non-reference): $te_non_ref" >> $report
+	echo "TEs detected by RetroSeq (reference): $te_ref" >> $report
 fi
 
 telocate_out="$samplefolder/results/$sample"_telocate_nonredundant.bed
@@ -900,9 +900,9 @@ then
 	te_all=`tail -n +2 $telocate_out | wc -l`
 	te_non_ref=`grep -c "non-ref" $telocate_out`
 	te_ref=`tail -n +2 $telocate_out | grep -v -c "non-ref"`
-	echo "TEs detected by TE-locate (all): $te_all"
-	echo "TEs detected by TE-locate (non-reference): $te_non_ref"
-	echo "TEs detected by TE-locate (reference): $te_ref"
+	echo "TEs detected by TE-locate (all): $te_all" >> $report
+	echo "TEs detected by TE-locate (non-reference): $te_non_ref" >> $report
+	echo "TEs detected by TE-locate (reference): $te_ref" >> $report
 fi
 
 #########################################################################################
