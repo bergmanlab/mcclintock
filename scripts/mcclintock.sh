@@ -827,20 +827,20 @@ fi
 if [[ -e "$bam" ]]
 then
 	normal_ref_genome=$referencefolder/$reference_genome_file
-	if [[ ! -f $referencefolder/dm6.sorted.genome ]]
+	if [[ ! -f $referencefolder/dm6.fasta.out.complement.bed ]]
 	then
 		grep chr $normal_ref_genome.fai | cut -f1,2 | sort > $referencefolder/dm6.sorted.genome
 		bedtools slop -i $bed_te_locations_file -g $referencefolder/dm6.sorted.genome -l 1 -r 0 > $referencefolder/dm6.fasta.out.zero.bed
 		bedtools complement -i $referencefolder/dm6.fasta.out.zero.bed -g $referencefolder/dm6.sorted.genome | grep -v chrM > $referencefolder/dm6.fasta.out.complement.bed
-		bed_nonte=$referencefolder/dm6.fasta.out.complement.bed
 	fi
+	bed_nonte=$referencefolder/dm6.fasta.out.complement.bed
 	genome_avg_depth=`samtools depth -b  $bed_nonte $bam | awk '{ total += $3 } END { print total/NR }'`
 	echo "average genome coverage: $genome_avg_depth" >> $report
 fi
 
 # per sample number of insertions (ref and non-ref)
 ngs_out="$samplefolder/results/$sample"_ngs_te_mapper_nonredundant.bed
-if [[ -e $ngs_out ]]
+if [[ -e "$ngs_out" ]]
 then
 	te_all=`tail -n +2 $ngs_out | wc -l`
 	te_non_ref=`grep -c "non-ref" $ngs_out`
@@ -851,7 +851,7 @@ then
 fi
 
 relocate_out="$samplefolder/results/$sample"_relocate_nonredundant.bed
-if [[ -e $relocate_out ]]
+if [[ -e "$relocate_out" ]]
 then
 	te_all=`tail -n +2 $relocate_out | wc -l`
 	te_non_ref=`grep -c "non-ref" $relocate_out`
@@ -862,7 +862,7 @@ then
 fi
 
 temp_out="$samplefolder/results/$sample"_temp_nonredundant.bed
-if [[ -e $ngs_out ]]
+if [[ -e "$temp_out" ]]
 then
 	te_all=`tail -n +2 $temp_out | wc -l`
 	te_non_ref=`grep -c "non-ref" $temp_out`
@@ -873,7 +873,7 @@ then
 fi
 
 popoolationte_out="$samplefolder/results/$sample"_popoolationte_nonredundant.bed
-if [[ -e $ngs_out ]]
+if [[ -e "$popoolationte_out" ]]
 then
 	te_all=`tail -n +2 $popoolationte_out | wc -l`
 	te_non_ref=`grep -c "non-ref" $popoolationte_out`
@@ -884,7 +884,7 @@ then
 fi
 
 retroseq_out="$samplefolder/results/$sample"_retroseq_nonredundant.bed
-if [[ -e $retroseq_out ]]
+if [[ -e "$retroseq_out" ]]
 then
 	te_all=`tail -n +2 $retroseq_out | wc -l`
 	te_non_ref=`grep -c "non-ref" $retroseq_out`
@@ -895,7 +895,7 @@ then
 fi
 
 telocate_out="$samplefolder/results/$sample"_telocate_nonredundant.bed
-if [[ -e $retroseq_out ]]
+if [[ -e "$telocate_out" ]]
 then
 	te_all=`tail -n +2 $telocate_out | wc -l`
 	te_non_ref=`grep -c "non-ref" $telocate_out`
