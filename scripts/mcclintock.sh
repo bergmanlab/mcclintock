@@ -181,7 +181,7 @@ mkdir $samplefolder/reads
 mkdir $samplefolder/bam
 mkdir $samplefolder/sam
 mkdir $samplefolder/results
-mkdir $samplefolder/results/qualitycontrol
+mkdir $samplefolder/results/summary
 mkdir $samplefolder/results/originalmethodresults
 
 # Copy input files in to sample directory
@@ -424,12 +424,12 @@ then
 	printf "\nFastQC not installed, skipping input quality analysis...\n\n" | tee -a /dev/stderr
 else
 	printf "\nPerforming FastQC analysis...\n\n" | tee -a /dev/stderr
-	mkdir $samplefolder/results/qualitycontrol/fastqc_analysis
+	mkdir $samplefolder/results/summary/fastqc_analysis
 	if [[ $single_end == "true" ]]
 	then
-		fastqc -t $processors $fastq1 -o $samplefolder/results/qualitycontrol/fastqc_analysis
+		fastqc -t $processors $fastq1 -o $samplefolder/results/summary/fastqc_analysis
 	else
-		fastqc -t $processors $fastq1 $fastq2 -o $samplefolder/results/qualitycontrol/fastqc_analysis
+		fastqc -t $processors $fastq1 $fastq2 -o $samplefolder/results/summary/fastqc_analysis
 	fi
 fi
 
@@ -465,10 +465,11 @@ fi
 if [[ "$te_cov" == "on" ]]
 then
 	printf "\nCalculating normalized average coverage for TEs...\n\n" | tee -a /dev/stderr
-	mkdir -p $samplefolder/results/te_coverage
-	te_cov_dir=$samplefolder/results/te_coverage
+	mkdir -p $samplefolder/results/summary/te_coverage
+	te_cov_dir=$samplefolder/results/summary/te_coverage
 	normal_ref_genome=$referencefolder/$reference_genome_file
 	bash $mcclintock_location/scripts/te_coverage.sh $sample $referencefolder $te_cov_dir $fastq1 $fastq2 $normal_ref_genome $consensus_te_seqs $processors
+	printf "\nCoverage analysis finished.\n\n" | tee -a /dev/stderr
 fi
 
 # Allow case insensitivity for method names
@@ -496,8 +497,8 @@ then
 		printf "\nCalculating median insert size...\n\n" | tee -a /dev/stderr
 		median_insertsize=`cut -f9 $sam | sort -S $memory"G" -n | awk '{if ($1 > 0) ins[reads++]=$1; } END { print ins[int(reads/2)]; }'`
 		printf "\nMedian insert size = $median_insertsize\n\n" | tee -a /dev/stderr
-		mkdir -p $samplefolder/results/qualitycontrol
-		echo $median_insertsize > $samplefolder/results/qualitycontrol/median_insertsize
+		mkdir -p $samplefolder/results/summary
+		echo $median_insertsize > $samplefolder/results/summary/median_insertsize
 	fi
 
 	# Allow case insensitivity for method names
@@ -512,7 +513,7 @@ then
 		samtools index $bam
 
 		# Get stats of bam file from samtools
-		samtools flagstat $bam > $samplefolder/results/qualitycontrol/bwamem_bamstats.txt
+		samtools flagstat $bam > $samplefolder/results/summary/bwamem_bamstats.txt
 	fi
 
 	# Allow case insensitivity for method names
@@ -771,7 +772,7 @@ fi
 
 # Generate final report
 ## McClintock version and invoke command
-report=$samplefolder/results/qualitycontrol/report.txt
+report=$samplefolder/results/summary/summary_report.txt
 echo "McClintock version: `git rev-parse HEAD`" > $report
 echo "McClintock was called as follows:" >> $report
 invocation="$(printf %q "$BASH_SOURCE")$((($#)) && printf ' %q' "$@")"
@@ -780,7 +781,7 @@ echo "$invocation" >> $report
 ## read length
 if [[ -n "$location" ]]
 then
-	fastqc_dir=$samplefolder/results/qualitycontrol/fastqc_analysis
+	fastqc_dir=$samplefolder/results/summary/fastqc_analysis
 	cd $fastqc_dir
 	unzip '*.zip'
 	r1_fastqc="$fastqc_dir/$sample"_1_fastqc/fastqc_data.txt
@@ -801,7 +802,7 @@ then
 fi
 
 ## read count
-bamstat=$samplefolder/results/qualitycontrol/bwamem_bamstats.txt
+bamstat=$samplefolder/results/summary/bwamem_bamstats.txt
 if [[ -e "$bamstat" ]]
 then
 	r1_count=`grep "read1" $bamstat | sed 's/\s.*//g'`
@@ -816,7 +817,7 @@ then
 fi
 
 ## median insert size
-median_insertsize=$samplefolder/results/qualitycontrol/median_insertsize
+median_insertsize=$samplefolder/results/summary/median_insertsize
 if [[ -e "$median_insertsize" ]]
 then
 	median_ins=`cat $median_insertsize`
@@ -904,6 +905,12 @@ then
 	echo "TEs detected by TE-locate (non-reference): $te_non_ref" >> $report
 	echo "TEs detected by TE-locate (reference): $te_ref" >> $report
 fi
+
+# create summary table for family and method based TE detection
+bed_dir="$samplefolder/results"
+te_name=$referencefolder/TE-names
+te_summary_out="$samplefolder/results/summary/te_summary_table.csv"
+perl $mcclintock_location/scripts/te_summary_table.pl -d $bed_dir -t $te_name > $te_summary_out
 
 #########################################################################################
 
