@@ -19,7 +19,7 @@ rm -rf $tmp_dir/*
 # Hard mask reference genome to exclude reference TE sequences using repeatmasker
 if [[ ! -f $reference_genome".masked" || ! -f $reference_genome".out.gff" ]]
 then
-    time RepeatMasker -dir $referencefolder -s -nolow -no_is -a $reference_genome -lib $consensus_te_seqs -pa $processors
+    time RepeatMasker -dir $referencefolder -s -gff -nolow -no_is -a $reference_genome -lib $consensus_te_seqs -pa $processors
     # RepeatMasker appears to override the custom database names during the ProcessRepeats step so this changes them back for
     # Drosophila, more rules like this may be needed for other reference genomes
     sed "s/McClintock-int/McClintock/g" $reference_genome".out.gff" > $referencefolder/tmp

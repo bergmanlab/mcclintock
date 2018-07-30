@@ -784,8 +784,8 @@ then
 	fastqc_dir=$samplefolder/results/summary/fastqc_analysis
 	cd $fastqc_dir
 	unzip '*.zip'
-	r1_fastqc="$fastqc_dir/$sample"_1_fastqc/fastqc_data.txt
-	r2_fastqc="$fastqc_dir/$sample"_2_fastqc/fastqc_data.txt
+	r1_fastqc=`ls -d -1 $fastqc_dir/*_1*/fastqc_data.txt`
+	r2_fastqc=`ls -d -1 $fastqc_dir/*_2*/fastqc_data.txt`
 	if [[ -e "$r2_fastqc" ]]
 	then
 	r1_len=`grep "Sequence length" $r1_fastqc | sed "s/Sequence length/read1 sequence length:/g"`
@@ -827,14 +827,13 @@ fi
 ## average genome coverage
 if [[ -e "$bam" ]]
 then
-	normal_ref_genome=$referencefolder/$reference_genome_file
 	if [[ ! -f $referencefolder/dm6.fasta.out.complement.bed ]]
 	then
-		grep chr $normal_ref_genome.fai | cut -f1,2 | sort > $referencefolder/dm6.sorted.genome
-		bedtools slop -i $bed_te_locations_file -g $referencefolder/dm6.sorted.genome -l 1 -r 0 > $referencefolder/dm6.fasta.out.zero.bed
-		bedtools complement -i $referencefolder/dm6.fasta.out.zero.bed -g $referencefolder/dm6.sorted.genome | grep -v chrM > $referencefolder/dm6.fasta.out.complement.bed
+		cat "$reference_genome.fai" | cut -f1,2 | sort > $referencefolder/"$sample.sorted.all.genome"
+		bedtools slop -i $bed_te_locations_file -g $referencefolder/"$sample.sorted.all.genome" -l 1 -r 0 > $referencefolder/"$sample.fasta.out.zero.all.bed"
+		bedtools complement -i $referencefolder/"$sample.fasta.out.zero.all.bed" -g $referencefolder/"$sample.sorted.all.genome" > $referencefolder/"$sample.fasta.out.complement.bed"
 	fi
-	bed_nonte=$referencefolder/dm6.fasta.out.complement.bed
+	bed_nonte=$referencefolder/"$sample.fasta.out.complement.bed"
 	genome_avg_depth=`samtools depth -b  $bed_nonte $bam | awk '{ total += $3 } END { print total/NR }'`
 	echo "average genome coverage: $genome_avg_depth" >> $report
 fi
