@@ -219,6 +219,17 @@ else
 	cp -s $input1 $samplefolder/reads/$sample.unPaired.fastq
 fi
 
+# Coverage analysis for each TE
+if [[ "$te_cov" == "on" ]]
+then
+	printf "\nCalculating normalized average coverage for TEs...\n\n" | tee -a /dev/stderr
+	mkdir -p $samplefolder/results/summary/te_coverage
+	te_cov_dir=$samplefolder/results/summary/te_coverage
+	normal_ref_genome=$referencefolder/$reference_genome_file
+	bash $mcclintock_location/scripts/te_coverage.sh $sample $referencefolder $te_cov_dir $fastq1 $fastq2 $normal_ref_genome $consensus_te_seqs $mcclintock_location $processors
+	printf "\nCoverage analysis finished.\n\n" | tee -a /dev/stderr
+fi
+
 # If a GFF is supplied then run the analysis using the GFF and TE hierarchy as input
 if [[ $inputg ]]
 then
@@ -459,17 +470,6 @@ telocate_te_locations=$telocate_te_locations"_HL.gff"
 if [[ ! -f $telocate_te_locations ]]
 then
 	perl $mcclintock_location/TE-locate/TE_hierarchy.pl $te_locations $te_families Alias
-fi
-
-# Coverage analysis for each TE
-if [[ "$te_cov" == "on" ]]
-then
-	printf "\nCalculating normalized average coverage for TEs...\n\n" | tee -a /dev/stderr
-	mkdir -p $samplefolder/results/summary/te_coverage
-	te_cov_dir=$samplefolder/results/summary/te_coverage
-	normal_ref_genome=$referencefolder/$reference_genome_file
-	bash $mcclintock_location/scripts/te_coverage.sh $sample $referencefolder $te_cov_dir $fastq1 $fastq2 $normal_ref_genome $consensus_te_seqs $processors
-	printf "\nCoverage analysis finished.\n\n" | tee -a /dev/stderr
 fi
 
 # Allow case insensitivity for method names
