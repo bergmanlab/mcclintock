@@ -50,7 +50,7 @@ awk 'BEGIN{OFS="\t"}{if(NR>3) {if($9=="C"){strand="-"}else{strand="+"};print $5,
 bedtools sort -i $rep_bed > $rep_bed_sorted
 grep chr $ref_augmented.fai | cut -f1,2 | sort > $referencefolder/$sample".sorted.genome"
 bedtools slop -i $rep_bed_sorted -g $referencefolder/$sample".sorted.genome" -l 1 -r 0 > $referencefolder/$sample".fasta.out.zero.bed"
-bedtools complement -i $referencefolder/$sample".fasta.out.zero.bed" -g $referencefolder/$sample".sorted.genome" | grep -v chrM > $referencefolder/$sample".fasta.out.complement.bed"
+bedtools complement -i $referencefolder/$sample".fasta.out.zero.bed" -g $referencefolder/$sample".sorted.genome" > $referencefolder/$sample".fasta.out.complement.bed"
 bed_nonte=$referencefolder/$sample".fasta.out.complement.bed"
 
 # Calculate depth of coverage for every TE using Samtools depth module on the BAM file and normalize by average coverage in no TE regione of the normal reference genome.
