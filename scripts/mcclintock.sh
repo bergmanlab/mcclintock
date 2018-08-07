@@ -195,6 +195,9 @@ then
 	grep \> $referencefolder/$reference_genome_file | cut -d\> -f2 > $referencefolder/chromosome_names
 fi
 reference_genome=$referencefolder/$reference_genome_file
+normal_ref_genome=$referencefolder/$reference_genome_file.old
+cp $reference_genome > $normal_ref_genome
+samtools faidx $normal_ref_genome
 chromosome_names=$referencefolder/chromosome_names
 
 # Copy the TE consesnus fasta file to the run folder
@@ -225,8 +228,8 @@ then
 	printf "\nCalculating normalized average coverage for TEs...\n\n" | tee -a /dev/stderr
 	mkdir -p $samplefolder/results/summary/te_coverage
 	te_cov_dir=$samplefolder/results/summary/te_coverage
-	normal_ref_genome=$referencefolder/$reference_genome_file
-	bash $mcclintock_location/scripts/te_coverage.sh $sample $referencefolder $te_cov_dir $fastq1 $fastq2 $normal_ref_genome $consensus_te_seqs $mcclintock_location $processors
+	ref_genome=$referencefolder/$reference_genome_file
+	bash $mcclintock_location/scripts/te_coverage.sh $sample $referencefolder $te_cov_dir $fastq1 $fastq2 $ref_genome $consensus_te_seqs $mcclintock_location $processors
 	printf "\nCoverage analysis finished.\n\n" | tee -a /dev/stderr
 fi
 
@@ -829,8 +832,8 @@ if [[ -e "$bam" ]]
 then
 	if [[ ! -f $referencefolder/dm6.fasta.out.complement.bed ]]
 	then
-		cat "$reference_genome.fai" | cut -f1,2 | sort > $referencefolder/"$sample.sorted.all.genome"
-		bedtools slop -i $bed_te_locations_file -g $referencefolder/"$sample.sorted.all.genome" -l 1 -r 0 > $referencefolder/"$sample.fasta.out.zero.all.bed"
+		cat "$normal_ref_genome".fai | cut -f1,2 | sort > $referencefolder/"$sample.sorted.all.genome"
+		bedtools slop -i $bed_te_locations_file -g $referencefolder/"$sample.sorted.all.genome" -l 1 -r 0 | sortBed > $referencefolder/"$sample.fasta.out.zero.all.bed"
 		bedtools complement -i $referencefolder/"$sample.fasta.out.zero.all.bed" -g $referencefolder/"$sample.sorted.all.genome" > $referencefolder/"$sample.fasta.out.complement.bed"
 	fi
 	bed_nonte=$referencefolder/"$sample.fasta.out.complement.bed"
