@@ -82,6 +82,8 @@ sh install.sh
 
 This will download and unpack all of the TE detection pipelines and check that the required dependencies are available in your path. Missing dependencies will be reported and you must install or make sure these are available to run the full pipeline.
 
+Note: required dependencies should be available in your enrivonment path before the installation, lack of dependencies might result in incorrect configurations for certain component methods.
+
 ### Running on a test dataset
 A script is included to run the full pipeline on a test Illumina resequencing dataset from the yeast genome. To run this test script change directory into the directory named test and run the script runttest.sh. 
 
