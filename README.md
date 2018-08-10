@@ -121,6 +121,8 @@ sh mcclintock.sh -m "RelocaTE TEMP ngs_te_mapper" -r reference.fasta -c te_conse
 
 Data created during processing will be stored in a directory in the output directory (if one is specified) within main directory named after the reference genome used with individual sub-directories for samples. 
 
+Note: If you want to run the pipeline on multiple samples using same reference genome and output directory as input, jobs have to be run in a specific way that McClintock run for a single sample has to finish before the rest runs get started.
+
 ### Output
 Output files for a full McClintock run or individual components are located in a directory named with the following path structure `/reference_genome/sample_name/results/`. All directories referred to below are contained within this parent directory.
 
