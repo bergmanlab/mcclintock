@@ -17,9 +17,9 @@ usage ()
 	echo "-o : An output folder for the run. This should be the absolute path. If not supplied then the directory mcclintock"
 	echo "     is launched from will be used. [Optional]"
 	echo "-T : If this option is specified then fastq comments (e.g. barcode) will be incorporated to SAM output. Warning: do not"
-	echo "     use this option if the input fastq files do not have comments."
+	echo "     use this option if the input fastq files do not have comments. [Optional: default will not include this]"
 	echo "-d : If this option is specified then McClintock will perform depth of coverage analysis for every TE. Note: Doing"
-	echo "     TE-based coverage analysis will result in longer running time."
+	echo "     TE-based coverage analysis will result in longer running time. [Optional: default will not include this]"
 	echo "	   . The default is not appending the fastq comment to SAM"
 	echo "-b : Retain the sorted and indexed BAM file of the paired end data aligned to the reference genome."
 	echo "-i : If this option is specified then all sample specific intermediate files will be removed, leaving only"
@@ -181,7 +181,7 @@ mkdir $samplefolder/reads
 mkdir $samplefolder/bam
 mkdir $samplefolder/sam
 mkdir $samplefolder/results
-mkdir $samplefolder/results/qualitycontrol
+mkdir $samplefolder/results/summary
 mkdir $samplefolder/results/originalmethodresults
 
 # Copy input files in to sample directory
@@ -195,6 +195,9 @@ then
 	grep \> $referencefolder/$reference_genome_file | cut -d\> -f2 > $referencefolder/chromosome_names
 fi
 reference_genome=$referencefolder/$reference_genome_file
+normal_ref_genome=$referencefolder/$reference_genome_file.old
+cp $reference_genome $normal_ref_genome
+samtools faidx $normal_ref_genome
 chromosome_names=$referencefolder/chromosome_names
 
 # Copy the TE consesnus fasta file to the run folder
@@ -217,6 +220,17 @@ then
 	fastq2=$samplefolder/reads/$fastq2_file
 else
 	cp -s $input1 $samplefolder/reads/$sample.unPaired.fastq
+fi
+
+# Coverage analysis for each TE
+if [[ "$te_cov" == "on" ]]
+then
+	printf "\nCalculating normalized average coverage for TEs...\n\n" | tee -a /dev/stderr
+	mkdir -p $samplefolder/results/summary/te_coverage
+	te_cov_dir=$samplefolder/results/summary/te_coverage
+	ref_genome=$referencefolder/$reference_genome_file
+	bash $mcclintock_location/scripts/te_coverage.sh $sample $referencefolder $te_cov_dir $fastq1 $fastq2 $ref_genome $consensus_te_seqs $mcclintock_location $processors
+	printf "\nCoverage analysis finished.\n\n" | tee -a /dev/stderr
 fi
 
 # If a GFF is supplied then run the analysis using the GFF and TE hierarchy as input
@@ -424,12 +438,12 @@ then
 	printf "\nFastQC not installed, skipping input quality analysis...\n\n" | tee -a /dev/stderr
 else
 	printf "\nPerforming FastQC analysis...\n\n" | tee -a /dev/stderr
-	mkdir $samplefolder/results/qualitycontrol/fastqc_analysis
+	mkdir $samplefolder/results/summary/fastqc_analysis
 	if [[ $single_end == "true" ]]
 	then
-		fastqc -t $processors $fastq1 -o $samplefolder/results/qualitycontrol/fastqc_analysis
+		fastqc -t $processors $fastq1 -o $samplefolder/results/summary/fastqc_analysis
 	else
-		fastqc -t $processors $fastq1 $fastq2 -o $samplefolder/results/qualitycontrol/fastqc_analysis
+		fastqc -t $processors $fastq1 $fastq2 -o $samplefolder/results/summary/fastqc_analysis
 	fi
 fi
 
@@ -461,16 +475,6 @@ then
 	perl $mcclintock_location/TE-locate/TE_hierarchy.pl $te_locations $te_families Alias
 fi
 
-# Coverage analysis for each TE
-if [[ "$te_cov" == "on" ]]
-then
-	printf "\nCalculating normalized average coverage for TEs...\n\n" | tee -a /dev/stderr
-	mkdir -p $samplefolder/results/te_coverage
-	te_cov_dir=$samplefolder/results/te_coverage
-	normal_ref_genome=$referencefolder/$reference_genome_file
-	bash $mcclintock_location/scripts/te_coverage.sh $sample $referencefolder $te_cov_dir $fastq1 $fastq2 $normal_ref_genome $consensus_te_seqs $processors
-fi
-
 # Allow case insensitivity for method names
 shopt -s nocasematch
 if [[ $methods == *TE-locate* || $methods == *TElocate* || $methods == *RetroSeq* || $methods == *TEMP* ]]
@@ -496,8 +500,8 @@ then
 		printf "\nCalculating median insert size...\n\n" | tee -a /dev/stderr
 		median_insertsize=`cut -f9 $sam | sort -S $memory"G" -n | awk '{if ($1 > 0) ins[reads++]=$1; } END { print ins[int(reads/2)]; }'`
 		printf "\nMedian insert size = $median_insertsize\n\n" | tee -a /dev/stderr
-		mkdir -p $samplefolder/results/qualitycontrol
-		echo $median_insertsize > $samplefolder/results/qualitycontrol/median_insertsize
+		mkdir -p $samplefolder/results/summary
+		echo $median_insertsize > $samplefolder/results/summary/median_insertsize
 	fi
 
 	# Allow case insensitivity for method names
@@ -512,7 +516,7 @@ then
 		samtools index $bam
 
 		# Get stats of bam file from samtools
-		samtools flagstat $bam > $samplefolder/results/qualitycontrol/bwamem_bamstats.txt
+		samtools flagstat $bam > $samplefolder/results/summary/bwamem_bamstats.txt
 	fi
 
 	# Allow case insensitivity for method names
@@ -768,6 +772,147 @@ then
 	fi
 	cd $mcclintock_location/
 fi
+
+# Generate final report
+## McClintock version and invoke command
+report=$samplefolder/results/summary/summary_report.txt
+echo "McClintock version: `git rev-parse HEAD`" > $report
+echo "McClintock was called as follows:" >> $report
+invocation="$(printf %q "$BASH_SOURCE")$((($#)) && printf ' %q' "$@")"
+echo "$invocation" >> $report
+
+## read length
+if [[ -n "$location" ]]
+then
+	fastqc_dir=$samplefolder/results/summary/fastqc_analysis
+	cd $fastqc_dir
+	unzip '*.zip'
+	r1_fastqc=`ls -d -1 $fastqc_dir/*_1*/fastqc_data.txt`
+	r2_fastqc=`ls -d -1 $fastqc_dir/*_2*/fastqc_data.txt`
+	if [[ -e "$r2_fastqc" ]]
+	then
+	r1_len=`grep "Sequence length" $r1_fastqc | sed "s/Sequence length/read1 sequence length:/g"`
+	r2_len=`grep "Sequence length" $r2_fastqc | sed "s/Sequence length/read2 sequence length:/g"`
+	echo "$r1_len" >> $report
+	echo "$r2_len" >> $report
+	rm -rf "$fastqc_dir/$sample"_1_fastqc
+	rm -rf "$fastqc_dir/$sample"_2_fastqc
+	else
+	r1_len=`grep "Sequence length" $r1_fastqc | sed "s/Sequence length/sequence length:/g"`
+	echo "$r1_len" >> $report
+	rm -rf "$fastqc_dir/$sample"_1_fastqc
+	fi
+fi
+
+## read count
+bamstat=$samplefolder/results/summary/bwamem_bamstats.txt
+if [[ -e "$bamstat" ]]
+then
+	r1_count=`grep "read1" $bamstat | sed 's/\s.*//g'`
+	r2_count=`grep "read2" $bamstat | sed 's/\s.*//g'`
+	if [[ -z "$r2_count" ]]
+	then
+		echo "Number of reads: $r1_count" >> $report
+	else
+		echo "Number of reads in read1: $r1_count" >> $report
+		echo "Number of reads in read2: $r2_count" >> $report
+	fi
+fi
+
+## median insert size
+median_insertsize=$samplefolder/results/summary/median_insertsize
+if [[ -e "$median_insertsize" ]]
+then
+	median_ins=`cat $median_insertsize`
+	echo "median insert size: $median_ins" >> $report
+fi
+
+## average genome coverage
+if [[ -e "$bam" ]]
+then
+	if [[ ! -f $referencefolder/dm6.fasta.out.complement.bed ]]
+	then
+		cat "$reference_genome".fai | cut -f1,2 | sort -k 1,1 -k2,2n > $referencefolder/"$sample.sorted.all.genome"
+		bedtools slop -i $bed_te_locations_file -g $referencefolder/"$sample.sorted.all.genome" -l 1 -r 0 | sort -k 1,1 -k2,2n > $referencefolder/"$sample.fasta.out.zero.all.bed"
+		bedtools complement -i $referencefolder/"$sample.fasta.out.zero.all.bed" -g $referencefolder/"$sample.sorted.all.genome" | grep -v "\b0\s*0\b" | grep -v "\s-[0-9]*\b" > $referencefolder/"$sample.fasta.out.complement.bed"
+	fi
+	bed_nonte=$referencefolder/"$sample.fasta.out.complement.bed"
+	genome_avg_depth=`samtools depth -b  $bed_nonte $bam | awk '{ total += $3 } END { print total/NR }'`
+	echo "average genome coverage: $genome_avg_depth" >> $report
+fi
+
+# per sample number of insertions (ref and non-ref)
+ngs_out="$samplefolder/results/$sample"_ngs_te_mapper_nonredundant.bed
+if [[ -e "$ngs_out" ]]
+then
+	te_all=`tail -n +2 $ngs_out | wc -l`
+	te_non_ref=`grep -c "non-ref" $ngs_out`
+	te_ref=`tail -n +2 $ngs_out | grep -v -c "non-ref"`
+	echo "TEs detected by ngs_te_mapper (all): $te_all" >> $report
+	echo "TEs detected by ngs_te_mapper (non-reference): $te_non_ref" >> $report
+	echo "TEs detected by ngs_te_mapper (reference): $te_ref" >> $report
+fi
+
+relocate_out="$samplefolder/results/$sample"_relocate_nonredundant.bed
+if [[ -e "$relocate_out" ]]
+then
+	te_all=`tail -n +2 $relocate_out | wc -l`
+	te_non_ref=`grep -c "non-ref" $relocate_out`
+	te_ref=`tail -n +2 $relocate_out | grep -v -c "non-ref"`
+	echo "TEs detected by RelocaTE (all): $te_all" >> $report
+	echo "TEs detected by RelocaTE (non-reference): $te_non_ref" >> $report
+	echo "TEs detected by RelocaTE (reference): $te_ref" >> $report
+fi
+
+temp_out="$samplefolder/results/$sample"_temp_nonredundant.bed
+if [[ -e "$temp_out" ]]
+then
+	te_all=`tail -n +2 $temp_out | wc -l`
+	te_non_ref=`grep -c "non-ref" $temp_out`
+	te_ref=`tail -n +2 $temp_out | grep -v -c "non-ref"`
+	echo "TEs detected by TEMP (all): $te_all" >> $report
+	echo "TEs detected by TEMP (non-reference): $te_non_ref" >> $report
+	echo "TEs detected by TEMP (reference): $te_ref" >> $report
+fi
+
+popoolationte_out="$samplefolder/results/$sample"_popoolationte_nonredundant.bed
+if [[ -e "$popoolationte_out" ]]
+then
+	te_all=`tail -n +2 $popoolationte_out | wc -l`
+	te_non_ref=`grep -c "non-ref" $popoolationte_out`
+	te_ref=`tail -n +2 $popoolationte_out | grep -v -c "non-ref"`
+	echo "TEs detected by PoPoolationTE (all): $te_all" >> $report
+	echo "TEs detected by PoPoolationTE (non-reference): $te_non_ref" >> $report
+	echo "TEs detected by PoPoolationTE (reference): $te_ref" >> $report
+fi
+
+retroseq_out="$samplefolder/results/$sample"_retroseq_nonredundant.bed
+if [[ -e "$retroseq_out" ]]
+then
+	te_all=`tail -n +2 $retroseq_out | wc -l`
+	te_non_ref=`grep -c "non-ref" $retroseq_out`
+	te_ref=`tail -n +2 $retroseq_out | grep -v -c "non-ref"`
+	echo "TEs detected by RetroSeq (all): $te_all" >> $report
+	echo "TEs detected by RetroSeq (non-reference): $te_non_ref" >> $report
+	echo "TEs detected by RetroSeq (reference): $te_ref" >> $report
+fi
+
+telocate_out="$samplefolder/results/$sample"_telocate_nonredundant.bed
+if [[ -e "$telocate_out" ]]
+then
+	te_all=`tail -n +2 $telocate_out | wc -l`
+	te_non_ref=`grep -c "non-ref" $telocate_out`
+	te_ref=`tail -n +2 $telocate_out | grep -v -c "non-ref"`
+	echo "TEs detected by TE-locate (all): $te_all" >> $report
+	echo "TEs detected by TE-locate (non-reference): $te_non_ref" >> $report
+	echo "TEs detected by TE-locate (reference): $te_ref" >> $report
+fi
+
+# create summary table for family and method based TE detection
+bed_dir="$samplefolder/results"
+te_name=$referencefolder/TE-names
+te_summary_out="$samplefolder/results/summary/te_summary_table.csv"
+perl $mcclintock_location/scripts/te_summary_table.pl -d $bed_dir -t $te_name > $te_summary_out
 
 #########################################################################################
 
