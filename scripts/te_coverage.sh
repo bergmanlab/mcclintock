@@ -10,6 +10,7 @@ reference_genome=$6
 consensus_te_seqs=$7
 mcclintock_location=$8
 processors=$9
+remove_intermediates=$10
 
 # create tmp folder for intermediate files
 tmp_dir=$referencefolder/te_cov_tmp
@@ -68,4 +69,7 @@ do
 done
 
 # remove tmp folder
-# rm -rf $tmp_dir
+if [[ "$remove_intermediates" = "on" ]]
+then
+    rm -rf $tmp_dir
+fi
