@@ -130,19 +130,18 @@ If FastQC was present on the system, then output of FastQC will be stored in the
 
 The summary report for the McClintock pipeline `summary_report.txt` will include version and arguments used for the pipeline, number of reads, median insert size, average genome coverage and total number of TEs detected for each method (including all, reference and non-reference).
 
-If TE coverage analysis module was enabled using `-d` option, then output of the module will be stored in `/summary/te_coverage/te_depth.csv`, containing normalized average depth for every TE in the TE library.
-
 The file structure for `summary` will look like this:
 
 File | Description
 -- | --
-/summary/te_coverage | Normalized average coverage for every TE family
 /summary/median_insertsize | Median insert size of the library
 /summary/bwamem_bamstats.txt | bamstats report
 /summary/fastqc_analysis | FastQC analysis output directory
 /summary/summary_report.txt | McClintock summary report
 /summary/te_summary_table.csv | Family and method based TE detection summary
 /summary/te_coverage/te_depth.csv | Normalized average depth for every TE in the TE library (only generated when `-d` is specified)
+
+If TE coverage analysis module was enabled using `-d` option, then output of the module will be stored in `/te_coverage/te_depth.csv`, containing normalized average depth for every TE in the TE library.
 
 Original result files for non-reference and (when available) reference predictions produced by each method are stored in the directory `/originalmethodresults`, containing one sub-directory for each method. Original non-reference and (when available) reference files are then merged and filtered to create 0-based .bed6 format files. For TEMP, Retroseq, and PoPoolationTE, original files are converted into \*raw.bed files that contain all unfiltered predictions for non-reference predictions plus reference TE predictions if provided by the method. Score (Retroseq, ≥6), read support (TEMP and PopoolationTE, reads found for both ends)  and sample frequency (TEMP, >10%) are used to filter raw prediction to create \*redundant.bed files. For RelocaTE, original files from individual families are merged and used to create \*redundant.bed files. For TE-locate, original files are used to create \*redundant.bed directly. \*redundant.bed are filtered to remove predictions that have the identical coordinates for different TE families, with the prediction having the greatest read support (RelocaTE, TEMP, PopoolationTE, TE-locate) or call status (Retroseq) being retained. Non-identical overlapping predictions are retained. The final output file of the run scripts for individual methods after merging reference and non-reference predictions and filtering is \*nonredundant.bed. For ngs_te_mapper, no filtering or merging is needed, and thus \*nonredundant.bed files are created directly.
 
