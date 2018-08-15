@@ -13,7 +13,7 @@ processors=$9
 remove_intermediates=$10
 
 # create tmp folder for intermediate files
-tmp_dir=$referencefolder/te_cov_tmp
+tmp_dir=$te_cov_dir/te_cov_tmp
 mkdir -p $tmp_dir
 rm -rf $tmp_dir/*
 

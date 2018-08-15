@@ -226,8 +226,8 @@ fi
 if [[ "$te_cov" == "on" ]]
 then
 	printf "\nCalculating normalized average coverage for TEs...\n\n" | tee -a /dev/stderr
-	mkdir -p $samplefolder/results/summary/te_coverage
-	te_cov_dir=$samplefolder/results/summary/te_coverage
+	te_cov_dir=$samplefolder/results/te_coverage
+	mkdir -p $te_cov_dir
 	ref_genome=$referencefolder/$reference_genome_file
 	bash $mcclintock_location/scripts/te_coverage.sh $sample $referencefolder $te_cov_dir $fastq1 $fastq2 $ref_genome $consensus_te_seqs $mcclintock_location $processors $remove_intermediates
 	printf "\nCoverage analysis finished.\n\n" | tee -a /dev/stderr
