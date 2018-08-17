@@ -229,7 +229,13 @@ then
 	te_cov_dir=$samplefolder/results/te_coverage
 	mkdir -p $te_cov_dir
 	ref_genome=$referencefolder/$reference_genome_file
-	bash $mcclintock_location/scripts/te_coverage.sh $sample $referencefolder $te_cov_dir $fastq1 $fastq2 $ref_genome $consensus_te_seqs $mcclintock_location $processors $remove_intermediates
+	if [[ $single_end == "true" ]]
+	then
+		bash $mcclintock_location/scripts/te_coverage.sh -s $sample -R $referencefolder -o $te_cov_dir -1 $fastq1 -r $ref_genome -c $consensus_te_seqs -m $mcclintock_location -p $processors -i $remove_intermediates
+	else
+		bash $mcclintock_location/scripts/te_coverage.sh -s $sample -R $referencefolder -o $te_cov_dir -1 $fastq1 -2 $fastq2 -r $ref_genome -c $consensus_te_seqs -m $mcclintock_location -p $processors -i $remove_intermediates
+	fi
+	
 	printf "\nCoverage analysis finished.\n\n" | tee -a /dev/stderr
 fi
 

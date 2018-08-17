@@ -1,16 +1,75 @@
 #!/bin/bash
 
-# Establish variables
-sample=$1
-referencefolder=$2
-te_cov_dir=$3
-fastq1=$4
-fastq2=$5
-reference_genome=$6
-consensus_te_seqs=$7
-mcclintock_location=$8
-processors=$9
-remove_intermediates=$10
+usage () 
+{
+    echo "-s : sample name [Required]"
+    echo "-R : referencefolder [Required]"
+    echo "-o : An output folder for the run. [Optional]"
+    echo "-1 : The absolute path of the first fastq file from a paired end read, this should be named ending _1.fastq. [Required]"
+	echo "-2 : The absolute path of the second fastq file from a paired end read, this should be named ending _2.fastq. [Optional]"
+	echo "-r : A reference genome sequence in fasta format. [Required]"
+	echo "-c : The consensus sequences of the TEs for the species in fasta format. [Required]"
+    echo "-m : McC location [Required]"
+    echo "-p : The number of processors to use for parallel stages of the pipeline. [Optional: default = 1]"
+	echo "-i : If this option is specified then all sample specific intermediate files will be removed, leaving only"
+	echo "     the overall results. The default is to leave sample specific intermediate files (may require large amounts"
+	echo "     of disk space)"
+	echo "-h : Prints this help guide."
+}
+
+# Set default value for processors in case it is not supplied
+processors=1
+
+# Get the options supplied to the program
+while getopts ":s:R:o:1:2:r:c:m:p:hi" opt;
+do
+	case $opt in
+		s)
+			sample=$OPTARG
+			;;
+		R)
+			referencefolder=$OPTARG
+			;;
+		o)
+			te_cov_dir=$OPTARG
+			;;
+		1)
+			fastq1=$OPTARG
+			;;
+		2)	
+			fastq2=$OPTARG
+			;;
+		r)
+			reference_genome=$OPTARG
+			;;
+		c)
+			consensus_te_seqs=$OPTARG
+			;;
+        m)
+            mcclintock_location=$OPTARG
+            ;;
+        p)
+            processors=$OPTARG
+            ;;
+        i)
+            remove_intermediates=on
+            ;;
+		h)
+			usage
+			exit 1
+			;;
+		\?)
+			echo "Unknown option: -$OPTARG"
+			usage
+			exit 1
+			;;
+		:)
+			echo "Missing option argument for -$OPTARG"
+			usage
+			exit 1
+			;;
+	esac
+done
 
 # create tmp folder for intermediate files
 tmp_dir=$te_cov_dir/te_cov_tmp
