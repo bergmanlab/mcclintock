@@ -67,25 +67,52 @@ How to run
 ------
 
 ### Installation
-To install the software, from the main pipeline directory, first clone the repository:
-
+You can use miniconda to install dependencies and create running environment for the McClintock pipeline.
+1. Install python3 miniconda (miniconda is a lightweight installer for the conda package manager).
 ```
+wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
+sh Miniconda3-latest-Linux-x86_64.sh # answer interactive prompts
+echo ". $HOME/miniconda3/etc/profile.d/conda.sh" >> $HOME/.bash_profile # add to .bash_profile
+source $HOME/.bash_profile
+```
+2. Update conda and set up your conda channels (this lets conda know where to find packages)
+```
+conda update conda
+conda config --add channels defaults
+conda config --add channels conda-forge
+conda config --add channels bioconda
+```
+3. Install dependencies with conda
+```
+conda create -y -n MCCLINTOCK
+conda activate MCCLINTOCK
+conda install -y repeatmasker=4.0.7
+conda install -y perl-bioperl-run=1.006900
+conda install -y bwa=0.7.4
+conda install -y bedtools=2.17.0
+conda install -y bowtie=1.0.0
+conda install -y ucsc-blat=366
+conda install -y samtools=0.1.19
+conda install -y r=3.5.0
+conda install -y fastqc=0.11.2
+conda install -y ucsc-twobittofa=366
+conda install -y bcftools=1.2
+conda install -y exonerate=2.4.0
+```
+4. Install McClintock by clone the repository, cd into the project directory and run the script install.sh with no arguments.
+```
+conda activate MCCLINTOCK
 git clone git@github.com:bergmanlab/mcclintock.git
-```
-
-Then cd into the project directory and run the script install.sh with no arguments:
-
-```
 cd mcclintock
 sh install.sh
 ```
 
-This will download and unpack all of the TE detection pipelines and check that the required dependencies are available in your path. Missing dependencies will be reported and you must install or make sure these are available to run the full pipeline.
+`install.sh` will download and unpack all of the TE detection pipelines and check that the required dependencies are available in your path. Missing dependencies will be reported and you must install or make sure these are available to run the full pipeline.
 
 Note: required dependencies should be available in your enrivonment path before the installation, lack of dependencies might result in incorrect configurations for certain component methods.
 
 ### Running on a test dataset
-A script is included to run the full pipeline on a test Illumina resequencing dataset from the yeast genome. To run this test script change directory into the directory named test and run the script runttest.sh. 
+A script is included to run the full pipeline on a test Illumina resequencing dataset from the yeast genome. To run this test script change directory into the directory named test and run the script `runtest.sh`.
 
 ```
 cd test
