@@ -184,7 +184,7 @@ The 4th column of \*nonredundant.bed files contains a string with the name of th
 
 License
 ------
-Copyright 2014-2017 Michael G. Nelson and Casey M. Bergman
+Copyright 2014-2018 Michael G. Nelson, Shunhua Han, and Casey M. Bergman
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
 
