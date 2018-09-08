@@ -87,31 +87,46 @@ then
     perl $mcclintock_location/scripts/fixfastalinelength.pl $reference_genome".masked" 80 $reference_genome".masked2"
     mv $reference_genome".masked2" $reference_genome".masked"
 fi
-
-# create augmented genome by including TE sequences at the end of the reference genome.
 ref_masked=$reference_genome".masked"
-ref_augmented=$ref_masked".aug"
-cat $ref_masked $consensus_te_seqs > $ref_augmented
-samtools faidx $ref_augmented
-bwa index $ref_augmented
+
+# create augmented genome by including TE sequences at the end of the masked reference genome.
+if [[ ! -f $ref_masked".aug" ]]
+then
+	cat $ref_masked $consensus_te_seqs > $ref_masked".aug"
+fi
+ref_masked_aug=$ref_masked".aug"
+
+# Create indexes of augmented masked reference genome if not already made
+if [[ ! -f $ref_masked_aug".fai" ]]
+then
+	samtools faidx $ref_masked_aug
+fi
+if [[ ! -f $ref_masked_aug ]]
+then
+	bwa index $ref_masked_aug
+fi
 
 # Map reads to the augmented genome.
-bwa mem -t $processors -v 0 -R '@RG\tID:'$sample'\tSM:'$sample $ref_augmented $fastq1 $fastq2 > $tmp_dir/$sample.sam
+bwa mem -t $processors -v 0 -R '@RG\tID:'$sample'\tSM:'$sample $ref_masked_aug $fastq1 $fastq2 > $tmp_dir/$sample.sam
 sam=$tmp_dir/$sample.sam
-samtools view -Sb -t $ref_augmented".fai" $sam | samtools sort - $tmp_dir/$sample
+samtools view -Sb -t $ref_masked_aug".fai" $sam | samtools sort - $tmp_dir/$sample
 bam=$tmp_dir/$sample.bam
 samtools index $bam
 
 # get non-TE regions of the reference genome in bed format
-rep_out=$reference_genome".out"
-rep_bed=$reference_genome".bed"
-rep_bed_sorted=$reference_genome".sorted.bed"
-awk 'BEGIN{OFS="\t"}{if(NR>3) {if($9=="C"){strand="-"}else{strand="+"};print $5,$6-1,$7,$10,".",strand}}' $rep_out > $rep_bed
-bedtools sort -i $rep_bed > $rep_bed_sorted
-grep chr $ref_augmented.fai | cut -f1,2 | sort > $referencefolder/$sample".sorted.genome"
-bedtools slop -i $rep_bed_sorted -g $referencefolder/$sample".sorted.genome" -l 1 -r 0 > $referencefolder/$sample".fasta.out.zero.bed"
-bedtools complement -i $referencefolder/$sample".fasta.out.zero.bed" -g $referencefolder/$sample".sorted.genome" > $referencefolder/$sample".fasta.out.complement.bed"
+if [[ ! -f $referencefolder/$sample".fasta.out.complement.bed" ]]
+then
+	rep_out=$reference_genome".out"
+	rep_bed=$reference_genome".bed"
+	rep_bed_sorted=$reference_genome".sorted.bed"
+	awk 'BEGIN{OFS="\t"}{if(NR>3) {if($9=="C"){strand="-"}else{strand="+"};print $5,$6-1,$7,$10,".",strand}}' $rep_out > $rep_bed
+	bedtools sort -i $rep_bed > $rep_bed_sorted
+	grep chr $ref_masked_aug.fai | cut -f1,2 | sort > $referencefolder/$sample".sorted.genome"
+	bedtools slop -i $rep_bed_sorted -g $referencefolder/$sample".sorted.genome" -l 1 -r 0 > $referencefolder/$sample".fasta.out.zero.bed"
+	bedtools complement -i $referencefolder/$sample".fasta.out.zero.bed" -g $referencefolder/$sample".sorted.genome" > $referencefolder/$sample".fasta.out.complement.bed"
+fi
 bed_nonte=$referencefolder/$sample".fasta.out.complement.bed"
+
 
 # Calculate depth of coverage for every TE using Samtools depth module on the BAM file and normalize by average coverage in no TE regione of the normal reference genome.
 grep ">" $consensus_te_seqs | sed 's/>//g' > $referencefolder/te_list
