@@ -127,11 +127,14 @@ then
 fi
 bed_nonte=$referencefolder/$sample".fasta.out.complement.bed"
 
-
-# Calculate depth of coverage for every TE using Samtools depth module on the BAM file and normalize by average coverage in no TE regione of the normal reference genome.
-grep ">" $consensus_te_seqs | sed 's/>//g' > $referencefolder/te_list
+# get TE list from consensus sequence file
+if [[ ! -f $referencefolder/te_list ]]
+then
+	grep ">" $consensus_te_seqs | sed 's/>//g' > $referencefolder/te_list
+fi
 te_list=$referencefolder/te_list
 
+# Calculate depth of coverage for every TE using Samtools depth module on the BAM file and normalize by average coverage in no TE regione of the normal reference genome.
 genome_avg_depth=`samtools depth -b  $bed_nonte $bam | awk '{ total += $3 } END { print total/NR }'`
 echo $genome_avg_depth > $referencefolder/genome_avg_depth
 printf '%s\n' "TE Family" "Normalized Depth" | paste -sd ',' > $te_cov_dir/te_depth.csv
