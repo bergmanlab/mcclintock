@@ -101,7 +101,7 @@ if [[ ! -f $ref_masked_aug".fai" ]]
 then
 	samtools faidx $ref_masked_aug
 fi
-if [[ ! -f $ref_masked_aug ]]
+if [[ ! -f $ref_masked_aug".bwt" ]]
 then
 	bwa index $ref_masked_aug
 fi
