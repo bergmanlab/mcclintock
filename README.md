@@ -70,10 +70,10 @@ How to run
 You can use miniconda to install dependencies and create running environment for the McClintock pipeline.
 1. Install python3 miniconda (miniconda is a lightweight installer for the conda package manager).
 ```
-wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
-sh Miniconda3-latest-Linux-x86_64.sh # answer interactive prompts
-echo ". $HOME/miniconda3/etc/profile.d/conda.sh" >> $HOME/.bash_profile # add to .bash_profile
-source $HOME/.bash_profile
+wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O $HOME//miniconda.sh
+bash ~/miniconda.sh -b -p $HOME/miniconda # silent mode
+echo "export PATH=\$PATH:\$HOME/miniconda/bin" >> $HOME/.bashrc # add to .bashrc
+source $HOME/.bashrc
 ```
 2. Update conda and set up your conda channels (this lets conda know where to find packages)
 ```
@@ -85,7 +85,7 @@ conda config --add channels bioconda
 3. Install dependencies with conda
 ```
 conda create -y -n MCCLINTOCK
-conda activate MCCLINTOCK
+source activate MCCLINTOCK
 conda install -y repeatmasker=4.0.7
 conda install -y perl-bioperl-run=1.006900
 conda install -y bwa=0.7.4
@@ -101,7 +101,7 @@ conda install -y exonerate=2.4.0
 ```
 4. Install McClintock by clone the repository, cd into the project directory and run the script install.sh with no arguments.
 ```
-conda activate MCCLINTOCK
+source activate MCCLINTOCK
 git clone git@github.com:bergmanlab/mcclintock.git
 cd mcclintock
 sh install.sh
