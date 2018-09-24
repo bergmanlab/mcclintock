@@ -89,7 +89,7 @@ do
 			addrefcopies=on
 			;;
 		i)
-			remove_intermediates=on
+			remove_intermediates=off
 			;;
 		T)
 			save_tag=on
@@ -231,9 +231,9 @@ then
 	ref_genome=$referencefolder/$reference_genome_file
 	if [[ $single_end == "true" ]]
 	then
-		bash $mcclintock_location/scripts/te_coverage.sh -s $sample -R $referencefolder -o $te_cov_dir -1 $fastq1 -r $ref_genome -c $consensus_te_seqs -m $mcclintock_location -p $processors -i $remove_intermediates -C $chromosome_names
+		bash $mcclintock_location/scripts/te_coverage.sh -s $sample -R $referencefolder -o $te_cov_dir -1 $fastq1 -r $ref_genome -c $consensus_te_seqs -m $mcclintock_location -p $processors -i $remove_intermediates -C $chromosome_names -g $genome
 	else
-		bash $mcclintock_location/scripts/te_coverage.sh -s $sample -R $referencefolder -o $te_cov_dir -1 $fastq1 -2 $fastq2 -r $ref_genome -c $consensus_te_seqs -m $mcclintock_location -p $processors -i $remove_intermediates -C $chromosome_names
+		bash $mcclintock_location/scripts/te_coverage.sh -s $sample -R $referencefolder -o $te_cov_dir -1 $fastq1 -2 $fastq2 -r $ref_genome -c $consensus_te_seqs -m $mcclintock_location -p $processors -i $remove_intermediates -C $chromosome_names -g $genome
 	fi
 	
 	printf "\nCoverage analysis finished.\n\n" | tee -a /dev/stderr

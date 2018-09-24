@@ -10,6 +10,7 @@ usage ()
 	echo "-r : A reference genome sequence in fasta format. [Required]"
 	echo "-c : The consensus sequences of the TEs for the species in fasta format. [Required]"
 	echo "-C : The chromosome names [Required]"
+	echo "-C : The genome names [Required]"
     echo "-m : McC location [Required]"
     echo "-p : The number of processors to use for parallel stages of the pipeline. [Optional: default = 1]"
 	echo "-i : If this option is specified then all sample specific intermediate files will be removed, leaving only"
@@ -22,7 +23,7 @@ usage ()
 processors=1
 
 # Get the options supplied to the program
-while getopts ":s:R:o:1:2:r:c:C:m:p:hi" opt;
+while getopts ":s:R:o:1:2:r:c:C:g:m:p:hi" opt;
 do
 	case $opt in
 		s)
@@ -48,6 +49,9 @@ do
 			;;
 		C)
 			chromosome_names=$OPTARG
+			;;
+		g)
+			genome=$OPTARG
 			;;	
         m)
             mcclintock_location=$OPTARG
@@ -79,9 +83,6 @@ done
 tmp_dir=$te_cov_dir/te_cov_tmp
 mkdir -p $tmp_dir
 rm -rf $tmp_dir/*
-
-genome=${reference_genome##*/}
-genome=${reference_genome%%.*}
 
 # Hard mask reference genome to exclude reference TE sequences using repeatmasker
 if [[ ! -f $reference_genome".masked" || ! -f $reference_genome".out.gff" ]]
@@ -152,8 +153,8 @@ do
     printf '%s,%.2f\n' "$te" "$te_depth_normalized" | paste -sd ',' >> $te_cov_dir/te_depth.csv
 done
 
-# # remove tmp folder
-# if [[ "$remove_intermediates" = "on" ]]
-# then
-#     rm -rf $tmp_dir
-# fi
+# remove tmp folder
+if [[ "$remove_intermediates" = "on" ]]
+then
+    rm -rf $tmp_dir
+fi
