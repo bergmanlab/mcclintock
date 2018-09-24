@@ -76,6 +76,9 @@ tmp_dir=$te_cov_dir/te_cov_tmp
 mkdir -p $tmp_dir
 rm -rf $tmp_dir/*
 
+genome=${reference_genome##*/}
+genome=${reference_genome%%.*}
+
 # Hard mask reference genome to exclude reference TE sequences using repeatmasker
 if [[ ! -f $reference_genome".masked" || ! -f $reference_genome".out.gff" ]]
 then
@@ -114,18 +117,18 @@ bam=$tmp_dir/$sample.bam
 samtools index $bam
 
 # get non-TE regions of the reference genome in bed format
-if [[ ! -f $referencefolder/$sample".fasta.out.complement.bed" ]]
+if [[ ! -f $referencefolder/$genome".fasta.out.complement.bed" ]]
 then
 	rep_out=$reference_genome".out"
 	rep_bed=$reference_genome".bed"
 	rep_bed_sorted=$reference_genome".sorted.bed"
 	awk 'BEGIN{OFS="\t"}{if(NR>3) {if($9=="C"){strand="-"}else{strand="+"};print $5,$6-1,$7,$10,".",strand}}' $rep_out > $rep_bed
 	bedtools sort -i $rep_bed > $rep_bed_sorted
-	grep chr $ref_masked_aug.fai | cut -f1,2 | sort > $referencefolder/$sample".sorted.genome"
-	bedtools slop -i $rep_bed_sorted -g $referencefolder/$sample".sorted.genome" -l 1 -r 0 > $referencefolder/$sample".fasta.out.zero.bed"
-	bedtools complement -i $referencefolder/$sample".fasta.out.zero.bed" -g $referencefolder/$sample".sorted.genome" > $referencefolder/$sample".fasta.out.complement.bed"
+	grep chr $ref_masked_aug.fai | cut -f1,2 | sort > $referencefolder/$genome".sorted.genome"
+	bedtools slop -i $rep_bed_sorted -g $referencefolder/$genome".sorted.genome" -l 1 -r 0 > $referencefolder/$genome".fasta.out.zero.bed"
+	bedtools complement -i $referencefolder/$genome".fasta.out.zero.bed" -g $referencefolder/$genome".sorted.genome" > $referencefolder/$genome".fasta.out.complement.bed"
 fi
-bed_nonte=$referencefolder/$sample".fasta.out.complement.bed"
+bed_nonte=$referencefolder/$genome".fasta.out.complement.bed"
 
 # get TE list from consensus sequence file
 if [[ ! -f $referencefolder/te_list ]]
