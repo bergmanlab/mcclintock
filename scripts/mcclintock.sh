@@ -89,7 +89,7 @@ do
 			addrefcopies=on
 			;;
 		i)
-			remove_intermediates=on
+			remove_intermediates=off
 			;;
 		T)
 			save_tag=on
@@ -231,9 +231,9 @@ then
 	ref_genome=$referencefolder/$reference_genome_file
 	if [[ $single_end == "true" ]]
 	then
-		bash $mcclintock_location/scripts/te_coverage.sh -s $sample -R $referencefolder -o $te_cov_dir -1 $fastq1 -r $ref_genome -c $consensus_te_seqs -m $mcclintock_location -p $processors -i $remove_intermediates
+		bash $mcclintock_location/scripts/te_coverage.sh -s $sample -R $referencefolder -o $te_cov_dir -1 $fastq1 -r $ref_genome -c $consensus_te_seqs -m $mcclintock_location -p $processors -i $remove_intermediates -C $chromosome_names -g $genome
 	else
-		bash $mcclintock_location/scripts/te_coverage.sh -s $sample -R $referencefolder -o $te_cov_dir -1 $fastq1 -2 $fastq2 -r $ref_genome -c $consensus_te_seqs -m $mcclintock_location -p $processors -i $remove_intermediates
+		bash $mcclintock_location/scripts/te_coverage.sh -s $sample -R $referencefolder -o $te_cov_dir -1 $fastq1 -2 $fastq2 -r $ref_genome -c $consensus_te_seqs -m $mcclintock_location -p $processors -i $remove_intermediates -C $chromosome_names -g $genome
 	fi
 	
 	printf "\nCoverage analysis finished.\n\n" | tee -a /dev/stderr
@@ -838,11 +838,11 @@ if [[ -e "$bam" ]]
 then
 	if [[ ! -f $referencefolder/dm6.fasta.out.complement.bed ]]
 	then
-		cat "$reference_genome".fai | cut -f1,2 | sort -k 1,1 -k2,2n > $referencefolder/"$sample.sorted.all.genome"
-		bedtools slop -i $bed_te_locations_file -g $referencefolder/"$sample.sorted.all.genome" -l 1 -r 0 | sort -k 1,1 -k2,2n > $referencefolder/"$sample.fasta.out.zero.all.bed"
-		bedtools complement -i $referencefolder/"$sample.fasta.out.zero.all.bed" -g $referencefolder/"$sample.sorted.all.genome" | grep -v "\b0\s*0\b" | grep -v "\s-[0-9]*\b" > $referencefolder/"$sample.fasta.out.complement.bed"
+		cat "$reference_genome".fai | cut -f1,2 | sort -k 1,1 -k2,2n > $referencefolder/"$genome.sorted.all.genome"
+		bedtools slop -i $bed_te_locations_file -g $referencefolder/"$genome.sorted.all.genome" -l 1 -r 0 | sort -k 1,1 -k2,2n > $referencefolder/"$sample.fasta.out.zero.all.bed"
+		bedtools complement -i $referencefolder/"$genome.fasta.out.zero.all.bed" -g $referencefolder/"$genome.sorted.all.genome" | grep -v "\b0\s*0\b" | grep -v "\s-[0-9]*\b" > $referencefolder/"$sample.fasta.out.complement.bed"
 	fi
-	bed_nonte=$referencefolder/"$sample.fasta.out.complement.bed"
+	bed_nonte=$referencefolder/"$genome.fasta.out.complement.bed"
 	genome_avg_depth=`samtools depth -b  $bed_nonte $bam | awk '{ total += $3 } END { print total/NR }'`
 	echo "average genome coverage: $genome_avg_depth" >> $report
 fi
