@@ -89,7 +89,7 @@ do
 			addrefcopies=on
 			;;
 		i)
-			remove_intermediates=off
+			remove_intermediates=on
 			;;
 		T)
 			save_tag=on
