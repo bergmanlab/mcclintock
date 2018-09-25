@@ -153,8 +153,8 @@ do
     printf '%s,%.2f\n' "$te" "$te_depth_normalized" | paste -sd ',' >> $te_cov_dir/te_depth.csv
 done
 
-# # remove tmp folder
-# if [[ "$remove_intermediates" = "on" ]]
-# then
-#     rm -rf $tmp_dir
-# fi
+# remove tmp folder
+if [[ "$remove_intermediates" = "on" ]]
+then
+    rm -rf $tmp_dir
+fi
