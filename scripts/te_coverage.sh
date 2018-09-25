@@ -9,6 +9,8 @@ usage ()
 	echo "-2 : The absolute path of the second fastq file from a paired end read, this should be named ending _2.fastq. [Optional]"
 	echo "-r : A reference genome sequence in fasta format. [Required]"
 	echo "-c : The consensus sequences of the TEs for the species in fasta format. [Required]"
+	echo "-C : The chromosome names [Required]"
+	echo "-g : The genome names [Required]"
     echo "-m : McC location [Required]"
     echo "-p : The number of processors to use for parallel stages of the pipeline. [Optional: default = 1]"
 	echo "-i : If this option is specified then all sample specific intermediate files will be removed, leaving only"
@@ -21,7 +23,7 @@ usage ()
 processors=1
 
 # Get the options supplied to the program
-while getopts ":s:R:o:1:2:r:c:m:p:hi" opt;
+while getopts ":s:R:o:1:2:r:c:C:g:m:p:hi" opt;
 do
 	case $opt in
 		s)
@@ -45,6 +47,12 @@ do
 		c)
 			consensus_te_seqs=$OPTARG
 			;;
+		C)
+			chromosome_names=$OPTARG
+			;;
+		g)
+			genome=$OPTARG
+			;;	
         m)
             mcclintock_location=$OPTARG
             ;;
@@ -113,26 +121,26 @@ samtools view -Sb -t $ref_masked_aug".fai" $sam | samtools sort - $tmp_dir/$samp
 bam=$tmp_dir/$sample.bam
 samtools index $bam
 
-# get non-TE regions of the reference genome in bed format
-if [[ ! -f $referencefolder/$sample".fasta.out.complement.bed" ]]
-then
-	rep_out=$reference_genome".out"
-	rep_bed=$reference_genome".bed"
-	rep_bed_sorted=$reference_genome".sorted.bed"
-	awk 'BEGIN{OFS="\t"}{if(NR>3) {if($9=="C"){strand="-"}else{strand="+"};print $5,$6-1,$7,$10,".",strand}}' $rep_out > $rep_bed
-	bedtools sort -i $rep_bed > $rep_bed_sorted
-	grep chr $ref_masked_aug.fai | cut -f1,2 | sort > $referencefolder/$sample".sorted.genome"
-	bedtools slop -i $rep_bed_sorted -g $referencefolder/$sample".sorted.genome" -l 1 -r 0 > $referencefolder/$sample".fasta.out.zero.bed"
-	bedtools complement -i $referencefolder/$sample".fasta.out.zero.bed" -g $referencefolder/$sample".sorted.genome" > $referencefolder/$sample".fasta.out.complement.bed"
-fi
-bed_nonte=$referencefolder/$sample".fasta.out.complement.bed"
-
 # get TE list from consensus sequence file
 if [[ ! -f $referencefolder/te_list ]]
 then
 	grep ">" $consensus_te_seqs | sed 's/>//g' > $referencefolder/te_list
 fi
 te_list=$referencefolder/te_list
+
+# get non-TE regions of the reference genome in bed format
+if [[ ! -f $referencefolder/$genome".fasta.out.complement.bed" ]]
+then
+	rep_out=$reference_genome".out"
+	rep_bed=$reference_genome".bed"
+	rep_bed_sorted=$reference_genome".sorted.bed"
+	awk 'BEGIN{OFS="\t"}{if(NR>3) {if($9=="C"){strand="-"}else{strand="+"};print $5,$6-1,$7,$10,".",strand}}' $rep_out > $rep_bed
+	bedtools sort -i $rep_bed > $rep_bed_sorted
+	grep -f $chromosome_names $ref_masked_aug.fai | cut -f1,2 | sort > $referencefolder/$genome".sorted.genome"
+	bedtools slop -i $rep_bed_sorted -g $referencefolder/$genome".sorted.genome" -l 1 -r 0 > $referencefolder/$genome".fasta.out.zero.bed"
+	bedtools complement -i $referencefolder/$genome".fasta.out.zero.bed" -g $referencefolder/$genome".sorted.genome" > $referencefolder/$genome".fasta.out.complement.bed"
+fi
+bed_nonte=$referencefolder/$genome".fasta.out.complement.bed"
 
 # Calculate depth of coverage for every TE using Samtools depth module on the BAM file and normalize by average coverage in no TE regione of the normal reference genome.
 genome_avg_depth=`samtools depth -b  $bed_nonte $bam | awk '{ total += $3 } END { print total/NR }'`
