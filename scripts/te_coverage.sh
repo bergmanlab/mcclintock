@@ -84,18 +84,23 @@ tmp_dir=$te_cov_dir/te_cov_tmp
 mkdir -p $tmp_dir
 rm -rf $tmp_dir/*
 
+reference_genome_file=${reference_genome##*/}
+reference_genome_file=${reference_genome_file%%.*}.cov.fasta
+cp $reference_genome $reference_genome_file
+reference_genome_cov=$reference_genome/$reference_genome_file
+
 # Hard mask reference genome to exclude reference TE sequences using repeatmasker
-if [[ ! -f $reference_genome".masked" || ! -f $reference_genome".out.gff" ]]
+if [[ ! -f $reference_genome_cov".masked" || ! -f $reference_genome_cov".out.gff" ]]
 then
-    time RepeatMasker -dir $referencefolder -s -gff -nolow -no_is -a $reference_genome -lib $consensus_te_seqs -pa $processors
+    time RepeatMasker -dir $referencefolder -s -gff -nolow -no_is -a $reference_genome_cov -lib $consensus_te_seqs -pa $processors
     # RepeatMasker appears to override the custom database names during the ProcessRepeats step so this changes them back for
     # Drosophila, more rules like this may be needed for other reference genomes
-    sed "s/McClintock-int/McClintock/g" $reference_genome".out.gff" > $referencefolder/tmp
-    sed "s/POGON1/pogo/g" $referencefolder/tmp > $reference_genome".out.gff"
-    perl $mcclintock_location/scripts/fixfastalinelength.pl $reference_genome".masked" 80 $reference_genome".masked2"
-    mv $reference_genome".masked2" $reference_genome".masked"
+    sed "s/McClintock-int/McClintock/g" $reference_genome_cov".out.gff" > $referencefolder/tmp
+    sed "s/POGON1/pogo/g" $referencefolder/tmp > $reference_genome_cov".out.gff"
+    perl $mcclintock_location/scripts/fixfastalinelength.pl $reference_genome_cov".masked" 80 $reference_genome_cov".masked2"
+    mv $reference_genome_cov".masked2" $reference_genome_cov".masked"
 fi
-ref_masked=$reference_genome".masked"
+ref_masked=$reference_genome_cov".masked"
 
 # create augmented genome by including TE sequences at the end of the masked reference genome.
 if [[ ! -f $ref_masked".aug" ]]
@@ -131,9 +136,9 @@ te_list=$referencefolder/te_list
 # get non-TE regions of the reference genome in bed format
 if [[ ! -f $referencefolder/$genome".fasta.out.complement.bed" ]]
 then
-	rep_out=$reference_genome".out"
-	rep_bed=$reference_genome".bed"
-	rep_bed_sorted=$reference_genome".sorted.bed"
+	rep_out=$reference_genome_cov".out"
+	rep_bed=$reference_genome_cov".bed"
+	rep_bed_sorted=$reference_genome_cov".sorted.bed"
 	awk 'BEGIN{OFS="\t"}{if(NR>3) {if($9=="C"){strand="-"}else{strand="+"};print $5,$6-1,$7,$10,".",strand}}' $rep_out > $rep_bed
 	bedtools sort -i $rep_bed > $rep_bed_sorted
 	grep -f $chromosome_names $ref_masked_aug.fai | cut -f1,2 | sort > $referencefolder/$genome".sorted.genome"
