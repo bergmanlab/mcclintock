@@ -86,7 +86,7 @@ rm -rf $tmp_dir/*
 
 reference_genome_file=${reference_genome##*/}
 reference_genome_file=${reference_genome_file%%.*}.cov.fasta
-cp $reference_genome $reference_genome/$reference_genome_file
+cp $reference_genome $referencefolder/$reference_genome_file
 reference_genome_cov=$referencefolder/$reference_genome_file
 
 # Hard mask reference genome to exclude reference TE sequences using repeatmasker
