@@ -67,6 +67,9 @@ do
 		t)
 			inputt=$OPTARG
 			;;
+		s)
+			inputff=$OPTARG
+			;;
 		1)	
 			input1=$OPTARG
 			;;
@@ -99,9 +102,6 @@ do
 			;;
 		d)
 			te_cov=on
-			;;
-		s)
-			inputff=$OPTARG
 			;;
 		b)
 			save_bam=on
@@ -228,34 +228,23 @@ else
 	cp -s $input1 $samplefolder/reads/$sample.unPaired.fastq
 fi
 
-# If a GFF file is supplied then a TE family file that links it to the fasta consensus is also needed
-if [[ "$inputg" ]]
-then
-	if [[ -z "$inputt" ]]
-	then
-		echo "If a GFF file is supplied then a TE family file that links it to the fasta consensus is also needed"
-		usage
-		exit 1
-	fi
-fi
-
 # Coverage analysis for each TE
 if [[ "$te_cov" == "on" ]]
 then
 	printf "\nCalculating normalized average coverage for TEs...\n\n" | tee -a /dev/stderr
-	if [[ -z "$inpuff" ]]
+	if [[ "$inputff" ]]
 	then
-		printf "\nThe consensus sequences of the TEs will be used for coverage analysis.\n\n" | tee -a /dev/stderr
-		cov_fasta=$consensus_te_seqs
-	else
 		printf "\nCustom TE library will be used for coverage analysis.\n\n" | tee -a /dev/stderr
-		cov_fasta_file=${inpuff##*/}
+		cov_fasta_file=${inputff##*/}
 		cov_fasta_file=${cov_fasta_file%%.*}_cov.fasta
 		if [[ ! -f $referencefolder/$cov_fasta_file ]]
 		then
-			perl $mcclintock_location/scripts/fixfastalinelength.pl $inpuff 80 $referencefolder/$cov_fasta_file
+			perl $mcclintock_location/scripts/fixfastalinelength.pl $inputff 80 $referencefolder/$cov_fasta_file
 		fi
 		cov_fasta=$referencefolder/$cov_fasta_file
+	else
+		printf "\nThe consensus sequences of the TEs will be used for coverage analysis.\n\n" | tee -a /dev/stderr
+		cov_fasta=$consensus_te_seqs
 	fi
 	te_cov_dir=$samplefolder/results/te_coverage
 	mkdir -p $te_cov_dir
