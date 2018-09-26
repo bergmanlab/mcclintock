@@ -19,8 +19,11 @@ usage ()
 	echo "-T : If this option is specified then fastq comments (e.g. barcode) will be incorporated to SAM output. Warning: do not"
 	echo "     use this option if the input fastq files do not have comments. [Optional: default will not include this]"
 	echo "-d : If this option is specified then McClintock will perform depth of coverage analysis for every TE. Note: Doing"
-	echo "     TE-based coverage analysis will result in longer running time. [Optional: default will not include this]"
-	echo "	   . The default is not appending the fastq comment to SAM"
+	echo "     TE-based coverage analysis will result in longer running time. A fasta file can be provided here for coverage"
+	echo "     analysis. If no file is provided here, the consensus sequences of the TEs will be used for the analysis. [Optional:"
+	echo "     default will not include this]"
+	echo "-s : A fasta file that will be used for TE-based coverage analysis, if not supplied then the consensus sequences"
+	echo "     of the TEs will be used for the analysis. [Optional]"
 	echo "-b : Retain the sorted and indexed BAM file of the paired end data aligned to the reference genome."
 	echo "-i : If this option is specified then all sample specific intermediate files will be removed, leaving only"
 	echo "     the overall results. The default is to leave sample specific intermediate files (may require large amounts"
@@ -49,7 +52,7 @@ mcclintock_location="$( cd "$(dirname "$0")" ; pwd -P )"
 cd $mcclintock_location/
 
 # Get the options supplied to the program
-while getopts ":r:c:g:t:1:2:o:p:M:m:hiTdbCR" opt;
+while getopts ":r:c:g:t:s:1:2:o:p:M:m:hiTdbCR" opt;
 do
 	case $opt in
 		r)
@@ -96,6 +99,9 @@ do
 			;;
 		d)
 			te_cov=on
+			;;
+		s)
+			inputff=$OPTARG
 			;;
 		b)
 			save_bam=on
@@ -222,18 +228,43 @@ else
 	cp -s $input1 $samplefolder/reads/$sample.unPaired.fastq
 fi
 
+# If a GFF file is supplied then a TE family file that links it to the fasta consensus is also needed
+if [[ "$inputg" ]]
+then
+	if [[ -z "$inputt" ]]
+	then
+		echo "If a GFF file is supplied then a TE family file that links it to the fasta consensus is also needed"
+		usage
+		exit 1
+	fi
+fi
+
 # Coverage analysis for each TE
 if [[ "$te_cov" == "on" ]]
 then
 	printf "\nCalculating normalized average coverage for TEs...\n\n" | tee -a /dev/stderr
+	if [[ -z "$inpuff" ]]
+	then
+		printf "\nThe consensus sequences of the TEs will be used for coverage analysis.\n\n" | tee -a /dev/stderr
+		cov_fasta=$consensus_te_seqs
+	else
+		printf "\nCustom TE library will be used for coverage analysis.\n\n" | tee -a /dev/stderr
+		cov_fasta_file=${inpuff##*/}
+		cov_fasta_file=${cov_fasta_file%%.*}_cov.fasta
+		if [[ ! -f $referencefolder/$cov_fasta_file ]]
+		then
+			perl $mcclintock_location/scripts/fixfastalinelength.pl $inpuff 80 $referencefolder/$cov_fasta_file
+		fi
+		cov_fasta=$referencefolder/$cov_fasta_file
+	fi
 	te_cov_dir=$samplefolder/results/te_coverage
 	mkdir -p $te_cov_dir
 	ref_genome=$referencefolder/$reference_genome_file
 	if [[ $single_end == "true" ]]
 	then
-		bash $mcclintock_location/scripts/te_coverage.sh -s $sample -R $referencefolder -o $te_cov_dir -1 $fastq1 -r $ref_genome -c $consensus_te_seqs -m $mcclintock_location -p $processors -i $remove_intermediates -C $chromosome_names -g $genome
+		bash $mcclintock_location/scripts/te_coverage.sh -s $sample -R $referencefolder -o $te_cov_dir -1 $fastq1 -r $ref_genome -c $cov_fasta -m $mcclintock_location -p $processors -i $remove_intermediates -C $chromosome_names -g $genome
 	else
-		bash $mcclintock_location/scripts/te_coverage.sh -s $sample -R $referencefolder -o $te_cov_dir -1 $fastq1 -2 $fastq2 -r $ref_genome -c $consensus_te_seqs -m $mcclintock_location -p $processors -i $remove_intermediates -C $chromosome_names -g $genome
+		bash $mcclintock_location/scripts/te_coverage.sh -s $sample -R $referencefolder -o $te_cov_dir -1 $fastq1 -2 $fastq2 -r $ref_genome -c $cov_fasta -m $mcclintock_location -p $processors -i $remove_intermediates -C $chromosome_names -g $genome
 	fi
 	
 	printf "\nCoverage analysis finished.\n\n" | tee -a /dev/stderr
