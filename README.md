@@ -130,6 +130,7 @@ The pipeline is invoked by running the mcclintock.sh script in the main project 
 * `-t` : A tab delimited file with one entry per ID in the GFF file and two columns: the first containing the ID and the second containing the TE family it belongs to. The family should correspond to the names of the sequences in the consensus fasta file. [Optional - required if GFF (option -g) is supplied]
 * `-T` : If this option is specified then fastq comments (e.g. barcode) will be incorporated to SAM output. Warning: do not use this option if the input fastq files do not have comments. [Optional: default will not include this]
 * `-d` : If this option is specified then McClintock will perform depth of coverage analysis for every TE. Note: perform coverage analysis for TEs will result in longer running time. [Optional: default will not include this]
+* `-s` : A fasta file that will be used for TE-based coverage analysis, if not supplied then the consensus sequences of the TEs will be used for the analysis. [Optional]
 * `-1` : The absolute path of the first fastq file from a paired end read, this should be named ending _1.fastq. [Required]
 * `-2` : The absolute path of the second fastq file from a paired end read, this should be named ending _2.fastq. [Optional]
 * `-o` : An output directory for the run. If not supplied then the reference genome name will be used. [Optional]
