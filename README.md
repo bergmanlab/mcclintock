@@ -19,7 +19,7 @@ Software Methods
 
 Software Dependencies
 ------
-All of the software systems must be run on a unix based system with the software dependencies listed per method below. FastQC is an optional step, if the software is not present then mcclintock will skip the step and you will not receive a quality report for your fastq input in the results directory. The versions used to run this pipeline are indicated in parentheses and no guarantee is made that it will function using alternate versions. In the case of bwa it is almost certain that some methods will fail if version v.0.7.4-r385 is not installed.
+All of the software systems must be run on a unix based system with the software dependencies listed per method below. FastQC is an optional step, if the software is not present then mcclintock will skip the step and you will not receive a quality report for your fastq input in the results directory. The versions used to run this pipeline are indicated in parentheses and no guarantee is made that it will function using alternate versions. In the case of bwa it is almost certain that some methods will fail if version v.0.7.4-r385 is not installed. See installation section below to use miniconda to install dependencies.
 
  * Optional software for the pipeline
     * [FastQC](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/) (Command line installation v0.11.2)
@@ -42,7 +42,7 @@ All of the software systems must be run on a unix based system with the software
     * [BWA](https://github.com/lh3/bwa/commit/c14aaad1ce72f5784bfe04df757a6b12fe07b7ea) (v.0.7.4-r385)
     * [SAMtools](http://sourceforge.net/projects/samtools/files/) (v.0.1.19-44428cd)
     * [BEDTools](https://code.google.com/p/bedtools/downloads/list) (v.2.17.0)
-    * [twoBitToFa](http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/twoBitToFa) (ucsc-tools v.294)
+    * [faToTwoBit](http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/faToTwoBit) (ucsc-tools v.294)
 
 * RetroSeq
     * [Perl](http://www.perl.org/get.html) (v.5.14.2)
