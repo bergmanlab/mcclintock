@@ -856,13 +856,13 @@ fi
 ## average genome coverage
 if [[ -e "$bam" ]]
 then
-	if [[ ! -f $referencefolder/dm6.fasta.out.complement.bed ]]
+	if [[ ! -f $referencefolder/dm6.fasta.out.complement.all.bed ]]
 	then
 		cat "$reference_genome".fai | cut -f1,2 | sort -k 1,1 -k2,2n > $referencefolder/"$genome.sorted.all.genome"
-		bedtools slop -i $bed_te_locations_file -g $referencefolder/"$genome.sorted.all.genome" -l 1 -r 0 | sort -k 1,1 -k2,2n > $referencefolder/"$sample.fasta.out.zero.all.bed"
-		bedtools complement -i $referencefolder/"$genome.fasta.out.zero.all.bed" -g $referencefolder/"$genome.sorted.all.genome" | grep -v "\b0\s*0\b" | grep -v "\s-[0-9]*\b" > $referencefolder/"$sample.fasta.out.complement.bed"
+		bedtools slop -i $bed_te_locations_file -g $referencefolder/"$genome.sorted.all.genome" -l 1 -r 0 | sort -k 1,1 -k2,2n > $referencefolder/"$genome.fasta.out.zero.all.bed"
+		bedtools complement -i $referencefolder/"$genome.fasta.out.zero.all.bed" -g $referencefolder/"$genome.sorted.all.genome" | grep -v "\b0\s*0\b" | grep -v "\s-[0-9]*\b" > $referencefolder/"$genome.fasta.out.complement.all.bed"
 	fi
-	bed_nonte=$referencefolder/"$genome.fasta.out.complement.bed"
+	bed_nonte=$referencefolder/"$genome.fasta.out.complement.all.bed"
 	genome_avg_depth=`samtools depth -b  $bed_nonte $bam | awk '{ total += $3 } END { print total/NR }'`
 	echo "average genome coverage: $genome_avg_depth" >> $report
 fi
