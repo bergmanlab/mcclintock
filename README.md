@@ -95,7 +95,7 @@ conda install -y ucsc-blat=366
 conda install -y samtools=0.1.19
 conda install -y r=3.5.0
 conda install -y fastqc=0.11.2
-conda install -y ucsc-twobittofa=366
+conda install -y ucsc-fatotwobit=366
 conda install -y bcftools=1.2
 conda install -y exonerate=2.4.0
 ```
