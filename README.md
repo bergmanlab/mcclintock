@@ -43,6 +43,7 @@ All of the software systems must be run on a unix based system with the software
     * [SAMtools](http://sourceforge.net/projects/samtools/files/) (v.0.1.19-44428cd)
     * [BEDTools](https://code.google.com/p/bedtools/downloads/list) (v.2.17.0)
     * [faToTwoBit](http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/faToTwoBit) (ucsc-tools v.294)
+    * [twoBitToFa](http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/twoBitToFa) (ucsc-tools v.294)
 
 * RetroSeq
     * [Perl](http://www.perl.org/get.html) (v.5.14.2)
@@ -96,6 +97,7 @@ conda install -y samtools=0.1.19
 conda install -y r=3.5.0
 conda install -y fastqc=0.11.2
 conda install -y ucsc-fatotwobit=366
+conda install -y ucsc-twobittofa=366
 conda install -y bcftools=1.2
 conda install -y exonerate=2.4.0
 ```
