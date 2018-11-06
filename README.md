@@ -69,6 +69,7 @@ How to run
 
 ### Installation
 You can use miniconda to install dependencies and create running environment for the McClintock pipeline.
+
 1. Install python3 miniconda (miniconda is a lightweight installer for the conda package manager).
 ```
 wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O $HOME//miniconda.sh
@@ -111,12 +112,13 @@ sh install.sh
 
 `install.sh` will download and unpack all of the TE detection pipelines and check that the required dependencies are available in your path. Missing dependencies will be reported and you must install or make sure these are available to run the full pipeline.
 
-Note: required dependencies should be available in your enrivonment path before the installation, lack of dependencies might result in incorrect configurations for certain component methods.
+Note: required dependencies should be available in your environment path before the installation, lack of dependencies might result in incorrect configurations for certain component methods.
 
 ### Running on a test dataset
-A script is included to run the full pipeline on a test Illumina resequencing dataset from the yeast genome. To run this test script change directory into the directory named test and run the script `runtest.sh`.
+A script is included to run the full pipeline on a test Illumina resequencing dataset from the yeast genome. To run this test script, make sure the MCCLINTOCK environment is activated and change directory into the directory named `test` and run the script `runtest.sh`.
 
 ```
+source activate MCCLINTOCK
 cd test
 sh runtest.sh
 ```
