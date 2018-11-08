@@ -2,15 +2,15 @@
 
 # Download all of the software methods.
 echo "Downloading pipelines..."
-wget --no-check-certificate http://downloads.sourceforge.net/project/popoolationte/popoolationte_1.02.zip -O PoPoolationTE.zip 
+wget --no-check-certificate http://downloads.sourceforge.net/project/popoolationte/popoolationte_1.02.zip -O PoPoolationTE.zip
 wget --no-check-certificate https://github.com/bergmanlab/ngs_te_mapper/archive/145fd73bdef836e10597b3ff5cb1355ca8f91b57.zip -O ngs_te_mapper.zip
 wget --no-check-certificate https://github.com/tk2/RetroSeq/archive/700d4f76a3b996686652866f2b81fefc6f0241e0.zip -O RetroSeq.zip
 wget --no-check-certificate https://github.com/srobb1/RelocaTE/archive/ce3a2066e15f5c14e2887fdf8dce0485e1750e5b.zip -O RelocaTE.zip
-wget http://sourceforge.net/projects/te-locate/files/TE-locate.tar/download -O TE-locate.tar
+wget --no-check-certificate https://downloads.sourceforge.net/project/te-locate/TE-locate.tar -O TE-locate.tar
 wget --no-check-certificate https://github.com/JialiUMassWengLab/TEMP/archive/d2500b904e2020d6a1075347b398525ede5feae1.zip -O TEMP.zip
 
 # Extract software and format folder layout.
-echo "Extracting pipelines..." 
+echo "Extracting pipelines..."
 unzip PoPoolationTE.zip
 mv popoolationte PoPoolationTE
 rm PoPoolationTE.zip
@@ -68,17 +68,17 @@ do
 	sed -i 's/defined @/@/g' $f
 done
 
-# Check dependencies 
+# Check dependencies
 echo "Testing dependencies..."
 dependencies="R RepeatMasker bedtools samtools bcftools bwa exonerate bowtie blat faToTwoBit twoBitToFa java perl"
 
 for dependency in $dependencies
-do 
+do
 	location=`which $dependency`
 	if test -z "$location"
 	then
 		echo "$dependency... NOT FOUND"
-	else 
+	else
 		echo "$dependency... FOUND"
 		if [[ $dependency == "bwa" ]]
 		then
@@ -97,7 +97,7 @@ bioperltest=$(perl -e 'use Bio::Seq' 2>&1)
 if [[ -n "$bioperltest" ]]
 then
 	echo "BioPerl... NOT FOUND"
-else  
+else
 	echo "BioPerl... FOUND"
 fi
 
