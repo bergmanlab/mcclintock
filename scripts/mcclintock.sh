@@ -40,6 +40,9 @@ usage ()
 	echo "-h : Prints this help guide."
 }
 
+# set up conda env for base mcclintock pipeline
+source activate MCCLINTOCK_main
+
 # Set default value for processors in case it is not supplied
 processors=1
 memory=4
@@ -249,13 +252,19 @@ then
 	te_cov_dir=$samplefolder/results/te_coverage
 	mkdir -p $te_cov_dir
 	ref_genome=$referencefolder/$reference_genome_file
+
+	# load conda env for coverage analysis
+	source deactivate
+	source activate MCCLINTOCK_cov
 	if [[ $single_end == "true" ]]
 	then
 		bash $mcclintock_location/scripts/te_coverage.sh -s $sample -R $referencefolder -o $te_cov_dir -1 $fastq1 -r $ref_genome -c $cov_fasta -m $mcclintock_location -p $processors -i $remove_intermediates -C $chromosome_names -g $genome
 	else
 		bash $mcclintock_location/scripts/te_coverage.sh -s $sample -R $referencefolder -o $te_cov_dir -1 $fastq1 -2 $fastq2 -r $ref_genome -c $cov_fasta -m $mcclintock_location -p $processors -i $remove_intermediates -C $chromosome_names -g $genome
 	fi
-	
+	# unload coverage env and reload conda env for base mcclintock pipeline
+	source deactivate
+	source activate MCCLINTOCK_main
 	printf "\nCoverage analysis finished.\n\n" | tee -a /dev/stderr
 fi
 
@@ -594,7 +603,14 @@ then
 	fi
 
 	cd $mcclintock_location/TE-locate
+
+	# set up conda env for telocate
+	source deactivate
+	source activate MCCLINTOCK_telocate
 	bash runtelocate.sh $sam_folder $telocate_reference_genome $telocate_te_locations $memory $sample $median_insertsize $samplefolder
+	# unload telocate conda env and reload env for base mcclintock
+	source deactivate
+	source activate MCCLINTOCK_main
 
 	# Save the original result file and the bed files filtered by mcclintock
 	mv $samplefolder/TE-locate/$sample"_telocate"* $samplefolder/results/
@@ -620,9 +636,16 @@ then
 	################################## Run RetroSeq ##################################
 
 	printf "\nRunning RetroSeq pipeline...\n\n" | tee -a /dev/stderr
-
+	
 	cd $mcclintock_location/RetroSeq
+
+	# set up conda env for retroseq
+	source deactivate
+	source activate MCCLINTOCK_retroseq
 	bash runretroseq.sh $consensus_te_seqs $bam $reference_genome $bed_te_locations_file $te_families $samplefolder
+	# unload retroseq conda env and reload env for base mcclintock
+	source deactivate
+	source activate MCCLINTOCK_main
 
 	# Save the original result file and the bed files filtered by mcclintock
 	mv $samplefolder/RetroSeq/$sample"_retroseq"* $samplefolder/results/
@@ -666,7 +689,13 @@ then
 
 	cd $mcclintock_location/TEMP
 
+	# set up conda env for temp
+	source deactivate
+	source activate MCCLINTOCK_temp
 	bash runtemp.sh $bam $twobitreference $consensus_te_seqs $bed_te_locations_file $te_families $median_insertsize $sample $processors $samplefolder $telocate_te_locations
+	# unload temp conda env and reload env for base mcclintock
+	source deactivate
+	source activate MCCLINTOCK_main
 
 	# Save the original result file and the bed files filtered by mcclintock
 	mv $samplefolder/TEMP/$sample"_temp"* $samplefolder/results/
@@ -712,8 +741,14 @@ then
 	fi
 	relocate_te_locations=$referencefolder/relocate_te_locations.gff
 
+	# set up conda env for relocate
 	cd $mcclintock_location/RelocaTE
+	source deactivate
+	source activate MCCLINTOCK_relocate
 	bash runrelocate.sh $relocate_te_seqs $reference_genome $samplefolder/reads $sample $relocate_te_locations $samplefolder $single_end
+	# unload relocate conda env and reload env for base mcclintock
+	source deactivate
+	source activate MCCLINTOCK_main
 
 	# Save the original result file and the bed files filtered by mcclintock
 	mv $samplefolder/RelocaTE/$sample"_relocate"* $samplefolder/results/
@@ -747,7 +782,13 @@ then
 		fastq2="false"
 	fi
 
+	# set up conda env for ngs_te_mapper
+	source deactivate
+	source activate MCCLINTOCK_ngstemapper
 	bash runngstemapper.sh $consensus_te_seqs $reference_genome $sample $fastq1 $fastq2 $samplefolder
+	# unload ngs_te_mapper conda env and reload env for base mcclintock
+	source deactivate
+	source activate MCCLINTOCK_main
 
 	# Save the original result file and the bed file filtered by mcclintock
 	mv $samplefolder/ngs_te_mapper/$sample"_ngs_te_mapper_nonredundant.bed" $samplefolder/results/
@@ -782,7 +823,14 @@ then
 	te_hierarchy=$referencefolder/te_hierarchy
 
 	cd $mcclintock_location/PoPoolationTE
+	
+	# set up conda env for populationte
+	source deactivate
+	source activate MCCLINTOCK_populationte
 	bash runpopoolationte.sh $popoolationte_reference_genome $te_hierarchy $fastq1 $fastq2 $popool_te_locations $processors $samplefolder
+	# unload populationte conda env and reload env for base mcclintock
+	source deactivate
+	source activate MCCLINTOCK_main
 
 	# Save the original result file and the bed files filtered by mcclintock
 	mv $samplefolder/PoPoolationTE/$sample"_popoolationte"* $samplefolder/results/
@@ -965,5 +1013,8 @@ then
 	printf "\nRemoving McClintock intermediate files\n\n" | tee -a /dev/stderr
 	rm -r $samplefolder/reads
 fi
+
+# unload conda env
+source deactivate
 
 printf "\nPipeline Complete\n\n" | tee -a /dev/stderr
