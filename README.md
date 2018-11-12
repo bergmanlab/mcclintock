@@ -90,10 +90,11 @@ git clone git@github.com:bergmanlab/mcclintock.git
 cd mcclintock
 sh env_install.sh
 ```
-4. Install McClintock by load main conda environment for McClintock pipeline and run the script install.sh with no arguments.
+4. Install McClintock by load main conda environment for McClintock pipeline and run the script install.sh with no arguments, after the installation is done, deactivate the conda environment.
 ```
 source activate MCCLINTOCK_main
 sh install.sh
+source deactivate
 ```
 
 `install.sh` will download and unpack all of the TE detection pipelines and check that the required dependencies are available in your path. Missing dependencies will be reported and you must install or make sure these are available to run the full pipeline.
@@ -101,10 +102,9 @@ sh install.sh
 Note: required dependencies should be available in your environment path before the installation, lack of dependencies might result in incorrect configurations for certain component methods.
 
 ### Running on a test dataset
-A script is included to run the full pipeline on a test Illumina resequencing dataset from the yeast genome. To run this test script, make sure the MCCLINTOCK environment is activated and change directory into the directory named `test` and run the script `runtest.sh`.
+A script is included to run the full pipeline on a test Illumina resequencing dataset from the yeast genome. To run this test script, make sure the no conda environment is activated and change directory into the directory named `test` and run the script `runtest.sh`.
 
 ```
-source activate MCCLINTOCK
 cd test
 sh runtest.sh
 ```
