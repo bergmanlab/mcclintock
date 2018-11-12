@@ -36,7 +36,7 @@ conda install -n MCCLINTOCK_ngstemapper -y r=3.5.0
 
 # create specific conda envs for temp
 conda create -y -n MCCLINTOCK_temp
-conda install -n MCCLINTOCK_relocate -y perl-bioperl-run=1.006900
+conda install -n MCCLINTOCK_temp -y perl-bioperl-run=1.006900
 conda install -n MCCLINTOCK_temp -y bwa=0.7.4
 conda install -n MCCLINTOCK_temp -y bedtools=2.17.0
 conda install -n MCCLINTOCK_temp -y samtools=0.1.19
