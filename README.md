@@ -89,7 +89,6 @@ conda config --add channels bioconda
 git clone git@github.com:bergmanlab/mcclintock.git
 cd mcclintock
 sh env_install.sh
-
 ```
 4. Install McClintock by load main conda environment for McClintock pipeline and run the script install.sh with no arguments.
 ```
