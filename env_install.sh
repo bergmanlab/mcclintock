@@ -1,8 +1,4 @@
 #!/bin/bash
-conda update conda
-conda config --add channels defaults
-conda config --add channels conda-forge
-conda config --add channels bioconda
 
 # remove env is already exist
 conda remove -y -n MCCLINTOCK_main --all
@@ -15,20 +11,20 @@ conda remove -y -n MCCLINTOCK_populationte --all
 conda remove -y -n MCCLINTOCK_retroseq --all
 
 # create specific conda envs for McC main pipeilne
-conda create -y -n MCCLINTOCK
-conda install -n MCCLINTOCK -y repeatmasker=4.0.7
-conda install -n MCCLINTOCK -y perl-bioperl-run=1.006900
-conda install -n MCCLINTOCK -y bwa=0.7.4
-conda install -n MCCLINTOCK -y bedtools=2.17.0
-conda install -n MCCLINTOCK -y bowtie=1.0.0
-conda install -n MCCLINTOCK -y ucsc-blat=366
-conda install -n MCCLINTOCK -y samtools=0.1.19
-conda install -n MCCLINTOCK -y r=3.5.0
-conda install -n MCCLINTOCK -y fastqc=0.11.2
-conda install -n MCCLINTOCK -y ucsc-fatotwobit=366
-conda install -n MCCLINTOCK -y ucsc-twobittofa=366
-conda install -n MCCLINTOCK -y bcftools=1.2
-conda install -n MCCLINTOCK -y exonerate=2.4.0
+conda create -y -n MCCLINTOCK_main
+conda install -n MCCLINTOCK_main -y repeatmasker=4.0.7
+conda install -n MCCLINTOCK_main -y perl-bioperl-run=1.006900
+conda install -n MCCLINTOCK_main -y bwa=0.7.4
+conda install -n MCCLINTOCK_main -y bedtools=2.17.0
+conda install -n MCCLINTOCK_main -y bowtie=1.0.0
+conda install -n MCCLINTOCK_main -y ucsc-blat=366
+conda install -n MCCLINTOCK_main -y samtools=0.1.19
+conda install -n MCCLINTOCK_main -y r=3.5.0
+conda install -n MCCLINTOCK_main -y fastqc=0.11.2
+conda install -n MCCLINTOCK_main -y ucsc-fatotwobit=366
+conda install -n MCCLINTOCK_main -y ucsc-twobittofa=366
+conda install -n MCCLINTOCK_main -y bcftools=1.2
+conda install -n MCCLINTOCK_main -y exonerate=2.4.0
 
 # create specific conda envs for coverage module
 conda create -y -n MCCLINTOCK_cov
