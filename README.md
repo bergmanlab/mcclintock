@@ -84,29 +84,16 @@ conda config --add channels defaults
 conda config --add channels conda-forge
 conda config --add channels bioconda
 ```
-3. Install dependencies with conda
+3. Install dependencies with conda by clone the McClintock repository, cd into the project directory and run the script install.sh with no arguments, the installation might take a while to finish.
 ```
-conda create -y -n MCCLINTOCK
-source activate MCCLINTOCK
-conda install -y repeatmasker=4.0.7
-conda install -y perl-bioperl-run=1.006900
-conda install -y bwa=0.7.4
-conda install -y bedtools=2.17.0
-conda install -y bowtie=1.0.0
-conda install -y ucsc-blat=366
-conda install -y samtools=0.1.19
-conda install -y r=3.5.0
-conda install -y fastqc=0.11.2
-conda install -y ucsc-fatotwobit=366
-conda install -y ucsc-twobittofa=366
-conda install -y bcftools=1.2
-conda install -y exonerate=2.4.0
-```
-4. Install McClintock by clone the repository, cd into the project directory and run the script install.sh with no arguments.
-```
-source activate MCCLINTOCK
 git clone git@github.com:bergmanlab/mcclintock.git
 cd mcclintock
+sh env_install.sh
+
+```
+4. Install McClintock by load main conda environment for McClintock pipeline and run the script install.sh with no arguments.
+```
+source activate MCCLINTOCK_main
 sh install.sh
 ```
 
