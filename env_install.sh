@@ -127,7 +127,7 @@ conda install -n MCCLINTOCK_populationte -y bcftools=1.2
 conda install -n MCCLINTOCK_populationte -y exonerate=2.4.0
 
 # create specific conda envs for MCCLINTOCK_retroseq
-conda create -y -n MCCLINTOCK_retroseqcon
+conda create -y -n MCCLINTOCK_retroseq
 conda install -n MCCLINTOCK_retroseq -y repeatmasker=4.0.7
 conda install -n MCCLINTOCK_retroseq -y perl-bioperl-run=1.006900
 conda install -n MCCLINTOCK_retroseq -y bwa=0.7.4
