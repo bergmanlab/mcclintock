@@ -7,7 +7,7 @@ conda remove -y -n MCCLINTOCK_temp --all
 conda remove -y -n MCCLINTOCK_ngstemapper --all
 conda remove -y -n MCCLINTOCK_relocate --all
 conda remove -y -n MCCLINTOCK_telocate --all
-conda remove -y -n MCCLINTOCK_populationte --all
+conda remove -y -n MCCLINTOCK_popoolationte --all
 conda remove -y -n MCCLINTOCK_retroseq --all
 
 # create specific conda envs for McC main pipeilne
@@ -59,11 +59,11 @@ conda install -n MCCLINTOCK_telocate -y bedtools=2.17.0
 conda install -n MCCLINTOCK_telocate -y java-jdk
 
 # create specific conda envs for MCCLINTOCK_populationte
-conda create -y -n MCCLINTOCK_populationte
-conda install -n MCCLINTOCK_populationte -y perl-bioperl-run=1.006900
-conda install -n MCCLINTOCK_populationte -y bwa=0.7.4
-conda install -n MCCLINTOCK_populationte -y bedtools=2.17.0
-conda install -n MCCLINTOCK_populationte -y samtools=0.1.19
+conda create -y -n MCCLINTOCK_popoolationte
+conda install -n MCCLINTOCK_popoolationte -y perl-bioperl-run=1.006900
+conda install -n MCCLINTOCK_popoolationte -y bwa=0.7.4
+conda install -n MCCLINTOCK_popoolationte -y bedtools=2.17.0
+conda install -n MCCLINTOCK_popoolationte -y samtools=0.1.19
 
 # create specific conda envs for MCCLINTOCK_retroseq
 conda create -y -n MCCLINTOCK_retroseq
