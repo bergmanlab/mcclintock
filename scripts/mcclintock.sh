@@ -994,29 +994,33 @@ then
 fi
 
 # create summary table for family and method based TE detection
-bed_dir="$samplefolder/results"
-te_name=$referencefolder/TE-names
-te_summary_out="$samplefolder/results/summary/te_summary_table.csv"
-perl $mcclintock_location/scripts/te_summary_table.pl -d $bed_dir -t $te_name > $te_summary_out
-
+if [[ $methods != ""]]
+then
+	bed_dir="$samplefolder/results"
+	te_name=$referencefolder/TE-names
+	te_summary_out="$samplefolder/results/summary/te_summary_table.csv"
+	perl $mcclintock_location/scripts/te_summary_table.pl -d $bed_dir -t $te_name > $te_summary_out
+fi
 #########################################################################################
 
 # If a user has used an altered genome then insertions in false chromosomes may exist
 # These can be because of a real nested insertion or self similarity
 # These results are removed to prevent errors in later analysis (e.g. genome browsing) but are saved in a folder
-if [[ "$addconsensus" = "on" || "$addrefcopies" = "on" ]]
+if [[ $methods != ""]]
 then
-	mkdir $samplefolder/results/non-ref_chromosome_results
-	for result_file in $samplefolder/results/*.bed
-	do
-		result_file_name=`basename $result_file`
-		grep  -w -v -F -f $chromosome_names $result_file > $samplefolder/results/non-ref_chromosome_results/$result_file_name
-		head -1 $result_file > $samplefolder/results/reference_chr_results
-		grep  -w -F -f $chromosome_names $result_file >> $samplefolder/results/reference_chr_results
-		mv $samplefolder/results/reference_chr_results $result_file
-	done
+	if [[ "$addconsensus" = "on" || "$addrefcopies" = "on" ]]
+	then
+		mkdir $samplefolder/results/non-ref_chromosome_results
+		for result_file in $samplefolder/results/*.bed
+		do
+			result_file_name=`basename $result_file`
+			grep  -w -v -F -f $chromosome_names $result_file > $samplefolder/results/non-ref_chromosome_results/$result_file_name
+			head -1 $result_file > $samplefolder/results/reference_chr_results
+			grep  -w -F -f $chromosome_names $result_file >> $samplefolder/results/reference_chr_results
+			mv $samplefolder/results/reference_chr_results $result_file
+		done
+	fi
 fi
-
 # If cleanup intermediate files is specified then delete all intermediate files specific to the sample
 # i.e. leave any reusable species data behind.
 if [[ "$remove_intermediates" = "on" ]]
