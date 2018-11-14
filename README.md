@@ -93,7 +93,6 @@ sh env_install.sh
 4. Install McClintock by load main conda environment for McClintock pipeline and run the script install.sh with no arguments, after the installation is done, deactivate the conda environment.
 ```
 sh install.sh
-source deactivate
 ```
 
 `install.sh` will download and unpack all of the TE detection pipelines and check that the required dependencies are available in your path. Missing dependencies will be reported and you must install or make sure these are available to run the full pipeline.
