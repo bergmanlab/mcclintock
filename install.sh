@@ -130,32 +130,48 @@ check_dependency() {
 
 echo "Testing dependencies for McClintock main pipeline..."
 dependencies_main=("RepeatMasker" "perl" "bwa" "bedtools" "samtools" "fastqc" "faToTwoBit")
+source activate MCCLINTOCK_main
 check_dependency "${dependencies_main[@]}"
+source deactivate
 
 echo "Testing dependencies for McClintock coverage module..."
 dependencies_cov=("RepeatMasker" "perl" "bwa" "bedtools" "samtools")
+source activate MCCLINTOCK_cov
 check_dependency "${dependencies_cov[@]}"
+source deactivate
 
 echo "Testing dependencies for McClintock ngs_te_mapper module..."
 dependencies_ngstemapper=("bwa" "bedtools" "R")
+source activate MCCLINTOCK_ngstemapper
 check_dependency "${dependencies_ngstemapper[@]}"
+source deactivate
 
 echo "Testing dependencies for McClintock TEMP module..."
 dependencies_temp=("perl" "bwa" "bedtools" "samtools" "faToTwoBit" "twoBitToFa")
+source activate MCCLINTOCK_temp
 check_dependency "${dependencies_temp[@]}"
+source deactivate
 
 echo "Testing dependencies for McClintock RelocaTE module..."
 dependencies_relocate=("perl" "bedtools" "bowtie" "blat" "samtools")
+source activate MCCLINTOCK_relocate
 check_dependency "${dependencies_relocate[@]}"
+source deactivate
 
 echo "Testing dependencies for McClintock TE-locate module..."
 dependencies_telocate=("perl" "bedtools" "bwa" "java")
+source activate MCCLINTOCK_telocate
 check_dependency "${dependencies_telocate[@]}"
+source deactivate
 
 echo "Testing dependencies for McClintock PoPoolationTE module..."
 dependencies_popoolationte=("perl" "bedtools" "bwa" "samtools")
+source activate MCCLINTOCK_popoolationte
 check_dependency "${dependencies_popoolationte[@]}"
+source deactivate
 
 echo "Testing dependencies for McClintock RetroSeq module..."
 dependencies_retroseq=("perl" "bedtools" "bwa" "samtools" "bcftools" "exonerate")
+source activate MCCLINTOCK_retroseq
 check_dependency "${dependencies_retroseq[@]}"
+source deactivate
