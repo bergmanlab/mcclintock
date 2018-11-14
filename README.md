@@ -92,7 +92,6 @@ sh env_install.sh
 ```
 4. Install McClintock by load main conda environment for McClintock pipeline and run the script install.sh with no arguments, after the installation is done, deactivate the conda environment.
 ```
-source activate MCCLINTOCK_main
 sh install.sh
 source deactivate
 ```
