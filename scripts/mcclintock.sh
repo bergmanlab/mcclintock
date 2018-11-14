@@ -837,7 +837,7 @@ then
 	
 	# set up conda env for populationte
 	source deactivate
-	source activate MCCLINTOCK_populationte
+	source activate MCCLINTOCK_popoolationte
 	bash runpopoolationte.sh $popoolationte_reference_genome $te_hierarchy $fastq1 $fastq2 $popool_te_locations $processors $samplefolder
 	# unload populationte conda env and reload env for base mcclintock
 	source deactivate
