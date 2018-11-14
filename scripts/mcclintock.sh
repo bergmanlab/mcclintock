@@ -994,7 +994,7 @@ then
 fi
 
 # create summary table for family and method based TE detection
-if [[ $methods != ""]]
+if [[ $methods != "" ]]
 then
 	bed_dir="$samplefolder/results"
 	te_name=$referencefolder/TE-names
@@ -1006,7 +1006,7 @@ fi
 # If a user has used an altered genome then insertions in false chromosomes may exist
 # These can be because of a real nested insertion or self similarity
 # These results are removed to prevent errors in later analysis (e.g. genome browsing) but are saved in a folder
-if [[ $methods != ""]]
+if [[ $methods != "" ]]
 then
 	if [[ "$addconsensus" = "on" || "$addrefcopies" = "on" ]]
 	then
