@@ -872,20 +872,21 @@ then
 	fastqc_dir=$samplefolder/results/summary/fastqc_analysis
 	cd $fastqc_dir
 	unzip '*.zip'
-	r1_fastqc=`ls -d -1 $fastqc_dir/*_1*/fastqc_data.txt`
-	r2_fastqc=`ls -d -1 $fastqc_dir/*_2*/fastqc_data.txt`
-	if [[ -e "$r2_fastqc" ]]
+	if [[ $single_end != "true" ]]
 	then
-	r1_len=`grep "Sequence length" $r1_fastqc | sed "s/Sequence length/read1 sequence length:/g"`
-	r2_len=`grep "Sequence length" $r2_fastqc | sed "s/Sequence length/read2 sequence length:/g"`
-	echo "$r1_len" >> $report
-	echo "$r2_len" >> $report
-	rm -rf "$fastqc_dir/$sample"_1_fastqc
-	rm -rf "$fastqc_dir/$sample"_2_fastqc
+		r1_fastqc=`ls -d -1 $fastqc_dir/*_1*/fastqc_data.txt`
+		r2_fastqc=`ls -d -1 $fastqc_dir/*_2*/fastqc_data.txt`
+		r1_len=`grep "Sequence length" $r1_fastqc | sed "s/Sequence length/read1 sequence length:/g"`
+		r2_len=`grep "Sequence length" $r2_fastqc | sed "s/Sequence length/read2 sequence length:/g"`
+		echo "$r1_len" >> $report
+		echo "$r2_len" >> $report
+		rm -rf "$fastqc_dir/$sample"_1_fastqc
+		rm -rf "$fastqc_dir/$sample"_2_fastqc
 	else
-	r1_len=`grep "Sequence length" $r1_fastqc | sed "s/Sequence length/sequence length:/g"`
-	echo "$r1_len" >> $report
-	rm -rf "$fastqc_dir/$sample"_1_fastqc
+		r1_fastqc=`ls -d -1 $fastqc_dir/*_1*/fastqc_data.txt`
+		r1_len=`grep "Sequence length" $r1_fastqc | sed "s/Sequence length/sequence length:/g"`
+		echo "$r1_len" >> $report
+		rm -rf "$fastqc_dir/$sample"_1_fastqc
 	fi
 fi
 
