@@ -886,7 +886,7 @@ then
 		r1_fastqc=`ls -d -1 $fastqc_dir/*_1*/fastqc_data.txt`
 		r1_len=`grep "Sequence length" $r1_fastqc | sed "s/Sequence length/sequence length:/g"`
 		echo "$r1_len" >> $report
-		rm -rf "$fastqc_dir/$sample"_1_fastqc
+		rm -rf "$fastqc_dir/$sample"_fastqc
 	fi
 fi
 
