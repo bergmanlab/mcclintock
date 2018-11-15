@@ -59,8 +59,10 @@ patch TEMP/scripts/TEMP_Absence.sh < scripts/TEMP_Absence.patch
 cp scripts/mcclintock.sh .
 
 # Replace PATH for perl in shebang with the one in current working enrivonment
+source activate MCCLINTOCK_relocate
 perlPath=$(which perl | sed 's/\//\\\//g')
 sed -i 's/\/usr\/bin\/perl -w/'"$perlPath"'/' RelocaTE/scripts/*.pl
+source deactivate
 
 # Remove deprecated use of defined from RelocaTE to reduce errors
 for f in RelocaTE/scripts/*.pl
@@ -69,44 +71,107 @@ do
 done
 
 # Check dependencies
-echo "Testing dependencies..."
-dependencies="R RepeatMasker bedtools samtools bcftools bwa exonerate bowtie blat faToTwoBit twoBitToFa java perl"
+check_bioperl() {
+	bioperltest=$(perl -e 'use Bio::Seq' 2>&1)
+	if [[ -n "$bioperltest" ]]
+	then
+		echo "BioPerl... NOT FOUND"
+	else
+		echo "BioPerl... FOUND"
+	fi
+}
 
-for dependency in $dependencies
-do
-	location=`which $dependency`
+check_bwa_version() {
+	version=`bwa 2>&1 >/dev/null | grep "Version:"`
+	if [[ $version != "Version: 0.7.4-r385" ]]
+	then
+		echo "CAUTION McClintock requires version 0.7.4-r385 to work correctly with all methods"
+		echo "You currently have $version installed."
+	fi
+}
+
+check_fastqc() {
+	location=`which fastqc`
 	if test -z "$location"
 	then
-		echo "$dependency... NOT FOUND"
+		echo "fastqc... NOT FOUND (Not required but recommended)"
 	else
-		echo "$dependency... FOUND"
-		if [[ $dependency == "bwa" ]]
+		echo "fastqc... FOUND"
+	fi
+}
+
+check_dependency() {
+	dependencies=("$@")
+	for dependency in "${dependencies[@]}"
+	do
+		if [[ $dependency == "bioperl" ]]
 		then
-			version=`bwa 2>&1 >/dev/null | grep "Version:"`
-			if [[ $version != "Version: 0.7.4-r385" ]]
+			check_bioperl
+			continue
+		fi
+		if [[ $dependency == "fastqc" ]]
+		then
+			check_fastqc
+			continue
+		fi
+		location=`which $dependency`
+		if test -z "$location"
+		then
+			echo "$dependency... NOT FOUND"
+		else
+			echo "$dependency... FOUND"
+			if [[ $dependency == "bwa" ]]
 			then
-				echo "CAUTION McClintock requires version 0.7.4-r385 to work correctly with all methods"
-				echo "You currently have $version installed."
+				check_bwa_version
 			fi
 		fi
-	fi
-done
+	done
+}
 
-# Test BioPerl
-bioperltest=$(perl -e 'use Bio::Seq' 2>&1)
-if [[ -n "$bioperltest" ]]
-then
-	echo "BioPerl... NOT FOUND"
-else
-	echo "BioPerl... FOUND"
-fi
+echo "Testing dependencies for McClintock main pipeline..."
+dependencies_main=("RepeatMasker" "perl" "bwa" "bedtools" "samtools" "fastqc" "faToTwoBit")
+source activate MCCLINTOCK_main
+check_dependency "${dependencies_main[@]}"
+source deactivate
 
-# Test for fastqc - not required but recommended
-echo "Testing optional dependencies..."
-location=`which fastqc`
-if test -z "$location"
-then
-	echo "fastqc... NOT FOUND (Not required but recommended)"
-else
-	echo "fastqc... FOUND"
-fi
+echo "Testing dependencies for McClintock coverage module..."
+dependencies_cov=("RepeatMasker" "perl" "bwa" "bedtools" "samtools")
+source activate MCCLINTOCK_cov
+check_dependency "${dependencies_cov[@]}"
+source deactivate
+
+echo "Testing dependencies for McClintock ngs_te_mapper module..."
+dependencies_ngstemapper=("bwa" "bedtools" "R")
+source activate MCCLINTOCK_ngstemapper
+check_dependency "${dependencies_ngstemapper[@]}"
+source deactivate
+
+echo "Testing dependencies for McClintock TEMP module..."
+dependencies_temp=("perl" "bwa" "bedtools" "samtools" "faToTwoBit" "twoBitToFa")
+source activate MCCLINTOCK_temp
+check_dependency "${dependencies_temp[@]}"
+source deactivate
+
+echo "Testing dependencies for McClintock RelocaTE module..."
+dependencies_relocate=("perl" "bedtools" "bowtie" "blat" "samtools")
+source activate MCCLINTOCK_relocate
+check_dependency "${dependencies_relocate[@]}"
+source deactivate
+
+echo "Testing dependencies for McClintock TE-locate module..."
+dependencies_telocate=("perl" "bedtools" "bwa" "java")
+source activate MCCLINTOCK_telocate
+check_dependency "${dependencies_telocate[@]}"
+source deactivate
+
+echo "Testing dependencies for McClintock PoPoolationTE module..."
+dependencies_popoolationte=("perl" "bedtools" "bwa" "samtools")
+source activate MCCLINTOCK_popoolationte
+check_dependency "${dependencies_popoolationte[@]}"
+source deactivate
+
+echo "Testing dependencies for McClintock RetroSeq module..."
+dependencies_retroseq=("perl" "bedtools" "bwa" "samtools" "bcftools" "exonerate")
+source activate MCCLINTOCK_retroseq
+check_dependency "${dependencies_retroseq[@]}"
+source deactivate

@@ -22,6 +22,7 @@ usage ()
 	echo "     TE-based coverage analysis will result in longer running time. A fasta file can be provided here for coverage"
 	echo "     analysis. If no file is provided here, the consensus sequences of the TEs will be used for the analysis. [Optional:"
 	echo "     default will not include this]"
+	echo "-D : IF this option is specified then only depth of coverage analysis for TEs will be performed. [Optional]"
 	echo "-s : A fasta file that will be used for TE-based coverage analysis, if not supplied then the consensus sequences"
 	echo "     of the TEs will be used for the analysis. [Optional]"
 	echo "-b : Retain the sorted and indexed BAM file of the paired end data aligned to the reference genome."
@@ -40,6 +41,9 @@ usage ()
 	echo "-h : Prints this help guide."
 }
 
+# set up conda env for base mcclintock pipeline
+source activate MCCLINTOCK_main
+
 # Set default value for processors in case it is not supplied
 processors=1
 memory=4
@@ -52,7 +56,7 @@ mcclintock_location="$( cd "$(dirname "$0")" ; pwd -P )"
 cd $mcclintock_location/
 
 # Get the options supplied to the program
-while getopts ":r:c:g:t:s:1:2:o:p:M:m:hiTdbCR" opt;
+while getopts ":r:c:g:t:s:1:2:o:p:M:m:hiTdDbCR" opt;
 do
 	case $opt in
 		r)
@@ -103,6 +107,9 @@ do
 		d)
 			te_cov=on
 			;;
+		D)
+			cov_only=on
+			;;
 		b)
 			save_bam=on
 			;;
@@ -149,13 +156,20 @@ printf "\nRunning McClintock version: " | tee -a /dev/stderr
 git rev-parse HEAD | tee -a /dev/stderr
 printf "\n\nDate of run is $date\n\n" | tee -a /dev/stderr
 
-# If only one fastq has been supplied assume this is single ended data and launch only ngs_te_mapper
+# If only one fastq has been supplied assume this is single ended data and launch only ngs_te_mapper and RelocaTE
 single_end="false"
 if [[ "$input1" && -z "$input2" ]]
 then
 	echo "Assuming single ended data and launching only ngs_te_mapper and RelocaTE"
 	methods="ngs_te_mapper RelocaTE"
 	single_end="true"
+fi
+
+# If coverage only option is provided then launch only coverage module
+if [[ "$cov_only" == "on" ]]
+then
+	echo "Coverage only option is provided and launching only coverage module"
+	methods=""
 fi
 
 genome=${inputr##*/}
@@ -229,7 +243,7 @@ else
 fi
 
 # Coverage analysis for each TE
-if [[ "$te_cov" == "on" ]]
+if [[ "$te_cov" == "on" || "$cov_only" == "on" ]]
 then
 	printf "\nCalculating normalized average coverage for TEs...\n\n" | tee -a /dev/stderr
 	if [[ "$inputff" ]]
@@ -249,13 +263,19 @@ then
 	te_cov_dir=$samplefolder/results/te_coverage
 	mkdir -p $te_cov_dir
 	ref_genome=$referencefolder/$reference_genome_file
+
+	# load conda env for coverage analysis
+	source deactivate
+	source activate MCCLINTOCK_cov
 	if [[ $single_end == "true" ]]
 	then
 		bash $mcclintock_location/scripts/te_coverage.sh -s $sample -R $referencefolder -o $te_cov_dir -1 $fastq1 -r $ref_genome -c $cov_fasta -m $mcclintock_location -p $processors -i $remove_intermediates -C $chromosome_names -g $genome
 	else
 		bash $mcclintock_location/scripts/te_coverage.sh -s $sample -R $referencefolder -o $te_cov_dir -1 $fastq1 -2 $fastq2 -r $ref_genome -c $cov_fasta -m $mcclintock_location -p $processors -i $remove_intermediates -C $chromosome_names -g $genome
 	fi
-	
+	# unload coverage env and reload conda env for base mcclintock pipeline
+	source deactivate
+	source activate MCCLINTOCK_main
 	printf "\nCoverage analysis finished.\n\n" | tee -a /dev/stderr
 fi
 
@@ -594,7 +614,14 @@ then
 	fi
 
 	cd $mcclintock_location/TE-locate
+
+	# set up conda env for telocate
+	source deactivate
+	source activate MCCLINTOCK_telocate
 	bash runtelocate.sh $sam_folder $telocate_reference_genome $telocate_te_locations $memory $sample $median_insertsize $samplefolder
+	# unload telocate conda env and reload env for base mcclintock
+	source deactivate
+	source activate MCCLINTOCK_main
 
 	# Save the original result file and the bed files filtered by mcclintock
 	mv $samplefolder/TE-locate/$sample"_telocate"* $samplefolder/results/
@@ -620,9 +647,16 @@ then
 	################################## Run RetroSeq ##################################
 
 	printf "\nRunning RetroSeq pipeline...\n\n" | tee -a /dev/stderr
-
+	
 	cd $mcclintock_location/RetroSeq
+
+	# set up conda env for retroseq
+	source deactivate
+	source activate MCCLINTOCK_retroseq
 	bash runretroseq.sh $consensus_te_seqs $bam $reference_genome $bed_te_locations_file $te_families $samplefolder
+	# unload retroseq conda env and reload env for base mcclintock
+	source deactivate
+	source activate MCCLINTOCK_main
 
 	# Save the original result file and the bed files filtered by mcclintock
 	mv $samplefolder/RetroSeq/$sample"_retroseq"* $samplefolder/results/
@@ -666,7 +700,13 @@ then
 
 	cd $mcclintock_location/TEMP
 
+	# set up conda env for temp
+	source deactivate
+	source activate MCCLINTOCK_temp
 	bash runtemp.sh $bam $twobitreference $consensus_te_seqs $bed_te_locations_file $te_families $median_insertsize $sample $processors $samplefolder $telocate_te_locations
+	# unload temp conda env and reload env for base mcclintock
+	source deactivate
+	source activate MCCLINTOCK_main
 
 	# Save the original result file and the bed files filtered by mcclintock
 	mv $samplefolder/TEMP/$sample"_temp"* $samplefolder/results/
@@ -712,8 +752,14 @@ then
 	fi
 	relocate_te_locations=$referencefolder/relocate_te_locations.gff
 
+	# set up conda env for relocate
 	cd $mcclintock_location/RelocaTE
+	source deactivate
+	source activate MCCLINTOCK_relocate
 	bash runrelocate.sh $relocate_te_seqs $reference_genome $samplefolder/reads $sample $relocate_te_locations $samplefolder $single_end
+	# unload relocate conda env and reload env for base mcclintock
+	source deactivate
+	source activate MCCLINTOCK_main
 
 	# Save the original result file and the bed files filtered by mcclintock
 	mv $samplefolder/RelocaTE/$sample"_relocate"* $samplefolder/results/
@@ -747,7 +793,13 @@ then
 		fastq2="false"
 	fi
 
+	# set up conda env for ngs_te_mapper
+	source deactivate
+	source activate MCCLINTOCK_ngstemapper
 	bash runngstemapper.sh $consensus_te_seqs $reference_genome $sample $fastq1 $fastq2 $samplefolder
+	# unload ngs_te_mapper conda env and reload env for base mcclintock
+	source deactivate
+	source activate MCCLINTOCK_main
 
 	# Save the original result file and the bed file filtered by mcclintock
 	mv $samplefolder/ngs_te_mapper/$sample"_ngs_te_mapper_nonredundant.bed" $samplefolder/results/
@@ -782,7 +834,14 @@ then
 	te_hierarchy=$referencefolder/te_hierarchy
 
 	cd $mcclintock_location/PoPoolationTE
+	
+	# set up conda env for populationte
+	source deactivate
+	source activate MCCLINTOCK_popoolationte
 	bash runpopoolationte.sh $popoolationte_reference_genome $te_hierarchy $fastq1 $fastq2 $popool_te_locations $processors $samplefolder
+	# unload populationte conda env and reload env for base mcclintock
+	source deactivate
+	source activate MCCLINTOCK_main
 
 	# Save the original result file and the bed files filtered by mcclintock
 	mv $samplefolder/PoPoolationTE/$sample"_popoolationte"* $samplefolder/results/
@@ -813,20 +872,21 @@ then
 	fastqc_dir=$samplefolder/results/summary/fastqc_analysis
 	cd $fastqc_dir
 	unzip '*.zip'
-	r1_fastqc=`ls -d -1 $fastqc_dir/*_1*/fastqc_data.txt`
-	r2_fastqc=`ls -d -1 $fastqc_dir/*_2*/fastqc_data.txt`
-	if [[ -e "$r2_fastqc" ]]
+	if [[ $single_end != "true" ]]
 	then
-	r1_len=`grep "Sequence length" $r1_fastqc | sed "s/Sequence length/read1 sequence length:/g"`
-	r2_len=`grep "Sequence length" $r2_fastqc | sed "s/Sequence length/read2 sequence length:/g"`
-	echo "$r1_len" >> $report
-	echo "$r2_len" >> $report
-	rm -rf "$fastqc_dir/$sample"_1_fastqc
-	rm -rf "$fastqc_dir/$sample"_2_fastqc
+		r1_fastqc=`ls -d -1 $fastqc_dir/*_1*/fastqc_data.txt`
+		r2_fastqc=`ls -d -1 $fastqc_dir/*_2*/fastqc_data.txt`
+		r1_len=`grep "Sequence length" $r1_fastqc | sed "s/Sequence length/read1 sequence length:/g"`
+		r2_len=`grep "Sequence length" $r2_fastqc | sed "s/Sequence length/read2 sequence length:/g"`
+		echo "$r1_len" >> $report
+		echo "$r2_len" >> $report
+		rm -rf "$fastqc_dir/$sample"_1_fastqc
+		rm -rf "$fastqc_dir/$sample"_2_fastqc
 	else
-	r1_len=`grep "Sequence length" $r1_fastqc | sed "s/Sequence length/sequence length:/g"`
-	echo "$r1_len" >> $report
-	rm -rf "$fastqc_dir/$sample"_1_fastqc
+		r1_fastqc=`ls -d -1 $fastqc_dir/*_1*/fastqc_data.txt`
+		r1_len=`grep "Sequence length" $r1_fastqc | sed "s/Sequence length/sequence length:/g"`
+		echo "$r1_len" >> $report
+		rm -rf "$fastqc_dir/$sample"_fastqc
 	fi
 fi
 
@@ -935,29 +995,33 @@ then
 fi
 
 # create summary table for family and method based TE detection
-bed_dir="$samplefolder/results"
-te_name=$referencefolder/TE-names
-te_summary_out="$samplefolder/results/summary/te_summary_table.csv"
-perl $mcclintock_location/scripts/te_summary_table.pl -d $bed_dir -t $te_name > $te_summary_out
-
+if [[ $methods != "" ]]
+then
+	bed_dir="$samplefolder/results"
+	te_name=$referencefolder/TE-names
+	te_summary_out="$samplefolder/results/summary/te_summary_table.csv"
+	perl $mcclintock_location/scripts/te_summary_table.pl -d $bed_dir -t $te_name > $te_summary_out
+fi
 #########################################################################################
 
 # If a user has used an altered genome then insertions in false chromosomes may exist
 # These can be because of a real nested insertion or self similarity
 # These results are removed to prevent errors in later analysis (e.g. genome browsing) but are saved in a folder
-if [[ "$addconsensus" = "on" || "$addrefcopies" = "on" ]]
+if [[ $methods != "" ]]
 then
-	mkdir $samplefolder/results/non-ref_chromosome_results
-	for result_file in $samplefolder/results/*.bed
-	do
-		result_file_name=`basename $result_file`
-		grep  -w -v -F -f $chromosome_names $result_file > $samplefolder/results/non-ref_chromosome_results/$result_file_name
-		head -1 $result_file > $samplefolder/results/reference_chr_results
-		grep  -w -F -f $chromosome_names $result_file >> $samplefolder/results/reference_chr_results
-		mv $samplefolder/results/reference_chr_results $result_file
-	done
+	if [[ "$addconsensus" = "on" || "$addrefcopies" = "on" ]]
+	then
+		mkdir $samplefolder/results/non-ref_chromosome_results
+		for result_file in $samplefolder/results/*.bed
+		do
+			result_file_name=`basename $result_file`
+			grep  -w -v -F -f $chromosome_names $result_file > $samplefolder/results/non-ref_chromosome_results/$result_file_name
+			head -1 $result_file > $samplefolder/results/reference_chr_results
+			grep  -w -F -f $chromosome_names $result_file >> $samplefolder/results/reference_chr_results
+			mv $samplefolder/results/reference_chr_results $result_file
+		done
+	fi
 fi
-
 # If cleanup intermediate files is specified then delete all intermediate files specific to the sample
 # i.e. leave any reusable species data behind.
 if [[ "$remove_intermediates" = "on" ]]
@@ -965,5 +1029,8 @@ then
 	printf "\nRemoving McClintock intermediate files\n\n" | tee -a /dev/stderr
 	rm -r $samplefolder/reads
 fi
+
+# unload conda env
+source deactivate
 
 printf "\nPipeline Complete\n\n" | tee -a /dev/stderr

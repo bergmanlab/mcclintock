@@ -84,29 +84,14 @@ conda config --add channels defaults
 conda config --add channels conda-forge
 conda config --add channels bioconda
 ```
-3. Install dependencies with conda
+3. Install dependencies with conda by clone the McClintock repository, cd into the project directory and run the script install.sh with no arguments, the installation might take a while to finish.
 ```
-conda create -y -n MCCLINTOCK
-source activate MCCLINTOCK
-conda install -y repeatmasker=4.0.7
-conda install -y perl-bioperl-run=1.006900
-conda install -y bwa=0.7.4
-conda install -y bedtools=2.17.0
-conda install -y bowtie=1.0.0
-conda install -y ucsc-blat=366
-conda install -y samtools=0.1.19
-conda install -y r=3.5.0
-conda install -y fastqc=0.11.2
-conda install -y ucsc-fatotwobit=366
-conda install -y ucsc-twobittofa=366
-conda install -y bcftools=1.2
-conda install -y exonerate=2.4.0
-```
-4. Install McClintock by clone the repository, cd into the project directory and run the script install.sh with no arguments.
-```
-source activate MCCLINTOCK
 git clone git@github.com:bergmanlab/mcclintock.git
 cd mcclintock
+sh env_install.sh
+```
+4. Install McClintock by load main conda environment for McClintock pipeline and run the script install.sh with no arguments, after the installation is done, deactivate the conda environment.
+```
 sh install.sh
 ```
 
@@ -115,10 +100,9 @@ sh install.sh
 Note: required dependencies should be available in your environment path before the installation, lack of dependencies might result in incorrect configurations for certain component methods.
 
 ### Running on a test dataset
-A script is included to run the full pipeline on a test Illumina resequencing dataset from the yeast genome. To run this test script, make sure the MCCLINTOCK environment is activated and change directory into the directory named `test` and run the script `runtest.sh`.
+A script is included to run the full pipeline on a test Illumina resequencing dataset from the yeast genome. To run this test script, make sure the none of the conda environment is activated and change directory into the directory named `test` and run the script `runtest.sh`.
 
 ```
-source activate MCCLINTOCK
 cd test
 sh runtest.sh
 ```
