@@ -90,14 +90,12 @@ git clone git@github.com:bergmanlab/mcclintock.git
 cd mcclintock
 sh env_install.sh
 ```
-4. Install McClintock by load main conda environment for McClintock pipeline and run the script install.sh with no arguments, after the installation is done, deactivate the conda environment.
+4. Install McClintock by run the script install.sh with no arguments.
 ```
 sh install.sh
 ```
 
 `install.sh` will download and unpack all of the TE detection pipelines and check that the required dependencies are available in your path. Missing dependencies will be reported and you must install or make sure these are available to run the full pipeline.
-
-Note: required dependencies should be available in your environment path before the installation, lack of dependencies might result in incorrect configurations for certain component methods.
 
 ### Running on a test dataset
 A script is included to run the full pipeline on a test Illumina resequencing dataset from the yeast genome. To run this test script, make sure the none of the conda environment is activated and change directory into the directory named `test` and run the script `runtest.sh`.
@@ -118,6 +116,7 @@ The pipeline is invoked by running the mcclintock.sh script in the main project 
 * `-t` : A tab delimited file with one entry per ID in the GFF file and two columns: the first containing the ID and the second containing the TE family it belongs to. The family should correspond to the names of the sequences in the consensus fasta file. [Optional - required if GFF (option -g) is supplied]
 * `-T` : If this option is specified then fastq comments (e.g. barcode) will be incorporated to SAM output. Warning: do not use this option if the input fastq files do not have comments. [Optional: default will not include this]
 * `-d` : If this option is specified then McClintock will perform depth of coverage analysis for every TE. Note: perform coverage analysis for TEs will result in longer running time. [Optional: default will not include this]
+* `-D` : IF this option is specified then only depth of coverage analysis for TEs will be performed. [Optional]
 * `-s` : A fasta file that will be used for TE-based coverage analysis, if not supplied then the consensus sequences of the TEs will be used for the analysis. [Optional]
 * `-1` : The absolute path of the first fastq file from a paired end read, this should be named ending _1.fastq. [Required]
 * `-2` : The absolute path of the second fastq file from a paired end read, this should be named ending _2.fastq. [Optional]
@@ -155,9 +154,9 @@ File | Description
 /summary/fastqc_analysis | FastQC analysis output directory
 /summary/summary_report.txt | McClintock summary report
 /summary/te_summary_table.csv | Family and method based TE detection summary
-/summary/te_coverage/te_depth.csv | Normalized average depth for every TE in the TE library (only generated when `-d` is specified)
+/summary/te_coverage/te_depth.csv | Normalized average depth for every TE in the TE library (only generated when `-d` or `-D` is specified)
 
-If TE coverage analysis module was enabled using `-d` option, then output of the module will be stored in `/te_coverage/te_depth.csv`, containing normalized average depth for every TE in the TE library.
+If TE coverage analysis module was enabled using `-d` or `-D` option, then output of the module will be stored in `/te_coverage/te_depth.csv`, containing normalized average depth for every TE in the TE library.
 
 Original result files for non-reference and (when available) reference predictions produced by each method are stored in the directory `/originalmethodresults`, containing one sub-directory for each method. Original non-reference and (when available) reference files are then merged and filtered to create 0-based .bed6 format files. For TEMP, Retroseq, and PoPoolationTE, original files are converted into \*raw.bed files that contain all unfiltered predictions for non-reference predictions plus reference TE predictions if provided by the method. Score (Retroseq, ≥6), read support (TEMP and PopoolationTE, reads found for both ends)  and sample frequency (TEMP, >10%) are used to filter raw prediction to create \*redundant.bed files. For RelocaTE, original files from individual families are merged and used to create \*redundant.bed files. For TE-locate, original files are used to create \*redundant.bed directly. \*redundant.bed are filtered to remove predictions that have the identical coordinates for different TE families, with the prediction having the greatest read support (RelocaTE, TEMP, PopoolationTE, TE-locate) or call status (Retroseq) being retained. Non-identical overlapping predictions are retained. The final output file of the run scripts for individual methods after merging reference and non-reference predictions and filtering is \*nonredundant.bed. For ngs_te_mapper, no filtering or merging is needed, and thus \*nonredundant.bed files are created directly.
 
