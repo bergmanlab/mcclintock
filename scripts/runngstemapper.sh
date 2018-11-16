@@ -10,6 +10,7 @@ then
 	fasta1_file=$4
 	fasta2_file=$5
 	outputfolder=$6
+	processors=$7
 	test_dir=`pwd`
 	
 	mkdir -p $outputfolder/ngs_te_mapper
@@ -19,10 +20,10 @@ then
 		base1=`basename $fasta1_file`
 		samplename=${base1%%.*}
 		# Run ngs_te_mapper on single end data
-		Rscript --vanilla $test_dir/sourceCode/ngs_te_mapper.R sample=$fasta1_file genome=$reference_genome teFile=$consensus_te_seqs tsd=20 output=$outputfolder/ngs_te_mapper sourceCodeFolder=$test_dir/sourceCode
+		Rscript --vanilla $test_dir/sourceCode/ngs_te_mapper.R sample=$fasta1_file genome=$reference_genome teFile=$consensus_te_seqs tsd=20 thread=$processors output=$outputfolder/ngs_te_mapper sourceCodeFolder=$test_dir/sourceCode
 	else
 		# Run ngs_te_mapper with both fastq files
-		Rscript --vanilla $test_dir/sourceCode/ngs_te_mapper.R sample=$fasta1_file\;$fasta2_file genome=$reference_genome teFile=$consensus_te_seqs tsd=20 output=$outputfolder/ngs_te_mapper sourceCodeFolder=$test_dir/sourceCode
+		Rscript --vanilla $test_dir/sourceCode/ngs_te_mapper.R sample=$fasta1_file\;$fasta2_file genome=$reference_genome teFile=$consensus_te_seqs tsd=20 thread=$processors output=$outputfolder/ngs_te_mapper sourceCodeFolder=$test_dir/sourceCode
 	fi
 
 	# Extract only the relevant data from the output file and sort the results

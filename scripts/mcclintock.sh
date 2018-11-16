@@ -796,7 +796,7 @@ then
 	# set up conda env for ngs_te_mapper
 	source deactivate
 	source activate MCCLINTOCK_ngstemapper
-	bash runngstemapper.sh $consensus_te_seqs $reference_genome $sample $fastq1 $fastq2 $samplefolder
+	bash runngstemapper.sh $consensus_te_seqs $reference_genome $sample $fastq1 $fastq2 $samplefolder $processors
 	# unload ngs_te_mapper conda env and reload env for base mcclintock
 	source deactivate
 	source activate MCCLINTOCK_main
