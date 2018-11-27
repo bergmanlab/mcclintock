@@ -159,7 +159,7 @@ do
 done
 
 # remove tmp folder
-if [[ "$remove_intermediates" = "on" ]]
+if [[ "$remove_intermediates" == "on" ]]
 then
     rm -rf $tmp_dir
 fi

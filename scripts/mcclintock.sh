@@ -269,9 +269,19 @@ then
 	source activate MCCLINTOCK_cov
 	if [[ $single_end == "true" ]]
 	then
-		bash $mcclintock_location/scripts/te_coverage.sh -s $sample -R $referencefolder -o $te_cov_dir -1 $fastq1 -r $ref_genome -c $cov_fasta -m $mcclintock_location -p $processors -i $remove_intermediates -C $chromosome_names -g $genome
+		if [[ "$remove_intermediates" == "on" ]]
+		then
+			bash $mcclintock_location/scripts/te_coverage.sh -s $sample -R $referencefolder -o $te_cov_dir -1 $fastq1 -r $ref_genome -c $cov_fasta -m $mcclintock_location -p $processors -i -C $chromosome_names -g $genome
+		else
+			bash $mcclintock_location/scripts/te_coverage.sh -s $sample -R $referencefolder -o $te_cov_dir -1 $fastq1 -r $ref_genome -c $cov_fasta -m $mcclintock_location -p $processors -C $chromosome_names -g $genome
+		fi
 	else
-		bash $mcclintock_location/scripts/te_coverage.sh -s $sample -R $referencefolder -o $te_cov_dir -1 $fastq1 -2 $fastq2 -r $ref_genome -c $cov_fasta -m $mcclintock_location -p $processors -i $remove_intermediates -C $chromosome_names -g $genome
+		if [[ "$remove_intermediates" == "on" ]]
+		then
+			bash $mcclintock_location/scripts/te_coverage.sh -s $sample -R $referencefolder -o $te_cov_dir -1 $fastq1 -2 $fastq2 -r $ref_genome -c $cov_fasta -m $mcclintock_location -p $processors -i -C $chromosome_names -g $genome
+		else
+			bash $mcclintock_location/scripts/te_coverage.sh -s $sample -R $referencefolder -o $te_cov_dir -1 $fastq1 -2 $fastq2 -r $ref_genome -c $cov_fasta -m $mcclintock_location -p $processors -C $chromosome_names -g $genome
+		fi
 	fi
 	# unload coverage env and reload conda env for base mcclintock pipeline
 	source deactivate
