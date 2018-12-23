@@ -926,7 +926,7 @@ fi
 ## average genome coverage
 if [[ -e "$bam" ]]
 then
-	if [[ ! -f $referencefolder/dm6.fasta.out.complement.all.bed ]]
+	if [[ ! -f $referencefolder/"$genome.fasta.out.complement.all.bed" ]]
 	then
 		cat "$reference_genome".fai | cut -f1,2 | sort -k 1,1 -k2,2n > $referencefolder/"$genome.sorted.all.genome"
 		bedtools slop -i $bed_te_locations_file -g $referencefolder/"$genome.sorted.all.genome" -l 1 -r 0 | sort -k 1,1 -k2,2n > $referencefolder/"$genome.fasta.out.zero.all.bed"
