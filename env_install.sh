@@ -27,6 +27,7 @@ conda install -n MCCLINTOCK_cov -y perl-bioperl-run=1.006900
 conda install -n MCCLINTOCK_cov -y bwa=0.7.4
 conda install -n MCCLINTOCK_cov -y bedtools=2.17.0
 conda install -n MCCLINTOCK_cov -y samtools=1.6
+conda install -n MCCLINTOCK_cov -y python=3.6
 
 # create specific conda envs for ngs_te_mapper
 conda create -y -n MCCLINTOCK_ngstemapper

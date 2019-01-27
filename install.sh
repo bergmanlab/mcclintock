@@ -8,6 +8,7 @@ wget --no-check-certificate https://github.com/tk2/RetroSeq/archive/700d4f76a3b9
 wget --no-check-certificate https://github.com/srobb1/RelocaTE/archive/ce3a2066e15f5c14e2887fdf8dce0485e1750e5b.zip -O RelocaTE.zip
 wget --no-check-certificate https://downloads.sourceforge.net/project/te-locate/TE-locate.tar -O TE-locate.tar
 wget --no-check-certificate https://github.com/JialiUMassWengLab/TEMP/archive/d2500b904e2020d6a1075347b398525ede5feae1.zip -O TEMP.zip
+wget --no-check-certificate https://github.com/pbasting/samplot/archive/7d0eb60bc858136ae7a08169d1f7eb4bd4a613cf.zip -O samplot.zip
 
 # Extract software and format folder layout.
 echo "Extracting pipelines..."
@@ -29,6 +30,9 @@ rm TE-locate.tar
 unzip TEMP.zip
 mv TEMP-d2500b904e2020d6a1075347b398525ede5feae1 TEMP
 rm TEMP.zip
+unzip samplot.zip
+mv samplot-7d0eb60bc858136ae7a08169d1f7eb4bd4a613cf samplot
+rm samplot.zip
 
 # Apply edits to software and custom run scripts.
 echo "Copying run scripts..."
@@ -135,7 +139,7 @@ check_dependency "${dependencies_main[@]}"
 source deactivate
 
 echo "Testing dependencies for McClintock coverage module..."
-dependencies_cov=("RepeatMasker" "perl" "bwa" "bedtools" "samtools")
+dependencies_cov=("RepeatMasker" "perl" "bwa" "bedtools" "samtools" "python")
 source activate MCCLINTOCK_cov
 check_dependency "${dependencies_cov[@]}"
 source deactivate
