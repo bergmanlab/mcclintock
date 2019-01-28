@@ -169,6 +169,7 @@ do
 	python $mcclintock_location/samplot/src/samplot.py \
     -n $te_name \
     -b $bam \
+	-r $ref_masked_aug \
     -o $plot_dir/$te_name.png \
     -c $te \
     --coverage_only
