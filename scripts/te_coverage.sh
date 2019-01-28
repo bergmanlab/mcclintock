@@ -165,6 +165,7 @@ do
 
 	te_name=`echo $te | sed 's/#.*//g'`
 	te_name=`echo $te | sed 's/\/.*//g'`
+	te_length=`cat $genome.fasta.fai | grep "$te_name" | cut -f2`
 
 	python $mcclintock_location/samplot/src/samplot.py \
     -n $te_name \
@@ -172,6 +173,8 @@ do
 	-r $ref_masked_aug \
     -o $plot_dir/$te_name.png \
     -c $te \
+	-s 1 \
+	-e $te_length \
     --coverage_only
 done
 
