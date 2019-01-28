@@ -166,7 +166,7 @@ do
 	te_name=`echo $te | sed 's/#.*//g'`
 	te_name=`echo $te | sed 's/\/.*//g'`
 
-	python $mcclintock_location/samplot/samplot.py \
+	python $mcclintock_location/samplot/src/samplot.py \
     -n $te_name \
     -b $bam \
     -o $plot_dir/$te_name.png \
