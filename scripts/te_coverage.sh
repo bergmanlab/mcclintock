@@ -165,7 +165,7 @@ do
 
 	te_name=`echo $te | sed 's/#.*//g'`
 	te_name=`echo $te | sed 's/\/.*//g'`
-	te_length=`cat $genome.fasta.fai | grep "$te_name" | cut -f2`
+	te_length=`cat $referencefolder/$genome.fasta.fai | grep "$te_name" | cut -f2`
 
 	python $mcclintock_location/samplot/src/samplot.py \
     -n $te_name \
