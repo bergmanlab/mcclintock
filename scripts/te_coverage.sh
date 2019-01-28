@@ -163,8 +163,8 @@ do
     te_depth_normalized=$(echo "$te_depth / $genome_avg_depth" | bc -l )
     printf '%s,%.2f\n' "$te" "$te_depth_normalized" | paste -sd ',' >> $te_cov_dir/te_depth.csv
 
-	te_name=$(cat $te | sed 's/#.*//g')
-	te_name=$(cat $te_name | sed 's/\/.*//g')
+	te_name=$(echo $te | sed 's/#.*//g')
+	# te_name=$(echo $te_name | sed 's/\/.*//g')
 	echo $te_name
 	te_length=$(awk -v var="${te_name}" '{if ($1==var) print $2}' $referencefolder/$genome.cov.fasta.masked.aug.fai)
 	echo $te_length
