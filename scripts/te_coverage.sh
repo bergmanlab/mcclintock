@@ -157,26 +157,37 @@ genome_avg_depth=`samtools depth -aa -b $bed_nonte $bam | awk '{ total += $3 } E
 echo $genome_avg_depth > $te_cov_dir/genome_avg_depth
 printf '%s\n' "TE Family" "Normalized Depth" | paste -sd ',' > $te_cov_dir/te_depth.csv
 
+te_start_array=()
+te_end_array=()
+te_name_concat=()
 for te in `cat $te_list`
 do
     te_depth=`samtools depth -aa -r $te $bam | awk '{ total += $3 } END { print total/NR }'`
     te_depth_normalized=$(echo "$te_depth / $genome_avg_depth" | bc -l )
     printf '%s,%.2f\n' "$te" "$te_depth_normalized" | paste -sd ',' >> $te_cov_dir/te_depth.csv
-
-	te_length=$(awk -v var="${te}" '{if ($1==var) print $2}' $referencefolder/$genome.cov.fasta.masked.aug.fai)
+	te_start_array+=("1")
+	te_end_array+=("$(awk -v var="${te}" '{if ($1==var) print $2}' $referencefolder/$genome.cov.fasta.masked.aug.fai)")
 	te_name=$(echo $te | sed 's/#.*//g')
 	te_name=$(echo $te_name | sed 's/\/.*//g')
+	te_name_array+=("$te_name")
+done
 
-	python $mcclintock_location/samplot/src/samplot.py \
-    -n $te_name \
+te_id_concat=$(cat $te_list |tr "\n" " ")
+te_start_concat=$(IFS=$' '; echo "${te_start_array[*]}")
+te_end_concat=$(IFS=$' '; echo "${te_end_array[*]}")
+te_name_concat=$(IFS=$' '; echo "${te_name_array[*]}")
+
+# generate coverage profile for every TE family
+python $mcclintock_location/samplot/src/samplot.py \
+    -n $te_name_concat \
     -b $bam \
     -r $ref_masked_aug \
-    -o $plot_dir/$te_name.png \
-    -c $te \
-    -s 1 \
-    -e $te_length \
-    --coverage_only
-done
+    -o $plot_dir/te_cov.png \
+    -c $te_id_concat \
+    -s $te_start_concat \
+    -e $te_end_concat \
+    --coverage_only \
+    --multifig_vertical
 
 # remove tmp folder
 if [[ "$remove_intermediates" == "on" ]]

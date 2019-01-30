@@ -32,6 +32,7 @@ conda install -n MCCLINTOCK_cov -y matplotlib
 conda install -n MCCLINTOCK_cov -y pysam
 source activate MCCLINTOCK_cov
 pip install statistics
+pip install Pillow
 source deactivate
 
 # create specific conda envs for ngs_te_mapper
