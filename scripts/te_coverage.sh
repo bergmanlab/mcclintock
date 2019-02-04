@@ -162,10 +162,10 @@ do
 	te_name=$(echo $te | sed 's/#.*//g')
 	te_name=$(echo $te_name | sed 's/\/.*//g')
 
-	samtools depth -aa -r $te $bam -d 0 -Q 1 > $te_cov_dir/$te_name.highQ.cov
-	samtools depth -aa -r $te $bam -d 0 -Q 0 > $te_cov_dir/$te_name.allQ.cov
+	samtools depth -aa -r $te $bam -d 0 -Q 1 > $tmp_dir/$te_name.highQ.cov
+	samtools depth -aa -r $te $bam -d 0 -Q 0 > $tmp_dir/$te_name.allQ.cov
 	
-    te_avg_depth=`cat $te_name.allQ.cov | awk '{ total += $3 } END { print total/NR }'`
+    te_avg_depth=`cat $tmp_dir/$te_name.allQ.cov | awk '{ total += $3 } END { print total/NR }'`
     te_avg_norm_depth=$(echo "$te_avg_depth / $genome_avg_depth" | bc -l )
     printf '%s,%.2f\n' "$te" "$te_avg_norm_depth" | paste -sd ',' >> $te_cov_dir/te_depth.csv
 
@@ -173,8 +173,8 @@ do
 	python $mcclintock_location/scripts/plot_coverage.py \
 		-n $te_name \
 		-o $plot_dir/$te_name.png \
-		-a $te_name.allQ.cov \
-		-u $te_name.highQ.cov \
+		-a $tmp_dir/$te_name.allQ.cov \
+		-u $tmp_dir/$te_name.highQ.cov \
 		--normalize_cov $genome_avg_depth \
 		--add_hline $te_avg_norm_depth
 
