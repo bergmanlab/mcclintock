@@ -5,7 +5,6 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.gridspec as gridspec
 import pylab
-import pysam
 import os
 import matplotlib.path as mpath
 import matplotlib.patches as mpatches
