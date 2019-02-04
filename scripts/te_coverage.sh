@@ -170,16 +170,14 @@ do
     printf '%s,%.2f\n' "$te" "$te_avg_norm_depth" | paste -sd ',' >> $te_cov_dir/te_depth.csv
 
 	# generate coverage profile for every TE family
-	python $mcclintock_location/samplot/src/samplot_cov.py \
-        -n $te_name \
-        -b $bam \
-        -r $ref_masked_aug \
-        -o $plot_dir/$te_name.png \
-        -c $te \
-        --depth_highq $te_name.highQ.cov \
-        --depth_allq $te_name.allQ.cov \
-        --normalize_cov $genome_avg_depth \
-        --add_hline $te_avg_norm_depth
+	python $mcclintock_location/scripts/plot_coverage.py \
+		-n $te_name \
+		-o $plot_dir/$te_name.png \
+		-a $te_name.allQ.cov \
+		-u $te_name.highQ.cov \
+		--normalize_cov $genome_avg_depth \
+		--add_hline $te_avg_norm_depth
+
 done
 
 # remove tmp folder
