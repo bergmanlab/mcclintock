@@ -170,7 +170,7 @@ do
     printf '%s,%.2f\n' "$te" "$te_avg_norm_depth" | paste -sd ',' >> $te_cov_dir/te_depth.csv
 
 	# generate coverage profile for every TE family
-	python $mcclintock_location/scripts/plot_coverage.py \
+	python -W ingore $mcclintock_location/scripts/plot_coverage.py \
 		-n $te_name \
 		-o $plot_dir/$te_name.png \
 		-a $tmp_dir/$te_name.allQ.cov \
