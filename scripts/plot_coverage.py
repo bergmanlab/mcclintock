@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import sys
 import os
+import math
 import argparse
 import numpy as np
 import matplotlib
@@ -98,8 +99,15 @@ def plot_coverage(chrom, all_pos, all_cov, uniq_pos, uniq_cov, title, height, wi
 
     ax.set_xlim(min(all_pos),max(all_pos))
     ax.set_ylim(0,max(all_cov))
-    plot.xticks([min(all_pos), np.median(all_pos), max(all_pos)])
-    plot.yticks([0, int(max(all_cov)/2), max(all_cov)])
+    plot.xticks([min(all_pos), int(np.median(all_pos)), max(all_pos)])
+
+    y_mid_tick = max(all_cov)/2
+    y_mid_tick = math.ceil(y_mid_tick*100)/100
+
+    y_max_tick = max(all_cov)
+    y_max_tick = math.ceil(y_max_tick*100)/100
+
+    plot.yticks([0, y_mid_tick, y_max_tick])
     
     ax.set_xlabel('Position on '+ chrom, fontsize=8)
 
