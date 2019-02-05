@@ -1,16 +1,14 @@
 #!/usr/bin/env python
 import sys
+import os
+import argparse
 import numpy as np
 import matplotlib
 matplotlib.use('Agg')
-import matplotlib.gridspec as gridspec
-import pylab
-import os
-import matplotlib.path as mpath
+import matplotlib.pyplot
 import matplotlib.patches as mpatches
-import argparse
-from matplotlib.offsetbox import AnchoredText
-import matplotlib.ticker as ticker
+
+
 
 
 
@@ -102,8 +100,11 @@ def plot_coverage(chrom, all_pos, all_cov, uniq_pos, uniq_cov, title, height, wi
     ax.set_ylim(0,max(all_cov))
     plot.xticks([min(all_pos), np.median(all_pos), max(all_pos)])
     plot.yticks([0, int(max(all_cov)/2), max(all_cov)])
-
+    
     ax.set_xlabel('Position on '+ chrom, fontsize=8)
+
+    # prevents scientific notation if positions are large
+    ax.ticklabel_format(useOffset=False, style='plain')
     
 
     if title:
