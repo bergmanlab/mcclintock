@@ -26,7 +26,15 @@ conda install -n MCCLINTOCK_cov -y repeatmasker=4.0.7
 conda install -n MCCLINTOCK_cov -y perl-bioperl-run=1.006900
 conda install -n MCCLINTOCK_cov -y bwa=0.7.4
 conda install -n MCCLINTOCK_cov -y bedtools=2.17.0
-conda install -n MCCLINTOCK_cov -y samtools=1.6
+conda install -n MCCLINTOCK_cov -y samtools=1.9
+conda install -n MCCLINTOCK_cov -y python=3.6
+conda install -n MCCLINTOCK_cov -y matplotlib
+
+source activate MCCLINTOCK_cov
+dir=`which openssl`
+lib_dir=`echo $dir | sed 's/bin\/openssl/lib/'`
+ln -s $lib_dir/libcrypto.so.1.1 $lib_dir/libcrypto.so.1.0.0
+source deactivate
 
 # create specific conda envs for ngs_te_mapper
 conda create -y -n MCCLINTOCK_ngstemapper

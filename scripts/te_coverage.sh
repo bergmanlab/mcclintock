@@ -84,6 +84,11 @@ tmp_dir=$te_cov_dir/te_cov_tmp
 mkdir -p $tmp_dir
 rm -rf $tmp_dir/*
 
+# create sub folder to save coverage plot for each TE family
+plot_dir=$te_cov_dir/te_cov_plot
+mkdir -p $plot_dir
+rm -rf $plot_dir/*
+
 reference_genome_file=${reference_genome##*/}
 reference_genome_file=${reference_genome_file%%.*}.cov.fasta
 cp $reference_genome $referencefolder/$reference_genome_file
@@ -148,14 +153,31 @@ fi
 bed_nonte=$referencefolder/$genome".fasta.out.complement.bed"
 
 # Calculate depth of coverage for every TE using Samtools depth module on the BAM file and normalize by average coverage in no TE regione of the normal reference genome.
-genome_avg_depth=`samtools depth -aa -b $bed_nonte $bam | awk '{ total += $3 } END { print total/NR }'`
+genome_avg_depth=`samtools depth -aa -b $bed_nonte $bam -d 0| awk '{ total += $3 } END { print total/NR }'`
 echo $genome_avg_depth > $te_cov_dir/genome_avg_depth
 printf '%s\n' "TE Family" "Normalized Depth" | paste -sd ',' > $te_cov_dir/te_depth.csv
+
 for te in `cat $te_list`
 do
-    te_depth=`samtools depth -aa -r $te $bam | awk '{ total += $3 } END { print total/NR }'`
-    te_depth_normalized=$(echo "$te_depth / $genome_avg_depth" | bc -l )
-    printf '%s,%.2f\n' "$te" "$te_depth_normalized" | paste -sd ',' >> $te_cov_dir/te_depth.csv
+	te_name=$(echo $te | sed 's/#.*//g')
+	te_name=$(echo $te_name | sed 's/\/.*//g')
+
+	samtools depth -aa -r $te $bam -d 0 -Q 1 > $tmp_dir/$te_name.highQ.cov
+	samtools depth -aa -r $te $bam -d 0 -Q 0 > $tmp_dir/$te_name.allQ.cov
+	
+    te_avg_depth=`cat $tmp_dir/$te_name.allQ.cov | awk '{ total += $3 } END { print total/NR }'`
+    te_avg_norm_depth=$(echo "$te_avg_depth / $genome_avg_depth" | bc -l )
+    printf '%s,%.2f\n' "$te" "$te_avg_norm_depth" | paste -sd ',' >> $te_cov_dir/te_depth.csv
+
+	# generate coverage profile for every TE family
+	python -W ignore $mcclintock_location/scripts/plot_coverage.py \
+		-n $te_name \
+		-o $plot_dir/$te_name.png \
+		-a $tmp_dir/$te_name.allQ.cov \
+		-u $tmp_dir/$te_name.highQ.cov \
+		--normalize_cov $genome_avg_depth \
+		--add_hline $te_avg_norm_depth
+
 done
 
 # remove tmp folder
