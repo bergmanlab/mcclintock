@@ -141,7 +141,7 @@ def plot_coverage(chrom, all_pos, all_cov, uniq_pos, uniq_cov, title, height, wi
     else:
         ax.set_ylabel('Coverage', fontsize=8)
 
-    plot.legend( elements , labels, loc=1, fontsize = 6, frameon=False)
+    plot.legend( elements , labels, loc=9, fontsize = 6, frameon=False, ncol=3, bbox_to_anchor=(0.5, 1.1))
 
 
     return plot
