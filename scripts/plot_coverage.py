@@ -101,11 +101,15 @@ def plot_coverage(chrom, all_pos, all_cov, uniq_pos, uniq_cov, title, height, wi
     ax.set_ylim(0,max(all_cov))
     plot.xticks([min(all_pos), int(np.median(all_pos)), max(all_pos)])
 
-    y_mid_tick = max(all_cov)/2
-    y_mid_tick = math.ceil(y_mid_tick*100)/100
-
     y_max_tick = max(all_cov)
     y_max_tick = math.ceil(y_max_tick*100)/100
+
+
+    if add_hline is None:
+        y_mid_tick = max(all_cov)/2
+        y_mid_tick = math.ceil(y_mid_tick*100)/100
+    else:
+        y_mid_tick = add_hline
 
     plot.yticks([0, y_mid_tick, y_max_tick])
     
@@ -133,7 +137,7 @@ def plot_coverage(chrom, all_pos, all_cov, uniq_pos, uniq_cov, title, height, wi
         ax.set_ylabel('Normalized Coverage', fontsize=8)
         ax.axhline(y=add_hline, color='black',alpha=0.5)
         elements += [matplotlib.pyplot.Line2D([0,0],[0,1],color='black', alpha=0.5)]
-        labels.append("Avg. Norm. Cov. ("+format(add_hline, '.2f')+")")
+        labels.append("Avg. Norm. Cov.")
     else:
         ax.set_ylabel('Coverage', fontsize=8)
 
