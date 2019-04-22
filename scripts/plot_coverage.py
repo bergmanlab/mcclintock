@@ -120,7 +120,7 @@ def plot_coverage(chrom, all_pos, all_cov, uniq_pos, uniq_cov, title, height, wi
     
 
     if title:
-        ax.set_title(" "*15 + title, fontsize=10, loc='left')
+        ax.set_title(" "*15 + title, fontsize=10, loc='left',y=1.07)
 
 
     ## legend
