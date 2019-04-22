@@ -171,7 +171,7 @@ do
 
 	# generate coverage profile for every TE family
 	python -W ignore $mcclintock_location/scripts/plot_coverage.py \
-		-n $te_name \
+		-n $sample \
 		-o $plot_dir/$te_name.png \
 		-a $tmp_dir/$te_name.allQ.cov \
 		-u $tmp_dir/$te_name.highQ.cov \
