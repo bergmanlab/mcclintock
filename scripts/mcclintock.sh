@@ -215,9 +215,9 @@ then
 	grep \> $referencefolder/$reference_genome_file | cut -d\> -f2 > $referencefolder/chromosome_names
 fi
 reference_genome=$referencefolder/$reference_genome_file
-normal_ref_genome=$referencefolder/$reference_genome_file.old
-cp $reference_genome $normal_ref_genome
-samtools faidx $normal_ref_genome
+# normal_ref_genome=$referencefolder/$reference_genome_file.old
+# cp $reference_genome $normal_ref_genome
+# samtools faidx $normal_ref_genome
 chromosome_names=$referencefolder/chromosome_names
 
 # Copy the TE consesnus fasta file to the run folder
