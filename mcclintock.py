@@ -169,6 +169,7 @@ def run_workflow(args, run_id):
         command.append(out_files[method])
 
     command += ["--configfile", args.out+"/config_"+str(run_id)+".json"]
+    command += ["--cores", str(args.proc)]
     mccutils.run_command(command)
 
 
