@@ -111,22 +111,39 @@ def make_run_config(args, sample_name, ref_name):
     run_config = args.out+"/config_"+str(run_id)+".json"
     data = {}
     data['args'] = {
-        'reference': str(args.reference),
-        'consensus': str(args.consensus),
-        'fq1': str(args.first),
-        'fq2': str(args.second),
         'proc': str(args.proc),
         'mem': str(args.mem),
         'out': str(args.out),
-        'locations': str(args.locations),
-        'family': str(args.family),
-        'coverage_fasta': str(args.coverage_fasta),
         'include_consensus': str(args.include_consensus),
         'include_reference': str(args.include_reference),
         'mcc_path': os.path.dirname(os.path.abspath(__file__)),
         'sample_name': sample_name,
         'ref_name': ref_name       
     }
+
+    # input paths for files
+    data["in"] = {
+        'reference' : str(args.reference),
+        'consensus' : str(args.consensus),
+        'fq1': str(args.first),
+        'fq2': str(args.second),
+        'locations': str(args.locations),
+        'family': str(args.family),
+        'coverage_fasta': str(args.coverage_fasta),
+    }
+
+    # where mcc copies will be stored
+    data["mcc"] = {
+        'reference' : args.out+"/input/"+ref_name+".fasta",
+        'consensus' : args.out+"/input/consensusTEs.fasta",
+        'fq1' : args.out+"/input/"+sample_name+"_1.fastq",
+        'fq2' : args.out+"/input/"+sample_name+"_2.fastq",
+        'locations' : args.out+"/input/referenceTEs.gff",
+        'family' : args.out+"/input/families.tsv",
+        'coverage_fasta' : args.out+"/input/coverageTEs.fasta"
+
+    }
+
 
     with open(run_config,"w") as config:
         json.dump(data, config, indent=4)
