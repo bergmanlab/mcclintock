@@ -1,2 +1,4 @@
-
+.snakemake/*
 .DS_Store
+modules/__pycache__/*
+config/__pycache__/*
