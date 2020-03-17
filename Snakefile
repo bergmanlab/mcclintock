@@ -27,8 +27,8 @@ rule setup_reads:
 rule fix_line_lengths:
     output:
         config['mcc']['reference'],
-        config['mcc']['consensus'],
-        config['mcc']['coverage_fasta']
+        temp(config['mcc']['consensus']),
+        temp(config['mcc']['coverage_fasta'])
 
     threads: 1
     
@@ -43,8 +43,8 @@ rule fix_line_lengths:
 
 rule make_run_copies:
     output:
-        config['mcc']['locations'],
-        config['mcc']['family']
+        temp(config['mcc']['locations']),
+        temp(config['mcc']['family'])
     run:
         if config['in']['locations'] == "None":
             shell("touch "+config['mcc']['locations'])
@@ -66,10 +66,13 @@ rule make_reference_te_gff:
     threads: workflow.cores
 
     output:
-        config['args']['out']+"/preprocessing.log"
+        config['mcc']['masked_fasta'],
+        config['mcc']['formatted_ref_tes'],
+        config['mcc']['formatted_family_tsv'],
+        config['mcc']['formatted_consensus']
     
     script:
-        "scripts/make_ref_te_gff.py"
+        config['args']['mcc_path']+"/scripts/make_ref_te_gff.py"
 
 rule coverage:
     input:
@@ -86,3 +89,13 @@ rule coverage:
         shell("touch "+config['args']['out']+"/coverage/coverage.log")    
     # script:
     #     "modules/coverage.py"
+
+rule telocate:
+    input:
+        config['mcc']['formatted_ref_tes']
+    
+    output:
+        config['args']['out']+"/te-locate/te-locate.log"
+    
+    run:
+        shell("touch "+config['args']['out']+"/te-locate/te-locate.log")

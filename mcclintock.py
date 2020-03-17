@@ -6,10 +6,13 @@ import modules.mccutils as mccutils
 import config.config as config
 import json
 import random
+import sys
 
 
 def main():
     args = parse_args()
+    mccutils.mkdir(args.out+"/logs")
+    mccutils.mkdir(args.out+"/tmp")
     sample_name = mccutils.get_base_name(args.first, fastq=True)
     ref_name = mccutils.get_base_name(args.reference)
     run_id = make_run_config(args, sample_name, ref_name)
@@ -40,7 +43,9 @@ def parse_args():
     # parser.add_argument("-i", "--remove_intermediate", action="store_true", help="If this option is specified then all sample specific intermediate files will be removed, leaving only the overall results. The default is to leave sample specific intermediate files", required=False)
     parser.add_argument("-C", "--include_consensus", action="store_true", help="This option will include the consensus TE sequences as extra chromosomes in the reference file (useful if the organism is known to have TEs that are not present in the reference strain)", required=False)
     parser.add_argument("-R", "--include_reference", action="store_true", help="This option will include the reference TE sequences as extra chromosomes in the reference file", required=False)
+    parser.add_argument("--clean", action="store_true", help="This option will make sure mcclintock runs from scratch and doesn't reuse files already created", required=False)
     
+
     args = parser.parse_args()
 
     #check -r
@@ -65,8 +70,9 @@ def parse_args():
     if args.out is None:
         args.out = os.path.abspath(".")
     else:
-        mccutils.makedir(args.out)
+        mccutils.mkdir(args.out)
     
+
     #check -m
     # If only one fastq has been supplied assume this is single ended data and launch only ngs_te_mapper and RelocaTE
     if args.second is None:
@@ -108,7 +114,8 @@ def parse_args():
 
 def make_run_config(args, sample_name, ref_name):
     run_id = random.randint(1000000,9999999)
-    run_config = args.out+"/config_"+str(run_id)+".json"
+    mccutils.mkdir(args.out+"/config")
+    run_config = args.out+"/config/config_"+str(run_id)+".json"
     data = {}
     data['args'] = {
         'proc': str(args.proc),
@@ -118,7 +125,8 @@ def make_run_config(args, sample_name, ref_name):
         'include_reference': str(args.include_reference),
         'mcc_path': os.path.dirname(os.path.abspath(__file__)),
         'sample_name': sample_name,
-        'ref_name': ref_name       
+        'ref_name': ref_name,
+        'run_id' : str(run_id)   
     }
 
     # input paths for files
@@ -133,14 +141,21 @@ def make_run_config(args, sample_name, ref_name):
     }
 
     # where mcc copies will be stored
+    input_dir = args.out+"/input/"
     data["mcc"] = {
-        'reference' : args.out+"/input/"+ref_name+".fasta",
-        'consensus' : args.out+"/input/consensusTEs.fasta",
-        'fq1' : args.out+"/input/"+sample_name+"_1.fastq",
-        'fq2' : args.out+"/input/"+sample_name+"_2.fastq",
-        'locations' : args.out+"/input/referenceTEs.gff",
-        'family' : args.out+"/input/families.tsv",
-        'coverage_fasta' : args.out+"/input/coverageTEs.fasta"
+        'mcc_files' : input_dir,
+        'reference' : input_dir+ref_name+".fasta",
+        'consensus' : input_dir+"consensusTEs.fasta",
+        'fq1' : input_dir+sample_name+"_1.fastq",
+        'fq2' : input_dir+sample_name+"_2.fastq",
+        'locations' : input_dir+"inrefTEs.gff",
+        'family' : input_dir+"families.tsv",
+        'coverage_fasta' : input_dir+"coverageTEs.fasta",
+        'masked_fasta' : input_dir+ref_name+".masked.fasta",
+        'formatted_ref_tes' : input_dir+ref_name+".ref.TEs.gff",
+        'formatted_family_tsv' : input_dir+ref_name+".TEs.family.map.tsv",
+        'formatted_consensus' : input_dir+"formattedConsensusTEs.tsv"
+
 
     }
 
@@ -163,13 +178,21 @@ def run_workflow(args, run_id):
     }
 
     path=os.path.dirname(os.path.abspath(__file__))
-    os.chdir(path)
+    mccutils.mkdir(args.out+"/snakemake")
+    snakemake_path = args.out+"/snakemake/"+str(run_id)
+    mccutils.mkdir(snakemake_path)
+    mccutils.run_command(["cp", path+"/Snakefile", snakemake_path])
+    os.chdir(snakemake_path)
     command = ["snakemake","--use-conda"]
     for method in args.methods:
         command.append(out_files[method])
 
-    command += ["--configfile", args.out+"/config_"+str(run_id)+".json"]
+    command += ["--configfile", args.out+"/config/config_"+str(run_id)+".json"]
     command += ["--cores", str(args.proc)]
+    if args.clean:
+        clean_command = command + ["--delete-all-output"]
+        mccutils.run_command(clean_command)
+
     mccutils.run_command(command)
 
 
