@@ -69,10 +69,12 @@ rule make_reference_te_gff:
         config['mcc']['masked_fasta'],
         config['mcc']['formatted_ref_tes'],
         config['mcc']['formatted_family_tsv'],
-        config['mcc']['formatted_consensus']
+        config['mcc']['formatted_consensus'],
+        config['mcc']['ref_te_fasta'],
+        config['mcc']['augmented_reference']
     
     script:
-        config['args']['mcc_path']+"/scripts/make_ref_te_gff.py"
+        config['args']['mcc_path']+"/scripts/make_ref_te_files.py"
 
 rule coverage:
     input:

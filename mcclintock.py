@@ -154,7 +154,9 @@ def make_run_config(args, sample_name, ref_name):
         'masked_fasta' : input_dir+ref_name+".masked.fasta",
         'formatted_ref_tes' : input_dir+ref_name+".ref.TEs.gff",
         'formatted_family_tsv' : input_dir+ref_name+".TEs.family.map.tsv",
-        'formatted_consensus' : input_dir+"formattedConsensusTEs.tsv"
+        'formatted_consensus' : input_dir+"formattedConsensusTEs.fasta",
+        'ref_te_fasta' : input_dir+ref_name+".ref.TEs.fasta",
+        'augmented_reference' : input_dir+ref_name+".aug.fasta"
 
 
     }
