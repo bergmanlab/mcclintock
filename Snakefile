@@ -1,26 +1,16 @@
 
 rule setup_reads:
+    input:
+        config['in']['fq1'],
+        config['in']['fq2']
     output:
         config['mcc']['fq1'],
         config['mcc']['fq2']
     
-    threads: 1
+    threads: workflow.cores
         
-    run:
-        # fastq1
-        if ".gz" in config['in']['fq1']:
-            shell("zcat "+config['in']['fq1']+" > "+config['mcc']['fq1'])
-        else:
-            shell("cp "+config['in']['fq1']+" "+config['mcc']['fq1'])
-
-        # fastq2
-        if config['in']['fq2'] == "None":
-            shell("touch "+config['mcc']['fq2'])
-        else:
-            if ".gz" in config['in']['fq2']:
-                shell("zcat "+config['in']['fq2']+" > "+config['mcc']['fq2'])
-            else:
-                shell("cp "+config['in']['fq2']+" "+config['mcc']['fq2'])
+    script:
+        config['args']['mcc_path']+"/scripts/trimgalore.py"
 
 
 
@@ -45,6 +35,9 @@ rule make_run_copies:
     output:
         temp(config['mcc']['locations']),
         temp(config['mcc']['taxonomy'])
+
+    threads: 1
+
     run:
         if config['in']['locations'] == "None":
             shell("touch "+config['mcc']['locations'])
@@ -75,6 +68,7 @@ rule make_reference_te_gff:
     
     script:
         config['args']['mcc_path']+"/scripts/make_ref_te_files.py"
+
 
 rule coverage:
     input:

@@ -16,7 +16,7 @@ def main():
     sample_name = mccutils.get_base_name(args.first, fastq=True)
     ref_name = mccutils.get_base_name(args.reference)
     run_id = make_run_config(args, sample_name, ref_name)
-    run_workflow(args, run_id)
+    run_workflow(args, sample_name, run_id)
 
 def parse_args():
     parser = argparse.ArgumentParser(prog='McClintock', description="Meta-pipeline to identify transposable element insertions using next generation sequencing data")
@@ -126,7 +126,8 @@ def make_run_config(args, sample_name, ref_name):
         'mcc_path': os.path.dirname(os.path.abspath(__file__)),
         'sample_name': sample_name,
         'ref_name': ref_name,
-        'run_id' : str(run_id)   
+        'run_id' : str(run_id),
+        'methods' : ",".join(args.methods)
     }
 
     # input paths for files
@@ -167,16 +168,17 @@ def make_run_config(args, sample_name, ref_name):
     
     return run_id
 
-def run_workflow(args, run_id):
+def run_workflow(args, sample_name, run_id):
     log = args.out+"/mcclintock."+str(run_id)+".log"
     out_files = {
         'coverage': args.out+"/coverage/coverage.log",
         'ngs_te_mapper': args.out+"/ngs_te_mapper/ngs_te_mapper.log",
         'relocate': args.out+"/relocate/relocate.log",
         'temp': args.out+"/temp/temp.log",
-        'retroseq': args.out+"//retroseq/retroseq.log",
+        'retroseq': args.out+"/retroseq/retroseq.log",
         'popoolationte': args.out+"/popoolationte/popoolationte.log",
-        'te-locate': args.out+"/te-locate/te-locate.log"
+        'te-locate': args.out+"/te-locate/te-locate.log",
+        'trimgalore': args.out+"/input/"+sample_name+"_1.fastq"
     }
 
     path=os.path.dirname(os.path.abspath(__file__))

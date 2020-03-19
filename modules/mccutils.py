@@ -30,6 +30,43 @@ def get_base_name(path, fastq=False):
     return no_ext
 
 
+def run_command_stdout(cmd_list, out_file, log=None):
+    msg = ""
+    if log is None:
+        try:
+            out = open(out_file,"w")
+            subprocess.check_call(cmd_list, stdout=out)
+            out.close()
+        except subprocess.CalledProcessError as e:
+            if e.output is not None:
+                msg = str(e.output)+"\n"
+            if e.stderr is not None:
+                msg += str(e.stderr)+"\n"
+            cmd_string = " ".join(cmd_list)
+            msg += msg + cmd_string + "\n"
+            sys.stderr.write(msg)
+            sys.exit(1)
+    
+    else:
+        try:
+            out_log = open(log,"a")
+            out = open(out_file,"w")
+            subprocess.check_call(cmd_list, stdout=out, stderr=out_log)
+            out.close()
+            out_log.close()
+
+        except subprocess.CalledProcessError as e:
+            if e.output is not None:
+                msg = str(e.output)+"\n"
+            if e.stderr is not None:
+                msg += str(e.stderr)+"\n"
+            cmd_string = " ".join(cmd_list)
+            msg += msg + cmd_string + "\n"
+            writelog(log, msg)
+            sys.stderr.write(msg)
+            sys.exit(1)
+
+
 def run_command(cmd_list, log=None):
     msg = ""
     if log is None:
