@@ -38,7 +38,7 @@ def parse_args():
     parser.add_argument("-s", "--coverage_fasta", type=str, help="A fasta file that will be used for TE-based coverage analysis, if not supplied then the consensus sequences of the TEs will be used for the analysis", required=False)
     # parser.add_argument("-d", "--coverage", action="store_true", help="If this option is specified then McClintock will perform depth of coverage analysis for every TE. Note: Doing TE-based coverage analysis will result in longer running time. A fasta file can be provided here for coverage analysis. If no file is provided here, the consensus sequences of the TEs will be used for the analysis", required=False)
     # parser.add_argument("-D", "--coverage_only", action="store_true", help="If this option is specified then only depth of coverage analysis for TEs will be performed", required=False)
-    # parser.add_argument("-T", "--comments", action="store_true", help="If this option is specified then fastq comments (e.g. barcode) will be incorporated to SAM output. Warning: do not use this option if the input fastq files do not have comments", required=False)
+    parser.add_argument("-T", "--comments", action="store_true", help="If this option is specified then fastq comments (e.g. barcode) will be incorporated to SAM output. Warning: do not use this option if the input fastq files do not have comments", required=False)
     # parser.add_argument("-b", "--keep_bam", action="store_true", help="Retain the sorted and indexed BAM file of the paired end data aligned to the reference genome", required=False)
     # parser.add_argument("-i", "--remove_intermediate", action="store_true", help="If this option is specified then all sample specific intermediate files will be removed, leaving only the overall results. The default is to leave sample specific intermediate files", required=False)
     parser.add_argument("-C", "--include_consensus", action="store_true", help="This option will include the consensus TE sequences as extra chromosomes in the reference file (useful if the organism is known to have TEs that are not present in the reference strain)", required=False)
@@ -108,6 +108,9 @@ def parse_args():
     if args.coverage_fasta is not None:
         args.coverage_fasta = mccutils.get_abs_path(args.coverage_fasta)
 
+    # check -T
+    if args.comments is None:
+        args.comments = False
     
     return args
 
@@ -127,7 +130,8 @@ def make_run_config(args, sample_name, ref_name):
         'sample_name': sample_name,
         'ref_name': ref_name,
         'run_id' : str(run_id),
-        'methods' : ",".join(args.methods)
+        'methods' : ",".join(args.methods),
+        'save_comments' : str(args.comments)
     }
 
     # input paths for files
@@ -157,7 +161,9 @@ def make_run_config(args, sample_name, ref_name):
         'formatted_taxonomy' : input_dir+ref_name+".TE.taxonomy.tsv",
         'formatted_consensus' : input_dir+"formattedConsensusTEs.fasta",
         'ref_te_fasta' : input_dir+ref_name+".ref.TEs.fasta",
-        'augmented_reference' : input_dir+ref_name+".aug.fasta"
+        'augmented_reference' : input_dir+ref_name+".aug.fasta",
+        'ref_tes_bed' : input_dir+ref_name+".ref.TEs.bed",
+        'sam' : input_dir+sample_name+".sam"
 
 
     }

@@ -16,7 +16,7 @@ def main():
     mcc_out = snakemake.config['args']['out']
     run_id = snakemake.config['args']['run_id']
 
-
+    # trims adaptors of input fastq(s)
     if "trimgalore" in methods:
         if snakemake.config['in']['fq2'] == "None":
             flags = trimgalore.SINGLE_END_FLAGS
@@ -29,6 +29,7 @@ def main():
         
         mccutils.run_command(["mv", trimmedfq, snakemake.output[0]])
     
+    # makes local unzipped copies of input fastq files
     else:
         if ".gz" in fq1:
             mccutils.run_command_stdout(["zcat",fq1], snakemake.output[0])
