@@ -13,7 +13,7 @@ def main():
     reference_fa = snakemake.input[0]
     consensus_TEs = snakemake.input[1]
     locations_gff = snakemake.input[2]
-    family_tsv = snakemake.input[3]
+    taxonomy_tsv = snakemake.input[3]
     ref_tes = snakemake.config['in']['locations']
     processors = snakemake.config['args']['proc']
     mcc_out = snakemake.config['args']['out']
@@ -23,13 +23,13 @@ def main():
     if ref_tes == "None":
         masked_reference, formatted_ref_tes = repeat_mask(reference_fa, consensus_TEs, processors, run_id, mcc_out)
         formatted_consensus_TEs, te_families = format_consensus_tes(consensus_TEs, run_id, mcc_out)
-        formatted_family_tsv, formatted_ref_tes = make_te_family_map(formatted_ref_tes, te_families, run_id, mcc_out)
+        formatted_taxonomy_tsv, formatted_ref_tes = make_te_taxonomy_map(formatted_ref_tes, te_families, run_id, mcc_out)
 
     # use provided reference TEs to mask genome
     else:
         formatted_ref_tes = format_ref_te_gff(ref_tes, run_id, mcc_out)
         masked_reference = mask_reference(reference_fa, formatted_ref_tes, run_id, mcc_out)
-        formatted_family_tsv = family_tsv
+        formatted_taxonomy_tsv = taxonomy_tsv
         formatted_consensus_TEs = consensus_TEs
 
 
@@ -43,14 +43,14 @@ def main():
                                             add_consensus=eval(snakemake.config['args']['include_consensus']),
                                             add_reference=eval(snakemake.config['args']['include_reference']))
     
-    formatted_family_tsv = augment_family_map(formatted_family_tsv, ref_te_fasta, formatted_consensus_TEs, run_id, mcc_out,
+    formatted_taxonomy_tsv = augment_taxonomy_map(formatted_taxonomy_tsv, ref_te_fasta, formatted_consensus_TEs, run_id, mcc_out,
                                             add_consensus=eval(snakemake.config['args']['include_consensus']),
                                             add_reference=eval(snakemake.config['args']['include_reference']))
 
 
     mccutils.run_command(["mv", masked_reference, snakemake.output[0]])
     mccutils.run_command(["mv", formatted_ref_tes, snakemake.output[1]])
-    mccutils.run_command(["mv", formatted_family_tsv, snakemake.output[2]])
+    mccutils.run_command(["mv", formatted_taxonomy_tsv, snakemake.output[2]])
     mccutils.run_command(["mv", formatted_consensus_TEs, snakemake.output[3]])
     mccutils.run_command(["mv", ref_te_fasta, snakemake.output[4]])
     mccutils.run_command(["mv", augmented_reference, snakemake.output[5]])
@@ -121,7 +121,7 @@ def format_consensus_tes(consensus_TEs, run_id, out):
     return formatted_consensus, families
 
 
-def make_te_family_map(ref_tes, consensus_families, run_id, out):
+def make_te_taxonomy_map(ref_tes, consensus_families, run_id, out):
     te_family_counts = {}
     family_tsv = out+"/tmp/"+run_id+"tmpfam.tsv"
     gff_lines = []
@@ -252,7 +252,7 @@ def augment_ref_te_gff(ref_tes_gff, ref_te_fasta, consensus_te_fasta, run_id, ou
     return ref_tes_gff
 
 
-def augment_family_map(family_map, ref_te_fasta, consensus_te_fasta, run_id, out, add_consensus=False, add_reference=False):
+def augment_taxonomy_map(family_map, ref_te_fasta, consensus_te_fasta, run_id, out, add_consensus=False, add_reference=False):
     families = {}
     map_lines = []
     with open(family_map, "r") as tsv:

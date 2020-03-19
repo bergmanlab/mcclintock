@@ -44,31 +44,31 @@ rule fix_line_lengths:
 rule make_run_copies:
     output:
         temp(config['mcc']['locations']),
-        temp(config['mcc']['family'])
+        temp(config['mcc']['taxonomy'])
     run:
         if config['in']['locations'] == "None":
             shell("touch "+config['mcc']['locations'])
         else:
             shell("cp "+config['in']['locations']+" "+config['mcc']['locations'])
         
-        if config['in']['family'] == "None":
-            shell("touch "+config['mcc']['family'])
+        if config['in']['taxonomy'] == "None":
+            shell("touch "+config['mcc']['taxonomy'])
         else:
-            shell("cp "+config['in']['family']+" "+config['mcc']['family'])
+            shell("cp "+config['in']['taxonomy']+" "+config['mcc']['taxonomy'])
 
 rule make_reference_te_gff:
     input:
         config['mcc']['reference'],
         config['mcc']['consensus'],
         config['mcc']['locations'],
-        config['mcc']['family']
+        config['mcc']['taxonomy']
     
     threads: workflow.cores
 
     output:
         config['mcc']['masked_fasta'],
         config['mcc']['formatted_ref_tes'],
-        config['mcc']['formatted_family_tsv'],
+        config['mcc']['formatted_taxonomy'],
         config['mcc']['formatted_consensus'],
         config['mcc']['ref_te_fasta'],
         config['mcc']['augmented_reference']

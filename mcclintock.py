@@ -34,7 +34,7 @@ def parse_args():
     parser.add_argument("-o", "--out", type=str, help="An output folder for the run. [default = '.']", required=False)
     parser.add_argument("-m", "--methods", type=str, help="A comma-delimited list containing the software you want the pipeline to use for analysis. e.g. '-m relocate,TEMP,ngs_te_mapper' will launch only those three methods", required=False)
     parser.add_argument("-g", "--locations", type=str, help="The locations of known TEs in the reference genome in GFF 3 format. This must include a unique ID attribute for every entry", required=False)
-    parser.add_argument("-t", "--family", type=str, help="A tab delimited file with one entry per ID in the GFF file and two columns: the first containing the ID and the second containing the TE family it belongs to. The family should correspond to the names of the sequences in the consensus fasta file", required=False)
+    parser.add_argument("-t", "--taxonomy", type=str, help="A tab delimited file with one entry per ID in the GFF file and two columns: the first containing the ID and the second containing the TE family it belongs to. The family should correspond to the names of the sequences in the consensus fasta file", required=False)
     parser.add_argument("-s", "--coverage_fasta", type=str, help="A fasta file that will be used for TE-based coverage analysis, if not supplied then the consensus sequences of the TEs will be used for the analysis", required=False)
     # parser.add_argument("-d", "--coverage", action="store_true", help="If this option is specified then McClintock will perform depth of coverage analysis for every TE. Note: Doing TE-based coverage analysis will result in longer running time. A fasta file can be provided here for coverage analysis. If no file is provided here, the consensus sequences of the TEs will be used for the analysis", required=False)
     # parser.add_argument("-D", "--coverage_only", action="store_true", help="If this option is specified then only depth of coverage analysis for TEs will be performed", required=False)
@@ -95,13 +95,13 @@ def parse_args():
     if args.locations is not None:
         args.locations = mccutils.get_abs_path(args.locations)
 
-        if args.family is None:
-            sys.stderr.write("If a GFF file is supplied (-g/--locations) then a TE family file that links it to the fasta consensus is also needed (-t/--family)...exiting...\n")
+        if args.taxonomy is None:
+            sys.stderr.write("If a GFF file is supplied (-g/--locations) then a TE taxonomy file that links it to the fasta consensus is also needed (-t/--taxonomy)...exiting...\n")
             sys.exit(1)
     
     # check -t
-    if args.family is not None:
-        args.family = mccutils.get_abs_path(args.family)
+    if args.taxonomy is not None:
+        args.taxonomy = mccutils.get_abs_path(args.taxonomy)
     
 
     # check -s
@@ -136,7 +136,7 @@ def make_run_config(args, sample_name, ref_name):
         'fq1': str(args.first),
         'fq2': str(args.second),
         'locations': str(args.locations),
-        'family': str(args.family),
+        'taxonomy': str(args.taxonomy),
         'coverage_fasta': str(args.coverage_fasta),
     }
 
@@ -149,11 +149,11 @@ def make_run_config(args, sample_name, ref_name):
         'fq1' : input_dir+sample_name+"_1.fastq",
         'fq2' : input_dir+sample_name+"_2.fastq",
         'locations' : input_dir+"inrefTEs.gff",
-        'family' : input_dir+"families.tsv",
+        'taxonomy' : input_dir+"taxonomy.tsv",
         'coverage_fasta' : input_dir+"coverageTEs.fasta",
         'masked_fasta' : input_dir+ref_name+".masked.fasta",
         'formatted_ref_tes' : input_dir+ref_name+".ref.TEs.gff",
-        'formatted_family_tsv' : input_dir+ref_name+".TEs.family.map.tsv",
+        'formatted_taxonomy' : input_dir+ref_name+".TE.taxonomy.tsv",
         'formatted_consensus' : input_dir+"formattedConsensusTEs.fasta",
         'ref_te_fasta' : input_dir+ref_name+".ref.TEs.fasta",
         'augmented_reference' : input_dir+ref_name+".aug.fasta"
