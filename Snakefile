@@ -1,3 +1,16 @@
+rule install_telocate:
+    params:
+        tar = config['args']['mcc_path']+"/tools/te-locate/te-locate.tar"
+    output:
+        config['args']['mcc_path']+"/tools/te-locate/TE_locate.pl",
+        config['args']['mcc_path']+"/tools/te-locate/TE_hierarchy.pl"
+    
+    run:
+        shell("mkdir -p "+config['args']['mcc_path']+"/tools/te-locate/")
+        shell("wget --no-check-certificate https://downloads.sourceforge.net/project/te-locate/TE-locate.tar -O "+params.tar)
+        shell("tar -xvf "+params.tar+" -C "+config['args']['mcc_path']+"/tools/te-locate/")
+
+
 
 rule setup_reads:
     input:
@@ -13,8 +26,14 @@ rule setup_reads:
         config['args']['mcc_path']+"/scripts/trimgalore.py"
 
 
-
 rule fix_line_lengths:
+    input:
+        ref = config['in']['reference'],
+        consensus = config['in']['consensus'],
+
+    params:
+        coverage_fasta = config['in']['coverage_fasta']
+
     output:
         config['mcc']['reference'],
         temp(config['mcc']['consensus']),
@@ -23,15 +42,19 @@ rule fix_line_lengths:
     threads: 1
     
     run:
-        shell("python "+config['args']['mcc_path']+"/scripts/fix_fasta_lines.py "+config['in']['reference']+" 80 > "+config['mcc']['reference'])
-        shell("python "+config['args']['mcc_path']+"/scripts/fix_fasta_lines.py "+config['in']['consensus']+" 80 > "+config['mcc']['consensus'])
-        if config['in']['coverage_fasta'] == "None":
-            shell("touch "+config['mcc']['coverage_fasta'])
+        shell("python "+config['args']['mcc_path']+"/scripts/fix_fasta_lines.py "+input.ref+" 80 > "+output[0])
+        shell("python "+config['args']['mcc_path']+"/scripts/fix_fasta_lines.py "+input.consensus+" 80 > "+output[1])
+        if params.coverage_fasta == "None":
+            shell("touch "+output[2])
         else:
-            shell("python "+config['args']['mcc_path']+"/scripts/fix_fasta_lines.py "+config['in']['coverage_fasta']+" 80 > "+config['mcc']['coverage_fasta'])
+            shell("python "+config['args']['mcc_path']+"/scripts/fix_fasta_lines.py "+params.coverage_fasta+" 80 > "+output[2])
 
 
 rule make_run_copies:
+    input:
+        locations = config['in']['locations'],
+        taxonomy = config['in']['taxonomy']
+
     output:
         temp(config['mcc']['locations']),
         temp(config['mcc']['taxonomy'])
@@ -39,15 +62,15 @@ rule make_run_copies:
     threads: 1
 
     run:
-        if config['in']['locations'] == "None":
-            shell("touch "+config['mcc']['locations'])
+        if input.locations == "None":
+            shell("touch "+output[0])
         else:
-            shell("cp "+config['in']['locations']+" "+config['mcc']['locations'])
+            shell("cp "+input.locations+" "+output[0])
         
-        if config['in']['taxonomy'] == "None":
-            shell("touch "+config['mcc']['taxonomy'])
+        if input.taxonomy == "None":
+            shell("touch "+output[1])
         else:
-            shell("cp "+config['in']['taxonomy']+" "+config['mcc']['taxonomy'])
+            shell("cp "+input.taxonomy+" "+output[1])
 
 rule make_reference_te_gff:
     input:
@@ -71,7 +94,7 @@ rule make_reference_te_gff:
 
 rule index_reference_genome:
     input:
-        config['mcc']['augmented_reference']
+        ref = config['mcc']['augmented_reference']
     
     threads: 1
 
@@ -80,8 +103,8 @@ rule index_reference_genome:
         config['mcc']['augmented_reference']+".bwt"
     
     run:
-        shell("samtools faidx "+config['mcc']['augmented_reference'])
-        shell("bwa index "+config['mcc']['augmented_reference'])
+        shell("samtools faidx "+input.ref)
+        shell("bwa index "+input.ref)
 
 rule map_reads:
     input:
@@ -97,7 +120,7 @@ rule map_reads:
     
     threads: workflow.cores
 
-    output: config['mcc']['sam']
+    output: temp(config['mcc']['sam'])
 
     run:
         if config['in']['fq2'] == 'None':
@@ -111,6 +134,23 @@ rule map_reads:
             else:
                 shell("bwa mem -t "+str(threads)+" -R '@RG\\tID:"+params.sample+"\\tSM:"+params.sample+"' "+input.ref+" "+input.fq1+" "+input.fq2+" > "+output[0]+" 2> "+log[0])
 
+rule sam_to_bam:
+    input:
+        sam = config['mcc']['sam'],
+        ref_idx = config['mcc']['augmented_reference']+".fai"
+    
+    threads: workflow.cores
+
+    output:
+        config['mcc']['bam'],
+        config['summary']['flagstat'],
+        temp(config['mcc']['mcc_files']+config['args']['run_id']+".tmp.bam")
+    
+    run:
+        shell("samtools view -@ "+str(workflow.cores)+" -Sb -t "+input.ref_idx+" "+input.sam+" > "+output[2])
+        shell("samtools sort -@ "+str(workflow.cores)+" "+output[2]+" "+output[0].replace(".bam", ""))
+        shell("samtools index "+output[0])
+        shell("samtools flagstat "+output[0]+" > "+output[1])
         
 
 rule make_ref_te_bed:
@@ -129,6 +169,75 @@ rule make_ref_te_bed:
                     split_line = line.replace(";","\t").split("\t")
                     line = "\t".join([split_line[0], str(int(split_line[3])-1), split_line[4], split_line[9], ".", split_line[6]])
                     o.write(line+"\n")
+
+rule telocate_taxonomy:
+    input:
+        script = config['args']['mcc_path']+"/tools/te-locate/TE_hierarchy.pl",
+        ref_gff = config['mcc']['formatted_ref_tes'],
+        taxonomy = config['mcc']['formatted_taxonomy']
+
+    output:
+        config['mcc']['telocate_te_gff']
+    
+    run:
+        shell("perl "+input.script+" "+input.ref_gff+" "+input.taxonomy+" Alias")
+
+
+rule median_insert_size:
+    input:
+        config['mcc']['sam']
+    
+    output:
+        config['summary']['median_insert_size']
+    
+    run:
+        import statistics
+        insert_sizes = []
+        with open(input[0],"r") as sam:
+            for line in sam:
+                split_line = line.split("\t")
+                if len(split_line) >= 8:
+                    insert_size = int(split_line[8])
+                    if insert_size > 0:
+                        insert_sizes.append(insert_size)
+        
+        insert_sizes.sort()
+        median = statistics.median(insert_sizes)
+        with open(output[0],"w") as out:
+            out.write("median_insert_size="+str(median)+"\n")
+
+rule telocate_sam:
+    input:
+        config['mcc']['sam']
+    
+    output:
+        config['mcc']['telocate_sam']
+
+    run:
+        shell("sort -S "+config['args']['mem']+"G --temporary-directory="+config['args']['out']+"/tmp "+input[0]+" > "+output[0])
+
+rule telocate_ref:
+    input:
+        config['mcc']['augmented_reference']
+    
+    output:
+        config['mcc']['telocate_ref_fasta']
+    
+    run:
+        chromosomes = []
+        with open(input[0],"r") as infa:
+            with open(output[0],"w") as outfa:
+                for line in infa:
+                    outfa.write(line)
+                    if ">" in line:
+                        chromosomes.append(line)
+
+        if len(chromosomes) < 5:
+            diff = 5 - len(chromosomes)        
+            with open(output[0],"a") as out: 
+                for i in range(1,diff+1):
+                    out.write(">fixforTElocate"+str(i)+"\n")
+                    out.write("ACGT\n")
 
 
 
@@ -150,7 +259,11 @@ rule coverage:
 
 rule telocate:
     input:
-        config['mcc']['formatted_ref_tes']
+        config['mcc']['telocate_te_gff'],
+        config['summary']['median_insert_size'],
+        config['mcc']['telocate_sam'],
+        config['mcc']['telocate_ref_fasta'],
+        config['args']['mcc_path']+"/tools/te-locate/TE_locate.pl"
     
     output:
         config['args']['out']+"/te-locate/te-locate.log"
@@ -161,11 +274,21 @@ rule telocate:
 
 rule retroseq:
     input:
+        config['mcc']['formatted_consensus'],
+        config['mcc']['bam'],
+        config['mcc']['augmented_reference'],
         config['mcc']['ref_tes_bed'],
-        config['mcc']['sam']
+        config['mcc']['formatted_taxonomy']
+
+
     
     output:
         config['args']['out']+"/retroseq/retroseq.log"
     
     run:
         shell("touch "+config['args']['out']+"/retroseq/retroseq.log")
+
+
+# rule TEMP:
+#     input:
+        

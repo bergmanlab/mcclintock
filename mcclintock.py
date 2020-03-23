@@ -163,9 +163,17 @@ def make_run_config(args, sample_name, ref_name):
         'ref_te_fasta' : input_dir+ref_name+".ref.TEs.fasta",
         'augmented_reference' : input_dir+ref_name+".aug.fasta",
         'ref_tes_bed' : input_dir+ref_name+".ref.TEs.bed",
-        'sam' : input_dir+sample_name+".sam"
+        'telocate_te_gff' : input_dir+ref_name+".ref.TEs_HL.gff",
+        'telocate_sam' : input_dir+sample_name+".telocate.sam",
+        'telocate_ref_fasta' : input_dir+ref_name+".aug.telocate.fasta",
+        'sam' : input_dir+sample_name+".sam",
+        'bam' : input_dir+sample_name+".bam",
+    }
 
-
+    summary_dir = args.out+"/summary/"
+    data['summary'] = {
+        'flagstat' : input_dir+sample_name+".bam.flagstat",
+        'median_insert_size' : input_dir+"median_insert.size"
     }
 
 
