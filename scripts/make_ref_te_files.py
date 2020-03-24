@@ -35,6 +35,10 @@ def main():
 
     ref_te_fasta = get_ref_te_fasta(reference_fa, formatted_ref_tes, run_id, mcc_out)
 
+    popoolationTE_tsv = make_popoolationTE_taxonomy(formatted_taxonomy_tsv, formatted_consensus_TEs, run_id, mcc_out)
+
+    mccutils.run_command(["cp", formatted_ref_tes, snakemake.output[7]])
+
     augmented_reference = augment_reference(reference_fa, ref_te_fasta, formatted_consensus_TEs, run_id, mcc_out, 
                                             add_consensus=eval(snakemake.config['args']['include_consensus']), 
                                             add_reference=eval(snakemake.config['args']['include_reference']))
@@ -54,7 +58,7 @@ def main():
     mccutils.run_command(["mv", formatted_consensus_TEs, snakemake.output[3]])
     mccutils.run_command(["mv", ref_te_fasta, snakemake.output[4]])
     mccutils.run_command(["mv", augmented_reference, snakemake.output[5]])
-
+    mccutils.run_command(["mv", popoolationTE_tsv, snakemake.output[6]])
 
 
 
@@ -199,6 +203,34 @@ def get_ref_te_fasta(reference, ref_tes_gff, run_id, out):
     #         outfa.write(line+"\n")
 
     return ref_te_fasta
+
+def make_popoolationTE_taxonomy(taxonomy, consensus, run_id, out):
+    te_families = []
+    popoolationTE_taxonomy = out+"/tmp/"+run_id+"tmppopoolationtetaxonomy.tsv"
+
+    with open(taxonomy, "r") as intsv:
+        for line in intsv:
+            split_line = line.split("\t")
+            te_families.append([split_line[0], split_line[1].replace("\n","")])
+    
+    fasta_records = SeqIO.parse(consensus,"fasta")
+
+    for record in fasta_records:
+        element = str(record.id)
+        te_families.append([element, element])
+    
+    with open(popoolationTE_taxonomy, "w") as outtsv:
+        header = "\t".join(["insert","id","family","superfamily","suborder","order","class","problem\n"])
+        outtsv.write(header)
+
+        for te_fam in te_families:
+            element = te_fam[0]
+            family = te_fam[1]
+            line = "\t".join([element, family, family, family, "na", "na", "na", "0\n"])
+            outtsv.write(line)
+    
+    return popoolationTE_taxonomy
+
 
 
 def augment_reference(reference, ref_tes, consensus_tes, run_id, out, add_consensus=False, add_reference=False):

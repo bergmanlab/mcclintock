@@ -1,4 +1,5 @@
 rule install_telocate:
+    threads: 1
     params:
         tar = config['args']['mcc_path']+"/tools/te-locate/te-locate.tar"
     output:
@@ -35,7 +36,7 @@ rule fix_line_lengths:
         coverage_fasta = config['in']['coverage_fasta']
 
     output:
-        config['mcc']['reference'],
+        temp(config['mcc']['reference']),
         temp(config['mcc']['consensus']),
         temp(config['mcc']['coverage_fasta'])
 
@@ -51,10 +52,6 @@ rule fix_line_lengths:
 
 
 rule make_run_copies:
-    input:
-        locations = config['in']['locations'],
-        taxonomy = config['in']['taxonomy']
-
     output:
         temp(config['mcc']['locations']),
         temp(config['mcc']['taxonomy'])
@@ -62,17 +59,17 @@ rule make_run_copies:
     threads: 1
 
     run:
-        if input.locations == "None":
+        if config['in']['locations'] == "None":
             shell("touch "+output[0])
         else:
-            shell("cp "+input.locations+" "+output[0])
+            shell("cp "+config['in']['locations']+" "+output[0])
         
-        if input.taxonomy == "None":
+        if config['in']['taxonomy'] == "None":
             shell("touch "+output[1])
         else:
-            shell("cp "+input.taxonomy+" "+output[1])
+            shell("cp "+config['in']['taxonomy']+" "+output[1])
 
-rule make_reference_te_gff:
+rule make_reference_te_files:
     input:
         config['mcc']['reference'],
         config['mcc']['consensus'],
@@ -87,7 +84,9 @@ rule make_reference_te_gff:
         config['mcc']['formatted_taxonomy'],
         config['mcc']['formatted_consensus'],
         config['mcc']['ref_te_fasta'],
-        config['mcc']['augmented_reference']
+        config['mcc']['augmented_reference'],
+        config['mcc']['popoolationTE_taxonomy'],
+        config['mcc']['popoolationTE_gff']
     
     script:
         config['args']['mcc_path']+"/scripts/make_ref_te_files.py"
@@ -120,7 +119,7 @@ rule map_reads:
     
     threads: workflow.cores
 
-    output: temp(config['mcc']['sam'])
+    output: config['mcc']['sam']
 
     run:
         if config['in']['fq2'] == 'None':
@@ -175,6 +174,8 @@ rule telocate_taxonomy:
         script = config['args']['mcc_path']+"/tools/te-locate/TE_hierarchy.pl",
         ref_gff = config['mcc']['formatted_ref_tes'],
         taxonomy = config['mcc']['formatted_taxonomy']
+    
+    threads: 1
 
     output:
         config['mcc']['telocate_te_gff']
@@ -187,6 +188,8 @@ rule median_insert_size:
     input:
         config['mcc']['sam']
     
+    threads: 1
+
     output:
         config['summary']['median_insert_size']
     
@@ -210,6 +213,8 @@ rule telocate_sam:
     input:
         config['mcc']['sam']
     
+    threads: 1
+    
     output:
         config['mcc']['telocate_sam']
 
@@ -219,6 +224,8 @@ rule telocate_sam:
 rule telocate_ref:
     input:
         config['mcc']['augmented_reference']
+    
+    threads: 1
     
     output:
         config['mcc']['telocate_ref_fasta']
@@ -239,6 +246,74 @@ rule telocate_ref:
                     out.write(">fixforTElocate"+str(i)+"\n")
                     out.write("ACGT\n")
 
+rule reference_2bit:
+    input:
+        config['mcc']['augmented_reference']
+    
+    output:
+        config['mcc']['ref_2bit']
+    
+    run:
+        shell("faToTwoBit "+input[0]+" "+output[0])
+
+rule relocaTE_consensus:
+    input:
+        config['mcc']['formatted_consensus']
+    
+    threads: 1
+
+    output:
+        config['mcc']['relocaTE_consensus']
+
+    run:
+        with open(input[0],"r") as infa:
+            with open(output[0], "w") as outfa:
+                for line in infa:
+                    if ">" in line:
+                        line = line.replace("\n","")
+                        line += " TSD=UNK\n"
+
+                    outfa.write(line)
+    
+rule relocaTE_ref_gff:
+    input:
+        config['mcc']['formatted_ref_tes'],
+        config['mcc']['formatted_taxonomy']
+
+    threads: 1
+
+    output:
+        config['mcc']['relocaTE_ref_TEs']
+
+    run:
+        taxonomy = {}
+        with open(input[1],"r") as tax:
+            for line in tax:
+                split_line = line.split("\t")
+                taxonomy[split_line[0]] = split_line[1].replace("\n","")
+        
+        with open(input[0], "r") as ingff:
+            with open(output[0],"w") as outgff:
+                for line in ingff:
+                    split_line = line.split("\t")
+                    split_line[2] = taxonomy[split_line[2]]
+                    line = "\t".join(split_line)
+                    outgff.write(line)
+
+
+rule popoolationTE_ref_fasta:
+    input:
+        config['mcc']['masked_fasta'],
+        config['mcc']['formatted_consensus'],
+        config['mcc']['ref_te_fasta']
+    
+    threads: 1
+
+    output:
+        config['mcc']['popoolationTE_ref_fasta']
+    
+    run:
+        shell("cat "+input[0]+" "+input[1]+" "+input[2]+" > "+output[0])
 
 
 rule coverage:
@@ -249,6 +324,8 @@ rule coverage:
         config['mcc']['consensus'],
         config['mcc']['coverage_fasta']
     
+    threads: workflow.cores
+
     output:
         config['args']['out']+"/coverage/coverage.log"
 
@@ -265,6 +342,8 @@ rule telocate:
         config['mcc']['telocate_ref_fasta'],
         config['args']['mcc_path']+"/tools/te-locate/TE_locate.pl"
     
+    threads: 1
+
     output:
         config['args']['out']+"/te-locate/te-locate.log"
     
@@ -280,7 +359,7 @@ rule retroseq:
         config['mcc']['ref_tes_bed'],
         config['mcc']['formatted_taxonomy']
 
-
+    threads: 1
     
     output:
         config['args']['out']+"/retroseq/retroseq.log"
@@ -289,6 +368,73 @@ rule retroseq:
         shell("touch "+config['args']['out']+"/retroseq/retroseq.log")
 
 
-# rule TEMP:
-#     input:
+
+rule TEMP:
+    input:
+        config['mcc']['bam'],
+        config['mcc']['ref_2bit'],
+        config['mcc']['formatted_consensus'],
+        config['mcc']['ref_tes_bed'],
+        config['mcc']['formatted_taxonomy'],
+        config['summary']['median_insert_size'],
+        config['mcc']['telocate_te_gff']
+
+    threads: workflow.cores
+
+    output:
+        config['args']['out']+"/temp/temp.log"
+    
+    run:
+        shell("touch "+output[0])
+
+
+
+rule relocaTE:
+    input:
+        config['mcc']['relocaTE_consensus'],
+        config['mcc']['relocaTE_ref_TEs'],
+        config['mcc']['augmented_reference'],
+        config['mcc']['fq1'],
+        config['mcc']['fq2']
+
+    threads: workflow.cores
+
+    output:
+        config['args']['out']+"/relocaTE/relocaTE.log"
+    
+    run:
+        shell("touch "+output[0])
+
+
+rule ngs_te_mapper:
+    input:
+        config['mcc']['formatted_consensus'],
+        config['mcc']['augmented_reference'],
+        config['mcc']['fq1'],
+        config['mcc']['fq2']
+    
+    threads: workflow.cores
+
+    output:
+        config['args']['out']+"/ngs_te_mapper/ngs_te_mapper.log"
+    
+    run:
+        shell("touch "+output[0])
         
+
+rule popoolationTE:
+    input:
+        config['mcc']['popoolationTE_ref_fasta'],
+        config['mcc']['popoolationTE_taxonomy'],
+        config['mcc']['popoolationTE_gff'],
+        config['mcc']['fq1'],
+        config['mcc']['fq2']
+    
+    threads: workflow.cores
+
+    output:
+        config['args']['out']+"/popoolationTE/popoolationTE.log"
+
+    run:
+        shell("touch "+output[0])
+

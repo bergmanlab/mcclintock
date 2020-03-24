@@ -168,6 +168,12 @@ def make_run_config(args, sample_name, ref_name):
         'telocate_ref_fasta' : input_dir+ref_name+".aug.telocate.fasta",
         'sam' : input_dir+sample_name+".sam",
         'bam' : input_dir+sample_name+".bam",
+        'ref_2bit' : input_dir+ref_name+".aug.fasta.2bit",
+        'relocaTE_consensus' : input_dir+"formattedConsensusTEs.relocaTE.fasta",
+        'relocaTE_ref_TEs' : input_dir+ref_name+".ref.TEs.relocaTE.gff",
+        'popoolationTE_ref_fasta' : input_dir+ref_name+".masked.popoolationTE.fasta",
+        'popoolationTE_taxonomy' : input_dir+"taxonomy.popoolationTE.tsv",
+        'popoolationTE_gff' : input_dir+ref_name+".ref.TEs.popoolationTE.gff"
     }
 
     summary_dir = args.out+"/summary/"
@@ -187,10 +193,10 @@ def run_workflow(args, sample_name, run_id):
     out_files = {
         'coverage': args.out+"/coverage/coverage.log",
         'ngs_te_mapper': args.out+"/ngs_te_mapper/ngs_te_mapper.log",
-        'relocate': args.out+"/relocate/relocate.log",
+        'relocate': args.out+"/relocaTE/relocaTE.log",
         'temp': args.out+"/temp/temp.log",
         'retroseq': args.out+"/retroseq/retroseq.log",
-        'popoolationte': args.out+"/popoolationte/popoolationte.log",
+        'popoolationte': args.out+"/popoolationTE/popoolationTE.log",
         'te-locate': args.out+"/te-locate/te-locate.log",
         'trimgalore': args.out+"/input/"+sample_name+"_1.fastq"
     }
@@ -210,7 +216,9 @@ def run_workflow(args, sample_name, run_id):
     if args.clean:
         clean_command = command + ["--delete-all-output"]
         mccutils.run_command(clean_command)
+        mccutils.run_command(["rm","-r",args.out+"/input"])
 
+    print(" ".join(command))
     mccutils.run_command(command)
 
 
