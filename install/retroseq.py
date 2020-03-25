@@ -5,7 +5,6 @@ import modules.mccutils as mccutils
 
 def main():
     install_path = snakemake.config['paths']['install']+"/tools/"
-    mccutils.mkdir(install_path)
 
     command = ["wget", "--no-check-certificate", "https://github.com/tk2/RetroSeq/archive/700d4f76a3b996686652866f2b81fefc6f0241e0.zip", "-O", snakemake.params.zipfile]
     mccutils.run_command(command, log=snakemake.params.log)

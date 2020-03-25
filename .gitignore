@@ -8,3 +8,4 @@ install/tools/*
 install/.snakemake/*
 install/install.log
 install/config.json
+envs/conda/*

@@ -50,7 +50,7 @@ def parse_args():
 
     if args.install:
         print("installing dependencies...")
-        install()
+        install(clean=args.clean)
         sys.exit(0)
 
     #check -r
@@ -121,6 +121,7 @@ def parse_args():
 
 
 def install(clean=False):
+
     mcc_path = os.path.dirname(os.path.abspath(__file__))
     install_path = mcc_path+"/install/"
     install_config = install_path+"/config.json"
@@ -136,8 +137,17 @@ def install(clean=False):
     if os.path.exists(install_path+"install.log"):
         os.remove(install_path+"install.log")
 
+    conda_env_dir = mcc_path+"/envs/conda"
+
+    # removes installed tools and conda environments
+    if clean:
+        print("Removing conda envs from: "+conda_env_dir)
+        print("Removing installed tools from: "+install_path+"tools")
+        mccutils.run_command(["rm","-r",conda_env_dir, install_path+"/tools"])
+
+    mccutils.mkdir(conda_env_dir)
     os.chdir(install_path)
-    command = ["snakemake","--use-conda","--configfile", install_config, "-R", "install_all"]
+    command = ["snakemake","--use-conda", "--conda-prefix", conda_env_dir, "--configfile", install_config, "-R", "install_all", "--cores", "1", "--nolock"]
     mccutils.run_command(command)
 
 def make_run_config(args, sample_name, ref_name):
@@ -232,7 +242,7 @@ def run_workflow(args, sample_name, run_id):
     mccutils.mkdir(snakemake_path)
     mccutils.run_command(["cp", path+"/Snakefile", snakemake_path])
     os.chdir(snakemake_path)
-    command = ["snakemake","--use-conda"]
+    command = ["snakemake","--use-conda", "--conda-prefix", path+"/envs"]
     for method in args.methods:
         command.append(out_files[method])
 

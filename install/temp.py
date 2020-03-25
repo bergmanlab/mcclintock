@@ -5,7 +5,6 @@ import modules.mccutils as mccutils
 
 def main():
     install_path = snakemake.config['paths']['install']+"/tools/"
-    mccutils.mkdir(install_path)
 
     command = ["wget", "--no-check-certificate", "https://github.com/JialiUMassWengLab/TEMP/archive/d2500b904e2020d6a1075347b398525ede5feae1.zip", "-O", snakemake.params.zipfile]
     mccutils.run_command(command, log=snakemake.params.log)

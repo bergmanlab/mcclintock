@@ -1,5 +1,4 @@
 rule install_telocate:
-    threads: 1
     params:
         tar = config['paths']['install']+"tools/te-locate/te-locate.tar",
         log = config['paths']['install']+"install.log"
@@ -8,6 +7,8 @@ rule install_telocate:
         config['paths']['install']+"tools/te-locate/TE_locate.pl",
         config['paths']['install']+"tools/te-locate/TE_hierarchy.pl"
     
+    conda: config['paths']['envs']+"mcc_telocate.yml"
+
     script:
         config['paths']['install']+"te-locate.py"
 
@@ -20,6 +21,8 @@ rule install_retroseq:
     output:
         config['paths']['install']+"tools/retroseq/bin/retroseq.pl"
     
+    conda: config['paths']['envs']+"mcc_retroseq.yml"
+
     script:
         config['paths']['install']+"retroseq.py"
 
@@ -33,6 +36,8 @@ rule install_temp:
         config['paths']['install']+"tools/temp/scripts/TEMP_Insertion.sh",
         config['paths']['install']+"tools/temp/scripts/TEMP_Absence.sh"
     
+    conda: config['paths']['envs']+"mcc_temp.yml"
+
     script:
         config['paths']['install']+"temp.py"
 
@@ -45,10 +50,12 @@ rule install_relocaTE:
     output:
         config['paths']['install']+"tools/relocate/scripts/relocaTE_insertionFinder.pl"
 
+    conda: config['paths']['envs']+"mcc_relocate.yml"
+
     script:
        config['paths']['install']+"relocate.py" 
 
-rule ngs_te_mapper:
+rule install_ngs_te_mapper:
     params:
         zipfile = config['paths']['install']+"tools/ngs_te_mapper/ngs_te_mapper.zip",
         log = config['paths']['install']+"install.log"
@@ -56,10 +63,12 @@ rule ngs_te_mapper:
     output:
         config['paths']['install']+"tools/ngs_te_mapper/sourceCode/run_ngs_te_mapper.sh"
     
+    conda: config['paths']['envs']+"mcc_ngs_te_mapper.yml"
+
     script:
         config['paths']['install']+"ngs_te_mapper.py"
     
-rule popoolationTE:
+rule install_popoolationTE:
     params:
         zipfile = config['paths']['install']+"tools/popoolationte.zip",
         log = config['paths']['install']+"install.log",
@@ -74,8 +83,23 @@ rule popoolationTE:
         config['paths']['install']+"tools/popoolationte/samro.pl",
         config['paths']['install']+"tools/popoolationte/identify-te-insertsites.pl"
     
+    conda: config['paths']['envs']+"mcc_popoolationte.yml"
+
     script:
         config['paths']['install']+"popoolationte.py"
+
+rule install_coverage:
+    params:
+        zipfile = config['paths']['install']+"tools/coverage.zip",
+        log = config['paths']['install']+"install.log"
+
+    output:
+        config['paths']['install']+"tools/coverage/src/samplot.py"    
+
+    conda: config['paths']['envs']+"mcc_coverage.yml"
+
+    script:
+        config['paths']['install']+"coverage.py"
 
 rule install_all:
     input:
@@ -89,4 +113,5 @@ rule install_all:
         config['paths']['install']+"tools/popoolationte/Modules/TEInsertUtility.pm",
         config['paths']['install']+"tools/popoolationte/Modules/TEInsert.pm",
         config['paths']['install']+"tools/popoolationte/samro.pl",
-        config['paths']['install']+"tools/popoolationte/identify-te-insertsites.pl"
+        config['paths']['install']+"tools/popoolationte/identify-te-insertsites.pl",
+        config['paths']['install']+"tools/coverage/src/samplot.py"

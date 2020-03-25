@@ -5,7 +5,6 @@ import modules.mccutils as mccutils
 
 def main():
     install_path = snakemake.config['paths']['install']+"/tools/"
-    mccutils.mkdir(install_path)
 
     command = ["wget", "--no-check-certificate", "https://github.com/bergmanlab/ngs_te_mapper/archive/fb23590200666fe66f1c417c5d5934385cb77ab9.zip", "-O", snakemake.params.zipfile]
     mccutils.run_command(command, log=snakemake.params.log)

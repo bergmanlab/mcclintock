@@ -5,7 +5,6 @@ import modules.mccutils as mccutils
 
 def main():
     install_path = snakemake.config['paths']['install']+"/tools/"
-    mccutils.mkdir(install_path)
 
     command = ["wget", "--no-check-certificate", "http://downloads.sourceforge.net/project/popoolationte/popoolationte_1.02.zip", "-O", snakemake.params.zipfile]
     mccutils.run_command(command, log=snakemake.params.log)

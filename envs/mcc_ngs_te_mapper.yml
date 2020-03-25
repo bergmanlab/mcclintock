@@ -1,0 +1,9 @@
+name: mcc_ngs_te_mapper
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - bwa=0.7.4
+  - bedtools=2.17.0
+  - r=3.5.0
