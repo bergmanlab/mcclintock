@@ -22,9 +22,9 @@ def parse_args():
     parser = argparse.ArgumentParser(prog='McClintock', description="Meta-pipeline to identify transposable element insertions using next generation sequencing data")
 
     ## required ##
-    parser.add_argument("-r", "--reference", type=str, help="A reference genome sequence in fasta format", required=True)
-    parser.add_argument("-c", "--consensus", type=str, help="The consensus sequences of the TEs for the species in fasta format", required=True)
-    parser.add_argument("-1", "--first", type=str, help="The path of the first fastq file from paired end read sequencing or the fastq file from single read sequencing", required=True)
+    parser.add_argument("-r", "--reference", type=str, help="A reference genome sequence in fasta format", required='--install' not in sys.argv)
+    parser.add_argument("-c", "--consensus", type=str, help="The consensus sequences of the TEs for the species in fasta format", required='--install' not in sys.argv)
+    parser.add_argument("-1", "--first", type=str, help="The path of the first fastq file from paired end read sequencing or the fastq file from single read sequencing", required='--install' not in sys.argv)
     
 
     ## optional ##
@@ -44,9 +44,14 @@ def parse_args():
     parser.add_argument("-C", "--include_consensus", action="store_true", help="This option will include the consensus TE sequences as extra chromosomes in the reference file (useful if the organism is known to have TEs that are not present in the reference strain)", required=False)
     parser.add_argument("-R", "--include_reference", action="store_true", help="This option will include the reference TE sequences as extra chromosomes in the reference file", required=False)
     parser.add_argument("--clean", action="store_true", help="This option will make sure mcclintock runs from scratch and doesn't reuse files already created", required=False)
-    
+    parser.add_argument("--install", action="store_true", help="This option will install the dependencies of mcclintock", required=False)
 
     args = parser.parse_args()
+
+    if args.install:
+        print("installing dependencies...")
+        install()
+        sys.exit(0)
 
     #check -r
     args.reference = mccutils.get_abs_path(args.reference)
@@ -114,6 +119,26 @@ def parse_args():
     
     return args
 
+
+def install(clean=False):
+    mcc_path = os.path.dirname(os.path.abspath(__file__))
+    install_path = mcc_path+"/install/"
+    install_config = install_path+"/config.json"
+    data = {}
+    data['paths'] = {
+        'mcc_path': mcc_path,
+        'install' : install_path,
+        'envs' : mcc_path+"/envs/"
+    }
+    with open(install_config,"w") as config:
+        json.dump(data, config, indent=4)
+
+    if os.path.exists(install_path+"install.log"):
+        os.remove(install_path+"install.log")
+
+    os.chdir(install_path)
+    command = ["snakemake","--use-conda","--configfile", install_config, "-R", "install_all"]
+    mccutils.run_command(command)
 
 def make_run_config(args, sample_name, ref_name):
     run_id = random.randint(1000000,9999999)

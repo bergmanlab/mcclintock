@@ -1,0 +1,12 @@
+--- PoPoolationTE/samro.pl	2012-01-27 09:30:15.000000000 +0000
++++ scripts/samro.pl	2015-02-26 14:08:44.080867237 +0000
+@@ -307,7 +307,8 @@
+             }
+         }
+ 
+-        warn "if of read is supposed to end with /1 or /2 : $readid" unless $readid=~m{/[12]$};
++		# This warning has been commented out as it cannot occur in mcclintock but still produces errors?
++		#warn "if of read is supposed to end with /1 or /2 : $readid" unless $readid=~m{/[12]$};
+         $readid=~s{/[12]$}{};
+         $s->{readid}=$readid;
+         return $s;

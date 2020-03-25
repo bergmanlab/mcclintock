@@ -1,0 +1,20 @@
+--- relocaTE_insertionFinder.pl	2015-06-26 15:27:16.430336059 +0100
++++ relocaTE_insertionFinder.pl.fixed	2015-06-26 13:45:23.431300162 +0100
+@@ -378,7 +378,7 @@
+            and ( ( $right_count + $left_count ) > $required_reads ) )
+       {
+         $event++;
+-        my $coor                  = $start + ( $TSD_len - 1 );
++        my $coor                  = $start + ( length($foundTSD) - 1 );
+         my $zero_base_coor        = $coor - 1;
+         my $sub_string_start      = $zero_base_coor - $flank_len + 1;
+         my $seq_start             = $coor - $flank_len + 1;
+@@ -407,7 +407,7 @@
+         print OUTLIST "$usr_target:$coor_start..$coor\t", join( ",", @reads ),
+           "\n";
+       } else {
+-        my $coor = $start + ( $TSD_len - 1 );
++        my $coor = $start + ( length($foundTSD) - 1 );
+         my $coor_start = $coor - length($foundTSD) + 1;
+         $left_count  = defined $left_count  ? $left_count  : 0;
+         $right_count = defined $right_count ? $right_count : 0;

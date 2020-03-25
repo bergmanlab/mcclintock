@@ -1,0 +1,92 @@
+rule install_telocate:
+    threads: 1
+    params:
+        tar = config['paths']['install']+"tools/te-locate/te-locate.tar",
+        log = config['paths']['install']+"install.log"
+
+    output:
+        config['paths']['install']+"tools/te-locate/TE_locate.pl",
+        config['paths']['install']+"tools/te-locate/TE_hierarchy.pl"
+    
+    script:
+        config['paths']['install']+"te-locate.py"
+
+
+rule install_retroseq:
+    params:
+        zipfile = config['paths']['install']+"tools/retroseq/retroseq.zip",
+        log = config['paths']['install']+"install.log"
+
+    output:
+        config['paths']['install']+"tools/retroseq/bin/retroseq.pl"
+    
+    script:
+        config['paths']['install']+"retroseq.py"
+
+rule install_temp:
+    params:
+        zipfile = config['paths']['install']+"tools/temp/temp.zip",
+        log = config['paths']['install']+"install.log",
+        patch = config['paths']['install']+"patches/temp/TEMP_Absence.patch"
+
+    output:
+        config['paths']['install']+"tools/temp/scripts/TEMP_Insertion.sh",
+        config['paths']['install']+"tools/temp/scripts/TEMP_Absence.sh"
+    
+    script:
+        config['paths']['install']+"temp.py"
+
+rule install_relocaTE:
+    params:
+        zipfile = config['paths']['install']+"tools/relocate/relocate.zip",
+        log = config['paths']['install']+"install.log",
+        patch = config['paths']['install']+"patches/relocate/relocaTE_insertionFinder.patch"
+    
+    output:
+        config['paths']['install']+"tools/relocate/scripts/relocaTE_insertionFinder.pl"
+
+    script:
+       config['paths']['install']+"relocate.py" 
+
+rule ngs_te_mapper:
+    params:
+        zipfile = config['paths']['install']+"tools/ngs_te_mapper/ngs_te_mapper.zip",
+        log = config['paths']['install']+"install.log"
+    
+    output:
+        config['paths']['install']+"tools/ngs_te_mapper/sourceCode/run_ngs_te_mapper.sh"
+    
+    script:
+        config['paths']['install']+"ngs_te_mapper.py"
+    
+rule popoolationTE:
+    params:
+        zipfile = config['paths']['install']+"tools/popoolationte.zip",
+        log = config['paths']['install']+"install.log",
+        patch1 = config['paths']['install']+"patches/popoolationte/TEInsertUtility.patch",
+        patch2 = config['paths']['install']+"patches/popoolationte/TEInsert.patch",
+        patch3 = config['paths']['install']+"patches/popoolationte/samro.patch",
+        patch4 = config['paths']['install']+"patches/popoolationte/identify-te-insertsites.patch"
+    
+    output:
+        config['paths']['install']+"tools/popoolationte/Modules/TEInsertUtility.pm",
+        config['paths']['install']+"tools/popoolationte/Modules/TEInsert.pm",
+        config['paths']['install']+"tools/popoolationte/samro.pl",
+        config['paths']['install']+"tools/popoolationte/identify-te-insertsites.pl"
+    
+    script:
+        config['paths']['install']+"popoolationte.py"
+
+rule install_all:
+    input:
+        config['paths']['install']+"tools/te-locate/TE_locate.pl",
+        config['paths']['install']+"tools/te-locate/TE_hierarchy.pl",
+        config['paths']['install']+"tools/retroseq/bin/retroseq.pl",
+        config['paths']['install']+"tools/temp/scripts/TEMP_Insertion.sh",
+        config['paths']['install']+"tools/temp/scripts/TEMP_Absence.sh",
+        config['paths']['install']+"tools/relocate/scripts/relocaTE_insertionFinder.pl",
+        config['paths']['install']+"tools/ngs_te_mapper/sourceCode/run_ngs_te_mapper.sh",
+        config['paths']['install']+"tools/popoolationte/Modules/TEInsertUtility.pm",
+        config['paths']['install']+"tools/popoolationte/Modules/TEInsert.pm",
+        config['paths']['install']+"tools/popoolationte/samro.pl",
+        config['paths']['install']+"tools/popoolationte/identify-te-insertsites.pl"

@@ -1,17 +1,3 @@
-rule install_telocate:
-    threads: 1
-    params:
-        tar = config['args']['mcc_path']+"/tools/te-locate/te-locate.tar"
-    output:
-        config['args']['mcc_path']+"/tools/te-locate/TE_locate.pl",
-        config['args']['mcc_path']+"/tools/te-locate/TE_hierarchy.pl"
-    
-    run:
-        shell("mkdir -p "+config['args']['mcc_path']+"/tools/te-locate/")
-        shell("wget --no-check-certificate https://downloads.sourceforge.net/project/te-locate/TE-locate.tar -O "+params.tar)
-        shell("tar -xvf "+params.tar+" -C "+config['args']['mcc_path']+"/tools/te-locate/")
-
-
 
 rule setup_reads:
     input:
@@ -340,7 +326,7 @@ rule telocate:
         config['summary']['median_insert_size'],
         config['mcc']['telocate_sam'],
         config['mcc']['telocate_ref_fasta'],
-        config['args']['mcc_path']+"/tools/te-locate/TE_locate.pl"
+        config['args']['mcc_path']+"/install/tools/te-locate/TE_locate.pl"
     
     threads: 1
 
