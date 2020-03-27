@@ -1,0 +1,8 @@
+name: mcclintock
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - snakemake=5.10.0
+  - biopython

@@ -1,0 +1,15 @@
+name: mcc_processing
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - bedtools=2.17.0
+  - biopython=1.76
+  - repeatmasker=4.0.7
+  - samtools=0.1.19
+  - trim-galore=0.6.5
+  - ucsc-fatotwobit
+  - perl-bioperl-run=1.006900
+  - bwa=0.7.4
+  

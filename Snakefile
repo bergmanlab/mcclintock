@@ -8,9 +8,11 @@ rule setup_reads:
         config['mcc']['fq2']
     
     threads: workflow.cores
+
+    conda: config['args']['mcc_path']+"/envs/mcc_processing.yml"
         
     script:
-        config['args']['mcc_path']+"/scripts/trimgalore.py"
+        config['args']['mcc_path']+"/scripts/setup_reads.py"
 
 
 rule fix_line_lengths:
@@ -27,14 +29,11 @@ rule fix_line_lengths:
         temp(config['mcc']['coverage_fasta'])
 
     threads: 1
-    
-    run:
-        shell("python "+config['args']['mcc_path']+"/scripts/fix_fasta_lines.py "+input.ref+" 80 > "+output[0])
-        shell("python "+config['args']['mcc_path']+"/scripts/fix_fasta_lines.py "+input.consensus+" 80 > "+output[1])
-        if params.coverage_fasta == "None":
-            shell("touch "+output[2])
-        else:
-            shell("python "+config['args']['mcc_path']+"/scripts/fix_fasta_lines.py "+params.coverage_fasta+" 80 > "+output[2])
+
+    conda: config['args']['mcc_path']+"/envs/mcc_processing.yml"
+
+    script:
+        config['args']['mcc_path']+"/scripts/fix_line_lengths.py"
 
 
 rule make_run_copies:
@@ -44,16 +43,10 @@ rule make_run_copies:
 
     threads: 1
 
-    run:
-        if config['in']['locations'] == "None":
-            shell("touch "+output[0])
-        else:
-            shell("cp "+config['in']['locations']+" "+output[0])
-        
-        if config['in']['taxonomy'] == "None":
-            shell("touch "+output[1])
-        else:
-            shell("cp "+config['in']['taxonomy']+" "+output[1])
+    conda: config['args']['mcc_path']+"/envs/mcc_processing.yml"
+
+    script:
+        config['args']['mcc_path']+"/scripts/make_run_copies.py"
 
 rule make_reference_te_files:
     input:
@@ -74,8 +67,10 @@ rule make_reference_te_files:
         config['mcc']['popoolationTE_taxonomy'],
         config['mcc']['popoolationTE_gff']
     
+    conda: config['args']['mcc_path']+"/envs/mcc_processing.yml"
+    
     script:
-        config['args']['mcc_path']+"/scripts/make_ref_te_files.py"
+        config['args']['mcc_path']+"/scripts/make_reference_te_files.py"
 
 rule index_reference_genome:
     input:
@@ -83,13 +78,15 @@ rule index_reference_genome:
     
     threads: 1
 
+    conda: config['args']['mcc_path']+"/envs/mcc_processing.yml"
+
     output:
         config['mcc']['augmented_reference']+".fai",
         config['mcc']['augmented_reference']+".bwt"
     
-    run:
-        shell("samtools faidx "+input.ref)
-        shell("bwa index "+input.ref)
+    script:
+        config['args']['mcc_path']+"/scripts/index_reference_genome.py"
+
 
 rule map_reads:
     input:
@@ -105,19 +102,12 @@ rule map_reads:
     
     threads: workflow.cores
 
+    conda: config['args']['mcc_path']+"/envs/mcc_processing.yml"
+
     output: config['mcc']['sam']
 
-    run:
-        if config['in']['fq2'] == 'None':
-            if eval(config['args']['save_comments']):
-                shell("bwa mem -C -t "+str(threads)+" -R '@RG\\tID:"+params.sample+"\\tSM:"+params.sample+"' "+input.ref+" "+input.fq1+" > "+output[0]+" 2> "+log[0])
-            else:
-                shell("bwa mem -t "+str(threads)+" -R '@RG\\tID:"+params.sample+"\\tSM:"+params.sample+"' "+input.ref+" "+input.fq1+" > "+output[0]+" 2> "+log[0])
-        else:
-            if eval(config['args']['save_comments']):
-                shell("bwa mem -C -t "+str(threads)+" -R '@RG\\tID:"+params.sample+"\\tSM:"+params.sample+"' "+input.ref+" "+input.fq1+" "+input.fq2+" > "+output[0]+" 2> "+log[0])
-            else:
-                shell("bwa mem -t "+str(threads)+" -R '@RG\\tID:"+params.sample+"\\tSM:"+params.sample+"' "+input.ref+" "+input.fq1+" "+input.fq2+" > "+output[0]+" 2> "+log[0])
+    script:
+        config['args']['mcc_path']+"/scripts/map_reads.py"
 
 rule sam_to_bam:
     input:
@@ -126,16 +116,15 @@ rule sam_to_bam:
     
     threads: workflow.cores
 
+    conda: config['args']['mcc_path']+"/envs/mcc_processing.yml"
+
     output:
-        config['mcc']['bam'],
-        config['summary']['flagstat'],
-        temp(config['mcc']['mcc_files']+config['args']['run_id']+".tmp.bam")
+        bam = config['mcc']['bam'],
+        flagstat = config['summary']['flagstat'],
+        tmp_bam = temp(config['mcc']['mcc_files']+config['args']['run_id']+".tmp.bam")
     
-    run:
-        shell("samtools view -@ "+str(workflow.cores)+" -Sb -t "+input.ref_idx+" "+input.sam+" > "+output[2])
-        shell("samtools sort -@ "+str(workflow.cores)+" "+output[2]+" "+output[0].replace(".bam", ""))
-        shell("samtools index "+output[0])
-        shell("samtools flagstat "+output[0]+" > "+output[1])
+    script:
+        config['args']['mcc_path']+"/scripts/sam_to_bam.py"
         
 
 rule make_ref_te_bed:
@@ -144,30 +133,29 @@ rule make_ref_te_bed:
     
     threads: 1
 
+    conda: config['args']['mcc_path']+"/envs/mcc_processing.yml"
+
     output:
         config['mcc']['ref_tes_bed']
 
-    run:
-        with open(input[0],"r") as i:
-            with open(output[0], "w") as o:
-                for line in i:
-                    split_line = line.replace(";","\t").split("\t")
-                    line = "\t".join([split_line[0], str(int(split_line[3])-1), split_line[4], split_line[9], ".", split_line[6]])
-                    o.write(line+"\n")
+    script:
+        config['args']['mcc_path']+"/scripts/make_ref_te_bed.py"
 
 rule telocate_taxonomy:
     input:
-        script = config['args']['mcc_path']+"/tools/te-locate/TE_hierarchy.pl",
+        script = config['args']['mcc_path']+"/install/tools/te-locate/TE_hierarchy.pl",
         ref_gff = config['mcc']['formatted_ref_tes'],
         taxonomy = config['mcc']['formatted_taxonomy']
     
     threads: 1
 
+    conda: config['args']['mcc_path']+"/envs/mcc_processing.yml"
+
     output:
         config['mcc']['telocate_te_gff']
     
-    run:
-        shell("perl "+input.script+" "+input.ref_gff+" "+input.taxonomy+" Alias")
+    script:
+        config['args']['mcc_path']+"/scripts/telocate_taxonomy.py"
 
 
 rule median_insert_size:
@@ -176,71 +164,55 @@ rule median_insert_size:
     
     threads: 1
 
+    conda: config['args']['mcc_path']+"/envs/mcc_processing.yml"
+
     output:
         config['summary']['median_insert_size']
     
-    run:
-        import statistics
-        insert_sizes = []
-        with open(input[0],"r") as sam:
-            for line in sam:
-                split_line = line.split("\t")
-                if len(split_line) >= 8:
-                    insert_size = int(split_line[8])
-                    if insert_size > 0:
-                        insert_sizes.append(insert_size)
-        
-        insert_sizes.sort()
-        median = statistics.median(insert_sizes)
-        with open(output[0],"w") as out:
-            out.write("median_insert_size="+str(median)+"\n")
+    script:
+        config['args']['mcc_path']+"/scripts/median_insert_size.py"
 
 rule telocate_sam:
     input:
         config['mcc']['sam']
     
     threads: 1
+
+    conda: config['args']['mcc_path']+"/envs/mcc_processing.yml"
     
     output:
         config['mcc']['telocate_sam']
 
-    run:
-        shell("sort -S "+config['args']['mem']+"G --temporary-directory="+config['args']['out']+"/tmp "+input[0]+" > "+output[0])
+    script:
+        config['args']['mcc_path']+"/scripts/telocate_sam.py"
 
 rule telocate_ref:
     input:
         config['mcc']['augmented_reference']
     
     threads: 1
-    
+
+    conda: config['args']['mcc_path']+"/envs/mcc_processing.yml"    
+
     output:
         config['mcc']['telocate_ref_fasta']
     
-    run:
-        chromosomes = []
-        with open(input[0],"r") as infa:
-            with open(output[0],"w") as outfa:
-                for line in infa:
-                    outfa.write(line)
-                    if ">" in line:
-                        chromosomes.append(line)
-
-        if len(chromosomes) < 5:
-            diff = 5 - len(chromosomes)        
-            with open(output[0],"a") as out: 
-                for i in range(1,diff+1):
-                    out.write(">fixforTElocate"+str(i)+"\n")
-                    out.write("ACGT\n")
+    script:
+        config['args']['mcc_path']+"/scripts/telocate_ref.py"
 
 rule reference_2bit:
     input:
         config['mcc']['augmented_reference']
     
+    threads: 1
+
+    conda: config['args']['mcc_path']+"/envs/mcc_processing.yml"
+    
     output:
         config['mcc']['ref_2bit']
     
-    run:
-        shell("faToTwoBit "+input[0]+" "+output[0])
+    script:
+        config['args']['mcc_path']+"/scripts/reference_2bit.py"
 
 rule relocaTE_consensus:
     input:
@@ -248,18 +220,13 @@ rule relocaTE_consensus:
     
     threads: 1
 
+    conda: config['args']['mcc_path']+"/envs/mcc_processing.yml"
+
     output:
         config['mcc']['relocaTE_consensus']
 
-    run:
-        with open(input[0],"r") as infa:
-            with open(output[0], "w") as outfa:
-                for line in infa:
-                    if ">" in line:
-                        line = line.replace("\n","")
-                        line += " TSD=UNK\n"
-
-                    outfa.write(line)
+    script:
+        config['args']['mcc_path']+"/scripts/relocaTE_consensus.py"
     
 rule relocaTE_ref_gff:
     input:
@@ -268,23 +235,13 @@ rule relocaTE_ref_gff:
 
     threads: 1
 
+    conda: config['args']['mcc_path']+"/envs/mcc_processing.yml"
+
     output:
         config['mcc']['relocaTE_ref_TEs']
 
-    run:
-        taxonomy = {}
-        with open(input[1],"r") as tax:
-            for line in tax:
-                split_line = line.split("\t")
-                taxonomy[split_line[0]] = split_line[1].replace("\n","")
-        
-        with open(input[0], "r") as ingff:
-            with open(output[0],"w") as outgff:
-                for line in ingff:
-                    split_line = line.split("\t")
-                    split_line[2] = taxonomy[split_line[2]]
-                    line = "\t".join(split_line)
-                    outgff.write(line)
+    script:
+        config['args']['mcc_path']+"/scripts/relocaTE_ref_gff.py" 
 
 
 rule popoolationTE_ref_fasta:
@@ -295,11 +252,13 @@ rule popoolationTE_ref_fasta:
     
     threads: 1
 
+    conda: config['args']['mcc_path']+"/envs/mcc_processing.yml"
+
     output:
         config['mcc']['popoolationTE_ref_fasta']
     
-    run:
-        shell("cat "+input[0]+" "+input[1]+" "+input[2]+" > "+output[0])
+    script:
+        config['args']['mcc_path']+"/scripts/popoolationTE_ref_fasta.py" 
 
 
 rule coverage:
@@ -326,7 +285,6 @@ rule telocate:
         config['summary']['median_insert_size'],
         config['mcc']['telocate_sam'],
         config['mcc']['telocate_ref_fasta'],
-        config['args']['mcc_path']+"/install/tools/te-locate/TE_locate.pl"
     
     threads: 1
 

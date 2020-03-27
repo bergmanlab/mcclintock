@@ -115,3 +115,8 @@ rule install_all:
         config['paths']['install']+"tools/popoolationte/samro.pl",
         config['paths']['install']+"tools/popoolationte/identify-te-insertsites.pl",
         config['paths']['install']+"tools/coverage/src/samplot.py"
+    
+    conda: config['paths']['envs']+"mcc_processing.yml"
+
+    shell:
+        "echo 'install done!'"

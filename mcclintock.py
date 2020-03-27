@@ -75,6 +75,7 @@ def parse_args():
     if args.out is None:
         args.out = os.path.abspath(".")
     else:
+        args.out = os.path.abspath(args.out)
         mccutils.mkdir(args.out)
     
 
@@ -242,7 +243,7 @@ def run_workflow(args, sample_name, run_id):
     mccutils.mkdir(snakemake_path)
     mccutils.run_command(["cp", path+"/Snakefile", snakemake_path])
     os.chdir(snakemake_path)
-    command = ["snakemake","--use-conda", "--conda-prefix", path+"/envs"]
+    command = ["snakemake","--use-conda", "--conda-prefix", path+"/envs/conda"]
     for method in args.methods:
         command.append(out_files[method])
 
