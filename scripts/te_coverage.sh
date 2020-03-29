@@ -144,7 +144,7 @@ then
 	rep_out=$reference_genome_cov".out"
 	rep_bed=$reference_genome_cov".bed"
 	rep_bed_sorted=$reference_genome_cov".sorted.bed"
-	awk 'BEGIN{OFS="\t"}{if(NR>3) {if($9=="C"){strand="-"}else{strand="+"};print $5,$6-1,$7,$10,".",strand}}' $rep_out > $rep_bed
+	awk 'BEGIN{OFS="\t"}{if(NR>3) {if($9=="C"){strand="-"}else{strand="+"};print $5,$6,$7,$10,".",strand}}' $rep_out > $rep_bed
 	bedtools sort -i $rep_bed > $rep_bed_sorted
 	grep -f $chromosome_names $ref_masked_aug.fai | cut -f1,2 | sort > $referencefolder/$genome".sorted.genome"
 	bedtools slop -i $rep_bed_sorted -g $referencefolder/$genome".sorted.genome" -l 1 -r 0 > $referencefolder/$genome".fasta.out.zero.bed"
