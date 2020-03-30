@@ -41,8 +41,8 @@ def parse_args():
     parser.add_argument("-T", "--comments", action="store_true", help="If this option is specified then fastq comments (e.g. barcode) will be incorporated to SAM output. Warning: do not use this option if the input fastq files do not have comments", required=False)
     # parser.add_argument("-b", "--keep_bam", action="store_true", help="Retain the sorted and indexed BAM file of the paired end data aligned to the reference genome", required=False)
     # parser.add_argument("-i", "--remove_intermediate", action="store_true", help="If this option is specified then all sample specific intermediate files will be removed, leaving only the overall results. The default is to leave sample specific intermediate files", required=False)
-    parser.add_argument("-C", "--include_consensus", action="store_true", help="This option will include the consensus TE sequences as extra chromosomes in the reference file (useful if the organism is known to have TEs that are not present in the reference strain)", required=False)
-    parser.add_argument("-R", "--include_reference", action="store_true", help="This option will include the reference TE sequences as extra chromosomes in the reference file", required=False)
+    parser.add_argument("-C", "--include_consensus_te", action="store_true", help="This option will include the consensus TE sequences as extra chromosomes in the reference file (useful if the organism is known to have TEs that are not present in the reference strain)", required=False)
+    parser.add_argument("-R", "--include_reference_te", action="store_true", help="This option will include the reference TE sequences as extra chromosomes in the reference file", required=False)
     parser.add_argument("--clean", action="store_true", help="This option will make sure mcclintock runs from scratch and doesn't reuse files already created", required=False)
     parser.add_argument("--install", action="store_true", help="This option will install the dependencies of mcclintock", required=False)
 
@@ -160,8 +160,8 @@ def make_run_config(args, sample_name, ref_name):
         'proc': str(args.proc),
         'mem': str(args.mem),
         'out': str(args.out),
-        'include_consensus': str(args.include_consensus),
-        'include_reference': str(args.include_reference),
+        'include_consensus': str(args.include_consensus_te),
+        'include_reference': str(args.include_reference_te),
         'mcc_path': os.path.dirname(os.path.abspath(__file__)),
         'sample_name': sample_name,
         'ref_name': ref_name,

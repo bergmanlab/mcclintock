@@ -1,6 +1,13 @@
 import os
 import sys
 import subprocess
+import math
+import argparse
+import numpy as np
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot
+import matplotlib.patches as mpatches
 sys.path.append(snakemake.config['args']['mcc_path'])
 import modules.mccutils as mccutils
 
@@ -30,9 +37,10 @@ def main():
 
     genome_depth = get_genome_depth(nonte_bed, bam, run_id, coverage_out)
 
-    make_depth_table(te_seqs, bam, genome_depth, run_id, coverage_out)
+    te_names, all_coverage_files, uniq_coverage_files, avg_norm_te_depths = make_depth_table(te_seqs, bam, genome_depth, run_id, coverage_out)
 
-    mccutils.run_command(["touch", snakemake.config['args']['out']+"/coverage/coverage.log"])
+    make_plots(te_names, all_coverage_files, uniq_coverage_files, avg_norm_te_depths, genome_depth, snakemake.params.sample, coverage_out)
+
 
 def repeatmask_genome(reference, lib, threads, run_id, out):
     outdir = out+"/input/repeatmasker_"+run_id
@@ -176,7 +184,12 @@ def get_avg_depth(depth_file):
 def make_depth_table(te_fasta, bam, genome_depth, run_id, out):
     depth_csv = out+"/output/te_depth.csv"
     with open(depth_csv, "w") as table:
-            table.write("TE-Family"+"\t"+"Normalized-Depth"+"\n")
+            table.write("TE-Family,Normalized-Depth"+"\n")
+    
+    te_names = []
+    uniq_coverage_files = []
+    all_coverage_files = []
+    avg_norm_depths = []
 
     with open(te_fasta,"r") as fa:
         for line in fa:
@@ -197,9 +210,126 @@ def make_depth_table(te_fasta, bam, genome_depth, run_id, out):
                 avg_norm_depth = avg_depth/genome_depth
 
                 with open(depth_csv, "a") as table:
-                    table.write(te_name+"\t"+str(avg_norm_depth)+"\n")
+                    table.write(te_name+","+str(avg_norm_depth)+"\n")
+    
+                te_names.append(te_name)
+                uniq_coverage_files.append(highQ)
+                all_coverage_files.append(allQ)
+                avg_norm_depths.append(avg_norm_depth)
+    
+    return te_names, all_coverage_files, uniq_coverage_files, avg_norm_depths
+
+
+def make_plots(te_names, all_coverage_files, uniq_coverage_files, avg_norm_te_depths, genome_depth, sample_name, out):
+    for x, te_name in enumerate(te_names):
+        chrom, all_pos, all_cov = read_samtools_depth_file(all_coverage_files[x])
+        chrom2, uniq_pos, uniq_cov = read_samtools_depth_file(uniq_coverage_files[x])
+
+        plot_height = 3
+        plot_width = 10
+        hline = avg_norm_te_depths[x]
+        output = out+"/output/"+te_name+".png"
+        plot = plot_coverage(chrom, all_pos, all_cov, uniq_pos, uniq_cov, sample_name, plot_height, plot_width, genome_depth, hline)
+        plot.savefig(output, bbox_inches="tight")
+
+
+
+def read_samtools_depth_file(depth_file):
+    chrom = ""
+    x = []
+    y = []
+    
+    with open(depth_file,"r") as depth:
+        for line in depth:
+            split_line = line.split("\t")
+            if chrom == "":
+                chrom = split_line[0]
+            elif chrom != split_line[0]:
+                sys.exit("Error: Samtools depth file has multiple reference contigs.... exiting...\n")
+            
+            x.append(int(split_line[1]))
+            y.append(int(split_line[2]))
+
+    return chrom, x, y
+
+
+def plot_coverage(chrom, all_pos, all_cov, uniq_pos, uniq_cov, title, height, width, normalize_cov, add_hline ):
+
+    if normalize_cov:
+        all_cov = np.array(all_cov)
+        uniq_cov = np.array(uniq_cov)
+
+        all_cov = all_cov/normalize_cov
+        uniq_cov = uniq_cov/normalize_cov
+
+    fig = matplotlib.pyplot.figure(figsize=(width, height), dpi=300)
+
+    plot = matplotlib.pyplot
+
+    ax = plot.subplot(1,1,1)
+
+    ax.fill_between(all_pos, all_cov, np.zeros(len(all_cov)), color='grey', step="pre", alpha=0.15)
+
+    ax.fill_between(uniq_pos, uniq_cov, np.zeros(len(uniq_cov)), color='darkgrey', step="pre", alpha=0.4)
+
+
+    ax.spines['top'].set_visible(False)
+    ax.spines['bottom'].set_visible(False)
+    ax.spines['left'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+
+    ax.tick_params(axis='y', colors='grey')
+    ax.tick_params(axis='x', labelsize=5, length=0, pad=5)
+    ax.tick_params(axis='y', labelsize=5, length=0, pad=5)
+
+    ax.set_xlim(min(all_pos),max(all_pos))
+    ax.set_ylim(0,max(all_cov))
+    plot.xticks([min(all_pos), int(np.median(all_pos)), max(all_pos)])
+
+    y_max_tick = max(all_cov)
+    y_max_tick = math.ceil(y_max_tick*100)/100
+
+
+    if add_hline is None:
+        y_mid_tick = max(all_cov)/2
+        y_mid_tick = math.ceil(y_mid_tick*100)/100
+    else:
+        y_mid_tick = add_hline
+
+    plot.yticks([0, y_mid_tick, y_max_tick])
+    
+    ax.set_xlabel('Position on '+ chrom, fontsize=8)
+
+    # prevents scientific notation if positions are large
+    ax.ticklabel_format(useOffset=False, style='plain')
     
 
+    if title:
+        ax.set_title(" "*15 + title, fontsize=10, loc='left',y=1.07)
+
+
+    ## legend
+
+    labels = []
+    elements = []
+
+    elements += [mpatches.Patch(color='darkgrey',alpha=.4)]
+    labels.append("Coverage (MAPQ > 0)")
+    elements += [mpatches.Patch(color='grey',alpha=.15)]
+    labels.append("Coverage (MAPQ = 0)")
+
+    if add_hline is not None:
+        ax.set_ylabel('Normalized Coverage', fontsize=8)
+        ax.axhline(y=add_hline, color='black',alpha=0.5)
+        elements += [matplotlib.pyplot.Line2D([0,0],[0,1],color='black', alpha=0.5)]
+        labels.append("Avg. Norm. Cov.")
+    else:
+        ax.set_ylabel('Coverage', fontsize=8)
+
+    plot.legend( elements , labels, loc=9, fontsize = 6, frameon=False, ncol=3, bbox_to_anchor=(0.5, 1.1))
+
+
+    return plot
 
 if __name__ == "__main__":                
     main()
