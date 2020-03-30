@@ -26,7 +26,7 @@ def main():
     index_genome(snakemake.input.ref)
     index_genome(augmented_reference)
     
-    if snakemake.config['in']['fq2'] != "None":
+    if snakemake.config['in']['fq2'] == "None":
         sam = map_reads(augmented_reference, snakemake.input.fq1, snakemake.threads, snakemake.params.sample, run_id, coverage_out)
     else:
         sam = map_reads(augmented_reference, snakemake.input.fq1, snakemake.threads, snakemake.params.sample, run_id, coverage_out, fq2=snakemake.input.fq2)
@@ -210,7 +210,7 @@ def make_depth_table(te_fasta, bam, genome_depth, run_id, out):
                 avg_norm_depth = avg_depth/genome_depth
 
                 with open(depth_csv, "a") as table:
-                    table.write(te_name+","+str(avg_norm_depth)+"\n")
+                    table.write(te_name+","+str(round(avg_norm_depth,2))+"\n")
     
                 te_names.append(te_name)
                 uniq_coverage_files.append(highQ)
