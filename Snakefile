@@ -263,21 +263,25 @@ rule popoolationTE_ref_fasta:
 
 rule coverage:
     input:
-        config['mcc']['fq1'],
-        config['mcc']['fq2'],
-        config['mcc']['reference'],
-        config['mcc']['consensus'],
-        config['mcc']['coverage_fasta']
+        fq1 = config['mcc']['fq1'],
+        fq2 = config['mcc']['fq2'],
+        ref = config['mcc']['reference'],
+        consensus = config['mcc']['consensus'],
+        coverage_fa = config['mcc']['coverage_fasta']
     
+    params: 
+        sample=config['args']['sample_name']
+
     threads: workflow.cores
 
-    output:
-        config['args']['out']+"/coverage/coverage.log"
+    conda: config['args']['mcc_path']+"/envs/mcc_coverage.yml"
 
-    run:
-        shell("touch "+config['args']['out']+"/coverage/coverage.log")    
-    # script:
-    #     "modules/coverage.py"
+    output:
+        config['args']['out']+"/results/coverage/output/te_depth.csv"
+
+    script:
+        config['args']['mcc_path']+"/modules/coverage.py"   
+
 
 rule telocate:
     input:

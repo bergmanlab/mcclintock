@@ -227,7 +227,7 @@ def make_run_config(args, sample_name, ref_name):
 def run_workflow(args, sample_name, run_id):
     log = args.out+"/mcclintock."+str(run_id)+".log"
     out_files = {
-        'coverage': args.out+"/coverage/coverage.log",
+        'coverage': args.out+"/results/coverage/output/te_depth.csv",
         'ngs_te_mapper': args.out+"/ngs_te_mapper/ngs_te_mapper.log",
         'relocate': args.out+"/relocaTE/relocaTE.log",
         'temp': args.out+"/temp/temp.log",
