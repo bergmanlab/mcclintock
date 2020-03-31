@@ -4,6 +4,8 @@ sys.path.append(snakemake.config['paths']['mcc_path'])
 import modules.mccutils as mccutils
 
 def main():
+    print("installing TEMP...")
+
     install_path = snakemake.config['paths']['install']+"/tools/"
 
     command = ["wget", "--no-check-certificate", "https://github.com/JialiUMassWengLab/TEMP/archive/d2500b904e2020d6a1075347b398525ede5feae1.zip", "-O", snakemake.params.zipfile]
@@ -27,6 +29,8 @@ def main():
 
     command = ["rm", snakemake.params.zipfile]
     mccutils.run_command(command, log=snakemake.params.log)
+
+    print("TEMP installation complete")
 
 if __name__ == "__main__":                
     main()

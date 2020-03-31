@@ -4,6 +4,8 @@ sys.path.append(snakemake.config['paths']['mcc_path'])
 import modules.mccutils as mccutils
 
 def main():
+    print("installing ngs_te_mapper...")
+
     install_path = snakemake.config['paths']['install']+"/tools/"
 
     command = ["wget", "--no-check-certificate", "https://github.com/bergmanlab/ngs_te_mapper/archive/fb23590200666fe66f1c417c5d5934385cb77ab9.zip", "-O", snakemake.params.zipfile]
@@ -24,6 +26,8 @@ def main():
 
     command = ["rm", snakemake.params.zipfile]
     mccutils.run_command(command, log=snakemake.params.log)
+
+    print("ngs_te_mapper installation complete")
 
 if __name__ == "__main__":                
     main()

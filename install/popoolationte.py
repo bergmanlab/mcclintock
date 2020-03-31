@@ -4,6 +4,8 @@ sys.path.append(snakemake.config['paths']['mcc_path'])
 import modules.mccutils as mccutils
 
 def main():
+    print("installing popoolationTE...")
+
     install_path = snakemake.config['paths']['install']+"/tools/"
 
     command = ["wget", "--no-check-certificate", "http://downloads.sourceforge.net/project/popoolationte/popoolationte_1.02.zip", "-O", snakemake.params.zipfile]
@@ -26,6 +28,8 @@ def main():
 
     command = ["rm", "-r", snakemake.config['paths']['install']+"popoolationte"]
     mccutils.run_command(command, log=snakemake.params.log)
+
+    print("popoolationTE installation complete")
 
 if __name__ == "__main__":                
     main()

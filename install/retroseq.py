@@ -4,6 +4,8 @@ sys.path.append(snakemake.config['paths']['mcc_path'])
 import modules.mccutils as mccutils
 
 def main():
+    print("installing RetroSeq...")
+
     install_path = snakemake.config['paths']['install']+"/tools/"
 
     command = ["wget", "--no-check-certificate", "https://github.com/tk2/RetroSeq/archive/700d4f76a3b996686652866f2b81fefc6f0241e0.zip", "-O", snakemake.params.zipfile]
@@ -25,6 +27,7 @@ def main():
     command = ["rm", snakemake.params.zipfile]
     mccutils.run_command(command, log=snakemake.params.log)
 
+    print("RetroSeq installation complete")
 
 if __name__ == "__main__":                
     main()

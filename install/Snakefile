@@ -1,7 +1,7 @@
 rule install_telocate:
     params:
         tar = config['paths']['install']+"tools/te-locate/te-locate.tar",
-        log = config['paths']['install']+"install.log"
+        log = config['paths']['log_dir']+"install.log"
 
     output:
         config['paths']['install']+"tools/te-locate/TE_locate.pl",
@@ -16,7 +16,7 @@ rule install_telocate:
 rule install_retroseq:
     params:
         zipfile = config['paths']['install']+"tools/retroseq/retroseq.zip",
-        log = config['paths']['install']+"install.log"
+        log = config['paths']['log_dir']+"install.log"
 
     output:
         config['paths']['install']+"tools/retroseq/bin/retroseq.pl"
@@ -29,7 +29,7 @@ rule install_retroseq:
 rule install_temp:
     params:
         zipfile = config['paths']['install']+"tools/temp/temp.zip",
-        log = config['paths']['install']+"install.log",
+        log = config['paths']['log_dir']+"install.log",
         patch = config['paths']['install']+"patches/temp/TEMP_Absence.patch"
 
     output:
@@ -44,7 +44,7 @@ rule install_temp:
 rule install_relocaTE:
     params:
         zipfile = config['paths']['install']+"tools/relocate/relocate.zip",
-        log = config['paths']['install']+"install.log",
+        log = config['paths']['log_dir']+"install.log",
         patch = config['paths']['install']+"patches/relocate/relocaTE_insertionFinder.patch"
     
     output:
@@ -58,7 +58,7 @@ rule install_relocaTE:
 rule install_ngs_te_mapper:
     params:
         zipfile = config['paths']['install']+"tools/ngs_te_mapper/ngs_te_mapper.zip",
-        log = config['paths']['install']+"install.log"
+        log = config['paths']['log_dir']+"install.log"
     
     output:
         config['paths']['install']+"tools/ngs_te_mapper/sourceCode/run_ngs_te_mapper.sh"
@@ -71,7 +71,7 @@ rule install_ngs_te_mapper:
 rule install_popoolationTE:
     params:
         zipfile = config['paths']['install']+"tools/popoolationte.zip",
-        log = config['paths']['install']+"install.log",
+        log = config['paths']['log_dir']+"install.log",
         patch1 = config['paths']['install']+"patches/popoolationte/TEInsertUtility.patch",
         patch2 = config['paths']['install']+"patches/popoolationte/TEInsert.patch",
         patch3 = config['paths']['install']+"patches/popoolationte/samro.patch",
@@ -91,7 +91,7 @@ rule install_popoolationTE:
 rule install_coverage:
     params:
         zipfile = config['paths']['install']+"tools/coverage.zip",
-        log = config['paths']['install']+"install.log"
+        log = config['paths']['log_dir']+"install.log"
 
     output:
         config['paths']['install']+"tools/coverage/src/samplot.py"    

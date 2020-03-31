@@ -4,6 +4,7 @@ sys.path.append(snakemake.config['paths']['mcc_path'])
 import modules.mccutils as mccutils
 
 def main():
+    print("installing coverage module...")
 
     install_path = snakemake.config['paths']['install']+"/tools/"
 
@@ -25,6 +26,8 @@ def main():
 
     command = ["rm", snakemake.params.zipfile]
     mccutils.run_command(command, log=snakemake.params.log)
+
+    print("coverage module installation complete")
 
 if __name__ == "__main__":                
     main()

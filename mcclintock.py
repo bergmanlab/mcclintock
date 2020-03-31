@@ -16,7 +16,7 @@ def main():
     sample_name = mccutils.get_base_name(args.first, fastq=True)
     ref_name = mccutils.get_base_name(args.reference)
     run_id = make_run_config(args, sample_name, ref_name)
-    run_workflow(args, sample_name, run_id)
+    run_workflow(args, sample_name, run_id, debug=args.debug)
 
 def parse_args():
     parser = argparse.ArgumentParser(prog='McClintock', description="Meta-pipeline to identify transposable element insertions using next generation sequencing data")
@@ -45,12 +45,16 @@ def parse_args():
     parser.add_argument("-R", "--include_reference_te", action="store_true", help="This option will include the reference TE sequences as extra chromosomes in the reference file", required=False)
     parser.add_argument("--clean", action="store_true", help="This option will make sure mcclintock runs from scratch and doesn't reuse files already created", required=False)
     parser.add_argument("--install", action="store_true", help="This option will install the dependencies of mcclintock", required=False)
+    parser.add_argument("--debug", action="store_true", help="This option will allow snakemake to print progress to stdout", required=False)
 
     args = parser.parse_args()
 
+    if args.debug is None:
+        args.debug = False
+
     if args.install:
         print("installing dependencies...")
-        install(clean=args.clean)
+        install(clean=args.clean, debug=args.debug)
         sys.exit(0)
 
     #check -r
@@ -121,16 +125,18 @@ def parse_args():
     return args
 
 
-def install(clean=False):
+def install(clean=False, debug=False):
 
     mcc_path = os.path.dirname(os.path.abspath(__file__))
     install_path = mcc_path+"/install/"
     install_config = install_path+"/config.json"
+    log_dir = install_path+"/log/"
     data = {}
     data['paths'] = {
         'mcc_path': mcc_path,
         'install' : install_path,
-        'envs' : mcc_path+"/envs/"
+        'envs' : mcc_path+"/envs/",
+        'log_dir': log_dir
     }
     with open(install_config,"w") as config:
         json.dump(data, config, indent=4)
@@ -148,7 +154,10 @@ def install(clean=False):
 
     mccutils.mkdir(conda_env_dir)
     os.chdir(install_path)
+    mccutils.mkdir(log_dir)
     command = ["snakemake","--use-conda", "--conda-prefix", conda_env_dir, "--configfile", install_config, "-R", "install_all", "--cores", "1", "--nolock"]
+    if not debug:
+        command.append("--quiet")
     mccutils.run_command(command)
 
 def make_run_config(args, sample_name, ref_name):
@@ -224,7 +233,7 @@ def make_run_config(args, sample_name, ref_name):
     
     return run_id
 
-def run_workflow(args, sample_name, run_id):
+def run_workflow(args, sample_name, run_id, debug=False):
     log = args.out+"/mcclintock."+str(run_id)+".log"
     out_files = {
         'coverage': args.out+"/results/coverage/output/te_depth.csv",
@@ -244,6 +253,9 @@ def run_workflow(args, sample_name, run_id):
     mccutils.run_command(["cp", path+"/Snakefile", snakemake_path])
     os.chdir(snakemake_path)
     command = ["snakemake","--use-conda", "--conda-prefix", path+"/envs/conda"]
+    if not debug:
+        command.append("--quiet")
+
     for method in args.methods:
         command.append(out_files[method])
 
