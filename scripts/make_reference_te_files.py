@@ -5,6 +5,7 @@ import sys
 import subprocess
 sys.path.append(snakemake.config['args']['mcc_path'])
 import modules.mccutils as mccutils
+import modules.fix_fasta as fix_fasta
 from Bio import SeqIO
 
 
@@ -95,7 +96,7 @@ def repeat_mask(reference, te_fasta, procs, run_id, out):
 
 
     masked_fasta = outdir+"/"+ref_name+".masked"
-    fasta_lines = mccutils.fix_fasta_lines(masked_fasta, 80)
+    fasta_lines = fix_fasta.fix_fasta_lines(masked_fasta, 80)
 
     masked_ref = out+"/tmp/"+run_id+"tmpmaskedreference.fasta"
     with open(masked_ref,"w") as fa:
@@ -233,12 +234,12 @@ def make_popoolationTE_taxonomy(taxonomy, consensus, run_id, out):
 
 
 def augment_reference(reference, ref_tes, consensus_tes, run_id, out, add_consensus=False, add_reference=False):
-    out_lines = mccutils.fix_fasta_lines(reference, 80)
+    out_lines = fix_fasta.fix_fasta_lines(reference, 80)
     if add_consensus:
-        consensus_lines = mccutils.fix_fasta_lines(consensus_tes, 80)
+        consensus_lines = fix_fasta.fix_fasta_lines(consensus_tes, 80)
         out_lines += consensus_lines
     if add_reference:
-        reference_te_lines = mccutils.fix_fasta_lines(ref_tes, 80)
+        reference_te_lines = fix_fasta.fix_fasta_lines(ref_tes, 80)
         out_lines += reference_te_lines
     
     augmented_reference = out+"/tmp/"+run_id+"tmpaugmentedreference.fasta"
