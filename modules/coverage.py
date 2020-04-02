@@ -21,6 +21,7 @@ def main():
         te_seqs = snakemake.input.coverage_fa
     
     mccutils.mkdir(coverage_out+"/input")
+    te_seqs = format_consensus_fasta(te_seqs, run_id, coverage_out)
     masked_reference, masked_gff = repeatmask_genome(snakemake.input.ref, te_seqs, snakemake.threads, run_id, coverage_out)
     augmented_reference = augment_genome(masked_reference, te_seqs, run_id, coverage_out)
     index_genome(snakemake.input.ref)
@@ -77,6 +78,20 @@ def augment_genome(fasta1, fasta2, run_id, out):
 def index_genome(fasta):
     mccutils.run_command(["samtools", "faidx", fasta])
     mccutils.run_command(["bwa", "index", fasta])
+
+def format_consensus_fasta(te_seqs, run_id, out):
+    special_chars = [";","&","(",")","|","*","?","[","]","~","{","}","<","!","^",'"',"'","\\","$","/"]
+    # removes any special characters from TE names
+    formatted_fasta = out+"/input/formattedTEsequences_"+run_id+".fasta"
+    with open(te_seqs,"r") as infa:
+        with open(formatted_fasta,"w") as outfa:
+            for line in infa:
+                if ">" in line:
+                    for special_char in special_chars:
+                        line = line.replace(special_char,"_")
+                outfa.write(line)
+    
+    return formatted_fasta
 
 
 def map_reads(reference, fq1, threads, sample_name, run_id, out, fq2=None):
@@ -196,7 +211,6 @@ def make_depth_table(te_fasta, bam, genome_depth, run_id, out):
             if ">" in line:
                 te_name = line.replace("\n","")
                 te_name = te_name.replace(">","")
-                te_name = te_name.replace("/","-")
 
                 mccutils.mkdir(out+"/output/te-depth")
                 highQ = out+"/output/te-depth/"+te_name+".highQ.cov"
