@@ -196,6 +196,7 @@ def make_depth_table(te_fasta, bam, genome_depth, run_id, out):
             if ">" in line:
                 te_name = line.replace("\n","")
                 te_name = te_name.replace(">","")
+                te_name = te_name.replace("/","-")
 
                 mccutils.mkdir(out+"/output/te-depth")
                 highQ = out+"/output/te-depth/"+te_name+".highQ.cov"
