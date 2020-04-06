@@ -8,8 +8,15 @@ def main():
 
     install_path = snakemake.config['paths']['install']+"/tools/"
 
-    command = ["wget", "--no-check-certificate", "https://github.com/bergmanlab/ngs_te_mapper/archive/fb23590200666fe66f1c417c5d5934385cb77ab9.zip", "-O", snakemake.params.zipfile]
-    mccutils.run_command(command, log=snakemake.params.log)
+    download_success = mccutils.download(snakemake.params.url, snakemake.params.zipfile, md5=snakemake.params.md5)
+
+    if not download_success:
+        print("temp download failed... retrying...")
+        download_success = mccutils.download(snakemake.params.url, snakemake.params.zipfile, md5=snakemake.params.md5)
+        if not download_success:
+            print("temp second download attempt failed... exiting...")
+            print("try running --install with --clean for clean installation")
+            sys.exit(1)
 
     command = ["unzip", snakemake.params.zipfile]
     mccutils.run_command(command, log=snakemake.params.log)

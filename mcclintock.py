@@ -6,6 +6,7 @@ import sys
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 import modules.mccutils as mccutils
 import config.config as config
+import config.install as config_install
 import json
 import random
 
@@ -140,6 +141,25 @@ def install(clean=False, debug=False):
         'envs' : mcc_path+"/envs/",
         'log_dir': log_dir
     }
+    
+    data['URLs'] = {
+        'te-locate' : config_install.URL["te-locate"],
+        'retroseq' : config_install.URL["retroseq"],
+        'temp' : config_install.URL["temp"],
+        'relocate' : config_install.URL["relocate"],
+        'ngs_te_mapper' : config_install.URL["ngs_te_mapper"],
+        'popoolationte' : config_install.URL["popoolationte"]
+    }
+
+    data['MD5s'] = {
+        'te-locate' : config_install.MD5['te-locate'],
+        'retroseq' : config_install.MD5['retroseq'],
+        'temp' : config_install.MD5["temp"],
+        'relocate' : config_install.MD5["relocate"],
+        'ngs_te_mapper' : config_install.MD5["ngs_te_mapper"],
+        'popoolationte' : config_install.MD5["popoolationte"]
+    }
+
     with open(install_config,"w") as config:
         json.dump(data, config, indent=4)
 

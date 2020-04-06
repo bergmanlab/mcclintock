@@ -1,6 +1,9 @@
 import os
 import subprocess
 import sys
+import urllib.request
+import hashlib
+import socket
 
 def mkdir(indir, log=None):
     if os.path.isdir(indir) == False:
@@ -104,3 +107,35 @@ def writelog(log, msg):
     if log is not None:
         with open(log, "a") as out:
             out.write(msg)
+
+
+def download(url, out_file, md5=None, timeout=15):
+    socket.setdefaulttimeout(timeout)
+    print("downloading ", url, "to", out_file)
+    try:
+        urllib.request.urlretrieve(url, out_file)
+    
+    except KeyboardInterrupt:
+        sys.exit(1)
+        
+    except:
+        print("download failed...")
+        return False
+
+    print("download complete")
+
+    if md5 == None:
+        return True
+    else:
+        print("checking md5 of ", out_file)
+        with open(out_file,"rb") as out:
+            data = out.read()
+
+            this_md5 = hashlib.md5(data).hexdigest()
+
+            if this_md5 != md5:
+                print("MD5 of", out_file, " : ", this_md5, "does not match currect MD5 hash: ", md5)
+                return False
+            else:
+                print("MD5 hash of ", out_file, "matches")
+                return True

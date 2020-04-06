@@ -8,8 +8,15 @@ def main():
 
     install_path = snakemake.config['paths']['install']+"/tools/"
 
-    command = ["wget", "--no-check-certificate", "http://downloads.sourceforge.net/project/popoolationte/popoolationte_1.02.zip", "-O", snakemake.params.zipfile]
-    mccutils.run_command(command, log=snakemake.params.log)
+    download_success = mccutils.download(snakemake.params.url, snakemake.params.zipfile, md5=snakemake.params.md5)
+
+    if not download_success:
+        print("temp download failed... retrying...")
+        download_success = mccutils.download(snakemake.params.url, snakemake.params.zipfile, md5=snakemake.params.md5)
+        if not download_success:
+            print("temp second download attempt failed... exiting...")
+            print("try running --install with --clean for clean installation")
+            sys.exit(1)
 
     command = ["unzip", snakemake.params.zipfile]
     mccutils.run_command(command, log=snakemake.params.log)
