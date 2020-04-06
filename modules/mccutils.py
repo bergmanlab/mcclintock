@@ -89,6 +89,7 @@ def run_command(cmd_list, log=None):
     else:
         try:
             out = open(log,"a")
+            out.write(" ".join(cmd_list)+"\n")
             subprocess.check_call(cmd_list, stdout=out, stderr=out)
             out.close()
 

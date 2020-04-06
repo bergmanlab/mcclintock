@@ -365,21 +365,29 @@ rule retroseq:
 
 rule TEMP:
     input:
-        config['mcc']['bam'],
-        config['mcc']['ref_2bit'],
-        config['mcc']['formatted_consensus'],
-        config['mcc']['ref_tes_bed'],
-        config['mcc']['formatted_taxonomy'],
-        config['summary']['median_insert_size'],
-        config['mcc']['telocate_te_gff']
+        bam = config['mcc']['bam'],
+        twobit = config['mcc']['ref_2bit'],
+        consensus = config['mcc']['formatted_consensus'],
+        ref_te_bed = config['mcc']['ref_tes_bed'],
+        taxonomy = config['mcc']['formatted_taxonomy'],
+        median_insert_size = config['summary']['median_insert_size'],
+        te_gff = config['mcc']['telocate_te_gff']
+    
+    conda: config['args']['mcc_path']+"/envs/mcc_temp.yml"
+
+    params:
+        log = config['args']['out']+"/logs/TEMP.log",
+        sample = config['args']['sample_name'],
+        scripts_dir = config['args']['mcc_path']+"/install/tools/temp/scripts/",
+        out_dir = config['args']['out']+"/results/TEMP/"
 
     threads: workflow.cores
 
     output:
-        config['args']['out']+"/results/temp/temp.log"
+        config['args']['out']+"/results/TEMP/TEMP.log"
     
-    run:
-        shell("touch "+output[0])
+    script:
+        config['args']['mcc_path']+"/modules/temp.py"
 
 
 
