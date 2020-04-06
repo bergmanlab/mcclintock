@@ -4,14 +4,15 @@ import sys
 import urllib.request
 import hashlib
 import socket
+import shutil
 
 def mkdir(indir, log=None):
     if os.path.isdir(indir) == False:
         os.mkdir(indir)
-    else:
-        msg = "cannot make dir:"+indir+" dir exists...skipping....\n"
-        sys.stderr.write(msg)
-        writelog(log, msg)
+    # else:
+    #     msg = "cannot make dir:"+indir+" dir exists...skipping....\n"
+    #     sys.stderr.write(msg)
+    #     writelog(log, msg)
 
 def get_abs_path(in_file, log=None):
     if os.path.isfile(in_file):
@@ -117,7 +118,7 @@ def download(url, out_file, md5=None, timeout=15):
     
     except KeyboardInterrupt:
         sys.exit(1)
-        
+
     except:
         print("download failed...")
         return False
@@ -139,3 +140,14 @@ def download(url, out_file, md5=None, timeout=15):
             else:
                 print("MD5 hash of ", out_file, "matches")
                 return True
+
+
+def remove(infile):
+    if os.path.exists(infile):
+        try:
+            if os.path.isfile(infile):
+                os.remove(infile)
+            elif os.path.isdir(infile):
+                shutil.rmtree(infile)
+        except OSError as e:
+            print("Error: %s : %s" % (infile, e.strerror))

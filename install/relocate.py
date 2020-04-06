@@ -31,11 +31,8 @@ def main():
 
     command = ["patch", "-i", snakemake.params.patch, install_path+"relocate/scripts/relocaTE_insertionFinder.pl"]    
 
-    command = ["rm", "-r", install_path+"RelocaTE-ce3a2066e15f5c14e2887fdf8dce0485e1750e5b"]
-    mccutils.run_command(command, log=snakemake.params.log)
-
-    command = ["rm", snakemake.params.zipfile]
-    mccutils.run_command(command, log=snakemake.params.log)
+    mccutils.remove(install_path+"RelocaTE-ce3a2066e15f5c14e2887fdf8dce0485e1750e5b")
+    mccutils.remove(snakemake.params.zipfile)
 
     print("relocaTE installation complete")
 

@@ -6,6 +6,7 @@ import modules.mccutils as mccutils
 
 
 def main():
+    print("<PROCESSING> making reference TE bed file")
     with open(snakemake.input[0],"r") as i:
         with open(snakemake.output[0], "w") as o:
             for line in i:

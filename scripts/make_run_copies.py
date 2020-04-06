@@ -6,6 +6,7 @@ import modules.mccutils as mccutils
 
 
 def main():
+    print("<PROCESSING> making run copies of input files")
     te_locations = snakemake.config['in']['locations']
     taxonomy = snakemake.config['in']['taxonomy']
 

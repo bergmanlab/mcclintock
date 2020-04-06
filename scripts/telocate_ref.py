@@ -6,6 +6,7 @@ import modules.mccutils as mccutils
 
 
 def main():
+    print("<PROCESSING> adding fake chromosomes if chrom # < 5, required by TE-locate")
     chromosomes = []
     with open(snakemake.input[0],"r") as infa:
         with open(snakemake.output[0],"w") as outfa:

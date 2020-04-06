@@ -28,11 +28,8 @@ def main():
         command = ["mv", install_path+"RetroSeq-700d4f76a3b996686652866f2b81fefc6f0241e0/"+f, install_path+"retroseq"]
         mccutils.run_command(command, log=snakemake.params.log)
     
-    command = ["rm", "-r", install_path+"RetroSeq-700d4f76a3b996686652866f2b81fefc6f0241e0"]
-    mccutils.run_command(command, log=snakemake.params.log)
-
-    command = ["rm", snakemake.params.zipfile]
-    mccutils.run_command(command, log=snakemake.params.log)
+    mccutils.remove(install_path+"RetroSeq-700d4f76a3b996686652866f2b81fefc6f0241e0")
+    mccutils.remove(snakemake.params.zipfile)
 
     print("RetroSeq installation complete")
 

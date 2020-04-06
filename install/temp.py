@@ -31,11 +31,9 @@ def main():
 
     command = ["patch", "-i", snakemake.params.patch, install_path+"temp/scripts/TEMP_Absence.sh"]    
 
-    command = ["rm", "-r", install_path+"TEMP-d2500b904e2020d6a1075347b398525ede5feae1"]
-    mccutils.run_command(command, log=snakemake.params.log)
 
-    command = ["rm", snakemake.params.zipfile]
-    mccutils.run_command(command, log=snakemake.params.log)
+    mccutils.remove(install_path+"TEMP-d2500b904e2020d6a1075347b398525ede5feae1")
+    mccutils.remove(snakemake.params.zipfile)
 
     print("TEMP installation complete")
 

@@ -7,6 +7,7 @@ import statistics
 
 
 def main():
+    print("<PROCESSING> calculating median insert size of reads...")
     insert_sizes = []
     with open(snakemake.input[0],"r") as sam:
         for line in sam:

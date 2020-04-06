@@ -6,6 +6,7 @@ import modules.mccutils as mccutils
 
 
 def main():
+    print("<PROCESSING> making TE-locate taxonomy file...")
     command = ["perl", snakemake.input.script, snakemake.input.ref_gff, snakemake.input.taxonomy, "Alias"]
     mccutils.run_command(command)
         

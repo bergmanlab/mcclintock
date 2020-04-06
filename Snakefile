@@ -3,6 +3,10 @@ rule setup_reads:
     input:
         config['in']['fq1'],
         config['in']['fq2']
+
+    params:
+        log=config['args']['out']+"/logs/processing.log"
+
     output:
         config['mcc']['fq1'],
         config['mcc']['fq2']
@@ -18,14 +22,15 @@ rule setup_reads:
 rule fix_line_lengths:
     input:
         ref = config['in']['reference'],
-        consensus = config['in']['consensus'],
+        consensus = config['in']['consensus']
 
     params:
-        coverage_fasta = config['in']['coverage_fasta']
+        coverage_fasta = config['in']['coverage_fasta'],
+        log=config['args']['out']+"/logs/processing.log"
 
     output:
         temp(config['mcc']['reference']),
-        temp(config['mcc']['consensus']),
+        config['mcc']['consensus'],
         temp(config['mcc']['coverage_fasta'])
 
     threads: 1
@@ -37,6 +42,9 @@ rule fix_line_lengths:
 
 
 rule make_run_copies:
+    params:
+        log=config['args']['out']+"/logs/processing.log"
+
     output:
         temp(config['mcc']['locations']),
         temp(config['mcc']['taxonomy'])
@@ -56,6 +64,9 @@ rule make_reference_te_files:
         config['mcc']['taxonomy']
     
     threads: workflow.cores
+
+    params:
+        log=config['args']['out']+"/logs/processing.log"
 
     output:
         config['mcc']['masked_fasta'],
@@ -78,6 +89,9 @@ rule index_reference_genome:
     
     threads: 1
 
+    params:
+        log=config['args']['out']+"/logs/processing.log"
+
     conda: config['args']['mcc_path']+"/envs/mcc_processing.yml"
 
     output:
@@ -96,7 +110,8 @@ rule map_reads:
         idx = config['mcc']['augmented_reference']+".bwt"
     
     params:
-        sample=config['args']['sample_name']
+        sample=config['args']['sample_name'],
+        log=config['args']['out']+"/logs/processing.log"
     
     log: config['args']['out']+"/logs/bwa.log"
     
@@ -113,6 +128,9 @@ rule sam_to_bam:
     input:
         sam = config['mcc']['sam'],
         ref_idx = config['mcc']['augmented_reference']+".fai"
+
+    params:
+        log=config['args']['out']+"/logs/processing.log"
     
     threads: workflow.cores
 
@@ -133,6 +151,9 @@ rule make_ref_te_bed:
     
     threads: 1
 
+    params:
+        log=config['args']['out']+"/logs/processing.log"
+
     conda: config['args']['mcc_path']+"/envs/mcc_processing.yml"
 
     output:
@@ -149,6 +170,9 @@ rule telocate_taxonomy:
     
     threads: 1
 
+    params:
+        log=config['args']['out']+"/logs/processing.log"
+
     conda: config['args']['mcc_path']+"/envs/mcc_processing.yml"
 
     output:
@@ -164,6 +188,9 @@ rule median_insert_size:
     
     threads: 1
 
+    params:
+        log=config['args']['out']+"/logs/processing.log"
+
     conda: config['args']['mcc_path']+"/envs/mcc_processing.yml"
 
     output:
@@ -177,6 +204,9 @@ rule telocate_sam:
         config['mcc']['sam']
     
     threads: 1
+
+    params:
+        log=config['args']['out']+"/logs/processing.log"
 
     conda: config['args']['mcc_path']+"/envs/mcc_processing.yml"
     
@@ -192,6 +222,9 @@ rule telocate_ref:
     
     threads: 1
 
+    params:
+        log=config['args']['out']+"/logs/processing.log"
+
     conda: config['args']['mcc_path']+"/envs/mcc_processing.yml"    
 
     output:
@@ -205,6 +238,9 @@ rule reference_2bit:
         config['mcc']['augmented_reference']
     
     threads: 1
+
+    params:
+        log=config['args']['out']+"/logs/processing.log"
 
     conda: config['args']['mcc_path']+"/envs/mcc_processing.yml"
     
@@ -220,6 +256,9 @@ rule relocaTE_consensus:
     
     threads: 1
 
+    params:
+        log=config['args']['out']+"/logs/processing.log"
+
     conda: config['args']['mcc_path']+"/envs/mcc_processing.yml"
 
     output:
@@ -234,6 +273,9 @@ rule relocaTE_ref_gff:
         config['mcc']['formatted_taxonomy']
 
     threads: 1
+
+    params:
+        log=config['args']['out']+"/logs/processing.log"
 
     conda: config['args']['mcc_path']+"/envs/mcc_processing.yml"
 
@@ -251,6 +293,9 @@ rule popoolationTE_ref_fasta:
         config['mcc']['ref_te_fasta']
     
     threads: 1
+
+    params:
+        log=config['args']['out']+"/logs/processing.log"
 
     conda: config['args']['mcc_path']+"/envs/mcc_processing.yml"
 
@@ -270,14 +315,15 @@ rule coverage:
         coverage_fa = config['mcc']['coverage_fasta']
     
     params: 
-        sample=config['args']['sample_name']
+        sample=config['args']['sample_name'],
+        log=config['args']['out']+"/logs/coverage.log"
 
     threads: workflow.cores
 
     conda: config['args']['mcc_path']+"/envs/mcc_coverage.yml"
 
     output:
-        config['args']['out']+"/results/coverage/output/te_depth.csv"
+        config['args']['out']+"/results/coverage/te_depth.csv"
 
     script:
         config['args']['mcc_path']+"/modules/coverage.py"   
@@ -293,10 +339,10 @@ rule telocate:
     threads: 1
 
     output:
-        config['args']['out']+"/te-locate/te-locate.log"
+        config['args']['out']+"/results/te-locate/te-locate.log"
     
     run:
-        shell("touch "+config['args']['out']+"/te-locate/te-locate.log")
+        shell("touch "+config['args']['out']+"/results/te-locate/te-locate.log")
 
 
 rule retroseq:
@@ -310,10 +356,10 @@ rule retroseq:
     threads: 1
     
     output:
-        config['args']['out']+"/retroseq/retroseq.log"
+        config['args']['out']+"/results/retroseq/retroseq.log"
     
     run:
-        shell("touch "+config['args']['out']+"/retroseq/retroseq.log")
+        shell("touch "+config['args']['out']+"/results/retroseq/retroseq.log")
 
 
 
@@ -330,7 +376,7 @@ rule TEMP:
     threads: workflow.cores
 
     output:
-        config['args']['out']+"/temp/temp.log"
+        config['args']['out']+"/results/temp/temp.log"
     
     run:
         shell("touch "+output[0])
@@ -348,7 +394,7 @@ rule relocaTE:
     threads: workflow.cores
 
     output:
-        config['args']['out']+"/relocaTE/relocaTE.log"
+        config['args']['out']+"/results/relocaTE/relocaTE.log"
     
     run:
         shell("touch "+output[0])
@@ -364,7 +410,7 @@ rule ngs_te_mapper:
     threads: workflow.cores
 
     output:
-        config['args']['out']+"/ngs_te_mapper/ngs_te_mapper.log"
+        config['args']['out']+"/results/ngs_te_mapper/ngs_te_mapper.log"
     
     run:
         shell("touch "+output[0])
@@ -381,7 +427,7 @@ rule popoolationTE:
     threads: workflow.cores
 
     output:
-        config['args']['out']+"/popoolationTE/popoolationTE.log"
+        config['args']['out']+"/results/popoolationTE/popoolationTE.log"
 
     run:
         shell("touch "+output[0])

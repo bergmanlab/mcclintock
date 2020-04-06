@@ -19,8 +19,10 @@ def main():
     mcc_out = snakemake.config['args']['out']
     run_id = snakemake.config['args']['run_id']
 
+    print("<PROCESSING> creating reference TE files...")
     # if no reference TEs were provided, they must be found with repeatmasker
     if ref_tes == "None":
+        print("<PROCESSING> no reference TEs provided... finding reference TEs with RepeatMasker...")
         masked_reference, formatted_ref_tes = repeat_mask(reference_fa, consensus_TEs, processors, run_id, mcc_out)
         formatted_consensus_TEs, te_families = format_consensus_tes(consensus_TEs, run_id, mcc_out)
         formatted_taxonomy_tsv, formatted_ref_tes = make_te_taxonomy_map(formatted_ref_tes, te_families, run_id, mcc_out)
@@ -55,10 +57,12 @@ def main():
     mccutils.run_command(["mv", masked_reference, snakemake.output[0]])
     mccutils.run_command(["mv", formatted_ref_tes, snakemake.output[1]])
     mccutils.run_command(["mv", formatted_taxonomy_tsv, snakemake.output[2]])
-    mccutils.run_command(["mv", formatted_consensus_TEs, snakemake.output[3]])
+    mccutils.run_command(["cp", formatted_consensus_TEs, snakemake.output[3]])
     mccutils.run_command(["mv", ref_te_fasta, snakemake.output[4]])
     mccutils.run_command(["mv", augmented_reference, snakemake.output[5]])
     mccutils.run_command(["mv", popoolationTE_tsv, snakemake.output[6]])
+
+    print("<PROCESSING> reference TE files created")
 
 
 

@@ -172,7 +172,8 @@ def install(clean=False, debug=False):
     if clean:
         print("Removing conda envs from: "+conda_env_dir)
         print("Removing installed tools from: "+install_path+"tools")
-        mccutils.run_command(["rm","-r",conda_env_dir, install_path+"/tools"])
+        mccutils.remove(conda_env_dir)
+        mccutils.remove(install_path+"/tools")
 
     mccutils.mkdir(conda_env_dir)
     os.chdir(install_path)
@@ -258,13 +259,13 @@ def make_run_config(args, sample_name, ref_name):
 def run_workflow(args, sample_name, run_id, debug=False):
     log = args.out+"/mcclintock."+str(run_id)+".log"
     out_files = {
-        'coverage': args.out+"/results/coverage/output/te_depth.csv",
-        'ngs_te_mapper': args.out+"/ngs_te_mapper/ngs_te_mapper.log",
-        'relocate': args.out+"/relocaTE/relocaTE.log",
-        'temp': args.out+"/temp/temp.log",
-        'retroseq': args.out+"/retroseq/retroseq.log",
-        'popoolationte': args.out+"/popoolationTE/popoolationTE.log",
-        'te-locate': args.out+"/te-locate/te-locate.log",
+        'coverage': args.out+"/results/coverage/te_depth.csv",
+        'ngs_te_mapper': args.out+"/results/ngs_te_mapper/ngs_te_mapper.log",
+        'relocate': args.out+"/results/relocaTE/relocaTE.log",
+        'temp': args.out+"/results/temp/temp.log",
+        'retroseq': args.out+"/results/retroseq/retroseq.log",
+        'popoolationte': args.out+"/results/popoolationTE/popoolationTE.log",
+        'te-locate': args.out+"/results/te-locate/te-locate.log",
         'trimgalore': args.out+"/input/"+sample_name+"_1.fastq"
     }
 
@@ -286,7 +287,7 @@ def run_workflow(args, sample_name, run_id, debug=False):
     if args.clean:
         clean_command = command + ["--delete-all-output"]
         mccutils.run_command(clean_command)
-        mccutils.run_command(["rm","-r",args.out+"/input"])
+        mccutils.remove(args.out+"/input")
 
     print(" ".join(command))
     mccutils.run_command(command)

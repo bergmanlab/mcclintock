@@ -6,6 +6,7 @@ import modules.mccutils as mccutils
 
 
 def main():
+    print("<PROCESSING> Converting sam to bam")
     command = ["samtools","view", "-@", str(snakemake.threads), "-Sb", "-t", snakemake.input.ref_idx, snakemake.input.sam]
     mccutils.run_command_stdout(command, snakemake.output.tmp_bam)
 

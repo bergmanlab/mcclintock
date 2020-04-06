@@ -30,11 +30,9 @@ def main():
     command = ["patch", "-i", snakemake.params.patch3, install_path+"popoolationte/samro.pl"]
     command = ["patch", "-i", snakemake.params.patch4, install_path+"popoolationte/identify-te-insertsites.pl"]
 
-    command = ["rm", snakemake.params.zipfile]
-    mccutils.run_command(command, log=snakemake.params.log)
 
-    command = ["rm", "-r", snakemake.config['paths']['install']+"popoolationte"]
-    mccutils.run_command(command, log=snakemake.params.log)
+    mccutils.remove(snakemake.params.zipfile)
+    mccutils.remove(snakemake.config['paths']['install']+"popoolationte")
 
     print("popoolationTE installation complete")
 

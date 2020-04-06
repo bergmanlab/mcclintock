@@ -28,11 +28,10 @@ def main():
         command = ["mv", install_path+"ngs_te_mapper-fb23590200666fe66f1c417c5d5934385cb77ab9/"+f, install_path+"ngs_te_mapper"]
         mccutils.run_command(command, log=snakemake.params.log)  
 
-    command = ["rm", "-r", install_path+"ngs_te_mapper-fb23590200666fe66f1c417c5d5934385cb77ab9"]
-    mccutils.run_command(command, log=snakemake.params.log)
 
-    command = ["rm", snakemake.params.zipfile]
-    mccutils.run_command(command, log=snakemake.params.log)
+    mccutils.remove(install_path+"ngs_te_mapper-fb23590200666fe66f1c417c5d5934385cb77ab9")
+    mccutils.remove(snakemake.params.zipfile)
+
 
     print("ngs_te_mapper installation complete")
 

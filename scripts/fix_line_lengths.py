@@ -8,7 +8,7 @@ import modules.mccutils as mccutils
 
 
 def main():
-    print("running rule: fix_line_lengths")
+    print("<PROCESSING> running rule: fix_line_lengths")
     length = 80
 
     fasta1 = snakemake.input[0]
@@ -26,7 +26,7 @@ def main():
         lines = fix_fasta.fix_fasta_lines(fasta3, length)
         write_fasta(lines, snakemake.output[2])
     
-    print("rule: fix_line_lengths Complete")
+    print("<PROCESSING> rule: fix_line_lengths Complete")
         
 
 

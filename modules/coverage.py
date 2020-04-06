@@ -17,39 +17,41 @@ def main():
     coverage_out = snakemake.config["args"]['out']+"/results/coverage/"
     run_id = snakemake.config['args']['run_id']
     te_seqs = snakemake.input.consensus
+    log = snakemake.params.log
     if snakemake.config['in']['coverage_fasta'] != "None":
         te_seqs = snakemake.input.coverage_fa
     
     mccutils.mkdir(coverage_out+"/input")
     te_seqs = format_consensus_fasta(te_seqs, run_id, coverage_out)
-    masked_reference, masked_gff = repeatmask_genome(snakemake.input.ref, te_seqs, snakemake.threads, run_id, coverage_out)
+    masked_reference, masked_gff = repeatmask_genome(snakemake.input.ref, te_seqs, snakemake.threads, run_id, coverage_out, log)
     augmented_reference = augment_genome(masked_reference, te_seqs, run_id, coverage_out)
-    index_genome(snakemake.input.ref)
-    index_genome(augmented_reference)
+    index_genome(snakemake.input.ref, log)
+    index_genome(augmented_reference, log)
     
     if snakemake.config['in']['fq2'] == "None":
-        sam = map_reads(augmented_reference, snakemake.input.fq1, snakemake.threads, snakemake.params.sample, run_id, coverage_out)
+        sam = map_reads(augmented_reference, snakemake.input.fq1, snakemake.threads, snakemake.params.sample, run_id, coverage_out, log)
     else:
-        sam = map_reads(augmented_reference, snakemake.input.fq1, snakemake.threads, snakemake.params.sample, run_id, coverage_out, fq2=snakemake.input.fq2)
+        sam = map_reads(augmented_reference, snakemake.input.fq1, snakemake.threads, snakemake.params.sample, run_id, coverage_out, log, fq2=snakemake.input.fq2)
 
-    bam = sam_to_bam(sam, augmented_reference, snakemake.params.sample, snakemake.threads, run_id, coverage_out)
+    bam = sam_to_bam(sam, augmented_reference, snakemake.params.sample, snakemake.threads, run_id, coverage_out, log)
 
-    nonte_bed = make_nonte_bed(snakemake.input.ref, augmented_reference, masked_gff, run_id, coverage_out)
+    nonte_bed = make_nonte_bed(snakemake.input.ref, augmented_reference, masked_gff, run_id, coverage_out, log)
 
-    genome_depth = get_genome_depth(nonte_bed, bam, run_id, coverage_out)
+    genome_depth = get_genome_depth(nonte_bed, bam, run_id, coverage_out, log)
 
-    te_names, all_coverage_files, uniq_coverage_files, avg_norm_te_depths = make_depth_table(te_seqs, bam, genome_depth, run_id, coverage_out)
+    te_names, all_coverage_files, uniq_coverage_files, avg_norm_te_depths = make_depth_table(te_seqs, bam, genome_depth, run_id, coverage_out, log)
 
     make_plots(te_names, all_coverage_files, uniq_coverage_files, avg_norm_te_depths, genome_depth, snakemake.params.sample, coverage_out)
 
 
-def repeatmask_genome(reference, lib, threads, run_id, out):
+def repeatmask_genome(reference, lib, threads, run_id, out, log):
+    print("<COVERAGE> Running RepeatMasker...")
     outdir = out+"/input/repeatmasker_"+run_id
     mccutils.mkdir(outdir)
     os.chdir(outdir)
 
     command = ["RepeatMasker","-pa", str(threads), "-lib", lib, "-dir", outdir, "-s", "-gff", "-nolow", "-no_is", reference]
-    mccutils.run_command(command)
+    mccutils.run_command(command, log=log)
 
     ref_name = os.path.basename(reference)
     masked_fasta = outdir+"/"+ref_name+".masked"
@@ -59,6 +61,7 @@ def repeatmask_genome(reference, lib, threads, run_id, out):
 
 
 def augment_genome(fasta1, fasta2, run_id, out):
+    print("<COVERAGE> Augmenting reference genome")
     augmented_genome = out+"/input/"+run_id+"_augmented_reference.fasta"
     lines = []
     with open(fasta1,"r") as fa1:
@@ -75,11 +78,13 @@ def augment_genome(fasta1, fasta2, run_id, out):
     
     return augmented_genome
 
-def index_genome(fasta):
-    mccutils.run_command(["samtools", "faidx", fasta])
-    mccutils.run_command(["bwa", "index", fasta])
+def index_genome(fasta, log):
+    print("<COVERAGE> samtools and bwa indexing", fasta)
+    mccutils.run_command(["samtools", "faidx", fasta], log=log)
+    mccutils.run_command(["bwa", "index", fasta], log=log)
 
 def format_consensus_fasta(te_seqs, run_id, out):
+    print("<COVERAGE> Removing special characters from TE sequence fasta headers...")
     special_chars = [";","&","(",")","|","*","?","[","]","~","{","}","<","!","^",'"',"'","\\","$","/"]
     # removes any special characters from TE names
     formatted_fasta = out+"/input/formattedTEsequences_"+run_id+".fasta"
@@ -94,39 +99,42 @@ def format_consensus_fasta(te_seqs, run_id, out):
     return formatted_fasta
 
 
-def map_reads(reference, fq1, threads, sample_name, run_id, out, fq2=None):
+def map_reads(reference, fq1, threads, sample_name, run_id, out, log, fq2=None):
+    print("<COVERAGE> Mapping reads to augmented reference genome...")
     command = ["bwa", "mem", "-t", str(threads), "-R", "@RG\\tID:"+sample_name+"\\tSM:"+sample_name, reference, fq1]
 
     if fq2 is not None:
         command.append(fq2)
     
     sam = out+"/input/"+run_id+"_"+sample_name+".sam"
-    mccutils.run_command_stdout(command, sam)
+    mccutils.run_command_stdout(command, sam, log=log)
 
     return sam
 
-def sam_to_bam(sam, reference, sample_name, threads, run_id, out):
+def sam_to_bam(sam, reference, sample_name, threads, run_id, out, log):
+    print("<COVERAGE> converting SAM to BAM, and indexing...")
     threads = str(threads)
     tmp_bam = out+"/input/"+run_id+"_tmp.bam"
     command = ["samtools", "view", "-Sb", "-@", threads, "-t", reference+".fai", sam]
-    mccutils.run_command_stdout(command, tmp_bam)
+    mccutils.run_command_stdout(command, tmp_bam, log=log)
 
     sorted_bam = out+"/input/"+run_id+"_"+sample_name+".bam"
     command = ["samtools", "sort", "-@", threads, tmp_bam]
-    mccutils.run_command_stdout(command, sorted_bam)
+    mccutils.run_command_stdout(command, sorted_bam, log=log)
 
-    mccutils.run_command(["samtools", "index", sorted_bam])
+    mccutils.run_command(["samtools", "index", sorted_bam], log=log)
 
-    mccutils.run_command(["rm", tmp_bam])
+    mccutils.remove(tmp_bam)
 
     return sorted_bam
 
-def make_nonte_bed(reference, augmented_reference, masked_gff, run_id, out):
+def make_nonte_bed(reference, augmented_reference, masked_gff, run_id, out, log):
+    print("<COVERAGE> creating BED file of non-TE regions...")
     masked_bed = out+"/input/"+run_id+"_ref_tes.bed"
     repeatmasker_gff_to_bed(masked_gff, masked_bed)
 
     sorted_bed = out+"/input/"+run_id+"_ref_tes_sorted.bed"
-    mccutils.run_command_stdout(["bedtools", "sort", "-i", masked_bed], sorted_bed)
+    mccutils.run_command_stdout(["bedtools", "sort", "-i", masked_bed], sorted_bed, log=log)
 
     chromosome_names = []
     with open(reference, "r") as fa:
@@ -144,16 +152,17 @@ def make_nonte_bed(reference, augmented_reference, masked_gff, run_id, out):
     
     non_te_bed = out+"/input/"+run_id+"_ref_nonte.bed"
     command = ["bedtools", "complement", "-i", sorted_bed, "-g", chrom_idx]
-    mccutils.run_command_stdout(command, non_te_bed)
+    mccutils.run_command_stdout(command, non_te_bed, log=log)
 
-
-    mccutils.run_command(["rm", masked_bed, sorted_bed, chrom_idx])
+    for f in [masked_bed, sorted_bed, chrom_idx]:
+        mccutils.remove(f)
 
     return non_te_bed
 
 
 
 def repeatmasker_gff_to_bed(gff, bed):
+    print("<COVERAGE> Converting repeatmasker GFF to BED...")
     with open(gff,"r") as ingff:
         with open(bed, "w") as outbed:
             for line in ingff:
@@ -169,14 +178,15 @@ def repeatmasker_gff_to_bed(gff, bed):
                     outbed.write(out_line+"\n")
 
 
-def get_genome_depth(non_te_bed, bam, run_id, out):
+def get_genome_depth(non_te_bed, bam, run_id, out, log):
+    print("<COVERAGE> determining the coverage depth of the genome...")
     depth_file = out+"/input/"+run_id+"genome.depth"
     command = ["samtools", "depth", "-aa", "-b", non_te_bed, bam, "-d", "0"]
-    mccutils.run_command_stdout(command, depth_file)
+    mccutils.run_command_stdout(command, depth_file, log=log)
 
     genome_depth = get_avg_depth(depth_file)
 
-    mccutils.run_command(["rm", depth_file])
+    mccutils.remove(depth_file)
 
     return genome_depth
 
@@ -196,8 +206,9 @@ def get_avg_depth(depth_file):
 
     return avg_depth
 
-def make_depth_table(te_fasta, bam, genome_depth, run_id, out):
-    depth_csv = out+"/output/te_depth.csv"
+def make_depth_table(te_fasta, bam, genome_depth, run_id, out, log):
+    print("<COVERAGE> Creating TE depth coverage table...")
+    depth_csv = out+"/te_depth.csv"
     with open(depth_csv, "w") as table:
             table.write("TE-Family,Normalized-Depth"+"\n")
     
@@ -212,14 +223,14 @@ def make_depth_table(te_fasta, bam, genome_depth, run_id, out):
                 te_name = line.replace("\n","")
                 te_name = te_name.replace(">","")
 
-                mccutils.mkdir(out+"/output/te-depth")
-                highQ = out+"/output/te-depth/"+te_name+".highQ.cov"
+                mccutils.mkdir(out+"/te-depth-files")
+                highQ = out+"/te-depth-files/"+te_name+".highQ.cov"
                 command = ["samtools", "depth", "-aa", "-r", te_name, bam, "-d", "0", "-Q", "1"]
-                mccutils.run_command_stdout(command, highQ)
+                mccutils.run_command_stdout(command, highQ, log=log)
 
-                allQ = out+"/output/te-depth/"+te_name+".allQ.cov"
+                allQ = out+"/te-depth-files/"+te_name+".allQ.cov"
                 command = ["samtools", "depth", "-aa", "-r", te_name, bam, "-d", "0", "-Q", "0"]
-                mccutils.run_command_stdout(command, allQ)
+                mccutils.run_command_stdout(command, allQ, log=log)
 
                 avg_depth = get_avg_depth(allQ)
                 avg_norm_depth = avg_depth/genome_depth
@@ -236,6 +247,8 @@ def make_depth_table(te_fasta, bam, genome_depth, run_id, out):
 
 
 def make_plots(te_names, all_coverage_files, uniq_coverage_files, avg_norm_te_depths, genome_depth, sample_name, out):
+    print("<COVERAGE> Creating TE coverage plots...")
+    mccutils.mkdir(out+"/plots")
     for x, te_name in enumerate(te_names):
         chrom, all_pos, all_cov = read_samtools_depth_file(all_coverage_files[x])
         chrom2, uniq_pos, uniq_cov = read_samtools_depth_file(uniq_coverage_files[x])
@@ -243,9 +256,10 @@ def make_plots(te_names, all_coverage_files, uniq_coverage_files, avg_norm_te_de
         plot_height = 3
         plot_width = 10
         hline = avg_norm_te_depths[x]
-        output = out+"/output/"+te_name+".png"
+        output = out+"plots/"+te_name+".png"
         plot = plot_coverage(chrom, all_pos, all_cov, uniq_pos, uniq_cov, sample_name, plot_height, plot_width, genome_depth, hline)
         plot.savefig(output, bbox_inches="tight")
+        print("<COVERAGE> plot created:", output)
 
 
 

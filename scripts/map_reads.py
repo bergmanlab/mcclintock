@@ -6,6 +6,7 @@ import modules.mccutils as mccutils
 
 
 def main():
+    print("<PROCESSING> mapping reads to reference")
     command = ["bwa","mem"]
     if eval(snakemake.config['args']['save_comments']):
         command.append("-C")
@@ -16,6 +17,7 @@ def main():
         command.append(snakemake.input.fq2)
     
     mccutils.run_command_stdout(command, snakemake.output[0], log=snakemake.log[0])
+    print("<PROCESSING> read mapping complete")
         
 
 
