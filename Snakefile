@@ -363,32 +363,57 @@ rule retroseq:
 
 
 
-rule TEMP:
+rule run_temp:
     input:
+        config['args']['mcc_path']+"/config/temp_run.py",
         bam = config['mcc']['bam'],
         twobit = config['mcc']['ref_2bit'],
         consensus = config['mcc']['formatted_consensus'],
         ref_te_bed = config['mcc']['ref_tes_bed'],
         taxonomy = config['mcc']['formatted_taxonomy'],
-        median_insert_size = config['summary']['median_insert_size'],
+        median_insert_size = config['summary']['median_insert_size']
+        
+    
+    conda: config['args']['mcc_path']+"/envs/mcc_temp.yml"
+
+    params:
+        log = config['args']['out']+"/logs/TEMP.log",
+        scripts_dir = config['args']['mcc_path']+"/install/tools/temp/scripts/",
+        out_dir = config['args']['out']+"/results/TEMP/raw/",
+        sample_name = config['args']['sample_name']
+
+    threads: workflow.cores
+
+    output:
+        config['args']['out']+"/results/TEMP/raw/"+config['args']['sample_name']+".insertion.refined.bp.summary",
+        config['args']['out']+"/results/TEMP/raw/"+config['args']['sample_name']+".absence.refined.bp.summary"
+    
+    script:
+        config['args']['mcc_path']+"/modules/temp_run.py"
+
+rule process_temp:
+    input:
+        config['args']['mcc_path']+"/config/temp_post.py",
+        insert_summary = config['args']['out']+"/results/TEMP/raw/"+config['args']['sample_name']+".insertion.refined.bp.summary",
+        absence_summary = config['args']['out']+"/results/TEMP/raw/"+config['args']['sample_name']+".absence.refined.bp.summary",
         te_gff = config['mcc']['telocate_te_gff']
     
     conda: config['args']['mcc_path']+"/envs/mcc_temp.yml"
 
     params:
         log = config['args']['out']+"/logs/TEMP.log",
-        sample = config['args']['sample_name'],
-        scripts_dir = config['args']['mcc_path']+"/install/tools/temp/scripts/",
-        out_dir = config['args']['out']+"/results/TEMP/"
+        out_dir = config['args']['out']+"/results/TEMP/",
+        sample_name = config['args']['sample_name']
 
     threads: workflow.cores
 
     output:
-        config['args']['out']+"/results/TEMP/TEMP.log"
+        config['args']['out']+"/results/TEMP/"+config['args']['sample_name']+"_temp_raw.bed",
+        config['args']['out']+"/results/TEMP/"+config['args']['sample_name']+"_temp_redundant.bed",
+        config['args']['out']+"/results/TEMP/"+config['args']['sample_name']+"_temp_nonredundant.bed"
     
     script:
-        config['args']['mcc_path']+"/modules/temp.py"
-
+        config['args']['mcc_path']+"/modules/temp_post.py"
 
 
 rule relocaTE:

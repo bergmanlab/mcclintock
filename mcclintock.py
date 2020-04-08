@@ -256,13 +256,14 @@ def make_run_config(args, sample_name, ref_name):
     
     return run_id
 
+
 def run_workflow(args, sample_name, run_id, debug=False):
     log = args.out+"/mcclintock."+str(run_id)+".log"
     out_files = {
         'coverage': args.out+"/results/coverage/te_depth.csv",
         'ngs_te_mapper': args.out+"/results/ngs_te_mapper/ngs_te_mapper.log",
         'relocate': args.out+"/results/relocaTE/relocaTE.log",
-        'temp': args.out+"/results/TEMP/TEMP.log",
+        'temp': args.out+"/results/TEMP/"+sample_name+"_temp_nonredundant.bed",
         'retroseq': args.out+"/results/retroseq/retroseq.log",
         'popoolationte': args.out+"/results/popoolationTE/popoolationTE.log",
         'te-locate': args.out+"/results/te-locate/te-locate.log",
