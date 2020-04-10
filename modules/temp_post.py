@@ -135,7 +135,7 @@ def get_non_absent_ref_tes(te_gff, absence_bed, sample, out, log):
                 insert.start = int(split_line[3])-1
                 insert.end = int(split_line[4])
                 insert.support = "!"
-                insert.name = split_line[9]+"_reference_"+sample+"_temp_nonab_"
+                insert.name = split_line[9].split("=")[1]+"_reference_"+sample+"_temp_nonab_"
                 insert.direction = split_line[6]
                 insert.classification = "!"
                 insert.junction1Support = "!"
@@ -235,15 +235,18 @@ def make_nonredundant_bed(insertions, sample, out, log, acceptable_classes=["1p1
     # collapsing all insterts that share the same chromosome and end position (and pass thresholds)
     for insert in insertions:
         if insert.type == "reference" or (insert.classification in acceptable_classes and insert.frequency > frequency_theshold):
-            key = insert.chromosome+"_"+str(insert.end)
+            if insert.type == "reference":
+                # reference TEs are only considered 'redundant' if they share the same start and end
+                key = insert.chromosome+"_"+str(insert.start)+"_"+str(insert.end)
+            else:
+                key = insert.chromosome+"_"+str(insert.end)
+
             if key not in collaped_insertions.keys():
                 collaped_insertions[key] = []
 
             collaped_insertions[key].append(insert)
     
     with open(unsorted_nonredundant_bed, "w") as bed:
-        header = 'track name="%s_TEMP" description="%s_TEMP"' % (sample, sample)
-        bed.write(header+"\n")
         for key in collaped_insertions.keys():
             highest_supported_insert = None
             for x, insert in enumerate(collaped_insertions[key]):
@@ -256,11 +259,20 @@ def make_nonredundant_bed(insertions, sample, out, log, acceptable_classes=["1p1
             line = "\t".join([highest_supported_insert.chromosome, str(highest_supported_insert.start), str(highest_supported_insert.end), highest_supported_insert.name, "0", highest_supported_insert.direction])
             bed.write(line+"\n")
 
-    nonredundant_bed = out+"/"+sample+"_temp_nonredundant.bed"
+    tmp_bed = out+"/"+sample+"_temp_nonredundant.bed.tmp"
 
     command = ["bedtools", "sort", "-i", unsorted_nonredundant_bed]
-    mccutils.run_command_stdout(command, nonredundant_bed, log=log)
+    mccutils.run_command_stdout(command, tmp_bed, log=log)
 
+    nonredundant_bed = out+"/"+sample+"_temp_nonredundant.bed"
+    with open(nonredundant_bed,"w") as outbed:
+        with open(tmp_bed, "r") as inbed:
+            header = 'track name="%s_TEMP" description="%s_TEMP"' % (sample, sample)
+            outbed.write(header+"\n")
+            for line in inbed:
+                outbed.write(line)
+
+    mccutils.remove(tmp_bed)
     mccutils.remove(unsorted_nonredundant_bed)
 
 

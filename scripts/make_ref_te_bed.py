@@ -11,7 +11,8 @@ def main():
         with open(snakemake.output[0], "w") as o:
             for line in i:
                 split_line = line.replace(";","\t").split("\t")
-                line = "\t".join([split_line[0], str(int(split_line[3])-1), split_line[4], split_line[9], ".", split_line[6]])
+                name = split_line[9].split("=")[1]
+                line = "\t".join([split_line[0], str(int(split_line[3])-1), split_line[4], name, ".", split_line[6]])
                 o.write(line+"\n")
         
 
