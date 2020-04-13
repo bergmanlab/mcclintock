@@ -5,7 +5,7 @@ import sys
 import subprocess
 sys.path.append(snakemake.config['args']['mcc_path'])
 import modules.mccutils as mccutils
-import config.trimgalore as trimgalore
+import config.preprocessing.trimgalore as trimgalore
 
 
 def main():

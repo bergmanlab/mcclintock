@@ -6,7 +6,7 @@ import sys
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 import modules.mccutils as mccutils
 import config.config as config
-import config.install as config_install
+import config.install.install as config_install
 import json
 import random
 
@@ -185,8 +185,9 @@ def install(clean=False, debug=False):
 
 def make_run_config(args, sample_name, ref_name):
     run_id = random.randint(1000000,9999999)
-    mccutils.mkdir(args.out+"/config")
-    run_config = args.out+"/config/config_"+str(run_id)+".json"
+    mccutils.mkdir(args.out+"/snakemake")
+    mccutils.mkdir(args.out+"/snakemake/config")
+    run_config = args.out+"/snakemake/config/config_"+str(run_id)+".json"
     data = {}
     data['args'] = {
         'proc': str(args.proc),
@@ -214,7 +215,7 @@ def make_run_config(args, sample_name, ref_name):
     }
 
     # where mcc copies will be stored
-    input_dir = args.out+"/input/"
+    input_dir = args.out+"/method_input/"
     data["mcc"] = {
         'mcc_files' : input_dir,
         'reference' : input_dir+ref_name+".fasta",
@@ -261,7 +262,7 @@ def run_workflow(args, sample_name, run_id, debug=False):
     log = args.out+"/mcclintock."+str(run_id)+".log"
     out_files = {
         'coverage': args.out+"/results/coverage/te_depth.csv",
-        'ngs_te_mapper': args.out+"/results/ngs_te_mapper/ngs_te_mapper.log",
+        'ngs_te_mapper': args.out+"/results/ngs_te_mapper/"+sample_name+"_ngs_te_mapper_nonredundant.bed",
         'relocate': args.out+"/results/relocaTE/relocaTE.log",
         'temp': args.out+"/results/TEMP/"+sample_name+"_temp_nonredundant.bed",
         'retroseq': args.out+"/results/retroseq/retroseq.log",
@@ -283,7 +284,7 @@ def run_workflow(args, sample_name, run_id, debug=False):
     for method in args.methods:
         command.append(out_files[method])
 
-    command += ["--configfile", args.out+"/config/config_"+str(run_id)+".json"]
+    command += ["--configfile", args.out+"/snakemake/config/config_"+str(run_id)+".json"]
     command += ["--cores", str(args.proc)]
     if args.clean:
         clean_command = command + ["--delete-all-output"]
@@ -292,6 +293,7 @@ def run_workflow(args, sample_name, run_id, debug=False):
 
     print(" ".join(command))
     mccutils.run_command(command)
+    mccutils.remove(args.out+"/tmp")
 
 
 if __name__ == "__main__":                

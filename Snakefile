@@ -326,7 +326,7 @@ rule coverage:
         config['args']['out']+"/results/coverage/te_depth.csv"
 
     script:
-        config['args']['mcc_path']+"/modules/coverage.py"   
+        config['args']['mcc_path']+"/modules/coverage/coverage.py"   
 
 
 rule telocate:
@@ -365,7 +365,7 @@ rule retroseq:
 
 rule run_temp:
     input:
-        config['args']['mcc_path']+"/config/temp_run.py",
+        config['args']['mcc_path']+"/config/TEMP/temp_run.py",
         bam = config['mcc']['bam'],
         twobit = config['mcc']['ref_2bit'],
         consensus = config['mcc']['formatted_consensus'],
@@ -379,23 +379,23 @@ rule run_temp:
     params:
         log = config['args']['out']+"/logs/TEMP.log",
         scripts_dir = config['args']['mcc_path']+"/install/tools/temp/scripts/",
-        out_dir = config['args']['out']+"/results/TEMP/raw/",
+        out_dir = config['args']['out']+"/results/TEMP/unfiltered/",
         sample_name = config['args']['sample_name']
 
     threads: workflow.cores
 
     output:
-        config['args']['out']+"/results/TEMP/raw/"+config['args']['sample_name']+".insertion.refined.bp.summary",
-        config['args']['out']+"/results/TEMP/raw/"+config['args']['sample_name']+".absence.refined.bp.summary"
+        config['args']['out']+"/results/TEMP/unfiltered/"+config['args']['sample_name']+".insertion.refined.bp.summary",
+        config['args']['out']+"/results/TEMP/unfiltered/"+config['args']['sample_name']+".absence.refined.bp.summary"
     
     script:
-        config['args']['mcc_path']+"/modules/temp_run.py"
+        config['args']['mcc_path']+"/modules/TEMP/temp_run.py"
 
 rule process_temp:
     input:
-        config['args']['mcc_path']+"/config/temp_post.py",
-        insert_summary = config['args']['out']+"/results/TEMP/raw/"+config['args']['sample_name']+".insertion.refined.bp.summary",
-        absence_summary = config['args']['out']+"/results/TEMP/raw/"+config['args']['sample_name']+".absence.refined.bp.summary",
+        config['args']['mcc_path']+"/config/TEMP/temp_post.py",
+        insert_summary = config['args']['out']+"/results/TEMP/unfiltered/"+config['args']['sample_name']+".insertion.refined.bp.summary",
+        absence_summary = config['args']['out']+"/results/TEMP/unfiltered/"+config['args']['sample_name']+".absence.refined.bp.summary",
         te_gff = config['mcc']['telocate_te_gff']
     
     conda: config['args']['mcc_path']+"/envs/mcc_temp.yml"
@@ -413,7 +413,7 @@ rule process_temp:
         config['args']['out']+"/results/TEMP/"+config['args']['sample_name']+"_temp_nonredundant.bed"
     
     script:
-        config['args']['mcc_path']+"/modules/temp_post.py"
+        config['args']['mcc_path']+"/modules/TEMP/temp_post.py"
 
 
 rule relocaTE:
@@ -435,18 +435,27 @@ rule relocaTE:
 
 rule ngs_te_mapper:
     input:
-        config['mcc']['formatted_consensus'],
-        config['mcc']['augmented_reference'],
-        config['mcc']['fq1'],
-        config['mcc']['fq2']
+        consensus_fasta = config['mcc']['formatted_consensus'],
+        reference_fasta = config['mcc']['augmented_reference'],
+        fastq1 = config['mcc']['fq1'],
+        fastq2 = config['mcc']['fq2']
+
+    params:
+        raw_fq2 = config['in']['fq2'],
+        out_dir = config['args']['out']+"/results/ngs_te_mapper/",
+        script_dir = config['args']['mcc_path']+"/install/tools/ngs_te_mapper/sourceCode/",
+        log = config['args']['out']+"/logs/ngs_te_mapper.log",
+        sample_name = config['args']['sample_name']
     
     threads: workflow.cores
 
+    conda: config['args']['mcc_path']+"/envs/mcc_ngs_te_mapper.yml"
+
     output:
-        config['args']['out']+"/results/ngs_te_mapper/ngs_te_mapper.log"
+        config['args']['out']+"/results/ngs_te_mapper/"+config['args']['sample_name']+"_ngs_te_mapper_nonredundant.bed"
     
-    run:
-        shell("touch "+output[0])
+    script:
+        config['args']['mcc_path']+"/modules/ngs_te_mapper/ngs_te_mapper.py"
         
 
 rule popoolationTE:

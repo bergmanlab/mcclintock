@@ -760,3 +760,173 @@ ce3a2066e15f5c14e2887fdf8dce0485e1750e5b
   inflating: RelocaTE-ce3a2066e15f5c14e2887fdf8dce0485e1750e5b/scripts/sam2bam.pl  
   inflating: RelocaTE-ce3a2066e15f5c14e2887fdf8dce0485e1750e5b/scripts/sam2fq.pl  
   inflating: RelocaTE-ce3a2066e15f5c14e2887fdf8dce0485e1750e5b/scripts/splitSam_byTarget.pl  
+Archive:  /home/pjb68507/git/mcclintock/install/tools/retroseq/retroseq.zip
+700d4f76a3b996686652866f2b81fefc6f0241e0
+   creating: RetroSeq-700d4f76a3b996686652866f2b81fefc6f0241e0/
+  inflating: RetroSeq-700d4f76a3b996686652866f2b81fefc6f0241e0/README.md  
+   creating: RetroSeq-700d4f76a3b996686652866f2b81fefc6f0241e0/RetroSeq/
+  inflating: RetroSeq-700d4f76a3b996686652866f2b81fefc6f0241e0/RetroSeq/Utilities.pm  
+  inflating: RetroSeq-700d4f76a3b996686652866f2b81fefc6f0241e0/RetroSeq/Vcf.pm  
+   creating: RetroSeq-700d4f76a3b996686652866f2b81fefc6f0241e0/bin/
+  inflating: RetroSeq-700d4f76a3b996686652866f2b81fefc6f0241e0/bin/retroseq.pl  
+unzip /home/pjb68507/git/mcclintock/install/tools/retroseq/retroseq.zip
+mv /home/pjb68507/git/mcclintock/install/RetroSeq-700d4f76a3b996686652866f2b81fefc6f0241e0 /home/pjb68507/git/mcclintock/install//tools/
+mv /home/pjb68507/git/mcclintock/install//tools/RetroSeq-700d4f76a3b996686652866f2b81fefc6f0241e0/RetroSeq /home/pjb68507/git/mcclintock/install//tools/retroseq
+mv /home/pjb68507/git/mcclintock/install//tools/RetroSeq-700d4f76a3b996686652866f2b81fefc6f0241e0/README.md /home/pjb68507/git/mcclintock/install//tools/retroseq
+mv /home/pjb68507/git/mcclintock/install//tools/RetroSeq-700d4f76a3b996686652866f2b81fefc6f0241e0/bin /home/pjb68507/git/mcclintock/install//tools/retroseq
+Archive:  /home/pjb68507/git/mcclintock/install/tools/ngs_te_mapper/ngs_te_mapper.zip
+fb23590200666fe66f1c417c5d5934385cb77ab9
+   creating: ngs_te_mapper-fb23590200666fe66f1c417c5d5934385cb77ab9/
+ extracting: ngs_te_mapper-fb23590200666fe66f1c417c5d5934385cb77ab9/.gitignore  
+  inflating: ngs_te_mapper-fb23590200666fe66f1c417c5d5934385cb77ab9/.project  
+  inflating: ngs_te_mapper-fb23590200666fe66f1c417c5d5934385cb77ab9/CITATION  
+  inflating: ngs_te_mapper-fb23590200666fe66f1c417c5d5934385cb77ab9/LICENSE  
+  inflating: ngs_te_mapper-fb23590200666fe66f1c417c5d5934385cb77ab9/README.md  
+  inflating: ngs_te_mapper-fb23590200666fe66f1c417c5d5934385cb77ab9/expectedBedFile.bed  
+   creating: ngs_te_mapper-fb23590200666fe66f1c417c5d5934385cb77ab9/img/
+  inflating: ngs_te_mapper-fb23590200666fe66f1c417c5d5934385cb77ab9/img/journal.pone.0030008.g001.jpg  
+   creating: ngs_te_mapper-fb23590200666fe66f1c417c5d5934385cb77ab9/sourceCode/
+  inflating: ngs_te_mapper-fb23590200666fe66f1c417c5d5934385cb77ab9/sourceCode/ngs_te_logo.R  
+  inflating: ngs_te_mapper-fb23590200666fe66f1c417c5d5934385cb77ab9/sourceCode/ngs_te_mapper.R  
+  inflating: ngs_te_mapper-fb23590200666fe66f1c417c5d5934385cb77ab9/sourceCode/ngs_te_mapper_functions.R  
+  inflating: ngs_te_mapper-fb23590200666fe66f1c417c5d5934385cb77ab9/sourceCode/run_ngs_te_mapper.sh  
+unzip /home/pjb68507/git/mcclintock/install/tools/ngs_te_mapper/ngs_te_mapper.zip
+mv /home/pjb68507/git/mcclintock/install/ngs_te_mapper-fb23590200666fe66f1c417c5d5934385cb77ab9 /home/pjb68507/git/mcclintock/install//tools/
+mv /home/pjb68507/git/mcclintock/install//tools/ngs_te_mapper-fb23590200666fe66f1c417c5d5934385cb77ab9/.project /home/pjb68507/git/mcclintock/install//tools/ngs_te_mapper
+mv /home/pjb68507/git/mcclintock/install//tools/ngs_te_mapper-fb23590200666fe66f1c417c5d5934385cb77ab9/.gitignore /home/pjb68507/git/mcclintock/install//tools/ngs_te_mapper
+mv /home/pjb68507/git/mcclintock/install//tools/ngs_te_mapper-fb23590200666fe66f1c417c5d5934385cb77ab9/CITATION /home/pjb68507/git/mcclintock/install//tools/ngs_te_mapper
+mv /home/pjb68507/git/mcclintock/install//tools/ngs_te_mapper-fb23590200666fe66f1c417c5d5934385cb77ab9/expectedBedFile.bed /home/pjb68507/git/mcclintock/install//tools/ngs_te_mapper
+mv /home/pjb68507/git/mcclintock/install//tools/ngs_te_mapper-fb23590200666fe66f1c417c5d5934385cb77ab9/LICENSE /home/pjb68507/git/mcclintock/install//tools/ngs_te_mapper
+mv /home/pjb68507/git/mcclintock/install//tools/ngs_te_mapper-fb23590200666fe66f1c417c5d5934385cb77ab9/img /home/pjb68507/git/mcclintock/install//tools/ngs_te_mapper
+mv /home/pjb68507/git/mcclintock/install//tools/ngs_te_mapper-fb23590200666fe66f1c417c5d5934385cb77ab9/sourceCode /home/pjb68507/git/mcclintock/install//tools/ngs_te_mapper
+mv /home/pjb68507/git/mcclintock/install//tools/ngs_te_mapper-fb23590200666fe66f1c417c5d5934385cb77ab9/README.md /home/pjb68507/git/mcclintock/install//tools/ngs_te_mapper
+Archive:  /home/pjb68507/git/mcclintock/install/tools/temp/temp.zip
+d2500b904e2020d6a1075347b398525ede5feae1
+   creating: TEMP-d2500b904e2020d6a1075347b398525ede5feae1/
+  inflating: TEMP-d2500b904e2020d6a1075347b398525ede5feae1/LICENSE  
+  inflating: TEMP-d2500b904e2020d6a1075347b398525ede5feae1/Manual  
+  inflating: TEMP-d2500b904e2020d6a1075347b398525ede5feae1/README.md  
+   creating: TEMP-d2500b904e2020d6a1075347b398525ede5feae1/scripts/
+  inflating: TEMP-d2500b904e2020d6a1075347b398525ede5feae1/scripts/TEMP_Absence.sh  
+  inflating: TEMP-d2500b904e2020d6a1075347b398525ede5feae1/scripts/TEMP_Insertion.sh  
+  inflating: TEMP-d2500b904e2020d6a1075347b398525ede5feae1/scripts/cmd.total.sh  
+  inflating: TEMP-d2500b904e2020d6a1075347b398525ede5feae1/scripts/excision.clustering.pl  
+  inflating: TEMP-d2500b904e2020d6a1075347b398525ede5feae1/scripts/filterFalsePositive.ex.pl  
+  inflating: TEMP-d2500b904e2020d6a1075347b398525ede5feae1/scripts/filterFalsePositive.in.pl  
+  inflating: TEMP-d2500b904e2020d6a1075347b398525ede5feae1/scripts/generate_density_json.pl  
+  inflating: TEMP-d2500b904e2020d6a1075347b398525ede5feae1/scripts/get_class.pl  
+  inflating: TEMP-d2500b904e2020d6a1075347b398525ede5feae1/scripts/make.bp.bed.pl  
+  inflating: TEMP-d2500b904e2020d6a1075347b398525ede5feae1/scripts/mergeTagsWithGap.pl  
+  inflating: TEMP-d2500b904e2020d6a1075347b398525ede5feae1/scripts/mergeTagsWithoutGap.pl  
+  inflating: TEMP-d2500b904e2020d6a1075347b398525ede5feae1/scripts/pickClippedFastq.pl  
+  inflating: TEMP-d2500b904e2020d6a1075347b398525ede5feae1/scripts/pickOverlapPair.ex.pl  
+  inflating: TEMP-d2500b904e2020d6a1075347b398525ede5feae1/scripts/pickOverlapPair.in.pl  
+  inflating: TEMP-d2500b904e2020d6a1075347b398525ede5feae1/scripts/pickSoftClipping.over.pl  
+  inflating: TEMP-d2500b904e2020d6a1075347b398525ede5feae1/scripts/pickUniqIntervalPos.pl  
+  inflating: TEMP-d2500b904e2020d6a1075347b398525ede5feae1/scripts/pickUniqMate.pl  
+  inflating: TEMP-d2500b904e2020d6a1075347b398525ede5feae1/scripts/pickUniqPairFastq.pl  
+  inflating: TEMP-d2500b904e2020d6a1075347b398525ede5feae1/scripts/pickUniqPairFastq_MEM.pl  
+  inflating: TEMP-d2500b904e2020d6a1075347b398525ede5feae1/scripts/pickUniqPos.pl  
+  inflating: TEMP-d2500b904e2020d6a1075347b398525ede5feae1/scripts/pickUniqPos_MEM.pl  
+  inflating: TEMP-d2500b904e2020d6a1075347b398525ede5feae1/scripts/refine_breakpoint.ex.pl  
+  inflating: TEMP-d2500b904e2020d6a1075347b398525ede5feae1/scripts/refine_breakpoint.in.pl  
+  inflating: TEMP-d2500b904e2020d6a1075347b398525ede5feae1/scripts/summarize_excision.pl  
+ extracting: TEMP-d2500b904e2020d6a1075347b398525ede5feae1/test_dataset.tar.gz  
+unzip /home/pjb68507/git/mcclintock/install/tools/temp/temp.zip
+mv /home/pjb68507/git/mcclintock/install/TEMP-d2500b904e2020d6a1075347b398525ede5feae1 /home/pjb68507/git/mcclintock/install//tools/
+mv /home/pjb68507/git/mcclintock/install//tools/TEMP-d2500b904e2020d6a1075347b398525ede5feae1/README.md /home/pjb68507/git/mcclintock/install//tools/temp
+mv /home/pjb68507/git/mcclintock/install//tools/TEMP-d2500b904e2020d6a1075347b398525ede5feae1/test_dataset.tar.gz /home/pjb68507/git/mcclintock/install//tools/temp
+mv /home/pjb68507/git/mcclintock/install//tools/TEMP-d2500b904e2020d6a1075347b398525ede5feae1/LICENSE /home/pjb68507/git/mcclintock/install//tools/temp
+mv /home/pjb68507/git/mcclintock/install//tools/TEMP-d2500b904e2020d6a1075347b398525ede5feae1/Manual /home/pjb68507/git/mcclintock/install//tools/temp
+mv /home/pjb68507/git/mcclintock/install//tools/TEMP-d2500b904e2020d6a1075347b398525ede5feae1/scripts /home/pjb68507/git/mcclintock/install//tools/temp
+Archive:  /home/pjb68507/git/mcclintock/install/tools/popoolationte.zip
+   creating: popoolationte/
+  inflating: popoolationte/crosslink-te-sites.pl  
+  inflating: popoolationte/estimate-polymorphism.pl  
+  inflating: popoolationte/filter-teinserts.pl  
+  inflating: popoolationte/genomic-N-2gtf.pl  
+  inflating: popoolationte/identify-te-insertsites.pl  
+   creating: popoolationte/Modules/
+  inflating: popoolationte/Modules/ParseSam.pm  
+  inflating: popoolationte/Modules/Recombination.pm  
+  inflating: popoolationte/Modules/SamSlider.pm  
+  inflating: popoolationte/Modules/SyncTEUtility.pm  
+  inflating: popoolationte/Modules/TEHierarchy.pm  
+  inflating: popoolationte/Modules/TEInsert.pm  
+  inflating: popoolationte/Modules/TEInsertUtility.pm  
+  inflating: popoolationte/Modules/TESamReader.pm  
+  inflating: popoolationte/Modules/TESite.pm  
+  inflating: popoolationte/Modules/TESiteUtility.pm  
+  inflating: popoolationte/Modules/Utility.pm  
+  inflating: popoolationte/samro.pl  
+  inflating: popoolationte/update-teinserts-with-knowntes.pl  
+unzip /home/pjb68507/git/mcclintock/install/tools/popoolationte.zip
+mv /home/pjb68507/git/mcclintock/install/popoolationte/genomic-N-2gtf.pl /home/pjb68507/git/mcclintock/install//tools/popoolationte
+mv /home/pjb68507/git/mcclintock/install/popoolationte/estimate-polymorphism.pl /home/pjb68507/git/mcclintock/install//tools/popoolationte
+mv /home/pjb68507/git/mcclintock/install/popoolationte/update-teinserts-with-knowntes.pl /home/pjb68507/git/mcclintock/install//tools/popoolationte
+mv /home/pjb68507/git/mcclintock/install/popoolationte/crosslink-te-sites.pl /home/pjb68507/git/mcclintock/install//tools/popoolationte
+mv /home/pjb68507/git/mcclintock/install/popoolationte/filter-teinserts.pl /home/pjb68507/git/mcclintock/install//tools/popoolationte
+mv /home/pjb68507/git/mcclintock/install/popoolationte/Modules /home/pjb68507/git/mcclintock/install//tools/popoolationte
+mv /home/pjb68507/git/mcclintock/install/popoolationte/samro.pl /home/pjb68507/git/mcclintock/install//tools/popoolationte
+mv /home/pjb68507/git/mcclintock/install/popoolationte/identify-te-insertsites.pl /home/pjb68507/git/mcclintock/install//tools/popoolationte
+Archive:  /home/pjb68507/git/mcclintock/install/tools/relocate/relocate.zip
+ce3a2066e15f5c14e2887fdf8dce0485e1750e5b
+   creating: RelocaTE-ce3a2066e15f5c14e2887fdf8dce0485e1750e5b/
+  inflating: RelocaTE-ce3a2066e15f5c14e2887fdf8dce0485e1750e5b/LICENSE  
+  inflating: RelocaTE-ce3a2066e15f5c14e2887fdf8dce0485e1750e5b/README.md  
+  inflating: RelocaTE-ce3a2066e15f5c14e2887fdf8dce0485e1750e5b/TSD.len_table.txt  
+  inflating: RelocaTE-ce3a2066e15f5c14e2887fdf8dce0485e1750e5b/master  
+   creating: RelocaTE-ce3a2066e15f5c14e2887fdf8dce0485e1750e5b/sample_relocaTE_run/
+  inflating: RelocaTE-ce3a2066e15f5c14e2887fdf8dce0485e1750e5b/sample_relocaTE_run/create_bam.sh  
+   creating: RelocaTE-ce3a2066e15f5c14e2887fdf8dce0485e1750e5b/sample_relocaTE_run/data/
+  inflating: RelocaTE-ce3a2066e15f5c14e2887fdf8dce0485e1750e5b/sample_relocaTE_run/data/MSUr7.sample.fa  
+  inflating: RelocaTE-ce3a2066e15f5c14e2887fdf8dce0485e1750e5b/sample_relocaTE_run/data/TEs.fa  
+   creating: RelocaTE-ce3a2066e15f5c14e2887fdf8dce0485e1750e5b/sample_relocaTE_run/data/fq/
+  inflating: RelocaTE-ce3a2066e15f5c14e2887fdf8dce0485e1750e5b/sample_relocaTE_run/data/fq/sample.unPaired.fq  
+  inflating: RelocaTE-ce3a2066e15f5c14e2887fdf8dce0485e1750e5b/sample_relocaTE_run/data/fq/sample_p1.fq  
+  inflating: RelocaTE-ce3a2066e15f5c14e2887fdf8dce0485e1750e5b/sample_relocaTE_run/data/fq/sample_p2.fq  
+  inflating: RelocaTE-ce3a2066e15f5c14e2887fdf8dce0485e1750e5b/sample_relocaTE_run/data/mping.fa  
+ extracting: RelocaTE-ce3a2066e15f5c14e2887fdf8dce0485e1750e5b/sample_relocaTE_run/data/sample.sorted.bam  
+  inflating: RelocaTE-ce3a2066e15f5c14e2887fdf8dce0485e1750e5b/sample_relocaTE_run/data/sample.sorted.bam.bai  
+  inflating: RelocaTE-ce3a2066e15f5c14e2887fdf8dce0485e1750e5b/sample_relocaTE_run/run_characTErizer.sh  
+  inflating: RelocaTE-ce3a2066e15f5c14e2887fdf8dce0485e1750e5b/sample_relocaTE_run/run_relocaTE.sh  
+  inflating: RelocaTE-ce3a2066e15f5c14e2887fdf8dce0485e1750e5b/sample_relocaTE_run/run_relocaTE_multiTE.sh  
+  inflating: RelocaTE-ce3a2066e15f5c14e2887fdf8dce0485e1750e5b/sample_relocaTE_run/run_relocaTE_multiTE_qsub.sh  
+  inflating: RelocaTE-ce3a2066e15f5c14e2887fdf8dce0485e1750e5b/sample_relocaTE_run/run_relocaTE_qsub.sh  
+  inflating: RelocaTE-ce3a2066e15f5c14e2887fdf8dce0485e1750e5b/sample_relocaTE_run/run_relocaTE_shell.sh  
+  inflating: RelocaTE-ce3a2066e15f5c14e2887fdf8dce0485e1750e5b/sample_relocaTE_run/sample_readme.txt  
+   creating: RelocaTE-ce3a2066e15f5c14e2887fdf8dce0485e1750e5b/scripts/
+  inflating: RelocaTE-ce3a2066e15f5c14e2887fdf8dce0485e1750e5b/scripts/cat_fq_shell.pl  
+  inflating: RelocaTE-ce3a2066e15f5c14e2887fdf8dce0485e1750e5b/scripts/characterizer.pl  
+  inflating: RelocaTE-ce3a2066e15f5c14e2887fdf8dce0485e1750e5b/scripts/clean_pairs.pl  
+  inflating: RelocaTE-ce3a2066e15f5c14e2887fdf8dce0485e1750e5b/scripts/clean_pairs_memory.pl  
+  inflating: RelocaTE-ce3a2066e15f5c14e2887fdf8dce0485e1750e5b/scripts/compare_strains.pl  
+  inflating: RelocaTE-ce3a2066e15f5c14e2887fdf8dce0485e1750e5b/scripts/compare_strains_characterizer.pl  
+  inflating: RelocaTE-ce3a2066e15f5c14e2887fdf8dce0485e1750e5b/scripts/construcTEr.pl  
+  inflating: RelocaTE-ce3a2066e15f5c14e2887fdf8dce0485e1750e5b/scripts/fastq_split.pl  
+  inflating: RelocaTE-ce3a2066e15f5c14e2887fdf8dce0485e1750e5b/scripts/merge_bam_shell.pl  
+  inflating: RelocaTE-ce3a2066e15f5c14e2887fdf8dce0485e1750e5b/scripts/move_files.pl  
+  inflating: RelocaTE-ce3a2066e15f5c14e2887fdf8dce0485e1750e5b/scripts/process_raw_reads.pl  
+  inflating: RelocaTE-ce3a2066e15f5c14e2887fdf8dce0485e1750e5b/scripts/relocaTE.pl  
+  inflating: RelocaTE-ce3a2066e15f5c14e2887fdf8dce0485e1750e5b/scripts/relocaTE_align.pl  
+  inflating: RelocaTE-ce3a2066e15f5c14e2887fdf8dce0485e1750e5b/scripts/relocaTE_fq2fa.pl  
+  inflating: RelocaTE-ce3a2066e15f5c14e2887fdf8dce0485e1750e5b/scripts/relocaTE_insertionFinder.pl  
+  inflating: RelocaTE-ce3a2066e15f5c14e2887fdf8dce0485e1750e5b/scripts/relocaTE_trim.pl  
+  inflating: RelocaTE-ce3a2066e15f5c14e2887fdf8dce0485e1750e5b/scripts/run_construcTEr.pl  
+  inflating: RelocaTE-ce3a2066e15f5c14e2887fdf8dce0485e1750e5b/scripts/sam2bam.pl  
+  inflating: RelocaTE-ce3a2066e15f5c14e2887fdf8dce0485e1750e5b/scripts/sam2fq.pl  
+  inflating: RelocaTE-ce3a2066e15f5c14e2887fdf8dce0485e1750e5b/scripts/splitSam_byTarget.pl  
+unzip /home/pjb68507/git/mcclintock/install/tools/relocate/relocate.zip
+mv /home/pjb68507/git/mcclintock/install/RelocaTE-ce3a2066e15f5c14e2887fdf8dce0485e1750e5b /home/pjb68507/git/mcclintock/install//tools/
+mv /home/pjb68507/git/mcclintock/install//tools/RelocaTE-ce3a2066e15f5c14e2887fdf8dce0485e1750e5b/README.md /home/pjb68507/git/mcclintock/install//tools/relocate
+mv /home/pjb68507/git/mcclintock/install//tools/RelocaTE-ce3a2066e15f5c14e2887fdf8dce0485e1750e5b/master /home/pjb68507/git/mcclintock/install//tools/relocate
+mv /home/pjb68507/git/mcclintock/install//tools/RelocaTE-ce3a2066e15f5c14e2887fdf8dce0485e1750e5b/sample_relocaTE_run /home/pjb68507/git/mcclintock/install//tools/relocate
+mv /home/pjb68507/git/mcclintock/install//tools/RelocaTE-ce3a2066e15f5c14e2887fdf8dce0485e1750e5b/TSD.len_table.txt /home/pjb68507/git/mcclintock/install//tools/relocate
+mv /home/pjb68507/git/mcclintock/install//tools/RelocaTE-ce3a2066e15f5c14e2887fdf8dce0485e1750e5b/LICENSE /home/pjb68507/git/mcclintock/install//tools/relocate
+mv /home/pjb68507/git/mcclintock/install//tools/RelocaTE-ce3a2066e15f5c14e2887fdf8dce0485e1750e5b/scripts /home/pjb68507/git/mcclintock/install//tools/relocate
+filterTEevents.pl
+sort_for_startPos.pl
+TE_hierarchy.pl
+TE_locate_core.jar
+TE_locate.pl
+tar -xvf /home/pjb68507/git/mcclintock/install/tools/te-locate/te-locate.tar -C /home/pjb68507/git/mcclintock/install//tools/te-locate/

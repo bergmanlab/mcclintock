@@ -1,3 +1,4 @@
+**/__pycache__/*
 .snakemake/*
 .DS_Store
 modules/__pycache__/*
@@ -10,3 +11,4 @@ install/install.log
 install/config.json
 envs/conda/*
 install/log/*
+config/TEMP/__pycache__/*
