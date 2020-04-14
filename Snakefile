@@ -405,7 +405,7 @@ rule process_temp:
         out_dir = config['args']['out']+"/results/TEMP/",
         sample_name = config['args']['sample_name']
 
-    threads: workflow.cores
+    threads: 1
 
     output:
         config['args']['out']+"/results/TEMP/"+config['args']['sample_name']+"_temp_raw.bed",
@@ -418,23 +418,32 @@ rule process_temp:
 
 rule relocaTE:
     input:
-        config['mcc']['relocaTE_consensus'],
-        config['mcc']['relocaTE_ref_TEs'],
-        config['mcc']['augmented_reference'],
-        config['mcc']['fq1'],
-        config['mcc']['fq2']
+        consensus_fasta = config['mcc']['relocaTE_consensus'],
+        te_gff = config['mcc']['relocaTE_ref_TEs'],
+        reference_fasta = config['mcc']['augmented_reference'],
+        fq1 = config['mcc']['fq1'],
+        fq2 = config['mcc']['fq2']
 
     threads: workflow.cores
 
+    conda: config['args']['mcc_path']+"/envs/mcc_relocate.yml"
+
+    params:
+        raw_fq2 = config['in']['fq2'],
+        out_dir = config['args']['out']+"/results/relocaTE/",
+        log = config['args']['out']+"/logs/relocaTE.log",
+        script_dir = config['args']['mcc_path']+"/install/tools/relocate/scripts/",
+
     output:
-        config['args']['out']+"/results/relocaTE/relocaTE.log"
+        config['args']['out']+"/logs/relocaTE.log"
     
-    run:
-        shell("touch "+output[0])
+    script:
+        config['args']['mcc_path']+"/modules/relocaTE/relocate.py"
 
 
-rule ngs_te_mapper:
+rule ngs_te_mapper_run:
     input:
+        config = config['args']['mcc_path']+"/config/ngs_te_mapper/ngs_te_mapper_run.py",
         consensus_fasta = config['mcc']['formatted_consensus'],
         reference_fasta = config['mcc']['augmented_reference'],
         fastq1 = config['mcc']['fq1'],
@@ -442,7 +451,7 @@ rule ngs_te_mapper:
 
     params:
         raw_fq2 = config['in']['fq2'],
-        out_dir = config['args']['out']+"/results/ngs_te_mapper/",
+        out_dir = config['args']['out']+"/results/ngs_te_mapper/unfiltered/",
         script_dir = config['args']['mcc_path']+"/install/tools/ngs_te_mapper/sourceCode/",
         log = config['args']['out']+"/logs/ngs_te_mapper.log",
         sample_name = config['args']['sample_name']
@@ -452,10 +461,30 @@ rule ngs_te_mapper:
     conda: config['args']['mcc_path']+"/envs/mcc_ngs_te_mapper.yml"
 
     output:
+        config['args']['out']+"/results/ngs_te_mapper/unfiltered/bed_tsd/"+config['args']['sample_name']+"_insertions.bed"
+    
+    script:
+        config['args']['mcc_path']+"/modules/ngs_te_mapper/ngs_te_mapper_run.py"
+
+rule ngs_te_mapper_post:
+    input:
+        config = config['args']['mcc_path']+"/config/ngs_te_mapper/ngs_te_mapper_post.py",
+        raw_bed = config['args']['out']+"/results/ngs_te_mapper/unfiltered/bed_tsd/"+config['args']['sample_name']+"_insertions.bed"
+
+    params:
+        out_dir = config['args']['out']+"/results/ngs_te_mapper/",
+        log = config['args']['out']+"/logs/ngs_te_mapper.log",
+        sample_name = config['args']['sample_name']
+    
+    threads: 1
+
+    conda: config['args']['mcc_path']+"/envs/mcc_ngs_te_mapper.yml"
+
+    output:
         config['args']['out']+"/results/ngs_te_mapper/"+config['args']['sample_name']+"_ngs_te_mapper_nonredundant.bed"
     
     script:
-        config['args']['mcc_path']+"/modules/ngs_te_mapper/ngs_te_mapper.py"
+        config['args']['mcc_path']+"/modules/ngs_te_mapper/ngs_te_mapper_post.py"
         
 
 rule popoolationTE:
