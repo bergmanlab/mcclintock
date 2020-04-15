@@ -26,9 +26,13 @@ def main():
         mccutils.run_command(command, log=snakemake.params.log)
 
     command = ["patch", "-i", snakemake.params.patch1, install_path+"popoolationte/Modules/TEInsertUtility.pm"]
-    command = ["patch", "-i", snakemake.params.patch2, install_path+"popoolationte/Modules/TEInsert.pm"]    
+    mccutils.run_command(command, log=snakemake.params.log)
+    command = ["patch", "-i", snakemake.params.patch2, install_path+"popoolationte/Modules/TEInsert.pm"]
+    mccutils.run_command(command, log=snakemake.params.log)
     command = ["patch", "-i", snakemake.params.patch3, install_path+"popoolationte/samro.pl"]
+    mccutils.run_command(command, log=snakemake.params.log)
     command = ["patch", "-i", snakemake.params.patch4, install_path+"popoolationte/identify-te-insertsites.pl"]
+    mccutils.run_command(command, log=snakemake.params.log)
 
 
     mccutils.remove(snakemake.params.zipfile)

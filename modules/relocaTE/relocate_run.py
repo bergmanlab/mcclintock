@@ -17,14 +17,14 @@ def main():
     script_dir = snakemake.params.script_dir
     out_dir = snakemake.params.out_dir
 
+    out_gff = snakemake.output[0]
+
     is_paired = True
     if snakemake.params.raw_fq2 == "None":
         is_paired = False
 
-    mccutils.mkdir(out_dir)
-    mccutils.mkdir(out_dir+"/unfiltered/")
     annotation = make_annotation_file(te_gff, out_dir)
-    os.chdir(out_dir+"/unfiltered/")
+    os.chdir(out_dir)
 
     fq_dir = os.path.dirname(fq1)
     command = ["perl", script_dir+"/relocaTE.pl", "-t", consensus_fasta, "-d", fq_dir, "-g", reference_fasta, "-o", ".", "-r", annotation]
@@ -35,12 +35,16 @@ def main():
         command += ["-u", "unPaired"]
     
     print("<RELOCATE> Running RelocaTE...")
+    # mccutils.run_command(command, log=log)
+    print(" ".join(command))
     mccutils.run_command(command)
-    mccutils.run_command(["touch",log])
+    # combine_gffs(out_dir, out_gff)
+
+
 
 
 def make_annotation_file(te_gff, out_dir):
-    annotation_file = out_dir+"/unfiltered/annotation.tsv"
+    annotation_file = out_dir+"/annotation.tsv"
     with open(annotation_file,"w") as out:
         with open(te_gff,"r") as gff:
             for line in gff:
@@ -50,6 +54,20 @@ def make_annotation_file(te_gff, out_dir):
                     out.write(outline+"\n")
     
     return annotation_file
+
+
+def combine_gffs(out_dir, outgff):
+    with open(outgff,"w") as out: 
+        for a in os.listdir(out_dir):
+            if os.path.isdir(out_dir+"/"+a):
+                for b in os.listdir(out_dir+"/"+a):
+                    if "results" in b:
+                        for c in os.listdir(out_dir+"/"+a+"/"+b):
+                            if ".gff" in c:
+                                with open(out_dir+"/"+a+"/"+b+"/"+c, "r") as ingff:
+                                    for line in ingff:
+                                        if "#" not in line:
+                                            out.write(line)
 
 if __name__ == "__main__":                
     main()

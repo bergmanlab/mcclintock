@@ -263,7 +263,7 @@ def run_workflow(args, sample_name, run_id, debug=False):
     out_files = {
         'coverage': args.out+"/results/coverage/te_depth.csv",
         'ngs_te_mapper': args.out+"/results/ngs_te_mapper/"+sample_name+"_ngs_te_mapper_nonredundant.bed",
-        'relocate': args.out+"/logs/relocaTE.log",
+        'relocate': args.out+"/results/relocaTE/"+sample_name+"_relocate_redundant.bed",
         'temp': args.out+"/results/TEMP/"+sample_name+"_temp_nonredundant.bed",
         'retroseq': args.out+"/results/retroseq/retroseq.log",
         'popoolationte': args.out+"/results/popoolationTE/popoolationTE.log",

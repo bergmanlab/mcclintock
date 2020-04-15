@@ -1,5 +1,6 @@
 import sys
 import os
+import subprocess
 sys.path.append(snakemake.config['paths']['mcc_path'])
 import modules.mccutils as mccutils
 
@@ -29,10 +30,30 @@ def main():
         mccutils.run_command(command, log=snakemake.params.log)
 
 
-    command = ["patch", "-i", snakemake.params.patch, install_path+"relocate/scripts/relocaTE_insertionFinder.pl"]    
+    command = ["patch", "-i", snakemake.params.patch, install_path+"relocate/scripts/relocaTE_insertionFinder.pl"]
+    mccutils.run_command(command, log=snakemake.params.log)
 
     mccutils.remove(install_path+"RelocaTE-ce3a2066e15f5c14e2887fdf8dce0485e1750e5b")
     mccutils.remove(snakemake.params.zipfile)
+
+    output = subprocess.Popen(["which", "perl"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    perl_path = output.stdout.read()
+    perl_path = perl_path.decode()
+
+    for f in os.listdir(install_path+"relocate/scripts/"):
+        if "pl" == f.split(".")[-1]:
+            with open(install_path+"tmp","w") as tmp:
+                with open(install_path+"relocate/scripts/"+f, "r") as script:
+                    for line in script:
+                        if "#!/usr/bin/perl" in line:
+                            line = "#!"+perl_path
+                        elif "defined @" in line:
+                            line = line.replace("defined @", "@")
+                        
+                        tmp.write(line)
+            
+            mccutils.run_command(["mv", install_path+"tmp", install_path+"relocate/scripts/"+f])
+
 
     print("relocaTE installation complete")
 

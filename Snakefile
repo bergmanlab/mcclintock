@@ -416,7 +416,7 @@ rule process_temp:
         config['args']['mcc_path']+"/modules/TEMP/temp_post.py"
 
 
-rule relocaTE:
+rule relocaTE_run:
     input:
         consensus_fasta = config['mcc']['relocaTE_consensus'],
         te_gff = config['mcc']['relocaTE_ref_TEs'],
@@ -424,7 +424,28 @@ rule relocaTE:
         fq1 = config['mcc']['fq1'],
         fq2 = config['mcc']['fq2']
 
-    threads: workflow.cores
+    threads: 1
+
+    conda: config['args']['mcc_path']+"/envs/mcc_relocate.yml"
+
+    params:
+        raw_fq2 = config['in']['fq2'],
+        out_dir = config['args']['out']+"/results/relocaTE/unfiltered/",
+        log = config['args']['out']+"/logs/relocaTE.log",
+        script_dir = config['args']['mcc_path']+"/install/tools/relocate/scripts/",
+
+    output:
+        config['args']['out']+"/results/relocaTE/unfiltered/combined.gff"
+    
+    script:
+        config['args']['mcc_path']+"/modules/relocaTE/relocate_run.py"
+
+rule relocaTE_post:
+    input:
+        relocate_gff = config['args']['out']+"/results/relocaTE/unfiltered/combined.gff",
+        te_gff = config['mcc']['relocaTE_ref_TEs'],
+
+    threads: 1
 
     conda: config['args']['mcc_path']+"/envs/mcc_relocate.yml"
 
@@ -432,13 +453,13 @@ rule relocaTE:
         raw_fq2 = config['in']['fq2'],
         out_dir = config['args']['out']+"/results/relocaTE/",
         log = config['args']['out']+"/logs/relocaTE.log",
-        script_dir = config['args']['mcc_path']+"/install/tools/relocate/scripts/",
+        sample_name = config['args']['sample_name']
 
     output:
-        config['args']['out']+"/logs/relocaTE.log"
+        config['args']['out']+"/results/relocaTE/"+config['args']['sample_name']+"_relocate_redundant.bed"
     
     script:
-        config['args']['mcc_path']+"/modules/relocaTE/relocate.py"
+        config['args']['mcc_path']+"/modules/relocaTE/relocate_post.py"
 
 
 rule ngs_te_mapper_run:
