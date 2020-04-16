@@ -46,9 +46,13 @@ def main():
                 with open(install_path+"relocate/scripts/"+f, "r") as script:
                     for line in script:
                         if "#!/usr/bin/perl" in line:
-                            line = "#!"+perl_path
+                            # line = "#!"+perl_path
+                            line = "#!/usr/bin/env perl\n"
                         elif "defined @" in line:
                             line = line.replace("defined @", "@")
+                        
+                        elif "$scripts/" in line and "perl" not in line and "relocaTE.pl" in f:
+                            line = line.replace("$scripts/", "perl $scripts/")
                         
                         tmp.write(line)
             

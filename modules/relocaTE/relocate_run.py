@@ -38,7 +38,7 @@ def main():
     # mccutils.run_command(command, log=log)
     print(" ".join(command))
     mccutils.run_command(command)
-    # combine_gffs(out_dir, out_gff)
+    combine_gffs(out_dir, out_gff)
 
 
 
