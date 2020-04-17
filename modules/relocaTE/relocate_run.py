@@ -28,7 +28,18 @@ def main():
     os.chdir(out_dir)
 
     fq_dir = os.path.dirname(fq1)
-    command = ["perl", script_dir+"/relocaTE.pl", "-t", consensus_fasta, "-d", fq_dir, "-g", reference_fasta, "-o", ".", "-r", annotation]
+    command = ["perl", script_dir+"/relocaTE.pl", 
+                    "-t", consensus_fasta, 
+                    "-d", fq_dir, 
+                    "-g", reference_fasta, 
+                    "-o", ".", 
+                    "-r", annotation,
+                    "-l", str(config.RELOCATE['l']),
+                    "-m", str(config.RELOCATE['m']),
+                    "-bm", str(config.RELOCATE['bm']),
+                    "-bt", str(config.RELOCATE['bt']),
+                    "-f", str(config.RELOCATE['f'])]
+
 
     if is_paired:
         command += ["-1", "_1", "-2", "_2"]
@@ -38,7 +49,7 @@ def main():
     print("<RELOCATE> Running RelocaTE...")
     # mccutils.run_command(command, log=log)
     print(" ".join(command))
-    mccutils.run_command(command)
+    mccutils.run_command(command, log=log)
     combine_gffs(out_dir, out_gff)
 
 
