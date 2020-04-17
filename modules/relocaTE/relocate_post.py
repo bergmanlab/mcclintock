@@ -46,6 +46,8 @@ def get_insertions(gff, sample_name, ref_l_threshold=0, ref_r_threshold=0, nonre
                 insert.end = int(split_line[4])
                 insert.strand = split_line[6]
 
+                feat_id = ""
+                feat_te_name = ""
                 for feat in feats:
                     if "ID=" in feat:
                         feat_id = feat.split("=")[1]
@@ -68,6 +70,7 @@ def get_insertions(gff, sample_name, ref_l_threshold=0, ref_r_threshold=0, nonre
                 if insert.type == "ref":
                     insert.name = feat_te_name+"_reference_"+sample_name+"_relocate_sr_"
                 elif insert.type == "nonref":
+                    feat_te_name = feat_id.split(".")[0]
                     insert.name = feat_te_name+"_non-reference_"+sample_name+"_relocate_sr_"
             
             if insert.type == "ref" and insert.left_support >= ref_l_threshold and insert.right_support >= ref_r_threshold:
@@ -133,7 +136,7 @@ def make_redundant_bed(insertions, sample_name, out_dir):
 
                 # write to bed with unique number added to name
                 split_line = line.split("\t")
-                split_line[3]+str(x+1)
+                split_line[3] += str(x+1)
                 line = "\t".join(split_line)
                 outbed.write(line)
     
