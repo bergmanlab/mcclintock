@@ -3,6 +3,7 @@ import sys
 import subprocess
 sys.path.append(snakemake.config['args']['mcc_path'])
 import modules.mccutils as mccutils
+import config.relocate.relocate_run as config
 
 
 def main():

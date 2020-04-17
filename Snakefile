@@ -418,6 +418,7 @@ rule process_temp:
 
 rule relocaTE_run:
     input:
+        config['args']['mcc_path']+"/config/relocate/relocate_run.py",
         consensus_fasta = config['mcc']['relocaTE_consensus'],
         te_gff = config['mcc']['relocaTE_ref_TEs'],
         reference_fasta = config['mcc']['augmented_reference'],
@@ -442,6 +443,7 @@ rule relocaTE_run:
 
 rule relocaTE_post:
     input:
+        config['args']['mcc_path']+"/config/relocate/relocate_post.py",
         relocate_gff = config['args']['out']+"/results/relocaTE/unfiltered/combined.gff",
         te_gff = config['mcc']['relocaTE_ref_TEs'],
 
@@ -456,7 +458,8 @@ rule relocaTE_post:
         sample_name = config['args']['sample_name']
 
     output:
-        config['args']['out']+"/results/relocaTE/"+config['args']['sample_name']+"_relocate_redundant.bed"
+        config['args']['out']+"/results/relocaTE/"+config['args']['sample_name']+"_relocate_redundant.bed",
+        config['args']['out']+"/results/relocaTE/"+config['args']['sample_name']+"_relocate_nonredundant.bed"
     
     script:
         config['args']['mcc_path']+"/modules/relocaTE/relocate_post.py"
