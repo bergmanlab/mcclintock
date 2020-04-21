@@ -303,7 +303,30 @@ rule popoolationTE_ref_fasta:
         config['mcc']['popoolationTE_ref_fasta']
     
     script:
-        config['args']['mcc_path']+"/scripts/popoolationTE_ref_fasta.py" 
+        config['args']['mcc_path']+"/scripts/popoolationTE_ref_fasta.py"
+
+
+rule repeatmask:
+    input:
+        reference = config['mcc']['augmented_reference'],
+        te_seqs = config['mcc']['formatted_consensus']
+    
+    params:
+        ref_name = config['args']['ref_name'],
+        out_dir = config['args']['out'],
+        log=config['args']['out']+"/logs/processing.log"
+    
+    threads: workflow.cores
+
+    conda: config['args']['mcc_path']+"/envs/mcc_processing.yml"
+
+    output:
+        rm_out = config['mcc']['repeatmasker_out']
+    
+    script:
+        config['args']['mcc_path']+"/scripts/repeatmask.py"
+
+
 
 
 rule coverage:
@@ -463,6 +486,61 @@ rule relocaTE_post:
     
     script:
         config['args']['mcc_path']+"/modules/relocaTE/relocate_post.py"
+
+
+rule relocaTE2_run:
+    input:
+        config['args']['mcc_path']+"/config/relocate2/relocate2_run.py",
+        reference = config['mcc']['augmented_reference'],
+        te_seqs = config['mcc']['formatted_consensus'],
+        rm_out = config['mcc']['repeatmasker_out'],
+        fastq1 = config['mcc']['fq1'],
+        fastq2 = config['mcc']['fq2'],
+        bam = config['mcc']['bam'],
+        median_insert_size = config['summary']['median_insert_size']
+
+    threads: workflow.cores
+
+    conda: config['args']['mcc_path']+"/envs/mcc_relocate2.yml"
+
+    params:
+        raw_fq2 = config['in']['fq2'],
+        out_dir = config['args']['out']+"/results/relocaTE2/unfiltered/",
+        log = config['args']['out']+"/logs/relocaTE2.log",
+        script_dir = config['args']['mcc_path']+"/install/tools/relocate2/scripts/"
+    
+    output:
+        config['args']['out']+"/results/relocaTE2/unfiltered/repeat/results/ALL.all_nonref_insert.gff",
+        config['args']['out']+"/results/relocaTE2/unfiltered/repeat/results/ALL.all_ref_insert.gff"
+    
+    script:
+        config['args']['mcc_path']+"/modules/relocaTE2/relocate2_run.py"
+
+
+
+rule relocaTE2_post:
+    input:
+        config['args']['mcc_path']+"/config/relocate2/relocate2_post.py",
+        rm_out = config['mcc']['repeatmasker_out'],
+        nonref_gff = config['args']['out']+"/results/relocaTE2/unfiltered/repeat/results/ALL.all_nonref_insert.gff",
+        ref_gff = config['args']['out']+"/results/relocaTE2/unfiltered/repeat/results/ALL.all_ref_insert.gff"
+
+    threads: 1
+
+    conda: config['args']['mcc_path']+"/envs/mcc_relocate2.yml"
+
+    params:
+        out_dir = config['args']['out']+"/results/relocaTE2/",
+        log = config['args']['out']+"/logs/relocaTE2.log",
+        sample_name = config['args']['sample_name']
+    
+    output:
+        config['args']['out']+"/results/relocaTE2/"+config['args']['sample_name']+"_relocate2_redundant.bed",
+        config['args']['out']+"/results/relocaTE2/"+config['args']['sample_name']+"_relocate2_nonredundant.bed"
+    
+    script:
+        config['args']['mcc_path']+"/modules/relocaTE2/relocate2_post.py"
+
 
 
 rule ngs_te_mapper_run:

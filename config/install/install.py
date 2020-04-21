@@ -4,7 +4,8 @@ URL = {
     "temp" : "https://github.com/JialiUMassWengLab/TEMP/archive/d2500b904e2020d6a1075347b398525ede5feae1.zip",
     "relocate" : "https://github.com/srobb1/RelocaTE/archive/ce3a2066e15f5c14e2887fdf8dce0485e1750e5b.zip",
     "ngs_te_mapper" : "https://github.com/bergmanlab/ngs_te_mapper/archive/fb23590200666fe66f1c417c5d5934385cb77ab9.zip",
-    "popoolationte" : "http://downloads.sourceforge.net/project/popoolationte/popoolationte_1.02.zip"
+    "popoolationte" : "http://downloads.sourceforge.net/project/popoolationte/popoolationte_1.02.zip",
+    "relocate2" : "https://github.com/stajichlab/RelocaTE2/archive/v2.0.1.zip"
 }
 
 MD5 = {
@@ -13,5 +14,6 @@ MD5 = {
     "temp" : "cfb77b2d1e82e38971e793f5e71f7d2c",
     "relocate" : "64cc60f65154368518529fb57becc3d6",
     "ngs_te_mapper" : "971dccdb8112e754293f7b8b44799aeb",
-    "popoolationte" : "315d266bd6da7487c919576dc46b92b4"
+    "popoolationte" : "315d266bd6da7487c919576dc46b92b4",
+    "relocate2" : "63eb7dbc09ffeb4063aef4857d198b06"
 }

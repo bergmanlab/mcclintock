@@ -148,7 +148,8 @@ def install(clean=False, debug=False):
         'temp' : config_install.URL["temp"],
         'relocate' : config_install.URL["relocate"],
         'ngs_te_mapper' : config_install.URL["ngs_te_mapper"],
-        'popoolationte' : config_install.URL["popoolationte"]
+        'popoolationte' : config_install.URL["popoolationte"],
+        'relocate2' : config_install.URL["relocate2"]
     }
 
     data['MD5s'] = {
@@ -157,7 +158,8 @@ def install(clean=False, debug=False):
         'temp' : config_install.MD5["temp"],
         'relocate' : config_install.MD5["relocate"],
         'ngs_te_mapper' : config_install.MD5["ngs_te_mapper"],
-        'popoolationte' : config_install.MD5["popoolationte"]
+        'popoolationte' : config_install.MD5["popoolationte"],
+        'relocate2' : config_install.MD5["relocate2"]
     }
 
     with open(install_config,"w") as config:
@@ -220,8 +222,8 @@ def make_run_config(args, sample_name, ref_name):
         'mcc_files' : input_dir,
         'reference' : input_dir+ref_name+".fasta",
         'consensus' : input_dir+"consensusTEs.fasta",
-        'fq1' : input_dir+"fastq/"+sample_name+"_1.fastq",
-        'fq2' : input_dir+"fastq/"+sample_name+"_2.fastq",
+        'fq1' : input_dir+"fastq/"+sample_name+"_1.fq",
+        'fq2' : input_dir+"fastq/"+sample_name+"_2.fq",
         'locations' : input_dir+"inrefTEs.gff",
         'taxonomy' : input_dir+"taxonomy.tsv",
         'coverage_fasta' : input_dir+"coverageTEs.fasta",
@@ -242,7 +244,8 @@ def make_run_config(args, sample_name, ref_name):
         'relocaTE_ref_TEs' : input_dir+ref_name+".ref.TEs.relocaTE.gff",
         'popoolationTE_ref_fasta' : input_dir+ref_name+".masked.popoolationTE.fasta",
         'popoolationTE_taxonomy' : input_dir+"taxonomy.popoolationTE.tsv",
-        'popoolationTE_gff' : input_dir+ref_name+".ref.TEs.popoolationTE.gff"
+        'popoolationTE_gff' : input_dir+ref_name+".ref.TEs.popoolationTE.gff",
+        'repeatmasker_out' : input_dir+ref_name+".repeatmasker.out"
     }
 
     summary_dir = args.out+"/summary/"
@@ -268,7 +271,8 @@ def run_workflow(args, sample_name, run_id, debug=False):
         'retroseq': args.out+"/results/retroseq/retroseq.log",
         'popoolationte': args.out+"/results/popoolationTE/popoolationTE.log",
         'te-locate': args.out+"/results/te-locate/te-locate.log",
-        'trimgalore': args.out+"/input/"+sample_name+"_1.fastq"
+        'trimgalore': args.out+"/input/"+sample_name+"_1.fastq",
+        'relocate2': args.out+"/results/relocaTE2/"+sample_name+"_relocate2_redundant.bed"
     }
 
     path=os.path.dirname(os.path.abspath(__file__))

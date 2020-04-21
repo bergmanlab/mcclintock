@@ -63,6 +63,21 @@ rule install_relocaTE:
     script:
        config['paths']['install']+"relocate.py" 
 
+rule install_relocaTE2:
+    params:
+        url = config['URLs']['relocate2'],
+        md5 = config['MD5s']['relocate2'],
+        zipfile = config['paths']['install']+"tools/relocate2/relocate2.zip",
+        log = config['paths']['log_dir']+"install.log"
+
+    conda: config['paths']['envs']+"mcc_relocate2.yml"
+
+    output:
+        config['paths']['install']+"tools/relocate2/scripts/relocaTE2.py"
+    
+    script:
+        config['paths']['install']+"relocate2.py"
+
 rule install_ngs_te_mapper:
     params:
         url = config['URLs']['ngs_te_mapper'],
@@ -126,7 +141,8 @@ rule install_all:
         config['paths']['install']+"tools/popoolationte/Modules/TEInsert.pm",
         config['paths']['install']+"tools/popoolationte/samro.pl",
         config['paths']['install']+"tools/popoolationte/identify-te-insertsites.pl",
-        config['paths']['install']+"tools/coverage/coverage.log"
+        config['paths']['install']+"tools/coverage/coverage.log",
+        config['paths']['install']+"tools/relocate2/scripts/relocaTE2.py"
     
     conda: config['paths']['envs']+"mcc_processing.yml"
 
