@@ -10,7 +10,7 @@ import config.preprocessing.trimgalore as trimgalore
 
 def main():
     fq1 = snakemake.input[0]
-    fq2 = snakemake.input[1]
+    fq2 = snakemake.params.fq2
     methods = snakemake.config['args']['methods'].split(",")
     processors = snakemake.config['args']['proc']
     mcc_out = snakemake.config['args']['out']
@@ -21,7 +21,7 @@ def main():
     # trims adaptors of input fastq(s)
     if "trimgalore" in methods:
         print("<PROCESSING> running trim_galore...")
-        if snakemake.config['in']['fq2'] == "None":
+        if fq2 == "None":
             flags = trimgalore.SINGLE_END_FLAGS
             trimmedfq = run_trim_galore(fq1, run_id, mcc_out, cores=processors, flags=flags)
             mccutils.run_command(["touch", snakemake.output[1]])

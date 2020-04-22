@@ -2,9 +2,10 @@
 rule setup_reads:
     input:
         config['in']['fq1'],
-        config['in']['fq2']
+        
 
     params:
+        fq2 = config['in']['fq2'],
         log=config['args']['out']+"/logs/processing.log"
 
     output:
@@ -189,7 +190,8 @@ rule median_insert_size:
     threads: 1
 
     params:
-        log=config['args']['out']+"/logs/processing.log"
+        log=config['args']['out']+"/logs/processing.log",
+        fq2 = config['in']['fq2']
 
     conda: config['envs']['mcc_processing']
 
