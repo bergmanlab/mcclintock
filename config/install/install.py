@@ -17,3 +17,17 @@ MD5 = {
     "popoolationte" : "315d266bd6da7487c919576dc46b92b4",
     "relocate2" : "63eb7dbc09ffeb4063aef4857d198b06"
 }
+
+
+ENV_PATH = "{{envpath}}"
+ENV = {
+    "coverage" : ENV_PATH+"mcc_coverage.yml",
+    "te-locate" : ENV_PATH+"mcc_telocate.yml",
+    "retroseq" : ENV_PATH+"mcc_retroseq.yml",
+    "temp" : ENV_PATH+"mcc_temp.yml",
+    "relocate" : ENV_PATH+"mcc_relocate.yml",
+    "ngs_te_mapper" : ENV_PATH+"mcc_ngs_te_mapper.yml",
+    "popoolationte" : ENV_PATH+"mcc_popoolationte.yml",
+    "relocate2" : ENV_PATH+"mcc_relocate2.yml",
+    "mcc_processing":  ENV_PATH+"mcc_processing.yml"
+}

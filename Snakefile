@@ -13,10 +13,10 @@ rule setup_reads:
     
     threads: workflow.cores
 
-    conda: config['args']['mcc_path']+"/envs/mcc_processing.yml"
+    conda: config['envs']['mcc_processing']
         
     script:
-        config['args']['mcc_path']+"/scripts/setup_reads.py"
+        config['args']['mcc_path']+"/scripts/preprocessing/setup_reads.py"
 
 
 rule fix_line_lengths:
@@ -35,10 +35,10 @@ rule fix_line_lengths:
 
     threads: 1
 
-    conda: config['args']['mcc_path']+"/envs/mcc_processing.yml"
+    conda: config['envs']['mcc_processing']
 
     script:
-        config['args']['mcc_path']+"/scripts/fix_line_lengths.py"
+        config['args']['mcc_path']+"/scripts/preprocessing/fix_line_lengths.py"
 
 
 rule make_run_copies:
@@ -51,10 +51,10 @@ rule make_run_copies:
 
     threads: 1
 
-    conda: config['args']['mcc_path']+"/envs/mcc_processing.yml"
+    conda: config['envs']['mcc_processing']
 
     script:
-        config['args']['mcc_path']+"/scripts/make_run_copies.py"
+        config['args']['mcc_path']+"/scripts/preprocessing/make_run_copies.py"
 
 rule make_reference_te_files:
     input:
@@ -78,10 +78,10 @@ rule make_reference_te_files:
         config['mcc']['popoolationTE_taxonomy'],
         config['mcc']['popoolationTE_gff']
     
-    conda: config['args']['mcc_path']+"/envs/mcc_processing.yml"
+    conda: config['envs']['mcc_processing']
     
     script:
-        config['args']['mcc_path']+"/scripts/make_reference_te_files.py"
+        config['args']['mcc_path']+"/scripts/preprocessing/make_reference_te_files.py"
 
 rule index_reference_genome:
     input:
@@ -92,14 +92,14 @@ rule index_reference_genome:
     params:
         log=config['args']['out']+"/logs/processing.log"
 
-    conda: config['args']['mcc_path']+"/envs/mcc_processing.yml"
+    conda: config['envs']['mcc_processing']
 
     output:
         config['mcc']['augmented_reference']+".fai",
         config['mcc']['augmented_reference']+".bwt"
     
     script:
-        config['args']['mcc_path']+"/scripts/index_reference_genome.py"
+        config['args']['mcc_path']+"/scripts/preprocessing/index_reference_genome.py"
 
 
 rule map_reads:
@@ -117,12 +117,12 @@ rule map_reads:
     
     threads: workflow.cores
 
-    conda: config['args']['mcc_path']+"/envs/mcc_processing.yml"
+    conda: config['envs']['mcc_processing']
 
     output: config['mcc']['sam']
 
     script:
-        config['args']['mcc_path']+"/scripts/map_reads.py"
+        config['args']['mcc_path']+"/scripts/preprocessing/map_reads.py"
 
 rule sam_to_bam:
     input:
@@ -134,15 +134,15 @@ rule sam_to_bam:
     
     threads: workflow.cores
 
-    conda: config['args']['mcc_path']+"/envs/mcc_processing.yml"
+    conda: config['envs']['mcc_processing']
 
     output:
         bam = config['mcc']['bam'],
-        flagstat = config['summary']['flagstat'],
+        flagstat = config['mcc']['flagstat'],
         tmp_bam = temp(config['mcc']['mcc_files']+config['args']['run_id']+".tmp.bam")
     
     script:
-        config['args']['mcc_path']+"/scripts/sam_to_bam.py"
+        config['args']['mcc_path']+"/scripts/preprocessing/sam_to_bam.py"
         
 
 rule make_ref_te_bed:
@@ -154,13 +154,13 @@ rule make_ref_te_bed:
     params:
         log=config['args']['out']+"/logs/processing.log"
 
-    conda: config['args']['mcc_path']+"/envs/mcc_processing.yml"
+    conda: config['envs']['mcc_processing']
 
     output:
         config['mcc']['ref_tes_bed']
 
     script:
-        config['args']['mcc_path']+"/scripts/make_ref_te_bed.py"
+        config['args']['mcc_path']+"/scripts/preprocessing/make_ref_te_bed.py"
 
 rule telocate_taxonomy:
     input:
@@ -173,13 +173,13 @@ rule telocate_taxonomy:
     params:
         log=config['args']['out']+"/logs/processing.log"
 
-    conda: config['args']['mcc_path']+"/envs/mcc_processing.yml"
+    conda: config['envs']['mcc_processing']
 
     output:
         config['mcc']['telocate_te_gff']
     
     script:
-        config['args']['mcc_path']+"/scripts/telocate_taxonomy.py"
+        config['args']['mcc_path']+"/scripts/preprocessing/telocate_taxonomy.py"
 
 
 rule median_insert_size:
@@ -191,13 +191,13 @@ rule median_insert_size:
     params:
         log=config['args']['out']+"/logs/processing.log"
 
-    conda: config['args']['mcc_path']+"/envs/mcc_processing.yml"
+    conda: config['envs']['mcc_processing']
 
     output:
-        config['summary']['median_insert_size']
+        config['mcc']['median_insert_size']
     
     script:
-        config['args']['mcc_path']+"/scripts/median_insert_size.py"
+        config['args']['mcc_path']+"/scripts/preprocessing/median_insert_size.py"
 
 rule telocate_sam:
     input:
@@ -208,13 +208,13 @@ rule telocate_sam:
     params:
         log=config['args']['out']+"/logs/processing.log"
 
-    conda: config['args']['mcc_path']+"/envs/mcc_processing.yml"
+    conda: config['envs']['mcc_processing']
     
     output:
         config['mcc']['telocate_sam']
 
     script:
-        config['args']['mcc_path']+"/scripts/telocate_sam.py"
+        config['args']['mcc_path']+"/scripts/preprocessing/telocate_sam.py"
 
 rule telocate_ref:
     input:
@@ -225,13 +225,13 @@ rule telocate_ref:
     params:
         log=config['args']['out']+"/logs/processing.log"
 
-    conda: config['args']['mcc_path']+"/envs/mcc_processing.yml"    
+    conda: config['envs']['mcc_processing']  
 
     output:
         config['mcc']['telocate_ref_fasta']
     
     script:
-        config['args']['mcc_path']+"/scripts/telocate_ref.py"
+        config['args']['mcc_path']+"/scripts/preprocessing/telocate_ref.py"
 
 rule reference_2bit:
     input:
@@ -242,13 +242,13 @@ rule reference_2bit:
     params:
         log=config['args']['out']+"/logs/processing.log"
 
-    conda: config['args']['mcc_path']+"/envs/mcc_processing.yml"
+    conda: config['envs']['mcc_processing']
     
     output:
         config['mcc']['ref_2bit']
     
     script:
-        config['args']['mcc_path']+"/scripts/reference_2bit.py"
+        config['args']['mcc_path']+"/scripts/preprocessing/reference_2bit.py"
 
 rule relocaTE_consensus:
     input:
@@ -259,13 +259,13 @@ rule relocaTE_consensus:
     params:
         log=config['args']['out']+"/logs/processing.log"
 
-    conda: config['args']['mcc_path']+"/envs/mcc_processing.yml"
+    conda: config['envs']['mcc_processing']
 
     output:
         config['mcc']['relocaTE_consensus']
 
     script:
-        config['args']['mcc_path']+"/scripts/relocaTE_consensus.py"
+        config['args']['mcc_path']+"/scripts/preprocessing/relocaTE_consensus.py"
     
 rule relocaTE_ref_gff:
     input:
@@ -277,13 +277,13 @@ rule relocaTE_ref_gff:
     params:
         log=config['args']['out']+"/logs/processing.log"
 
-    conda: config['args']['mcc_path']+"/envs/mcc_processing.yml"
+    conda: config['envs']['mcc_processing']
 
     output:
         config['mcc']['relocaTE_ref_TEs']
 
     script:
-        config['args']['mcc_path']+"/scripts/relocaTE_ref_gff.py" 
+        config['args']['mcc_path']+"/scripts/preprocessing/relocaTE_ref_gff.py" 
 
 
 rule popoolationTE_ref_fasta:
@@ -297,13 +297,13 @@ rule popoolationTE_ref_fasta:
     params:
         log=config['args']['out']+"/logs/processing.log"
 
-    conda: config['args']['mcc_path']+"/envs/mcc_processing.yml"
+    conda: config['envs']['mcc_processing']
 
     output:
         config['mcc']['popoolationTE_ref_fasta']
     
     script:
-        config['args']['mcc_path']+"/scripts/popoolationTE_ref_fasta.py"
+        config['args']['mcc_path']+"/scripts/preprocessing/popoolationTE_ref_fasta.py"
 
 
 rule repeatmask:
@@ -318,13 +318,13 @@ rule repeatmask:
     
     threads: workflow.cores
 
-    conda: config['args']['mcc_path']+"/envs/mcc_processing.yml"
+    conda: config['envs']['mcc_processing']
 
     output:
         rm_out = config['mcc']['repeatmasker_out']
     
     script:
-        config['args']['mcc_path']+"/scripts/repeatmask.py"
+        config['args']['mcc_path']+"/scripts/preprocessing/repeatmask.py"
 
 
 
@@ -343,19 +343,238 @@ rule coverage:
 
     threads: workflow.cores
 
-    conda: config['args']['mcc_path']+"/envs/mcc_coverage.yml"
+    conda: config['envs']['coverage']
 
     output:
         config['args']['out']+"/results/coverage/te_depth.csv"
 
     script:
-        config['args']['mcc_path']+"/modules/coverage/coverage.py"   
+        config['args']['mcc_path']+"/scripts/coverage/coverage.py"   
 
+
+rule run_temp:
+    input:
+        config['args']['mcc_path']+"/config/TEMP/temp_run.py",
+        bam = config['mcc']['bam'],
+        twobit = config['mcc']['ref_2bit'],
+        consensus = config['mcc']['formatted_consensus'],
+        ref_te_bed = config['mcc']['ref_tes_bed'],
+        taxonomy = config['mcc']['formatted_taxonomy'],
+        median_insert_size = config['mcc']['median_insert_size']
+        
+    
+    conda: config['envs']['temp']
+
+    params:
+        log = config['args']['out']+"/logs/TEMP.log",
+        scripts_dir = config['args']['mcc_path']+"/install/tools/temp/scripts/",
+        out_dir = config['args']['out']+"/results/TEMP/unfiltered/",
+        sample_name = config['args']['sample_name']
+
+    threads: workflow.cores
+
+    output:
+        config['args']['out']+"/results/TEMP/unfiltered/"+config['args']['sample_name']+".insertion.refined.bp.summary",
+        config['args']['out']+"/results/TEMP/unfiltered/"+config['args']['sample_name']+".absence.refined.bp.summary"
+    
+    script:
+        config['args']['mcc_path']+"/scripts/TEMP/temp_run.py"
+
+rule process_temp:
+    input:
+        config['args']['mcc_path']+"/config/TEMP/temp_post.py",
+        insert_summary = config['args']['out']+"/results/TEMP/unfiltered/"+config['args']['sample_name']+".insertion.refined.bp.summary",
+        absence_summary = config['args']['out']+"/results/TEMP/unfiltered/"+config['args']['sample_name']+".absence.refined.bp.summary",
+        te_gff = config['mcc']['telocate_te_gff']
+    
+    conda: config['envs']['temp']
+
+    params:
+        log = config['args']['out']+"/logs/TEMP.log",
+        out_dir = config['args']['out']+"/results/TEMP/",
+        sample_name = config['args']['sample_name']
+
+    threads: 1
+
+    output:
+        config['args']['out']+"/results/TEMP/"+config['args']['sample_name']+"_temp_raw.bed",
+        config['args']['out']+"/results/TEMP/"+config['args']['sample_name']+"_temp_redundant.bed",
+        config['args']['out']+"/results/TEMP/"+config['args']['sample_name']+"_temp_nonredundant.bed"
+    
+    script:
+        config['args']['mcc_path']+"/scripts/TEMP/temp_post.py"
+
+
+rule relocaTE_run:
+    input:
+        config['args']['mcc_path']+"/config/relocate/relocate_run.py",
+        consensus_fasta = config['mcc']['relocaTE_consensus'],
+        te_gff = config['mcc']['relocaTE_ref_TEs'],
+        reference_fasta = config['mcc']['augmented_reference'],
+        fq1 = config['mcc']['fq1'],
+        fq2 = config['mcc']['fq2']
+
+    threads: 1
+
+    conda: config['envs']['relocate']
+
+    params:
+        raw_fq2 = config['in']['fq2'],
+        out_dir = config['args']['out']+"/results/relocaTE/unfiltered/",
+        log = config['args']['out']+"/logs/relocaTE.log",
+        script_dir = config['args']['mcc_path']+"/install/tools/relocate/scripts/",
+
+    output:
+        config['args']['out']+"/results/relocaTE/unfiltered/combined.gff"
+    
+    script:
+        config['args']['mcc_path']+"/scripts/relocaTE/relocate_run.py"
+
+rule relocaTE_post:
+    input:
+        config['args']['mcc_path']+"/config/relocate/relocate_post.py",
+        relocate_gff = config['args']['out']+"/results/relocaTE/unfiltered/combined.gff",
+        te_gff = config['mcc']['relocaTE_ref_TEs'],
+
+    threads: 1
+
+    conda: config['envs']['relocate']
+
+    params:
+        raw_fq2 = config['in']['fq2'],
+        out_dir = config['args']['out']+"/results/relocaTE/",
+        log = config['args']['out']+"/logs/relocaTE.log",
+        sample_name = config['args']['sample_name']
+
+    output:
+        config['args']['out']+"/results/relocaTE/"+config['args']['sample_name']+"_relocate_redundant.bed",
+        config['args']['out']+"/results/relocaTE/"+config['args']['sample_name']+"_relocate_nonredundant.bed"
+    
+    script:
+        config['args']['mcc_path']+"/scripts/relocaTE/relocate_post.py"
+
+
+rule relocaTE2_run:
+    input:
+        config['args']['mcc_path']+"/config/relocate2/relocate2_run.py",
+        reference = config['mcc']['augmented_reference'],
+        te_seqs = config['mcc']['formatted_consensus'],
+        rm_out = config['mcc']['repeatmasker_out'],
+        fastq1 = config['mcc']['fq1'],
+        fastq2 = config['mcc']['fq2'],
+        bam = config['mcc']['bam'],
+        median_insert_size = config['mcc']['median_insert_size']
+
+    threads: workflow.cores
+
+    conda: config['envs']['relocate2']
+
+    params:
+        raw_fq2 = config['in']['fq2'],
+        out_dir = config['args']['out']+"/results/relocaTE2/unfiltered/",
+        log = config['args']['out']+"/logs/relocaTE2.log",
+        script_dir = config['args']['mcc_path']+"/install/tools/relocate2/scripts/"
+    
+    output:
+        config['args']['out']+"/results/relocaTE2/unfiltered/repeat/results/ALL.all_nonref_insert.gff",
+        config['args']['out']+"/results/relocaTE2/unfiltered/repeat/results/ALL.all_ref_insert.gff"
+    
+    script:
+        config['args']['mcc_path']+"/scripts/relocaTE2/relocate2_run.py"
+
+
+
+rule relocaTE2_post:
+    input:
+        config['args']['mcc_path']+"/config/relocate2/relocate2_post.py",
+        rm_out = config['mcc']['repeatmasker_out'],
+        nonref_gff = config['args']['out']+"/results/relocaTE2/unfiltered/repeat/results/ALL.all_nonref_insert.gff",
+        ref_gff = config['args']['out']+"/results/relocaTE2/unfiltered/repeat/results/ALL.all_ref_insert.gff"
+
+    threads: 1
+
+    conda: config['envs']['relocate2']
+
+    params:
+        out_dir = config['args']['out']+"/results/relocaTE2/",
+        log = config['args']['out']+"/logs/relocaTE2.log",
+        sample_name = config['args']['sample_name']
+    
+    output:
+        config['args']['out']+"/results/relocaTE2/"+config['args']['sample_name']+"_relocate2_redundant.bed",
+        config['args']['out']+"/results/relocaTE2/"+config['args']['sample_name']+"_relocate2_nonredundant.bed"
+    
+    script:
+        config['args']['mcc_path']+"/scripts/relocaTE2/relocate2_post.py"
+
+
+
+rule ngs_te_mapper_run:
+    input:
+        config = config['args']['mcc_path']+"/config/ngs_te_mapper/ngs_te_mapper_run.py",
+        consensus_fasta = config['mcc']['formatted_consensus'],
+        reference_fasta = config['mcc']['augmented_reference'],
+        fastq1 = config['mcc']['fq1'],
+        fastq2 = config['mcc']['fq2']
+
+    params:
+        raw_fq2 = config['in']['fq2'],
+        out_dir = config['args']['out']+"/results/ngs_te_mapper/unfiltered/",
+        script_dir = config['args']['mcc_path']+"/install/tools/ngs_te_mapper/sourceCode/",
+        log = config['args']['out']+"/logs/ngs_te_mapper.log",
+        sample_name = config['args']['sample_name']
+    
+    threads: workflow.cores
+
+    conda: config['envs']['ngs_te_mapper']
+
+    output:
+        config['args']['out']+"/results/ngs_te_mapper/unfiltered/bed_tsd/"+config['args']['sample_name']+"_insertions.bed"
+    
+    script:
+        config['args']['mcc_path']+"/scripts/ngs_te_mapper/ngs_te_mapper_run.py"
+
+rule ngs_te_mapper_post:
+    input:
+        config = config['args']['mcc_path']+"/config/ngs_te_mapper/ngs_te_mapper_post.py",
+        raw_bed = config['args']['out']+"/results/ngs_te_mapper/unfiltered/bed_tsd/"+config['args']['sample_name']+"_insertions.bed"
+
+    params:
+        out_dir = config['args']['out']+"/results/ngs_te_mapper/",
+        log = config['args']['out']+"/logs/ngs_te_mapper.log",
+        sample_name = config['args']['sample_name']
+    
+    threads: 1
+
+    conda: config['envs']['ngs_te_mapper']
+
+    output:
+        config['args']['out']+"/results/ngs_te_mapper/"+config['args']['sample_name']+"_ngs_te_mapper_nonredundant.bed"
+    
+    script:
+        config['args']['mcc_path']+"/scripts/ngs_te_mapper/ngs_te_mapper_post.py"
+        
+
+rule popoolationTE:
+    input:
+        config['mcc']['popoolationTE_ref_fasta'],
+        config['mcc']['popoolationTE_taxonomy'],
+        config['mcc']['popoolationTE_gff'],
+        config['mcc']['fq1'],
+        config['mcc']['fq2']
+    
+    threads: workflow.cores
+
+    output:
+        config['args']['out']+"/results/popoolationTE/popoolationTE.log"
+
+    run:
+        shell("touch "+output[0])
 
 rule telocate:
     input:
         config['mcc']['telocate_te_gff'],
-        config['summary']['median_insert_size'],
+        config['mcc']['median_insert_size'],
         config['mcc']['telocate_sam'],
         config['mcc']['telocate_ref_fasta'],
     
@@ -383,225 +602,4 @@ rule retroseq:
     
     run:
         shell("touch "+config['args']['out']+"/results/retroseq/retroseq.log")
-
-
-
-rule run_temp:
-    input:
-        config['args']['mcc_path']+"/config/TEMP/temp_run.py",
-        bam = config['mcc']['bam'],
-        twobit = config['mcc']['ref_2bit'],
-        consensus = config['mcc']['formatted_consensus'],
-        ref_te_bed = config['mcc']['ref_tes_bed'],
-        taxonomy = config['mcc']['formatted_taxonomy'],
-        median_insert_size = config['summary']['median_insert_size']
-        
-    
-    conda: config['args']['mcc_path']+"/envs/mcc_temp.yml"
-
-    params:
-        log = config['args']['out']+"/logs/TEMP.log",
-        scripts_dir = config['args']['mcc_path']+"/install/tools/temp/scripts/",
-        out_dir = config['args']['out']+"/results/TEMP/unfiltered/",
-        sample_name = config['args']['sample_name']
-
-    threads: workflow.cores
-
-    output:
-        config['args']['out']+"/results/TEMP/unfiltered/"+config['args']['sample_name']+".insertion.refined.bp.summary",
-        config['args']['out']+"/results/TEMP/unfiltered/"+config['args']['sample_name']+".absence.refined.bp.summary"
-    
-    script:
-        config['args']['mcc_path']+"/modules/TEMP/temp_run.py"
-
-rule process_temp:
-    input:
-        config['args']['mcc_path']+"/config/TEMP/temp_post.py",
-        insert_summary = config['args']['out']+"/results/TEMP/unfiltered/"+config['args']['sample_name']+".insertion.refined.bp.summary",
-        absence_summary = config['args']['out']+"/results/TEMP/unfiltered/"+config['args']['sample_name']+".absence.refined.bp.summary",
-        te_gff = config['mcc']['telocate_te_gff']
-    
-    conda: config['args']['mcc_path']+"/envs/mcc_temp.yml"
-
-    params:
-        log = config['args']['out']+"/logs/TEMP.log",
-        out_dir = config['args']['out']+"/results/TEMP/",
-        sample_name = config['args']['sample_name']
-
-    threads: 1
-
-    output:
-        config['args']['out']+"/results/TEMP/"+config['args']['sample_name']+"_temp_raw.bed",
-        config['args']['out']+"/results/TEMP/"+config['args']['sample_name']+"_temp_redundant.bed",
-        config['args']['out']+"/results/TEMP/"+config['args']['sample_name']+"_temp_nonredundant.bed"
-    
-    script:
-        config['args']['mcc_path']+"/modules/TEMP/temp_post.py"
-
-
-rule relocaTE_run:
-    input:
-        config['args']['mcc_path']+"/config/relocate/relocate_run.py",
-        consensus_fasta = config['mcc']['relocaTE_consensus'],
-        te_gff = config['mcc']['relocaTE_ref_TEs'],
-        reference_fasta = config['mcc']['augmented_reference'],
-        fq1 = config['mcc']['fq1'],
-        fq2 = config['mcc']['fq2']
-
-    threads: 1
-
-    conda: config['args']['mcc_path']+"/envs/mcc_relocate.yml"
-
-    params:
-        raw_fq2 = config['in']['fq2'],
-        out_dir = config['args']['out']+"/results/relocaTE/unfiltered/",
-        log = config['args']['out']+"/logs/relocaTE.log",
-        script_dir = config['args']['mcc_path']+"/install/tools/relocate/scripts/",
-
-    output:
-        config['args']['out']+"/results/relocaTE/unfiltered/combined.gff"
-    
-    script:
-        config['args']['mcc_path']+"/modules/relocaTE/relocate_run.py"
-
-rule relocaTE_post:
-    input:
-        config['args']['mcc_path']+"/config/relocate/relocate_post.py",
-        relocate_gff = config['args']['out']+"/results/relocaTE/unfiltered/combined.gff",
-        te_gff = config['mcc']['relocaTE_ref_TEs'],
-
-    threads: 1
-
-    conda: config['args']['mcc_path']+"/envs/mcc_relocate.yml"
-
-    params:
-        raw_fq2 = config['in']['fq2'],
-        out_dir = config['args']['out']+"/results/relocaTE/",
-        log = config['args']['out']+"/logs/relocaTE.log",
-        sample_name = config['args']['sample_name']
-
-    output:
-        config['args']['out']+"/results/relocaTE/"+config['args']['sample_name']+"_relocate_redundant.bed",
-        config['args']['out']+"/results/relocaTE/"+config['args']['sample_name']+"_relocate_nonredundant.bed"
-    
-    script:
-        config['args']['mcc_path']+"/modules/relocaTE/relocate_post.py"
-
-
-rule relocaTE2_run:
-    input:
-        config['args']['mcc_path']+"/config/relocate2/relocate2_run.py",
-        reference = config['mcc']['augmented_reference'],
-        te_seqs = config['mcc']['formatted_consensus'],
-        rm_out = config['mcc']['repeatmasker_out'],
-        fastq1 = config['mcc']['fq1'],
-        fastq2 = config['mcc']['fq2'],
-        bam = config['mcc']['bam'],
-        median_insert_size = config['summary']['median_insert_size']
-
-    threads: workflow.cores
-
-    conda: config['args']['mcc_path']+"/envs/mcc_relocate2.yml"
-
-    params:
-        raw_fq2 = config['in']['fq2'],
-        out_dir = config['args']['out']+"/results/relocaTE2/unfiltered/",
-        log = config['args']['out']+"/logs/relocaTE2.log",
-        script_dir = config['args']['mcc_path']+"/install/tools/relocate2/scripts/"
-    
-    output:
-        config['args']['out']+"/results/relocaTE2/unfiltered/repeat/results/ALL.all_nonref_insert.gff",
-        config['args']['out']+"/results/relocaTE2/unfiltered/repeat/results/ALL.all_ref_insert.gff"
-    
-    script:
-        config['args']['mcc_path']+"/modules/relocaTE2/relocate2_run.py"
-
-
-
-rule relocaTE2_post:
-    input:
-        config['args']['mcc_path']+"/config/relocate2/relocate2_post.py",
-        rm_out = config['mcc']['repeatmasker_out'],
-        nonref_gff = config['args']['out']+"/results/relocaTE2/unfiltered/repeat/results/ALL.all_nonref_insert.gff",
-        ref_gff = config['args']['out']+"/results/relocaTE2/unfiltered/repeat/results/ALL.all_ref_insert.gff"
-
-    threads: 1
-
-    conda: config['args']['mcc_path']+"/envs/mcc_relocate2.yml"
-
-    params:
-        out_dir = config['args']['out']+"/results/relocaTE2/",
-        log = config['args']['out']+"/logs/relocaTE2.log",
-        sample_name = config['args']['sample_name']
-    
-    output:
-        config['args']['out']+"/results/relocaTE2/"+config['args']['sample_name']+"_relocate2_redundant.bed",
-        config['args']['out']+"/results/relocaTE2/"+config['args']['sample_name']+"_relocate2_nonredundant.bed"
-    
-    script:
-        config['args']['mcc_path']+"/modules/relocaTE2/relocate2_post.py"
-
-
-
-rule ngs_te_mapper_run:
-    input:
-        config = config['args']['mcc_path']+"/config/ngs_te_mapper/ngs_te_mapper_run.py",
-        consensus_fasta = config['mcc']['formatted_consensus'],
-        reference_fasta = config['mcc']['augmented_reference'],
-        fastq1 = config['mcc']['fq1'],
-        fastq2 = config['mcc']['fq2']
-
-    params:
-        raw_fq2 = config['in']['fq2'],
-        out_dir = config['args']['out']+"/results/ngs_te_mapper/unfiltered/",
-        script_dir = config['args']['mcc_path']+"/install/tools/ngs_te_mapper/sourceCode/",
-        log = config['args']['out']+"/logs/ngs_te_mapper.log",
-        sample_name = config['args']['sample_name']
-    
-    threads: workflow.cores
-
-    conda: config['args']['mcc_path']+"/envs/mcc_ngs_te_mapper.yml"
-
-    output:
-        config['args']['out']+"/results/ngs_te_mapper/unfiltered/bed_tsd/"+config['args']['sample_name']+"_insertions.bed"
-    
-    script:
-        config['args']['mcc_path']+"/modules/ngs_te_mapper/ngs_te_mapper_run.py"
-
-rule ngs_te_mapper_post:
-    input:
-        config = config['args']['mcc_path']+"/config/ngs_te_mapper/ngs_te_mapper_post.py",
-        raw_bed = config['args']['out']+"/results/ngs_te_mapper/unfiltered/bed_tsd/"+config['args']['sample_name']+"_insertions.bed"
-
-    params:
-        out_dir = config['args']['out']+"/results/ngs_te_mapper/",
-        log = config['args']['out']+"/logs/ngs_te_mapper.log",
-        sample_name = config['args']['sample_name']
-    
-    threads: 1
-
-    conda: config['args']['mcc_path']+"/envs/mcc_ngs_te_mapper.yml"
-
-    output:
-        config['args']['out']+"/results/ngs_te_mapper/"+config['args']['sample_name']+"_ngs_te_mapper_nonredundant.bed"
-    
-    script:
-        config['args']['mcc_path']+"/modules/ngs_te_mapper/ngs_te_mapper_post.py"
-        
-
-rule popoolationTE:
-    input:
-        config['mcc']['popoolationTE_ref_fasta'],
-        config['mcc']['popoolationTE_taxonomy'],
-        config['mcc']['popoolationTE_gff'],
-        config['mcc']['fq1'],
-        config['mcc']['fq2']
-    
-    threads: workflow.cores
-
-    output:
-        config['args']['out']+"/results/popoolationTE/popoolationTE.log"
-
-    run:
-        shell("touch "+output[0])
 

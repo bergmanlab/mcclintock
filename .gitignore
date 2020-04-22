@@ -9,6 +9,7 @@ install/tools/*
 install/.snakemake/*
 install/install.log
 install/config.json
+install/envs/conda/*
 envs/conda/*
 install/log/*
 config/TEMP/__pycache__/*

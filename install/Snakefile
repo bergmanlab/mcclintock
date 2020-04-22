@@ -9,10 +9,10 @@ rule install_telocate:
         config['paths']['install']+"tools/te-locate/TE_locate.pl",
         config['paths']['install']+"tools/te-locate/TE_hierarchy.pl"
     
-    conda: config['paths']['envs']+"mcc_telocate.yml"
+    conda: config['ENVs']['te-locate']
 
     script:
-        config['paths']['install']+"te-locate.py"
+        config['paths']['install']+"scripts/te-locate.py"
 
 
 rule install_retroseq:
@@ -25,10 +25,10 @@ rule install_retroseq:
     output:
         config['paths']['install']+"tools/retroseq/bin/retroseq.pl"
     
-    conda: config['paths']['envs']+"mcc_retroseq.yml"
+    conda: config['ENVs']['retroseq']
 
     script:
-        config['paths']['install']+"retroseq.py"
+        config['paths']['install']+"scripts/retroseq.py"
 
 rule install_temp:
     params:
@@ -42,10 +42,10 @@ rule install_temp:
         config['paths']['install']+"tools/temp/scripts/TEMP_Insertion.sh",
         config['paths']['install']+"tools/temp/scripts/TEMP_Absence.sh"
     
-    conda: config['paths']['envs']+"mcc_temp.yml"
+    conda: config['ENVs']['temp']
 
     script:
-        config['paths']['install']+"temp.py"
+        config['paths']['install']+"scripts/temp.py"
 
 rule install_relocaTE:
     params:
@@ -58,10 +58,10 @@ rule install_relocaTE:
     output:
         config['paths']['install']+"tools/relocate/scripts/relocaTE_insertionFinder.pl"
 
-    conda: config['paths']['envs']+"mcc_relocate.yml"
+    conda: config['ENVs']['relocate']
 
     script:
-       config['paths']['install']+"relocate.py" 
+       config['paths']['install']+"scripts/relocate.py" 
 
 rule install_relocaTE2:
     params:
@@ -70,13 +70,13 @@ rule install_relocaTE2:
         zipfile = config['paths']['install']+"tools/relocate2/relocate2.zip",
         log = config['paths']['log_dir']+"install.log"
 
-    conda: config['paths']['envs']+"mcc_relocate2.yml"
+    conda: config['ENVs']['relocate2']
 
     output:
         config['paths']['install']+"tools/relocate2/scripts/relocaTE2.py"
     
     script:
-        config['paths']['install']+"relocate2.py"
+        config['paths']['install']+"scripts/relocate2.py"
 
 rule install_ngs_te_mapper:
     params:
@@ -88,10 +88,10 @@ rule install_ngs_te_mapper:
     output:
         config['paths']['install']+"tools/ngs_te_mapper/sourceCode/run_ngs_te_mapper.sh"
     
-    conda: config['paths']['envs']+"mcc_ngs_te_mapper.yml"
+    conda: config['ENVs']['ngs_te_mapper']
 
     script:
-        config['paths']['install']+"ngs_te_mapper.py"
+        config['paths']['install']+"scripts/ngs_te_mapper.py"
     
 rule install_popoolationTE:
     params:
@@ -110,10 +110,10 @@ rule install_popoolationTE:
         config['paths']['install']+"tools/popoolationte/samro.pl",
         config['paths']['install']+"tools/popoolationte/identify-te-insertsites.pl"
     
-    conda: config['paths']['envs']+"mcc_popoolationte.yml"
+    conda: config['ENVs']['popoolationte']
 
     script:
-        config['paths']['install']+"popoolationte.py"
+        config['paths']['install']+"scripts/popoolationte.py"
 
 rule install_coverage:
     params:
@@ -123,7 +123,7 @@ rule install_coverage:
     output:
         config['paths']['install']+"tools/coverage/coverage.log"    
 
-    conda: config['paths']['envs']+"mcc_coverage.yml"
+    conda: config['ENVs']['coverage']
 
     shell:
         "echo 'coverage env installed' > {output}"
@@ -144,7 +144,7 @@ rule install_all:
         config['paths']['install']+"tools/coverage/coverage.log",
         config['paths']['install']+"tools/relocate2/scripts/relocaTE2.py"
     
-    conda: config['paths']['envs']+"mcc_processing.yml"
+    conda: config['ENVs']['mcc_processing']
 
     shell:
         "echo 'install done!'"

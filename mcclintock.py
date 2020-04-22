@@ -4,7 +4,7 @@ import argparse
 import os
 import sys
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-import modules.mccutils as mccutils
+import scripts.mccutils as mccutils
 import config.config as config
 import config.install.install as config_install
 import json
@@ -134,33 +134,20 @@ def install(clean=False, debug=False):
     install_path = mcc_path+"/install/"
     install_config = install_path+"/config.json"
     log_dir = install_path+"/log/"
+    conda_env_dir = install_path+"/envs/conda"
     data = {}
     data['paths'] = {
         'mcc_path': mcc_path,
         'install' : install_path,
-        'envs' : mcc_path+"/envs/",
         'log_dir': log_dir
     }
     
-    data['URLs'] = {
-        'te-locate' : config_install.URL["te-locate"],
-        'retroseq' : config_install.URL["retroseq"],
-        'temp' : config_install.URL["temp"],
-        'relocate' : config_install.URL["relocate"],
-        'ngs_te_mapper' : config_install.URL["ngs_te_mapper"],
-        'popoolationte' : config_install.URL["popoolationte"],
-        'relocate2' : config_install.URL["relocate2"]
-    }
+    data['URLs'] = config_install.URL
+    data['MD5s'] = config_install.MD5
+    data['ENVs'] = config_install.ENV
 
-    data['MD5s'] = {
-        'te-locate' : config_install.MD5['te-locate'],
-        'retroseq' : config_install.MD5['retroseq'],
-        'temp' : config_install.MD5["temp"],
-        'relocate' : config_install.MD5["relocate"],
-        'ngs_te_mapper' : config_install.MD5["ngs_te_mapper"],
-        'popoolationte' : config_install.MD5["popoolationte"],
-        'relocate2' : config_install.MD5["relocate2"]
-    }
+    for method in data['ENVs'].keys():
+        data['ENVs'][method] = data['ENVs'][method].replace(config_install.ENV_PATH, install_path+"envs/")
 
     with open(install_config,"w") as config:
         json.dump(data, config, indent=4)
@@ -168,7 +155,6 @@ def install(clean=False, debug=False):
     if os.path.exists(install_path+"install.log"):
         os.remove(install_path+"install.log")
 
-    conda_env_dir = mcc_path+"/envs/conda"
 
     # removes installed tools and conda environments
     if clean:
@@ -218,62 +204,35 @@ def make_run_config(args, sample_name, ref_name):
 
     # where mcc copies will be stored
     input_dir = args.out+"/method_input/"
-    data["mcc"] = {
-        'mcc_files' : input_dir,
-        'reference' : input_dir+ref_name+".fasta",
-        'consensus' : input_dir+"consensusTEs.fasta",
-        'fq1' : input_dir+"fastq/"+sample_name+"_1.fq",
-        'fq2' : input_dir+"fastq/"+sample_name+"_2.fq",
-        'locations' : input_dir+"inrefTEs.gff",
-        'taxonomy' : input_dir+"taxonomy.tsv",
-        'coverage_fasta' : input_dir+"coverageTEs.fasta",
-        'masked_fasta' : input_dir+ref_name+".masked.fasta",
-        'formatted_ref_tes' : input_dir+ref_name+".ref.TEs.gff",
-        'formatted_taxonomy' : input_dir+ref_name+".TE.taxonomy.tsv",
-        'formatted_consensus' : input_dir+"formattedConsensusTEs.fasta",
-        'ref_te_fasta' : input_dir+ref_name+".ref.TEs.fasta",
-        'augmented_reference' : input_dir+ref_name+".aug.fasta",
-        'ref_tes_bed' : input_dir+ref_name+".ref.TEs.bed",
-        'telocate_te_gff' : input_dir+ref_name+".ref.TEs_HL.gff",
-        'telocate_sam' : input_dir+sample_name+".telocate.sam",
-        'telocate_ref_fasta' : input_dir+ref_name+".aug.telocate.fasta",
-        'sam' : input_dir+sample_name+".sam",
-        'bam' : input_dir+sample_name+".sorted.bam",
-        'ref_2bit' : input_dir+ref_name+".aug.fasta.2bit",
-        'relocaTE_consensus' : input_dir+"formattedConsensusTEs.relocaTE.fasta",
-        'relocaTE_ref_TEs' : input_dir+ref_name+".ref.TEs.relocaTE.gff",
-        'popoolationTE_ref_fasta' : input_dir+ref_name+".masked.popoolationTE.fasta",
-        'popoolationTE_taxonomy' : input_dir+"taxonomy.popoolationTE.tsv",
-        'popoolationTE_gff' : input_dir+ref_name+".ref.TEs.popoolationTE.gff",
-        'repeatmasker_out' : input_dir+ref_name+".repeatmasker.out"
-    }
+    data["mcc"] = config.INTERMEDIATE_PATHS
+    for key in data["mcc"].keys():
+        data["mcc"][key] = data["mcc"][key].replace(config.INPUT_DIR, input_dir)
+        data["mcc"][key] = data["mcc"][key].replace(config.REF_NAME, ref_name)
+        data["mcc"][key] = data["mcc"][key].replace(config.SAMPLE_NAME, sample_name)
+    
 
-    summary_dir = args.out+"/summary/"
-    data['summary'] = {
-        'flagstat' : input_dir+sample_name+".bam.flagstat",
-        'median_insert_size' : input_dir+"median_insert.size"
-    }
+    env_path = os.path.dirname(os.path.abspath(__file__))+"/install/envs/"
+    data["envs"] = config_install.ENV
+    for key in data["envs"].keys():
+        data['envs'][key] = data['envs'][key].replace(config_install.ENV_PATH, env_path)
 
 
-    with open(run_config,"w") as config:
-        json.dump(data, config, indent=4)
+    with open(run_config,"w") as conf:
+        json.dump(data, conf, indent=4)
     
     return run_id
 
 
 def run_workflow(args, sample_name, run_id, debug=False):
     log = args.out+"/mcclintock."+str(run_id)+".log"
-    out_files = {
-        'coverage': args.out+"/results/coverage/te_depth.csv",
-        'ngs_te_mapper': args.out+"/results/ngs_te_mapper/"+sample_name+"_ngs_te_mapper_nonredundant.bed",
-        'relocate': args.out+"/results/relocaTE/"+sample_name+"_relocate_redundant.bed",
-        'temp': args.out+"/results/TEMP/"+sample_name+"_temp_nonredundant.bed",
-        'retroseq': args.out+"/results/retroseq/retroseq.log",
-        'popoolationte': args.out+"/results/popoolationTE/popoolationTE.log",
-        'te-locate': args.out+"/results/te-locate/te-locate.log",
-        'trimgalore': args.out+"/input/"+sample_name+"_1.fastq",
-        'relocate2': args.out+"/results/relocaTE2/"+sample_name+"_relocate2_redundant.bed"
-    }
+
+    results_dir = args.out+"/results/"
+    input_dir = args.out+"/method_input/"
+    out_files = config.OUT_PATHS
+    for key in out_files.keys():
+        out_files[key] = out_files[key].replace(config.INPUT_DIR, input_dir)
+        out_files[key] = out_files[key].replace(config.RESULTS_DIR, results_dir)
+        out_files[key] = out_files[key].replace(config.SAMPLE_NAME, sample_name)   
 
     path=os.path.dirname(os.path.abspath(__file__))
     mccutils.mkdir(args.out+"/snakemake")
@@ -281,7 +240,7 @@ def run_workflow(args, sample_name, run_id, debug=False):
     mccutils.mkdir(snakemake_path)
     mccutils.run_command(["cp", path+"/Snakefile", snakemake_path])
     os.chdir(snakemake_path)
-    command = ["snakemake","--use-conda", "--conda-prefix", path+"/envs/conda"]
+    command = ["snakemake","--use-conda", "--conda-prefix", path+"/install/envs/conda"]
     if not debug:
         command.append("--quiet")
 
