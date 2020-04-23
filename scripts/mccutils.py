@@ -152,3 +152,14 @@ def remove(infile):
                 shutil.rmtree(infile)
         except OSError as e:
             print("Error: %s : %s" % (infile, e.strerror))
+
+
+def get_median_insert_size(infile):
+    median_insert_size = 0
+    with open(infile,"r") as inf:
+        for line in inf:
+            insert = line.split("=")[1]
+            insert = insert.replace("\n","")
+            median_insert_size = int(float(insert))
+    
+    return median_insert_size

@@ -24,7 +24,7 @@ INTERMEDIATE_PATHS = {
         'augmented_reference' : INPUT_DIR+REF_NAME+".aug.fasta",
         'ref_tes_bed' : INPUT_DIR+REF_NAME+".ref.TEs.bed",
         'telocate_te_gff' : INPUT_DIR+REF_NAME+".ref.TEs_HL.gff",
-        'telocate_sam' : INPUT_DIR+SAMPLE_NAME+".telocate.sam",
+        'telocate_sam' : INPUT_DIR+"telocate_sam/"+SAMPLE_NAME+".telocate.sam",
         'telocate_ref_fasta' : INPUT_DIR+REF_NAME+".aug.telocate.fasta",
         'sam' : INPUT_DIR+SAMPLE_NAME+".sam",
         'bam' : INPUT_DIR+SAMPLE_NAME+".sorted.bam",
@@ -48,7 +48,7 @@ OUT_PATHS = {
         'temp': RESULTS_DIR+"TEMP/"+SAMPLE_NAME+"_temp_nonredundant.bed",
         'retroseq': RESULTS_DIR+"retroseq/retroseq.log",
         'popoolationte': RESULTS_DIR+"popoolationTE/popoolationTE.log",
-        'te-locate': RESULTS_DIR+"te-locate/te-locate.log",
+        'te-locate': RESULTS_DIR+"te-locate/"+SAMPLE_NAME+"_telocate_nonredundant.bed",
         'trimgalore': INPUT_DIR+"fastq/"+SAMPLE_NAME+"_1.fq",
         'relocate2': RESULTS_DIR+"relocaTE2/"+SAMPLE_NAME+"_relocate2_redundant.bed"
 }

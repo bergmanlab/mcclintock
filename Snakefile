@@ -573,20 +573,46 @@ rule popoolationTE:
     run:
         shell("touch "+output[0])
 
-rule telocate:
+rule telocate_run:
     input:
-        config['mcc']['telocate_te_gff'],
-        config['mcc']['median_insert_size'],
-        config['mcc']['telocate_sam'],
-        config['mcc']['telocate_ref_fasta'],
+        te_gff = config['mcc']['telocate_te_gff'],
+        sam = config['mcc']['telocate_sam'],
+        ref =config['mcc']['telocate_ref_fasta'],
+        median_insert_size = config['mcc']['median_insert_size']
+    
+    params:
+        run_script = config['args']['mcc_path']+"/install/tools/te-locate/TE_locate.pl",
+        max_mem = config['args']['mem'],
+        out_dir = config['args']['out']+"/results/te-locate/unfiltered/"
     
     threads: 1
 
+    conda: config['envs']['te-locate']
+
     output:
-        config['args']['out']+"/results/te-locate/te-locate.log"
+        config['args']['out']+"/results/te-locate/unfiltered/te-locate-raw.info"
     
-    run:
-        shell("touch "+config['args']['out']+"/results/te-locate/te-locate.log")
+    script:
+        config['args']['mcc_path']+"/scripts/telocate/telocate_run.py"
+
+rule telocate_post:
+    input:
+        telocate_raw = config['args']['out']+"/results/te-locate/unfiltered/te-locate-raw.info",
+        te_gff = config['mcc']['telocate_te_gff']
+    
+    params:
+        out_dir = config['args']['out']+"/results/te-locate/",
+        sample_name = config['args']['sample_name']
+    
+    threads: 1
+
+    conda: config['envs']['te-locate']
+
+    output:
+        config['args']['out']+"/results/te-locate/"+config['args']['sample_name']+"_telocate_nonredundant.bed"
+    
+    script:
+        config['args']['mcc_path']+"/scripts/telocate/telocate_post.py"
 
 
 rule retroseq:
