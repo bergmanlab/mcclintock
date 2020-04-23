@@ -38,19 +38,21 @@ def read_insertions(telocate_out, sample_name):
                 insert = Insertion()
                 split_line = line.split("\t")
                 insert.chromosome = split_line[0]
-                insert.start = int(split_line[1])-1
-                insert.end = insert.start+int(split_line[2])
+                insert.start = int(split_line[1])
+                
                 te_name = split_line[3].split("/")[1]
                 if "old" in split_line[15]:
                     insert.type = "ref"
+                    insert.end = insert.start+int(split_line[2])
                     insert.name = te_name+"_reference_"+sample_name+"_telocate_rp_"
                 else:
                     insert.type = "nonref"
+                    insert.end = insert.start
                     insert.name = te_name+"_non-reference_"+sample_name+"_telocate_rp_"
 
-                if split_line[13] == "parallel":
+                if split_line[12] == "parallel":
                     insert.strand = "+"
-                elif split_line[13] == "uncertain":
+                elif split_line[12] == "uncertain":
                     insert.strand = "."
                 else:
                     insert.strand = "-"
@@ -79,9 +81,10 @@ def filter_by_reference(insertions, te_gff):
         if insert.type == "nonref":
             passed_insertions.append(insert)
         else:
-            if insert.chromosome+"_"+str(insert.start+1) in gff_insertions.keys():
-                insert.strand = gff_insertions[insert.chromosome+"_"+str(insert.start+1)]
+            if insert.chromosome+"_"+str(insert.start) in gff_insertions.keys():
+                insert.strand = gff_insertions[insert.chromosome+"_"+str(insert.start)]
                 passed_insertions.append(insert)
+            
     
     return passed_insertions
 
