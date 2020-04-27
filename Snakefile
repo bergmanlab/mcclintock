@@ -615,19 +615,46 @@ rule telocate_post:
         config['args']['mcc_path']+"/scripts/telocate/telocate_post.py"
 
 
-rule retroseq:
+rule retroseq_run:
     input:
-        config['mcc']['formatted_consensus'],
-        config['mcc']['bam'],
-        config['mcc']['augmented_reference'],
-        config['mcc']['ref_tes_bed'],
-        config['mcc']['formatted_taxonomy']
+        consensus_fasta = config['mcc']['formatted_consensus'],
+        bam = config['mcc']['bam'],
+        ref_fasta = config['mcc']['augmented_reference'],
+        ref_te_bed = config['mcc']['ref_tes_bed'],
+        taxonomy = config['mcc']['formatted_taxonomy']
 
     threads: 1
+
+    conda: config['envs']['retroseq']
+
+    params:
+        script_dir = config['args']['mcc_path']+"/install/tools/retroseq/bin/",
+        out_dir = config['args']['out']+"/results/retroseq/unfiltered/",
+        ref_name=config['args']['ref_name'],
+        sample_name=config['args']['sample_name']
     
     output:
-        config['args']['out']+"/results/retroseq/retroseq.log"
+        config['args']['out']+"/results/retroseq/unfiltered/"+config['args']['sample_name']+".call.PE.vcf"
     
-    run:
-        shell("touch "+config['args']['out']+"/results/retroseq/retroseq.log")
+    script:
+        config['args']['mcc_path']+"/scripts/retroseq/retroseq_run.py"
+
+rule retroseq_post:
+    input:
+        retroseq_out = config['args']['out']+"/results/retroseq/unfiltered/"+config['args']['sample_name']+".call.PE.vcf"
+
+    threads: 1
+
+    conda: config['envs']['retroseq']
+
+    params:
+        out_dir = config['args']['out']+"/results/retroseq/",
+        ref_name=config['args']['ref_name'],
+        sample_name=config['args']['sample_name']
+    
+    output:
+        config['args']['out']+"/results/retroseq/"+config['args']['sample_name']+"_retroseq_nonredundant.bed"
+    
+    script:
+        config['args']['mcc_path']+"/scripts/retroseq/retroseq_post.py"
 

@@ -46,7 +46,7 @@ OUT_PATHS = {
         'ngs_te_mapper': RESULTS_DIR+"ngs_te_mapper/"+SAMPLE_NAME+"_ngs_te_mapper_nonredundant.bed",
         'relocate': RESULTS_DIR+"relocaTE/"+SAMPLE_NAME+"_relocate_redundant.bed",
         'temp': RESULTS_DIR+"TEMP/"+SAMPLE_NAME+"_temp_nonredundant.bed",
-        'retroseq': RESULTS_DIR+"retroseq/retroseq.log",
+        'retroseq': RESULTS_DIR+"retroseq/"+SAMPLE_NAME+"_retroseq_nonredundant.bed",
         'popoolationte': RESULTS_DIR+"popoolationTE/popoolationTE.log",
         'te-locate': RESULTS_DIR+"te-locate/"+SAMPLE_NAME+"_telocate_nonredundant.bed",
         'trimgalore': INPUT_DIR+"fastq/"+SAMPLE_NAME+"_1.fq",
