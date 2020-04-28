@@ -17,6 +17,7 @@ class Insertion:
         self.breakpoint_confidence = -1
 
 def main():
+    print("<RETROSEQ POST> Processing RetroSeq results...")
     retroseq_out = snakemake.input.retroseq_out
 
     out_dir = snakemake.params.out_dir
@@ -26,6 +27,7 @@ def main():
     insertions = read_insertions(retroseq_out, sample_name, support_threshold=config.READ_SUPPORT_THRESHOLD, breakpoint_threshold=config.BREAKPOINT_CONFIDENCE_THRESHOLD)
     insertions = make_redundant_bed(insertions, sample_name, out_dir)
     make_nonredundant_bed(insertions, sample_name, out_dir)
+    print("<RETROSEQ POST> RetroSeq post processing complete")
 
 def read_insertions(retroseq_vcf, sample_name, support_threshold=0, breakpoint_threshold=6):
     insertions = []

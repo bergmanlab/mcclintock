@@ -7,6 +7,7 @@ import config.telocate.telocate_run as config
 
 
 def main():
+    print("<TELOCATE> Running TE-Locate...")
     te_gff = snakemake.input.te_gff
     sam = snakemake.input.sam
     ref_fasta = snakemake.input.ref
@@ -15,6 +16,7 @@ def main():
     telocate = snakemake.params.run_script
     max_mem = snakemake.params.max_mem
     out_dir = snakemake.params.out_dir
+    log = snakemake.params.log
 
 
     sam_dir = os.path.dirname(sam)
@@ -27,10 +29,11 @@ def main():
 
     command = ["perl", telocate, str(max_mem), sam_dir, te_gff, ref_fasta, out_dir, str(distance), str(config.MIN_SUPPORT_READS), str(config.MIN_SUPPORT_INDIVIDUALS)]
 
-    mccutils.run_command(command)
+    mccutils.run_command(command, log=log)
 
 
     mccutils.run_command(["cp", out_dir+"_"+str(distance)+"_reads3_acc1.info", out_dir+"te-locate-raw.info"])
+    print("<TELOCATE> TE-Locate complete")
 
 
 

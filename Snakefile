@@ -557,21 +557,6 @@ rule ngs_te_mapper_post:
         config['args']['mcc_path']+"/scripts/ngs_te_mapper/ngs_te_mapper_post.py"
         
 
-rule popoolationTE:
-    input:
-        config['mcc']['popoolationTE_ref_fasta'],
-        config['mcc']['popoolationTE_taxonomy'],
-        config['mcc']['popoolationTE_gff'],
-        config['mcc']['fq1'],
-        config['mcc']['fq2']
-    
-    threads: workflow.cores
-
-    output:
-        config['args']['out']+"/results/popoolationTE/popoolationTE.log"
-
-    run:
-        shell("touch "+output[0])
 
 rule telocate_run:
     input:
@@ -583,7 +568,8 @@ rule telocate_run:
     params:
         run_script = config['args']['mcc_path']+"/install/tools/te-locate/TE_locate.pl",
         max_mem = config['args']['mem'],
-        out_dir = config['args']['out']+"/results/te-locate/unfiltered/"
+        out_dir = config['args']['out']+"/results/te-locate/unfiltered/",
+        log = config['args']['out']+"/logs/te-locate.log"
     
     threads: 1
 
@@ -631,7 +617,8 @@ rule retroseq_run:
         script_dir = config['args']['mcc_path']+"/install/tools/retroseq/bin/",
         out_dir = config['args']['out']+"/results/retroseq/unfiltered/",
         ref_name=config['args']['ref_name'],
-        sample_name=config['args']['sample_name']
+        sample_name=config['args']['sample_name'],
+        log = config['args']['out']+"/logs/retroseq.log"
     
     output:
         config['args']['out']+"/results/retroseq/unfiltered/"+config['args']['sample_name']+".call.PE.vcf"
@@ -658,3 +645,52 @@ rule retroseq_post:
     script:
         config['args']['mcc_path']+"/scripts/retroseq/retroseq_post.py"
 
+
+rule popoolationTE_preprocessing:
+    input:
+        ref_fasta = config['mcc']['popoolationTE_ref_fasta'],
+        taxonomy = config['mcc']['popoolationTE_taxonomy'],
+        te_gff = config['mcc']['popoolationTE_gff'],
+        fq1 = config['mcc']['fq1'],
+        fq2 = config['mcc']['fq2']
+    
+    threads: workflow.cores
+
+    conda: config['envs']['popoolationte']
+
+    params:
+        out_dir = config['args']['out']+"/results/popoolationTE/unfiltered/",
+        sample_name=config['args']['sample_name'],
+        log = config['args']['out']+"/logs/popoolationTE.log"
+
+    output:
+        config['args']['out']+"/results/popoolationTE/unfiltered/reads1.sam",
+        config['args']['out']+"/results/popoolationTE/unfiltered/reads2.sam"
+
+    script:
+        config['args']['mcc_path']+"/scripts/popoolationte/popoolationte_pre.py"
+
+rule popoolationTE_run:
+    input:
+        ref_fasta = config['mcc']['popoolationTE_ref_fasta'],
+        taxonomy = config['mcc']['popoolationTE_taxonomy'],
+        te_gff = config['mcc']['popoolationTE_gff'],
+        fq1 = config['mcc']['fq1'],
+        fq2 = config['mcc']['fq2'],
+        sam1 = config['args']['out']+"/results/popoolationTE/unfiltered/reads1.sam",
+        sam2 = config['args']['out']+"/results/popoolationTE/unfiltered/reads2.sam"
+    
+    threads: 1
+
+    conda: config['envs']['popoolationte']
+
+    params:
+        out_dir = config['args']['out']+"/results/popoolationTE/unfiltered/",
+        sample_name=config['args']['sample_name'],
+        log = config['args']['out']+"/logs/popoolationTE.log"
+
+    output:
+        config['args']['out']+"/results/popoolationTE/unfiltered/popoolationTE.log"
+
+    script:
+        config['args']['mcc_path']+"/scripts/popoolationte/popoolationte_run.py"

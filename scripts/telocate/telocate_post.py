@@ -17,6 +17,7 @@ class Insertion:
 
 
 def main():
+    print("<TELOCATE> Processing TE-Locate results...")
     telocate_raw = snakemake.input.telocate_raw
     te_gff = snakemake.input.te_gff
 
@@ -27,6 +28,7 @@ def main():
     insertions = filter_by_reference(insertions, te_gff)
     insertions = make_redundant_bed(insertions, sample_name, out_dir)
     make_nonredundant_bed(insertions, sample_name, out_dir)
+    print("<TELOCATE> TE-Locate post processing complete")
 
 
 

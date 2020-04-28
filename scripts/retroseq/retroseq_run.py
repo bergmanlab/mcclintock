@@ -9,6 +9,7 @@ from Bio import SeqIO
 
 
 def main():
+    print("<RETROSEQ> Running RetroSeq...")
     consensus_fasta = snakemake.input.consensus_fasta
     bam = snakemake.input.bam
     ref_fasta = snakemake.input.ref_fasta
@@ -19,12 +20,14 @@ def main():
     out_dir = snakemake.params.out_dir
     ref_name = snakemake.params.ref_name
     sample_name = snakemake.params.sample_name
+    log = snakemake.params.log
 
     elements = split_consensus_fasta(consensus_fasta, ref_name, out_dir)
 
     bed_location_file = make_consensus_beds(elements, ref_name, ref_te_bed, taxonomy, out_dir)
 
-    run_retroseq(bam, bed_location_file, ref_fasta, script_dir, sample_name, out_dir, config.PARAMETERS)
+    run_retroseq(bam, bed_location_file, ref_fasta, script_dir, sample_name, out_dir, config.PARAMETERS, log=log)
+    print("<RETROSEQ> RetroSeq complete")
 
 
 
@@ -93,14 +96,14 @@ def make_consensus_beds(elements, ref_name, te_bed, taxon, out):
     return location_file
     
 
-def run_retroseq(bam, bed_locations, ref_fasta, script_dir, sample_name, out_dir, params):
+def run_retroseq(bam, bed_locations, ref_fasta, script_dir, sample_name, out_dir, params, log=None):
     discovery_out = out_dir+"/"+sample_name+".discovery"
     command = ["perl", script_dir+"/retroseq.pl", "-discover",  "-bam", bam, "-refTEs", bed_locations, "-output", discovery_out, "-depth", str(params["depth"]), "-reads", str(params['reads']), "-q", str(params['q'])]
-    mccutils.run_command(command)
+    mccutils.run_command(command, log=log)
 
     call_out  = out_dir+"/"+sample_name+".call"
     command = ["perl", script_dir+"/retroseq.pl", "-call", "-bam", bam, "-input", discovery_out, "-filter", bed_locations, "-ref", ref_fasta, "-output", call_out, "-orientate", "yes", "-depth", str(params["depth"]), "-reads", str(params['reads']), "-q", str(params['q'])]
-    mccutils.run_command(command)
+    mccutils.run_command(command, log=log)
     
 
             
