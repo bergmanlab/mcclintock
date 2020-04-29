@@ -19,11 +19,16 @@ def main():
     raw_fq2 = snakemake.params.raw_fq2
     out_dir = snakemake.params.out_dir
     log = snakemake.params.log
-    script = snakemake.params.script_dir+"relocaTE2.py"
     median_insert_size_file = snakemake.input.median_insert_size
 
     median_insert_size = get_median_insert_size(median_insert_size_file)
     fq_dir = os.path.dirname(fq1)
+
+    output = subprocess.Popen(["which", "relocaTE2.py"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    script = output.stdout.read()
+    script = script.decode()
+    script = script.replace("\n","")
+
 
     is_paired = True
     if snakemake.params.raw_fq2 == "None":

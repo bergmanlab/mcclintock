@@ -474,8 +474,7 @@ rule relocaTE2_run:
     params:
         raw_fq2 = config['in']['fq2'],
         out_dir = config['args']['out']+"/results/relocaTE2/unfiltered/",
-        log = config['args']['out']+"/logs/relocaTE2.log",
-        script_dir = config['args']['mcc_path']+"/install/tools/relocate2/scripts/"
+        log = config['args']['out']+"/logs/relocaTE2.log"
     
     output:
         config['args']['out']+"/results/relocaTE2/unfiltered/repeat/results/ALL.all_nonref_insert.gff",
