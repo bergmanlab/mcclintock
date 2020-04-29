@@ -2,7 +2,7 @@ import sys
 import os
 import subprocess
 sys.path.append(snakemake.config['paths']['mcc_path'])
-import modules.mccutils as mccutils
+import scripts.mccutils as mccutils
 
 def main():
     print("installing relocaTE...")

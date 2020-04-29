@@ -1,7 +1,7 @@
 import sys
 import os
 sys.path.append(snakemake.config['paths']['mcc_path'])
-import modules.mccutils as mccutils
+import scripts.mccutils as mccutils
 
 def main():
     print("installing ngs_te_mapper...")
