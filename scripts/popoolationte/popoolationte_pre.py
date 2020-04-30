@@ -9,28 +9,35 @@ import scripts.mccutils as mccutils
 def main():
     print("<POPOOLATIONTE PREPROCESSING> Running PopoolationTE preprocessing steps...")
     ref_fasta = snakemake.input.ref_fasta
-    taxonomy = snakemake.input.taxonomy
-    te_gff = snakemake.input.te_gff
     fq1 = snakemake.input.fq1
     fq2 = snakemake.input.fq2
 
     out_dir = snakemake.params.out_dir
     sample_name = snakemake.params.sample_name
     log = snakemake.params.log
+    script_dir = snakemake.params.script_dir
 
     threads = snakemake.threads
 
+    print("\tformatting read names...")
     fq1,fq2 = format_read_names(fq1, fq2, sample_name, out_dir)
-
+    print("\tindexing popoolationTE reference fasta...")
     index_fasta(ref_fasta, log=log)
-    map_reads(fq1, ref_fasta, snakemake.output[0], threads=threads, log=log)
-    map_reads(fq2, ref_fasta, snakemake.output[1], threads=threads, log=log)
-
+    print("\tmapping reads from "+fq1)
+    sam1 = map_reads(fq1, ref_fasta, threads=threads, log=log)
+    print("\tmapping reads from "+fq2)
+    sam2 = map_reads(fq2, ref_fasta, threads=threads, log=log)
+    print("\tcombining alignments...")
+    combined_sam = combine_alignments(sam1, sam2, fq1, fq2, script_dir, out_dir)
+    print("\tsorting sam file...")
+    bam = sam_to_bam(combined_sam, threads=threads)
+    sorted_bam = sort_bam(bam, threads=threads)
+    sorted_sam = bam_to_sam(sorted_bam, threads=threads)
     print("<POPOOLATIONTE PREPROCESSING> PopoolationTE preprocessing complete")
 
 def format_read_names(fq1, fq2, sample_name, out_dir):
-    outfq1 = out_dir+"/reads1.fastq"
-    outfq2 = out_dir+"/reads2.fastq"
+    outfq1 = out_dir+"reads1.fastq"
+    outfq2 = out_dir+"reads2.fastq"
 
     with open(outfq1,"w") as outfq:
         with open(fq1,"r") as infq:
@@ -58,30 +65,54 @@ def index_fasta(fasta, log=None):
     command = ["bwa", "index", fasta]
     mccutils.run_command(command, log=log)
 
-def map_reads(fq, fasta, outfile, threads=1, log=None):
+def map_reads(fq, fasta, threads=1, log=None):
+    outfile = fq.split(".")
+    outfile[-1] = "sam"
+    outfile = ".".join(outfile)
+
     command = ["bwa", "bwasw", "-t", str(threads), fasta, fq]
     mccutils.run_command_stdout(command, outfile, log=log)
 
-def get_read_length(fq1, fq2):
-    read1_length = 0
-    with open(fq1, "r") as fq:
-        for l, line in fq:
-            if l == 1:
-                read1_length = len(line.replace("\n",""))
-            elif l > 1:
-                break
-    
-    read2_length = 0
-    with open(fq2, "r") as fq:
-        for l, line in fq:
-            if l == 1:
-                read2_length = len(line.replace("\n",""))
-            elif l > 1:
-                break
-    
-    read_length = int((read1_length + read2_length)//2)
+    return outfile
 
-    return(read_length)
+
+def combine_alignments(sam1, sam2, fq1, fq2, script_path, out):
+    out_sam = out+"combined.sam"
+    command = ["perl", script_path+"samro.pl", "--sam1", sam1, "--sam2", sam2, "--fq1", fq1, "--fq2", fq2, "--output", out_sam]
+    mccutils.run_command(command)
+    return out_sam
+
+
+def sam_to_bam(sam, threads=1):
+    bam = sam.split(".")
+    bam[-1] = "bam"
+    bam = ".".join(bam)
+
+    command = ["samtools","view", "-Sb", "-@", str(threads), sam]
+    mccutils.run_command_stdout(command, bam)
+
+    return bam
+
+def sort_bam(bam, threads=1):
+    sorted_bam = bam.split(".")
+    sorted_bam[-1] = "sorted.bam"
+    sorted_bam = ".".join(sorted_bam)
+    print(sorted_bam)
+    command = ["samtools", "sort", bam, "-@", str(threads), "-o", sorted_bam]
+    print(command)
+    mccutils.run_command_stdout(command, sorted_bam)
+
+    return sorted_bam
+
+def bam_to_sam(bam, threads=1):
+    sam = bam.split(".")
+    sam[-1] = "sam"
+    sam = ".".join(sam)
+
+    command = ["samtools", "view", "-@", str(threads), bam]
+    mccutils.run_command_stdout(command, sam)
+
+    return sam
 
 
 if __name__ == "__main__":                
