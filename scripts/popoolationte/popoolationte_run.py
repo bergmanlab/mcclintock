@@ -26,8 +26,10 @@ def main():
     print("\tcalculating median insert size...")
     median_insert_size = get_median_insert_size(sam)
     max_dist = int(median_insert_size * (3+read_length))
+    print("\tconverting TE gff to PoPoolationTE known TE file...")
     known_inserts = make_known_insert_file(te_gff, out_dir)
-    run_popoolationte(sam, ref_fasta, taxonomy, read_length, median_insert_size, max_dist, known_inserts, script_dir, out_dir)
+    print("\tRunning the PoPoolationTE workflow scripts...")
+    run_popoolationte(sam, ref_fasta, taxonomy, read_length, median_insert_size, max_dist, known_inserts, script_dir, out_dir, log=log)
     mccutils.run_command(["touch", snakemake.output[0]])
 
 
@@ -91,7 +93,8 @@ def make_known_insert_file(gff, out):
     
     return out_file
 
-def run_popoolationte(sam, reference, taxon, read_len, insert_size, max_dist, ref_inserts, script_dir, out_dir):
+def run_popoolationte(sam, reference, taxon, read_len, insert_size, max_dist, ref_inserts, script_dir, out_dir, log=None):
+    print("\t\tidentify-te-insertsites.pl")
     insert_sites = out_dir+"te-fwd-rev.txt"
     command = ["perl", script_dir+"identify-te-insertsites.pl", 
                     "--input", sam, 
@@ -99,12 +102,14 @@ def run_popoolationte(sam, reference, taxon, read_len, insert_size, max_dist, re
                     "--te-hierarchy-level", "family", 
                     "--narrow-range", str(read_len), "--min-count", "3",
                     "--min-map-qual", "15", "--output", insert_sites, "--insert-distance", str(insert_size), "--read-length", str(read_len)]
-    mccutils.run_command(command)
+    mccutils.run_command(command, log=log)
 
+    print("\t\tgenomic-N-2gtf.pl")
     poly_n = out_dir+"poly_n.gtf"
     command = ["perl", script_dir+"genomic-N-2gtf.pl", "--input", reference]
-    mccutils.run_command_stdout(command, poly_n)
+    mccutils.run_command_stdout(command, poly_n, log=log)
 
+    print("\t\tcrosslink-te-sites.pl")
     crosslinked = out_dir+"te-inserts.txt"
     command = ["perl", script_dir+"crosslink-te-sites.pl", 
                     "--directional-insertions", insert_sites, 
@@ -115,8 +120,9 @@ def run_popoolationte(sam, reference, taxon, read_len, insert_size, max_dist, re
                     "--poly-n", poly_n,
                     "--te-hierarchy", taxon,
                     "--te-hier-level", "family"]
-    mccutils.run_command(command)
+    mccutils.run_command(command, log=log)
 
+    print("\t\tupdate-teinserts-with-knowntes.pl")
     updated_inserts = out_dir+"te-insertions-updated.txt"
     command = ["perl", script_dir+"update-teinserts-with-knowntes.pl", 
                     "--known", ref_inserts,
@@ -126,8 +132,9 @@ def run_popoolationte(sam, reference, taxon, read_len, insert_size, max_dist, re
                     "--max-dist", str(max_dist),
                     "--te-insertions", crosslinked,
                     "--single-site-shift", "100"]
-    mccutils.run_command(command)
+    mccutils.run_command(command, log=log)
 
+    print("\t\testimate-polymorphism.pl")
     te_polymorphism = out_dir+"te-polymorphism"
     command = ["perl", script_dir+"estimate-polymorphism.pl", 
                     "--sam-file", sam,
@@ -136,15 +143,16 @@ def run_popoolationte(sam, reference, taxon, read_len, insert_size, max_dist, re
                     "--te-hierarchy-level", "family",
                     "--min-map-qual", "15",
                     "--output", te_polymorphism]
-    mccutils.run_command(command)
+    mccutils.run_command(command, log=log)
 
+    print("\t\tfilter-teinserts.pl")
     filtered = out_dir+"te-poly-filtered.txt"
     command = ["perl", script_dir+"filter-teinserts.pl",
                     "--te-insertions", te_polymorphism,
                     "--output", filtered,
                     "--discard-overlapping",
                     "--min-count", "5"]
-    mccutils.run_command(command)
+    mccutils.run_command(command, log=log)
 
 if __name__ == "__main__":                
     main()

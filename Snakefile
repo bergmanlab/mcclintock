@@ -693,3 +693,22 @@ rule popoolationTE_run:
 
     script:
         config['args']['mcc_path']+"/scripts/popoolationte/popoolationte_run.py"
+
+rule popoolationTE_post:
+    input:
+        popoolationte_out = config['args']['out']+"/results/popoolationTE/unfiltered/te-poly-filtered.txt"
+    
+    threads: 1
+
+    conda: config['envs']['popoolationte']
+
+    params:
+        out_dir = config['args']['out']+"/results/popoolationTE/",
+        sample_name=config['args']['sample_name'],
+        log = config['args']['out']+"/logs/popoolationTE.log"
+
+    output:
+        config['args']['out']+"/results/popoolationTE/"+config['args']['sample_name']+"_popoolationte_nonredundant.bed"
+
+    script:
+        config['args']['mcc_path']+"/scripts/popoolationte/popoolationte_post.py"
