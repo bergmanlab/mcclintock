@@ -3,6 +3,7 @@ import sys
 import subprocess
 sys.path.append(snakemake.config['args']['mcc_path'])
 import scripts.mccutils as mccutils
+import config.popoolationte.popoolationte_post as config
 
 class Insertion:
     def __init__(self):
@@ -26,7 +27,7 @@ def main():
     sample_name = snakemake.params.sample_name
     log = snakemake.params.log
 
-    insertions = read_insertions(popoolationte_out, sample_name)
+    insertions = read_insertions(popoolationte_out, sample_name, require_both_end_support=config.REQUIRE_BOTH_END_SUPPORT, percent_read_support_threshold=config.PERCENT_READ_SUPPORT_THRESHOLD)
     insertions = make_redundant_bed(insertions, sample_name, out_dir)
     make_nonredundant_bed(insertions, sample_name, out_dir)
     print("<POPOOLATIONTE POSTPROCESSING> PopoolationTE postprocessing complete")
