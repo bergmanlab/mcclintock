@@ -7,7 +7,7 @@ import scripts.mccutils as mccutils
 
 def main():
     log = snakemake.params.log
-    print("<PROCESSING> Converting sam to bam")
+    print("<PROCESSING> Converting sam to bam...log:"+log)
     command = ["samtools","view", "-@", str(snakemake.threads), "-Sb", "-t", snakemake.input.ref_idx, snakemake.input.sam]
     mccutils.run_command_stdout(command, snakemake.output.tmp_bam, log=log)
 

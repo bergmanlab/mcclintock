@@ -9,6 +9,7 @@ import config.config as config
 import config.install.install as config_install
 import json
 import random
+from datetime import datetime
 
 
 
@@ -176,11 +177,17 @@ def make_run_config(args, sample_name, ref_name):
     mccutils.mkdir(args.out+"/snakemake")
     mccutils.mkdir(args.out+"/snakemake/config")
     run_config = args.out+"/snakemake/config/config_"+str(run_id)+".json"
+
+    now = datetime.now()
+    now_str = now.strftime("%d-%m-%Y_%H.%M.%S")
+    mccutils.mkdir(args.out+"/logs/"+now_str+"_"+str(run_id))
+
     data = {}
     data['args'] = {
         'proc': str(args.proc),
         'mem': str(args.mem),
         'out': str(args.out),
+        'log_dir': args.out+"/logs/"+now_str+"_"+str(run_id)+"/",
         'include_consensus': str(args.include_consensus_te),
         'include_reference': str(args.include_reference_te),
         'mcc_path': os.path.dirname(os.path.abspath(__file__)),

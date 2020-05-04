@@ -18,24 +18,25 @@ def main():
     processors = snakemake.config['args']['proc']
     mcc_out = snakemake.config['args']['out']
     run_id = snakemake.config['args']['run_id']
+    log = snakemake.params.log
 
     print("<PROCESSING> creating reference TE files...")
     # if no reference TEs were provided, they must be found with repeatmasker
     if ref_tes == "None":
         print("<PROCESSING> no reference TEs provided... finding reference TEs with RepeatMasker...")
-        masked_reference, formatted_ref_tes = repeat_mask(reference_fa, consensus_TEs, processors, run_id, mcc_out)
+        masked_reference, formatted_ref_tes = repeat_mask(reference_fa, consensus_TEs, processors, run_id, log, mcc_out)
         formatted_consensus_TEs, te_families = format_consensus_tes(consensus_TEs, run_id, mcc_out)
         formatted_taxonomy_tsv, formatted_ref_tes = make_te_taxonomy_map(formatted_ref_tes, te_families, run_id, mcc_out)
 
     # use provided reference TEs to mask genome
     else:
         formatted_ref_tes = format_ref_te_gff(ref_tes, run_id, mcc_out)
-        masked_reference = mask_reference(reference_fa, formatted_ref_tes, run_id, mcc_out)
+        masked_reference = mask_reference(reference_fa, formatted_ref_tes, run_id, log, mcc_out)
         formatted_taxonomy_tsv = taxonomy_tsv
         formatted_consensus_TEs = consensus_TEs
 
 
-    ref_te_fasta = get_ref_te_fasta(reference_fa, formatted_ref_tes, run_id, mcc_out)
+    ref_te_fasta = get_ref_te_fasta(reference_fa, formatted_ref_tes, run_id, log, mcc_out)
 
     popoolationTE_tsv = make_popoolationTE_taxonomy(formatted_taxonomy_tsv, formatted_consensus_TEs, run_id, mcc_out)
 
@@ -67,12 +68,11 @@ def main():
 
 
 # creates reference TE gff using repeatmasker and consensus TE fasta
-def repeat_mask(reference, te_fasta, procs, run_id, out):
+def repeat_mask(reference, te_fasta, procs, run_id, log, out):
     outdir = out+"/tmp/repeatmasker_"+run_id
     mccutils.mkdir(outdir)
     os.chdir(outdir)
     command = ["RepeatMasker","-pa", procs, "-lib", te_fasta, "-dir", outdir, "-s", "-gff", "-nolow", "-no_is", reference]
-    log = out+"/logs/repeatmasker.log"
     mccutils.run_command(command, log=log)
     os.chdir(out)
 
@@ -187,16 +187,14 @@ def format_ref_te_gff(ref_tes, run_id, out):
     
     
 # masks reference genome using reference TEs provided by user
-def mask_reference(reference, ref_tes_gff, run_id, out):
+def mask_reference(reference, ref_tes_gff, run_id, log, out):
     masked_reference = out+"/tmp/"+run_id+"tmpmaskedreference.fasta"
-    log = out+"/logs/bedtools.maskfasta.log"
     command = ["bedtools", "maskfasta", "-fi", reference, "-fo", masked_reference, "-bed", ref_tes_gff]
     mccutils.run_command(command, log=log)
 
     return masked_reference
 
-def get_ref_te_fasta(reference, ref_tes_gff, run_id, out):
-    log = out+"/logs/bedtools.getfasta.log"
+def get_ref_te_fasta(reference, ref_tes_gff, run_id, log, out):
     ref_te_fasta = out+"/tmp/"+run_id+"tmpreferencetes.fasta"
     command = ["bedtools", "getfasta", "-name", "-fi", reference, "-bed", ref_tes_gff, "-fo", ref_te_fasta]
     mccutils.run_command(command, log=log)

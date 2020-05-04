@@ -45,7 +45,7 @@ def main():
 
 
 def repeatmask_genome(reference, lib, threads, run_id, out, log):
-    print("<COVERAGE> Running RepeatMasker...")
+    print("<COVERAGE> Running RepeatMasker...log:"+log)
     outdir = out+"/input/repeatmasker_"+run_id
     mccutils.mkdir(outdir)
     os.chdir(outdir)
@@ -79,7 +79,7 @@ def augment_genome(fasta1, fasta2, run_id, out):
     return augmented_genome
 
 def index_genome(fasta, log):
-    print("<COVERAGE> samtools and bwa indexing", fasta)
+    print("<COVERAGE> samtools and bwa indexing", fasta, "Log:"+log)
     mccutils.run_command(["samtools", "faidx", fasta], log=log)
     mccutils.run_command(["bwa", "index", fasta], log=log)
 
@@ -100,7 +100,7 @@ def format_consensus_fasta(te_seqs, run_id, out):
 
 
 def map_reads(reference, fq1, threads, sample_name, run_id, out, log, fq2=None):
-    print("<COVERAGE> Mapping reads to augmented reference genome...")
+    print("<COVERAGE> Mapping reads to augmented reference genome...log:"+log)
     command = ["bwa", "mem", "-t", str(threads), "-R", "@RG\\tID:"+sample_name+"\\tSM:"+sample_name, reference, fq1]
 
     if fq2 is not None:
@@ -112,7 +112,7 @@ def map_reads(reference, fq1, threads, sample_name, run_id, out, log, fq2=None):
     return sam
 
 def sam_to_bam(sam, reference, sample_name, threads, run_id, out, log):
-    print("<COVERAGE> converting SAM to BAM, and indexing...")
+    print("<COVERAGE> converting SAM to BAM, and indexing...log:"+log)
     threads = str(threads)
     tmp_bam = out+"/input/"+run_id+"_tmp.bam"
     command = ["samtools", "view", "-Sb", "-@", threads, "-t", reference+".fai", sam]
@@ -129,7 +129,7 @@ def sam_to_bam(sam, reference, sample_name, threads, run_id, out, log):
     return sorted_bam
 
 def make_nonte_bed(reference, augmented_reference, masked_gff, run_id, out, log):
-    print("<COVERAGE> creating BED file of non-TE regions...")
+    print("<COVERAGE> creating BED file of non-TE regions...log:"+log)
     masked_bed = out+"/input/"+run_id+"_ref_tes.bed"
     repeatmasker_gff_to_bed(masked_gff, masked_bed)
 
@@ -179,7 +179,7 @@ def repeatmasker_gff_to_bed(gff, bed):
 
 
 def get_genome_depth(non_te_bed, bam, run_id, out, log):
-    print("<COVERAGE> determining the coverage depth of the genome...")
+    print("<COVERAGE> determining the coverage depth of the genome...log:"+log)
     depth_file = out+"/input/"+run_id+"genome.depth"
     command = ["samtools", "depth", "-aa", "-b", non_te_bed, bam, "-d", "0"]
     mccutils.run_command_stdout(command, depth_file, log=log)
@@ -207,7 +207,7 @@ def get_avg_depth(depth_file):
     return avg_depth
 
 def make_depth_table(te_fasta, bam, genome_depth, run_id, out, log):
-    print("<COVERAGE> Creating TE depth coverage table...")
+    print("<COVERAGE> Creating TE depth coverage table...log:"+log)
     depth_csv = out+"/te_depth.csv"
     with open(depth_csv, "w") as table:
             table.write("TE-Family,Normalized-Depth"+"\n")

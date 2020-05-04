@@ -6,13 +6,13 @@ rule setup_reads:
 
     params:
         fq2 = config['in']['fq2'],
-        log=config['args']['out']+"/logs/processing.log"
+        log = config['args']['log_dir']+"trimgalore.log"
 
     output:
         config['mcc']['fq1'],
         config['mcc']['fq2']
     
-    threads: workflow.cores
+    threads: max(workflow.cores-1, 1)
 
     conda: config['envs']['mcc_processing']
         
@@ -27,7 +27,7 @@ rule fix_line_lengths:
 
     params:
         coverage_fasta = config['in']['coverage_fasta'],
-        log=config['args']['out']+"/logs/processing.log"
+        log=config['args']['log_dir']+"processing.log"
 
     output:
         temp(config['mcc']['reference']),
@@ -44,7 +44,7 @@ rule fix_line_lengths:
 
 rule make_run_copies:
     params:
-        log=config['args']['out']+"/logs/processing.log"
+        log=config['args']['log_dir']+"processing.log"
 
     output:
         temp(config['mcc']['locations']),
@@ -64,10 +64,10 @@ rule make_reference_te_files:
         config['mcc']['locations'],
         config['mcc']['taxonomy']
     
-    threads: workflow.cores
+    threads: max(workflow.cores-1, 1)
 
     params:
-        log=config['args']['out']+"/logs/processing.log"
+        log=config['args']['log_dir']+"processing.log"
 
     output:
         config['mcc']['masked_fasta'],
@@ -91,7 +91,7 @@ rule index_reference_genome:
     threads: 1
 
     params:
-        log=config['args']['out']+"/logs/processing.log"
+        log=config['args']['log_dir']+"processing.log"
 
     conda: config['envs']['mcc_processing']
 
@@ -112,11 +112,11 @@ rule map_reads:
     
     params:
         sample=config['args']['sample_name'],
-        log=config['args']['out']+"/logs/processing.log"
+        log=config['args']['log_dir']+"processing.log"
     
-    log: config['args']['out']+"/logs/bwa.log"
+    log: config['args']['log_dir']+"bwa.log"
     
-    threads: workflow.cores
+    threads: max(workflow.cores-1, 1)
 
     conda: config['envs']['mcc_processing']
 
@@ -131,9 +131,9 @@ rule sam_to_bam:
         ref_idx = config['mcc']['augmented_reference']+".fai"
 
     params:
-        log=config['args']['out']+"/logs/processing.log"
+        log=config['args']['log_dir']+"processing.log"
     
-    threads: workflow.cores
+    threads: max(workflow.cores-1, 1)
 
     conda: config['envs']['mcc_processing']
 
@@ -153,7 +153,7 @@ rule make_ref_te_bed:
     threads: 1
 
     params:
-        log=config['args']['out']+"/logs/processing.log"
+        log=config['args']['log_dir']+"processing.log"
 
     conda: config['envs']['mcc_processing']
 
@@ -172,7 +172,7 @@ rule telocate_taxonomy:
     threads: 1
 
     params:
-        log=config['args']['out']+"/logs/processing.log"
+        log=config['args']['log_dir']+"processing.log"
 
     conda: config['envs']['mcc_processing']
 
@@ -190,7 +190,7 @@ rule median_insert_size:
     threads: 1
 
     params:
-        log=config['args']['out']+"/logs/processing.log",
+        log=config['args']['log_dir']+"processing.log",
         fq2 = config['in']['fq2']
 
     conda: config['envs']['mcc_processing']
@@ -208,7 +208,7 @@ rule telocate_sam:
     threads: 1
 
     params:
-        log=config['args']['out']+"/logs/processing.log"
+        log=config['args']['log_dir']+"processing.log"
 
     conda: config['envs']['mcc_processing']
     
@@ -225,7 +225,7 @@ rule telocate_ref:
     threads: 1
 
     params:
-        log=config['args']['out']+"/logs/processing.log"
+        log=config['args']['log_dir']+"processing.log"
 
     conda: config['envs']['mcc_processing']  
 
@@ -242,7 +242,7 @@ rule reference_2bit:
     threads: 1
 
     params:
-        log=config['args']['out']+"/logs/processing.log"
+        log=config['args']['log_dir']+"processing.log"
 
     conda: config['envs']['mcc_processing']
     
@@ -259,7 +259,7 @@ rule relocaTE_consensus:
     threads: 1
 
     params:
-        log=config['args']['out']+"/logs/processing.log"
+        log=config['args']['log_dir']+"processing.log"
 
     conda: config['envs']['mcc_processing']
 
@@ -277,7 +277,7 @@ rule relocaTE_ref_gff:
     threads: 1
 
     params:
-        log=config['args']['out']+"/logs/processing.log"
+        log=config['args']['log_dir']+"processing.log"
 
     conda: config['envs']['mcc_processing']
 
@@ -297,7 +297,7 @@ rule popoolationTE_ref_fasta:
     threads: 1
 
     params:
-        log=config['args']['out']+"/logs/processing.log"
+        log=config['args']['log_dir']+"processing.log"
 
     conda: config['envs']['mcc_processing']
 
@@ -316,9 +316,9 @@ rule repeatmask:
     params:
         ref_name = config['args']['ref_name'],
         out_dir = config['args']['out'],
-        log=config['args']['out']+"/logs/processing.log"
+        log=config['args']['log_dir']+"processing.log"
     
-    threads: workflow.cores
+    threads: max(workflow.cores-1, 1)
 
     conda: config['envs']['mcc_processing']
 
@@ -341,9 +341,9 @@ rule coverage:
     
     params: 
         sample=config['args']['sample_name'],
-        log=config['args']['out']+"/logs/coverage.log"
+        log=config['args']['log_dir']+"coverage.log"
 
-    threads: workflow.cores
+    threads: max(workflow.cores-1, 1)
 
     conda: config['envs']['coverage']
 
@@ -368,12 +368,12 @@ rule run_temp:
     conda: config['envs']['temp']
 
     params:
-        log = config['args']['out']+"/logs/TEMP.log",
+        log = config['args']['log_dir']+"TEMP.log",
         scripts_dir = config['args']['mcc_path']+"/install/tools/temp/scripts/",
         out_dir = config['args']['out']+"/results/TEMP/unfiltered/",
         sample_name = config['args']['sample_name']
 
-    threads: workflow.cores
+    threads: max(workflow.cores-1, 1)
 
     output:
         config['args']['out']+"/results/TEMP/unfiltered/"+config['args']['sample_name']+".insertion.refined.bp.summary",
@@ -392,7 +392,7 @@ rule process_temp:
     conda: config['envs']['temp']
 
     params:
-        log = config['args']['out']+"/logs/TEMP.log",
+        log = config['args']['log_dir']+"TEMP.log",
         out_dir = config['args']['out']+"/results/TEMP/",
         sample_name = config['args']['sample_name']
 
@@ -423,7 +423,7 @@ rule relocaTE_run:
     params:
         raw_fq2 = config['in']['fq2'],
         out_dir = config['args']['out']+"/results/relocaTE/unfiltered/",
-        log = config['args']['out']+"/logs/relocaTE.log",
+        log = config['args']['log_dir']+"relocaTE.log",
         script_dir = config['args']['mcc_path']+"/install/tools/relocate/scripts/",
 
     output:
@@ -445,7 +445,7 @@ rule relocaTE_post:
     params:
         raw_fq2 = config['in']['fq2'],
         out_dir = config['args']['out']+"/results/relocaTE/",
-        log = config['args']['out']+"/logs/relocaTE.log",
+        log = config['args']['log_dir']+"relocaTE.log",
         sample_name = config['args']['sample_name']
 
     output:
@@ -467,14 +467,14 @@ rule relocaTE2_run:
         bam = config['mcc']['bam'],
         median_insert_size = config['mcc']['median_insert_size']
 
-    threads: workflow.cores
+    threads: max(workflow.cores-1, 1)
 
     conda: config['envs']['relocate2']
 
     params:
         raw_fq2 = config['in']['fq2'],
         out_dir = config['args']['out']+"/results/relocaTE2/unfiltered/",
-        log = config['args']['out']+"/logs/relocaTE2.log"
+        log = config['args']['log_dir']+"relocaTE2.log"
     
     output:
         config['args']['out']+"/results/relocaTE2/unfiltered/repeat/results/ALL.all_nonref_insert.gff",
@@ -498,7 +498,7 @@ rule relocaTE2_post:
 
     params:
         out_dir = config['args']['out']+"/results/relocaTE2/",
-        log = config['args']['out']+"/logs/relocaTE2.log",
+        log = config['args']['log_dir']+"relocaTE2.log",
         sample_name = config['args']['sample_name']
     
     output:
@@ -522,10 +522,10 @@ rule ngs_te_mapper_run:
         raw_fq2 = config['in']['fq2'],
         out_dir = config['args']['out']+"/results/ngs_te_mapper/unfiltered/",
         script_dir = config['args']['mcc_path']+"/install/tools/ngs_te_mapper/sourceCode/",
-        log = config['args']['out']+"/logs/ngs_te_mapper.log",
+        log = config['args']['log_dir']+"ngs_te_mapper.log",
         sample_name = config['args']['sample_name']
     
-    threads: workflow.cores
+    threads: max(workflow.cores-1, 1)
 
     conda: config['envs']['ngs_te_mapper']
 
@@ -542,7 +542,7 @@ rule ngs_te_mapper_post:
 
     params:
         out_dir = config['args']['out']+"/results/ngs_te_mapper/",
-        log = config['args']['out']+"/logs/ngs_te_mapper.log",
+        log = config['args']['log_dir']+"ngs_te_mapper.log",
         sample_name = config['args']['sample_name']
     
     threads: 1
@@ -568,7 +568,7 @@ rule telocate_run:
         run_script = config['args']['mcc_path']+"/install/tools/te-locate/TE_locate.pl",
         max_mem = config['args']['mem'],
         out_dir = config['args']['out']+"/results/te-locate/unfiltered/",
-        log = config['args']['out']+"/logs/te-locate.log"
+        log = config['args']['log_dir']+"te-locate.log"
     
     threads: 1
 
@@ -617,7 +617,7 @@ rule retroseq_run:
         out_dir = config['args']['out']+"/results/retroseq/unfiltered/",
         ref_name=config['args']['ref_name'],
         sample_name=config['args']['sample_name'],
-        log = config['args']['out']+"/logs/retroseq.log"
+        log = config['args']['log_dir']+"retroseq.log"
     
     output:
         config['args']['out']+"/results/retroseq/unfiltered/"+config['args']['sample_name']+".call.PE.vcf"
@@ -651,14 +651,14 @@ rule popoolationTE_preprocessing:
         fq1 = config['mcc']['fq1'],
         fq2 = config['mcc']['fq2']
     
-    threads: workflow.cores
+    threads: max(workflow.cores-1, 1)
 
     conda: config['envs']['popoolationte']
 
     params:
         out_dir = config['args']['out']+"/results/popoolationTE/unfiltered/",
         sample_name=config['args']['sample_name'],
-        log = config['args']['out']+"/logs/popoolationTE.log",
+        log = config['args']['log_dir']+"popoolationTE.log",
         script_dir = config['args']['mcc_path']+"/install/tools/popoolationte/"
 
     output:
@@ -685,7 +685,7 @@ rule popoolationTE_run:
     params:
         out_dir = config['args']['out']+"/results/popoolationTE/unfiltered/",
         sample_name=config['args']['sample_name'],
-        log = config['args']['out']+"/logs/popoolationTE.log",
+        log = config['args']['log_dir']+"popoolationTE.log",
         script_dir = config['args']['mcc_path']+"/install/tools/popoolationte/"
 
     output:
@@ -705,7 +705,7 @@ rule popoolationTE_post:
     params:
         out_dir = config['args']['out']+"/results/popoolationTE/",
         sample_name=config['args']['sample_name'],
-        log = config['args']['out']+"/logs/popoolationTE.log"
+        log = config['args']['log_dir']+"popoolationTE.log"
 
     output:
         config['args']['out']+"/results/popoolationTE/"+config['args']['sample_name']+"_popoolationte_nonredundant.bed"
