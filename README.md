@@ -42,6 +42,7 @@ conda update conda
 ```
 git clone git@github.com:bergmanlab/mcclintock.git
 cd mcclintock
+git checkout refactor ## OMIT WHEN REFACTOR BRANCH IS MERGED WITH MASTER
 conda env create -f install/envs/mcclintock.yml --name mcclintock
 conda activate mcclintock
 ```
