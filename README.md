@@ -12,6 +12,7 @@ Software Methods
 ------
  * [ngs_te_mapper](https://github.com/bergmanlab/ngs_te_mapper) - [Linheiro and Bergman (2012)](http://www.plosone.org/article/info%3Adoi%2F10.1371/journal.pone.0030008)
  * [RelocaTE](https://github.com/srobb1/RelocaTE) - [Robb *et al.* (2013)](http://www.g3journal.org/content/3/6/949.long)
+ * [RelocaTE2](https://github.com/stajichlab/RelocaTE2) - [Chen *et al.* (2017)](https://peerj.com/articles/2942/)
  * [TEMP](https://github.com/JialiUMassWengLab/TEMP) - [Zhuang *et al.* (2014)](http://nar.oxfordjournals.org/content/42/11/6826.full)
  * [RetroSeq](https://github.com/tk2/RetroSeq) - [Keane *et al.* (2012)](http://bioinformatics.oxfordjournals.org/content/29/3/389.long)
  * [PoPoolationTE](https://sourceforge.net/projects/popoolationte/) - [Kofler *et al.* (2012)](http://www.plosgenetics.org/article/info%3Adoi%2F10.1371%2Fjournal.pgen.1002487;jsessionid=2CFC9BF7DEF785D90070915204B5F846)
@@ -45,6 +46,7 @@ conda env create -f install/envs/mcclintock.yml --name mcclintock
 conda activate mcclintock
 ```
 **NOTE: the `mcclintock` conda environment must always be activate when executing the mcclintock.py script.**
+
 4. Create component method conda environments and install their depenencies. Each software method has their own set of dependencies. To avoid dependency clashes, McClintock creates a separate conda environment for each method and installs their dependencies separately.
 ```
 python3 mcclintock.py --install
