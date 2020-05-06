@@ -51,6 +51,7 @@ def main():
     print(" ".join(command))
     mccutils.run_command(command, log=log)
     combine_gffs(out_dir, out_gff)
+    print("<RELOCATE> RelocaTE run complete")
 
 
 

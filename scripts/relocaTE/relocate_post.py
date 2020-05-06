@@ -24,6 +24,8 @@ def main():
     log = snakemake.params.log
     sample_name = snakemake.params.sample_name
 
+    print("<RELOCATE POST> Processing RelocaTE results...")
+
     insertions = get_insertions(relocate_gff, sample_name, ref_l_threshold=config.REF_LEFT_THRESHOLD, ref_r_threshold=config.REF_RIGHT_THRESHOLD, nonref_l_threshold=config.NONREF_LEFT_THRESHOLD, nonref_r_threshold=config.NONREF_RIGHT_THRESHOLD)
 
     insertions = set_ref_orientations(insertions, te_gff)
@@ -31,6 +33,8 @@ def main():
     insertions = make_redundant_bed(insertions, sample_name, out_dir)
 
     make_nonredundant_bed(insertions, sample_name, out_dir)
+
+    print("<RELOCATE POST> RelocaTE postprocessing results...")
 
 
 def get_insertions(gff, sample_name, ref_l_threshold=0, ref_r_threshold=0, nonref_l_threshold=0, nonref_r_threshold=0):

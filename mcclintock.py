@@ -177,6 +177,18 @@ def make_run_config(args, sample_name, ref_name):
     mccutils.mkdir(args.out+"/snakemake")
     mccutils.mkdir(args.out+"/snakemake/config")
     run_config = args.out+"/snakemake/config/config_"+str(run_id)+".json"
+    input_dir = args.out+"/method_input/"
+    results_dir = args.out+"/results/"
+
+    out_files_to_make = []
+    out_files = config.OUT_PATHS
+    for key in out_files.keys():
+        out_files[key] = out_files[key].replace(config.INPUT_DIR, input_dir)
+        out_files[key] = out_files[key].replace(config.RESULTS_DIR, results_dir)
+        out_files[key] = out_files[key].replace(config.SAMPLE_NAME, sample_name)   
+    
+    for method in args.methods:
+        out_files_to_make.append(out_files[method])
 
     now = datetime.now()
     now_str = now.strftime("%d-%m-%Y_%H.%M.%S")
@@ -195,6 +207,7 @@ def make_run_config(args, sample_name, ref_name):
         'ref_name': ref_name,
         'run_id' : str(run_id),
         'methods' : ",".join(args.methods),
+        'out_files': ",".join(out_files_to_make),
         'save_comments' : str(args.comments)
     }
 
@@ -210,7 +223,7 @@ def make_run_config(args, sample_name, ref_name):
     }
 
     # where mcc copies will be stored
-    input_dir = args.out+"/method_input/"
+    
     data["mcc"] = config.INTERMEDIATE_PATHS
     for key in data["mcc"].keys():
         data["mcc"][key] = data["mcc"][key].replace(config.INPUT_DIR, input_dir)
@@ -250,16 +263,26 @@ def run_workflow(args, sample_name, run_id, debug=False):
     command = ["snakemake","--use-conda", "--conda-prefix", path+"/install/envs/conda"]
     if not debug:
         command.append("--quiet")
-
-    for method in args.methods:
-        command.append(out_files[method])
-
+    else:
+        command.append("--reason")
+    
     command += ["--configfile", args.out+"/snakemake/config/config_"+str(run_id)+".json"]
     command += ["--cores", str(args.proc)]
+
     if args.clean:
         clean_command = command + ["--delete-all-output"]
         mccutils.run_command(clean_command)
         mccutils.remove(args.out+"/input")
+
+
+    for method in args.methods:
+        command.append(out_files[method])
+
+
+    
+    command.append(args.out+"/results/summary/summary_report.txt")
+
+
 
     print(" ".join(command))
     mccutils.run_command(command)

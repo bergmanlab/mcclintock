@@ -1,5 +1,6 @@
 #!/bin/bash
 
+cd $(dirname "$0")
 
 printf "Downloading reference genome...\n\n"
 wget -nc http://hgdownload.soe.ucsc.edu/goldenPath/sacCer2/bigZips/chromFa.tar.gz

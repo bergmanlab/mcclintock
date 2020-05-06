@@ -30,9 +30,9 @@ rule fix_line_lengths:
         log=config['args']['log_dir']+"processing.log"
 
     output:
-        temp(config['mcc']['reference']),
+        config['mcc']['reference'],
         config['mcc']['consensus'],
-        temp(config['mcc']['coverage_fasta'])
+        config['mcc']['coverage_fasta']
 
     threads: 1
 
@@ -47,8 +47,8 @@ rule make_run_copies:
         log=config['args']['log_dir']+"processing.log"
 
     output:
-        temp(config['mcc']['locations']),
-        temp(config['mcc']['taxonomy'])
+        config['mcc']['locations'],
+        config['mcc']['taxonomy']
 
     threads: 1
 
@@ -712,3 +712,25 @@ rule popoolationTE_post:
 
     script:
         config['args']['mcc_path']+"/scripts/popoolationte/popoolationte_post.py"
+
+
+rule summary_report:
+    input:
+        out_files = config['args']['out_files'].split(","),
+        fq1 = config['mcc']['fq1'],
+        fq2 = config['mcc']['fq2'],
+        ref = config['mcc']['reference'],
+        bam = config['mcc']['bam'],
+        flagstat = config['mcc']['flagstat'],
+        median_insert_size = config['mcc']['median_insert_size']
+
+    threads: workflow.cores
+
+    conda: config['envs']['mcc_processing']
+
+    output:
+        config['args']['out']+"/results/summary/summary_report.txt"
+    
+    script:
+        config['args']['mcc_path']+"/scripts/summary/summary_report.py"
+        
