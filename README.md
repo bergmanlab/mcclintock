@@ -19,56 +19,12 @@ Software Methods
 
 Software Dependencies
 ------
-All of the software systems must be run on a unix based system with the software dependencies listed per method below. FastQC is an optional step, if the software is not present then mcclintock will skip the step and you will not receive a quality report for your fastq input in the results directory. The versions used to run this pipeline are indicated in parentheses and no guarantee is made that it will function using alternate versions. In the case of bwa it is almost certain that some methods will fail if version v.0.7.4-r385 is not installed. See installation section below to use miniconda to install dependencies.
+This system was designed to run on linux operating systems. Installation of software dependencies requires conda (see installation)
 
- * Optional software for the pipeline
-    * [FastQC](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/) (Command line installation v0.11.2)
-    * [RepeatMasker](http://www.repeatmasker.org/RMDownload.html) (v.4.0.2) (Necessary if no GFF is supplied)
 
- * ngs_te_mapper
-    * [R](http://cran.r-project.org/) (v.3.0.2)
-    * [BWA](https://github.com/lh3/bwa/commit/c14aaad1ce72f5784bfe04df757a6b12fe07b7ea) (v.0.7.4-r385)
-
- * RelocaTE
-    * [Perl](http://www.perl.org/get.html) (v.5.14.2)
-    * [BioPerl](http://www.bioperl.org/wiki/Getting_BioPerl) (v.1.006901)
-    * [SAMtools](http://sourceforge.net/projects/samtools/files/) (v.0.1.19-44428cd)
-    * [Blat](http://users.soe.ucsc.edu/~kent/src/) (v.35x1)
-    * [Bowtie](http://bowtie-bio.sourceforge.net/index.shtml) (v.1.0.0)
-  
-* TEMP
-    * [Perl](http://www.perl.org/get.html) (v.5.14.2)
-    * [BioPerl](http://www.bioperl.org/wiki/Getting_BioPerl) (v.1.006901)
-    * [BWA](https://github.com/lh3/bwa/commit/c14aaad1ce72f5784bfe04df757a6b12fe07b7ea) (v.0.7.4-r385)
-    * [SAMtools](http://sourceforge.net/projects/samtools/files/) (v.0.1.19-44428cd)
-    * [BEDTools](https://code.google.com/p/bedtools/downloads/list) (v.2.17.0)
-    * [faToTwoBit](http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/faToTwoBit) (ucsc-tools v.294)
-    * [twoBitToFa](http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/twoBitToFa) (ucsc-tools v.294)
-
-* RetroSeq
-    * [Perl](http://www.perl.org/get.html) (v.5.14.2)
-    * [BEDTools](https://code.google.com/p/bedtools/downloads/list) (v.2.17.0)
-    * [SAMtools](http://sourceforge.net/projects/samtools/files/) (v.0.1.19-44428cd)
-    * [BCFTools](https://github.com/samtools/bcftools) (v.0.1.19-44428cd)
-    * [Exonerate](http://www.ebi.ac.uk/~guy/exonerate/) (v.2.2.0)
-    * [BWA](https://github.com/lh3/bwa/commit/c14aaad1ce72f5784bfe04df757a6b12fe07b7ea) (v.0.7.4-r385)
-
-* PoPoolationTE
-    * [Perl](http://www.perl.org/get.html) (v.5.14.2)
-    * [RepeatMasker](http://www.repeatmasker.org/RMDownload.html) (v.4.0.2)
-    * [SAMtools](http://sourceforge.net/projects/samtools/files/) (v.0.1.19-44428cd)
-    * [BWA](https://github.com/lh3/bwa/commit/c14aaad1ce72f5784bfe04df757a6b12fe07b7ea) (v.0.7.4-r385)
-
-* TE-locate
-    * [Perl](http://www.perl.org/get.html) (v.5.14.2)
-    * [Java](http://www.oracle.com/technetwork/java/javase/downloads/index.html) (v.1.6.0_24)
-    * [BWA](https://github.com/lh3/bwa/commit/c14aaad1ce72f5784bfe04df757a6b12fe07b7ea) (v.00.7.4-r385)
-
-How to run 
-------
-
-### Installation
-You can use miniconda to install dependencies and create running environment for the McClintock pipeline.
+Installation
+-------
+Conda is required to install software dependencies. You can install conda via miniconda.
 
 1. Install python3 miniconda (miniconda is a lightweight installer for the conda package manager).
 ```
@@ -77,66 +33,133 @@ bash ~/miniconda.sh -b -p $HOME/miniconda # silent mode
 echo "export PATH=\$PATH:\$HOME/miniconda/bin" >> $HOME/.bashrc # add to .bashrc
 source $HOME/.bashrc
 ```
-2. Update conda and set up your conda channels (this lets conda know where to find packages)
+2. Update conda
 ```
 conda update conda
-conda config --add channels defaults
-conda config --add channels conda-forge
-conda config --add channels bioconda
 ```
-3. Install dependencies with conda by clone the McClintock repository, cd into the project directory and run the script install.sh with no arguments, the installation might take a while to finish.
+3. Install and activate mcclintock main environment. This will create an environment containing the dependencies require to run the main script (Python3, SnakeMake)
 ```
 git clone git@github.com:bergmanlab/mcclintock.git
 cd mcclintock
-sh env_install.sh
+conda env create -f install/envs/mcclintock.yml --name mcclintock
+conda activate mcclintock
 ```
-4. Install McClintock by run the script install.sh with no arguments.
+**NOTE: the `mcclintock` conda environment must always be activate when executing the mcclintock.py script.**
+4. Create component method conda environments and install their depenencies. Each software method has their own set of dependencies. To avoid dependency clashes, McClintock creates a separate conda environment for each method and installs their dependencies separately.
 ```
-sh install.sh
+python3 mcclintock.py --install
 ```
 
-`install.sh` will download and unpack all of the TE detection pipelines and check that the required dependencies are available in your path. Missing dependencies will be reported and you must install or make sure these are available to run the full pipeline.
-
+How to run 
+------
 ### Running on a test dataset
-A script is included to run the full pipeline on a test Illumina resequencing dataset from the yeast genome. To run this test script, make sure the none of the conda environment is activated and change directory into the directory named `test` and run the script `runtest.sh`.
+Some test data is provided in the `test/` directory, though the larger files (reads, reference genome) must be downloaded using the `test/download_test_data.sh` script.
 
 ```
-cd test
-sh runtest.sh
+sh test/download_test_data.sh
 ```
 
-This script will download the UCSC sacCer2 yeast reference genome, an annotation of TEs in the yeast reference genome from [Carr, Bensasson and Bergman (2012)](http://www.plosone.org/article/info%3Adoi%2F10.1371%2Fjournal.pone.0050978), and a pair of fastq files from SRA, then run the full pipeline.
+The test data provided is a UCSC sacCer2 yeast reference genome, an annotation of TEs in the yeast reference genome from [Carr, Bensasson and Bergman (2012)](http://www.plosone.org/article/info%3Adoi%2F10.1371%2Fjournal.pone.0050978), and a pair of fastq files from SRA.
+
+McClintock can then be run with the test data using the following command (make sure mcclintock conda environment is active: `conda active mcclintock`) 
+
+```
+python3 mcclintock.py \
+    -r test/sacCer2.fasta \
+    -c test/sac_cer_TE_seqs.fasta \
+    -g test/reference_TE_locations.gff \
+    -t test/sac_cer_te_families.tsv \
+    -1 test/SRR800842_1.fastq \
+    -2 test/SRR800842_2.fastq \
+    -p 4 \
+    -o /path/to/output/directory
+```
+  * change `/path/to/output/directory` to a real path where you desire the mcclintock output to be created.
+  * you can also increase `-p 4` to a higher number if you have more CPU threads available.
+
 
 ### Running the pipeline
-The pipeline is invoked by running the mcclintock.sh script in the main project directory. This script takes the following 6 input files, specified as options:
-* `-m` : A string containing the list of software you want the pipeline to use for analysis e.g. \"-m relocate TEMP ngs_te_mapper\" will launch only those three methods [Optional: default is to run all methods]
-* `-r` : A reference genome sequence in fasta format. [Required]
-* `-c` : The consensus sequences of the TEs for the species in fasta format. [Required]
-* `-g` : The locations of known TEs in the reference genome in GFF 3 format. This must include a unique ID attribute for every entry. [Optional]
-* `-t` : A tab delimited file with one entry per ID in the GFF file and two columns: the first containing the ID and the second containing the TE family it belongs to. The family should correspond to the names of the sequences in the consensus fasta file. [Optional - required if GFF (option -g) is supplied]
-* `-T` : If this option is specified then fastq comments (e.g. barcode) will be incorporated to SAM output. Warning: do not use this option if the input fastq files do not have comments. [Optional: default will not include this]
-* `-d` : If this option is specified then McClintock will perform depth of coverage analysis for every TE. Note: perform coverage analysis for TEs will result in longer running time. [Optional: default will not include this]
-* `-D` : IF this option is specified then only depth of coverage analysis for TEs will be performed. [Optional]
-* `-s` : A fasta file that will be used for TE-based coverage analysis, if not supplied then the consensus sequences of the TEs will be used for the analysis. [Optional]
-* `-1` : The absolute path of the first fastq file from a paired end read, this should be named ending _1.fastq. [Required]
-* `-2` : The absolute path of the second fastq file from a paired end read, this should be named ending _2.fastq. [Optional]
-* `-o` : An output directory for the run. If not supplied then the reference genome name will be used. [Optional]
-* `-b` : Retain the sorted and indexed BAM file of the paired end data aligned to the reference genome.
-* `-i` : If this option is specified then all sample specific intermediate files will be removed, leaving only the overall results. The default is to leave sample specific intermediate files (may require large amounts of disk space)
-* `-C` : This option will include the consensus TE sequences as extra chromosomes in the reference file (useful if the organism is known to have TEs that are not present in the reference strain). [Optional: default will not include this]
-* `-R` : This option will include the reference TE sequences as extra chromosomes in the reference file [Optional: default will not include this]
-* `-p` : The number of processors to use for parallel stages of the pipeline. [Optional: default = 1]
-* `-M` : The amount of memory available for the pipeline in GB. [Optional: default = 4]
-* `-h` : Prints this help guide.
+The pipeline is invoked by running the `mcclintock.py` script in the main project directory. The options available for this script are as follows:
+```
+  -h, --help            show this help message and exit
+  -r REFERENCE, --reference REFERENCE
+                        A reference genome sequence in fasta format
+  -c CONSENSUS, --consensus CONSENSUS
+                        The consensus sequences of the TEs for the species in
+                        fasta format
+  -1 FIRST, --first FIRST
+                        The path of the first fastq file from paired end read
+                        sequencing or the fastq file from single read
+                        sequencing
+  -2 SECOND, --second SECOND
+                        The path of the second fastq file from a paired end
+                        read sequencing
+  -p PROC, --proc PROC  The number of processors to use for parallel stages of
+                        the pipeline [default = 1]
+  -M MEM, --mem MEM     The amount of memory available for the pipeline in GB.
+                        [default = 4]
+  -o OUT, --out OUT     An output folder for the run. [default = '.']
+  -m METHODS, --methods METHODS
+                        A comma-delimited list containing the software you
+                        want the pipeline to use for analysis. e.g. '-m
+                        relocate,TEMP,ngs_te_mapper' will launch only those
+                        three methods
+  -g LOCATIONS, --locations LOCATIONS
+                        The locations of known TEs in the reference genome in
+                        GFF 3 format. This must include a unique ID attribute
+                        for every entry
+  -t TAXONOMY, --taxonomy TAXONOMY
+                        A tab delimited file with one entry per ID in the GFF
+                        file and two columns: the first containing the ID and
+                        the second containing the TE family it belongs to. The
+                        family should correspond to the names of the sequences
+                        in the consensus fasta file
+  -s COVERAGE_FASTA, --coverage_fasta COVERAGE_FASTA
+                        A fasta file that will be used for TE-based coverage
+                        analysis, if not supplied then the consensus sequences
+                        of the TEs will be used for the analysis
+  -T, --comments        If this option is specified then fastq comments (e.g.
+                        barcode) will be incorporated to SAM output. Warning:
+                        do not use this option if the input fastq files do not
+                        have comments
+  -C, --include_consensus_te
+                        This option will include the consensus TE sequences as
+                        extra chromosomes in the reference file (useful if the
+                        organism is known to have TEs that are not present in
+                        the reference strain)
+  -R, --include_reference_te
+                        This option will include the reference TE sequences as
+                        extra chromosomes in the reference file
+  --clean               This option will make sure mcclintock runs from
+                        scratch and doesn't reuse files already created
+  --install             This option will install the dependencies of
+                        mcclintock
+  --debug               This option will allow snakemake to print progress to
+                        stdout
+
+```
 
 Example pipeline run:
 ```
-sh mcclintock.sh -m "RelocaTE TEMP ngs_te_mapper" -r reference.fasta -c te_consensus.fasta -g te_locations.gff -t te_families.tsv -1 sample_1.fastq -2 sample_2.fastq -p 2 -i -b
+python3 mcclintock.py \
+    -r sacCer2.fasta \
+    -c sac_cer_TE_seqs.fasta \
+    -g reference_TE_locations.gff \
+    -t sac_cer_te_families.tsv \
+    -1 SRR800842_1.fastq \
+    -2 SRR800842_2.fastq \
+    -p 20 \
+    -m temp,retroseq,trimgalore \
+    -o .
 ```
-
-Data created during processing will be stored in a directory in the output directory (if one is specified) within main directory named after the reference genome used with individual sub-directories for samples. 
-
-Note: If you want to run the pipeline on multiple samples using same reference genome and output directory as input, jobs have to be run in a specific way that McClintock run for a single sample has to finish before the rest runs get started.
+* The above example will run TEMP, RetroSeq, and Trim_Galore on the data specified. There are other component methods available in the mcclintock pipeline
+```
+ngs_te_mapper,relocate,relocate2,temp,retroseq,popoolationte,te-locate,coverage,trimgalore
+```
+* `trimgalore` and `coverage` are not TE detection methods, but rather optional supplementary components that can be used if desired. 
+  * `trimgalore` (https://github.com/FelixKrueger/TrimGalore) performs QC of the fastq files and trims adapters. 
+  * `coverage` produces read coverage plots of each TE.
+# UPDATE BELOW
 
 ### Output
 Output files for a full McClintock run or individual components are located in a directory named with the following path structure `/reference_genome/sample_name/results/`. All directories referred to below are contained within this parent directory.
