@@ -12,7 +12,7 @@ rule setup_reads:
         config['mcc']['fq1'],
         config['mcc']['fq2']
     
-    threads: max(workflow.cores-1, 1)
+    threads: config['args']['max_threads_per_rule']
 
     conda: config['envs']['mcc_processing']
         
@@ -64,7 +64,7 @@ rule make_reference_te_files:
         config['mcc']['locations'],
         config['mcc']['taxonomy']
     
-    threads: max(workflow.cores-1, 1)
+    threads: config['args']['max_threads_per_rule']
 
     params:
         log=config['args']['log_dir']+"processing.log"
@@ -116,7 +116,7 @@ rule map_reads:
     
     log: config['args']['log_dir']+"bwa.log"
     
-    threads: max(workflow.cores-1, 1)
+    threads: config['args']['max_threads_per_rule']
 
     conda: config['envs']['mcc_processing']
 
@@ -133,7 +133,7 @@ rule sam_to_bam:
     params:
         log=config['args']['log_dir']+"processing.log"
     
-    threads: max(workflow.cores-1, 1)
+    threads: config['args']['max_threads_per_rule']
 
     conda: config['envs']['mcc_processing']
 
@@ -318,7 +318,7 @@ rule repeatmask:
         out_dir = config['args']['out'],
         log=config['args']['log_dir']+"processing.log"
     
-    threads: max(workflow.cores-1, 1)
+    threads: config['args']['max_threads_per_rule']
 
     conda: config['envs']['mcc_processing']
 
@@ -343,7 +343,7 @@ rule coverage:
         sample=config['args']['sample_name'],
         log=config['args']['log_dir']+"coverage.log"
 
-    threads: max(workflow.cores-1, 1)
+    threads: config['args']['max_threads_per_rule']
 
     conda: config['envs']['coverage']
 
@@ -373,7 +373,7 @@ rule run_temp:
         out_dir = config['args']['out']+"/results/TEMP/unfiltered/",
         sample_name = config['args']['sample_name']
 
-    threads: max(workflow.cores-1, 1)
+    threads: config['args']['max_threads_per_rule']
 
     output:
         config['args']['out']+"/results/TEMP/unfiltered/"+config['args']['sample_name']+".insertion.refined.bp.summary",
@@ -467,7 +467,7 @@ rule relocaTE2_run:
         bam = config['mcc']['bam'],
         median_insert_size = config['mcc']['median_insert_size']
 
-    threads: max(workflow.cores-1, 1)
+    threads: config['args']['max_threads_per_rule']
 
     conda: config['envs']['relocate2']
 
@@ -525,7 +525,7 @@ rule ngs_te_mapper_run:
         log = config['args']['log_dir']+"ngs_te_mapper.log",
         sample_name = config['args']['sample_name']
     
-    threads: max(workflow.cores-1, 1)
+    threads: config['args']['max_threads_per_rule']
 
     conda: config['envs']['ngs_te_mapper']
 
@@ -651,7 +651,7 @@ rule popoolationTE_preprocessing:
         fq1 = config['mcc']['fq1'],
         fq2 = config['mcc']['fq2']
     
-    threads: max(workflow.cores-1, 1)
+    threads: config['args']['max_threads_per_rule']
 
     conda: config['envs']['popoolationte']
 

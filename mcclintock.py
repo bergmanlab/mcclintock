@@ -208,7 +208,8 @@ def make_run_config(args, sample_name, ref_name):
         'run_id' : str(run_id),
         'methods' : ",".join(args.methods),
         'out_files': ",".join(out_files_to_make),
-        'save_comments' : str(args.comments)
+        'save_comments' : str(args.comments),
+        'max_threads_per_rule' : max(1, calculate_max_threads(args.proc, args.methods, config.MULTI_THREAD_METHODS))
     }
 
     # input paths for files
@@ -287,6 +288,26 @@ def run_workflow(args, sample_name, run_id, debug=False):
     print(" ".join(command))
     mccutils.run_command(command)
     mccutils.remove(args.out+"/tmp")
+
+
+def calculate_max_threads(avail_procs, methods_used, multithread_methods):
+    max_threads = avail_procs
+
+    multi_methods_used = 0
+    for method in methods_used:
+        if method in multithread_methods:
+            multi_methods_used += 1
+
+    if multi_methods_used > 1:
+        is_even = False
+        if max_threads%2 == 0:
+            is_even = True
+        
+        max_threads = max_threads//2
+        if is_even:
+            max_threads = max_threads-1
+
+    return max_threads        
 
 
 if __name__ == "__main__":                
