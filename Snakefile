@@ -722,14 +722,29 @@ rule summary_report:
         ref = config['mcc']['reference'],
         bam = config['mcc']['bam'],
         flagstat = config['mcc']['flagstat'],
-        median_insert_size = config['mcc']['median_insert_size']
+        median_insert_size = config['mcc']['median_insert_size'],
+        taxonomy = config['mcc']['formatted_taxonomy']
+
+
+    params:
+        methods = config['args']['methods'].split(","),
+        results_dir = config['args']['out']+"/results/",
+        sample_name = config['args']['sample_name'],
+        command = config['args']['full_command'],
+        execution_dir = config['args']['call_directory'],
+        time = config['args']['time'],
+        raw_fq2 = config['in']['fq2'],
+        out_dir = config['args']['out']+"/results/summary/"
+
 
     threads: workflow.cores
 
     conda: config['envs']['mcc_processing']
 
     output:
-        config['args']['out']+"/results/summary/summary_report.txt"
+        te_summary = config['args']['out']+"/results/summary/te_summary.txt",
+        te_csv = config['args']['out']+"/results/summary/te_summary.csv",
+        summary_report = config['args']['out']+"/results/summary/summary_report.txt"
     
     script:
         config['args']['mcc_path']+"/scripts/summary/summary_report.py"

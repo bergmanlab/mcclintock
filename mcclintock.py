@@ -14,12 +14,14 @@ from datetime import datetime
 
 
 def main():
+    full_command = " ".join(sys.argv)
+    current_directory = os.getcwd()
     args = parse_args()
     mccutils.mkdir(args.out+"/logs")
     mccutils.mkdir(args.out+"/tmp")
     sample_name = mccutils.get_base_name(args.first, fastq=True)
     ref_name = mccutils.get_base_name(args.reference)
-    run_id = make_run_config(args, sample_name, ref_name)
+    run_id = make_run_config(args, sample_name, ref_name, full_command, current_directory)
     run_workflow(args, sample_name, run_id, debug=args.debug)
 
 def parse_args():
@@ -172,7 +174,7 @@ def install(clean=False, debug=False):
         command.append("--quiet")
     mccutils.run_command(command)
 
-def make_run_config(args, sample_name, ref_name):
+def make_run_config(args, sample_name, ref_name, full_command, current_directory):
     run_id = random.randint(1000000,9999999)
     mccutils.mkdir(args.out+"/snakemake")
     mccutils.mkdir(args.out+"/snakemake/config")
@@ -191,7 +193,7 @@ def make_run_config(args, sample_name, ref_name):
         out_files_to_make.append(out_files[method])
 
     now = datetime.now()
-    now_str = now.strftime("%d-%m-%Y_%H.%M.%S")
+    now_str = now.strftime("%Y-%m-%d_%H.%M.%S")
     mccutils.mkdir(args.out+"/logs/"+now_str+"_"+str(run_id))
 
     data = {}
@@ -209,7 +211,10 @@ def make_run_config(args, sample_name, ref_name):
         'methods' : ",".join(args.methods),
         'out_files': ",".join(out_files_to_make),
         'save_comments' : str(args.comments),
-        'max_threads_per_rule' : max(1, calculate_max_threads(args.proc, args.methods, config.MULTI_THREAD_METHODS))
+        'max_threads_per_rule' : max(1, calculate_max_threads(args.proc, args.methods, config.MULTI_THREAD_METHODS)),
+        'full_command' : full_command,
+        'call_directory': current_directory,
+        'time': now.strftime("%Y-%m-%d %H:%M:%S")
     }
 
     # input paths for files
@@ -281,7 +286,7 @@ def run_workflow(args, sample_name, run_id, debug=False):
 
 
     
-    command.append(args.out+"/results/summary/summary_report.txt")
+    command.append(args.out+"/results/summary/te_summary.txt")
 
 
 
