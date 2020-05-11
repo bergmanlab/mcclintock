@@ -13,26 +13,35 @@ def main():
     fq1 = snakemake.input.fastq1
     fq2 = snakemake.input.fastq2
     bam = snakemake.input.bam
+    log = snakemake.params.log
+    raw_fq2 = snakemake.params.raw_fq2
+    is_paired = True
+    if snakemake.params.raw_fq2 == "None":
+        is_paired = False
+    
+    with open(log,"a") as l:
+        l.write("reference fasta: "+reference+"\n")
+        l.write("TE fasta: "+te_seqs+"\n")
+        l.write("repeatmasker out: "+rm_out+"\n")
+        l.write("BAM: "+bam+"\n")
+        l.write("fastq1: "+fq1+"\n")
+        if is_paired:
+            l.write("fastq2: "+fq2+"\n")
+
 
     threads = snakemake.threads
-
-    raw_fq2 = snakemake.params.raw_fq2
     out_dir = snakemake.params.out_dir
-    log = snakemake.params.log
     median_insert_size_file = snakemake.input.median_insert_size
 
     median_insert_size = get_median_insert_size(median_insert_size_file)
     fq_dir = os.path.dirname(fq1)
-
     output = subprocess.Popen(["which", "relocaTE2.py"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     script = output.stdout.read()
     script = script.decode()
     script = script.replace("\n","")
 
 
-    is_paired = True
-    if snakemake.params.raw_fq2 == "None":
-        is_paired = False
+
 
     print("<RELOCATE> Running RelocaTE2...")
     command =  [

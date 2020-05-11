@@ -38,6 +38,7 @@ def run_command_stdout(cmd_list, out_file, log=None):
     msg = ""
     if log is None:
         try:
+            # print(" ".join(cmd_list)+" > "+out_file)
             out = open(out_file,"w")
             subprocess.check_call(cmd_list, stdout=out)
             out.close()
@@ -54,6 +55,7 @@ def run_command_stdout(cmd_list, out_file, log=None):
     else:
         try:
             out_log = open(log,"a")
+            out_log.write(" ".join(cmd_list)+" > "+out_file+"\n")
             out = open(out_file,"w")
             subprocess.check_call(cmd_list, stdout=out, stderr=out_log)
             out.close()
@@ -75,6 +77,7 @@ def run_command(cmd_list, log=None):
     msg = ""
     if log is None:
         try:
+            # print(" ".join(cmd_list))
             subprocess.check_call(cmd_list)
         except subprocess.CalledProcessError as e:
             if e.output is not None:

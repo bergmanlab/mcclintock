@@ -14,10 +14,11 @@ def main():
     consensus_TEs = snakemake.input[1]
     locations_gff = snakemake.input[2]
     taxonomy_tsv = snakemake.input[3]
-    ref_tes = snakemake.config['in']['locations']
-    processors = snakemake.config['args']['proc']
-    mcc_out = snakemake.config['args']['out']
-    run_id = snakemake.config['args']['run_id']
+
+    processors = snakemake.threads
+    ref_tes = snakemake.params.raw_ref_tes
+    mcc_out = snakemake.params.out_dir
+    run_id = snakemake.params.run_id
     log = snakemake.params.log
 
     print("<PROCESSING> creating reference TE files...")
@@ -265,7 +266,7 @@ def augment_ref_te_gff(ref_tes_gff, ref_te_fasta, consensus_te_fasta, run_id, ou
             length = len(str(record.seq))
             te = str(record.id)
             features = ";".join(["ID=instance"+te,"Name=instance"+te,"Alias=instance"+te])
-            line = "\t".join([te, "reannotate", "transposable_element", "1", str(length), ".", "+", ".", features])
+            line = "\t".join([te, "reannotate", te, "1", str(length), ".", "+", ".", features])
             line = line+"\n"
             gff_lines.append(line)
     

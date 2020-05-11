@@ -11,12 +11,19 @@ def main():
     reference_fasta = snakemake.input.reference_fasta
     fastq1 = snakemake.input.fastq1
     fastq2 = snakemake.input.fastq2
-    threads = snakemake.threads
+
     log = snakemake.params.log
+    with open(log,"a") as l:
+        l.write("consensus fasta: "+consensus_fasta+"\n")
+        l.write("reference fasta: "+reference_fasta+"\n")
+        l.write("fastq1: "+fastq1+"\n")
+        l.write("fastq2: "+fastq2+"\n")
+
+
+    threads = snakemake.threads
     sample_name = snakemake.params.sample_name
     script_dir = snakemake.params.script_dir
     out_dir = snakemake.params.out_dir
-
     out_bed = snakemake.output[0]
 
     is_paired = True

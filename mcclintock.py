@@ -9,14 +9,17 @@ import config.config as config
 import config.install.install as config_install
 import json
 import random
+import gzip
 from datetime import datetime
+from Bio import SeqIO
 
 
 
 def main():
-    full_command = " ".join(sys.argv)
+    full_command = " ".join(["python3"] + sys.argv)
     current_directory = os.getcwd()
     args = parse_args()
+    check_input_files(args.reference, args.consensus, args.first, fq2=args.second, locations=args.locations, taxonomy=args.taxonomy, coverage_fasta=args.coverage_fasta)
     mccutils.mkdir(args.out+"/logs")
     mccutils.mkdir(args.out+"/tmp")
     sample_name = mccutils.get_base_name(args.first, fastq=True)
@@ -129,6 +132,86 @@ def parse_args():
         args.comments = False
     
     return args
+
+def check_input_files(ref, consensus, fq1, fq2=None, locations=None, taxonomy=None, coverage_fasta=None):
+    # check reference fasta
+    print("checking reference fasta:", ref)
+    try:
+        with open(ref,"r") as fa:
+            for record in SeqIO.parse(fa, "fasta"):
+                pass
+    except Exception as e:
+        print(e)
+        sys.exit(ref+" appears to be a malformed FastA file..exiting...\n")
+
+    print("checking fq1:", fq1)
+    #check fq1
+    if ".fastq" not in fq1 and ".fq" not in fq1:
+        sys.exit(fq1+" is not a (.fastq/.fq) file, exiting...\n")
+    
+    #check fq2
+    if fq2 is not None:
+        print("checking fq2:", fq2)
+        if ".fastq" not in fq2 and ".fq" not in fq2:
+            sys.exit(fq2+" is not a (.fastq/.fq) file, exiting...\n")
+    
+
+    # checking consensus
+    print("checking consensus fasta:", consensus)
+    consensus_seq_names = []
+    try:
+        with open(consensus,"r") as fa:
+            for record in SeqIO.parse(fa, "fasta"):
+                consensus_seq_names.append(str(record.id))
+    except Exception as e:
+        print(e)
+        sys.exit(consensus+" appears to be a malformed FastA file..exiting...\n")
+    
+    #check locations gff
+    gff_ids = []
+    if locations is not None:
+        print("checking lcations gff:", locations)
+        with open(locations,"r") as gff:
+            for line in gff:
+                if "#" not in line:
+                    split_line = line.split("\t")
+                    if len(split_line) < 9:
+                        sys.exit(locations+" appears to be a malformed GFF file..exiting...\n")
+                    else:
+                        feats = split_line[8]
+                        split_feats = feats.split(";")
+                        gff_id = ""
+                        for feat in split_feats:
+                            if feat[:3] == "ID=":
+                                gff_id = feat.split("=")[1].replace("\n","")
+                                if gff_id not in gff_ids:
+                                    gff_ids.append(gff_id)
+                                else:
+                                    sys.exit("ID: "+gff_id+" is not unique. please ensure each feature has a unique ID\n")
+                        if gff_id == "":
+                            sys.exit("GFF line: "+line+" is missing an ID attribute (ex. ID=chr1_TY1s1+\n")
+                        
+    
+    # check taxonomy
+    with open(taxonomy, "r") as tsv:
+        for line in tsv:
+            split_line = line.split("\t")
+            if len(split_line) != 2:
+                sys.exit(taxonomy+" does not have two columns. Should be tab-separated file with feature ID and TE family as columns\n")
+            else:
+                te_id = split_line[0]
+                te_family = split_line[1].replace("\n","")
+
+                if te_id not in gff_ids:
+                    sys.exit("TE ID: "+te_id+" not found in IDs from GFF: "+locations+"\nplease make sure each ID in: "+taxonomy+" is found in:"+locations+"\n")
+                
+                if te_family not in consensus_seq_names:
+                    sys.exit("TE Family: "+te_family+" not found in sequence names from: "+consensus+"\nplease make sure each family in: "+taxonomy+" is found in: "+consensus+"\n")
+                
+
+
+
+
 
 
 def install(clean=False, debug=False):

@@ -12,11 +12,17 @@ def main():
     sam = snakemake.input.sam
     ref_fasta = snakemake.input.ref
     median_insert_size_file = snakemake.input.median_insert_size
+    log = snakemake.params.log
+    with open(log,"a") as l:
+        l.write("TE GFF: "+te_gff+"\n")
+        l.write("SAM: "+sam+"\n")
+        l.write("reference fasta: "+ref_fasta+"\n")
+        
 
     telocate = snakemake.params.run_script
     max_mem = snakemake.params.max_mem
     out_dir = snakemake.params.out_dir
-    log = snakemake.params.log
+    
 
 
     sam_dir = os.path.dirname(sam)

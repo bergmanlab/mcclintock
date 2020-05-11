@@ -4,5 +4,6 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - python=3.7.7
+  - python=3.8.2
   - snakemake=5.10.0
+  - biopython=1.76

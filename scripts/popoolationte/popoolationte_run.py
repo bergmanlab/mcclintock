@@ -16,10 +16,17 @@ def main():
     fq1 = snakemake.input.fq1
     fq2 = snakemake.input.fq2
     sam = snakemake.input.sam
+    log = snakemake.params.log
+    with open(log,"a") as l:
+        l.write("reference fasta: "+ref_fasta+"\n")
+        l.write("Taxonomy TSV: "+taxonomy+"\n")
+        l.write("TE GFF: "+te_gff+"\n")
+        l.write("fastq1: "+fq1+'\n')
+        l.write("fastq2: "+fq2+"\n")
+        l.write("SAM: "+sam+"\n")
 
     out_dir = snakemake.params.out_dir
     sample_name = snakemake.params.sample_name
-    log = snakemake.params.log
     script_dir = snakemake.params.script_dir
 
     print("\tgetting read length...")

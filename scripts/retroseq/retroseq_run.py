@@ -15,12 +15,20 @@ def main():
     ref_fasta = snakemake.input.ref_fasta
     ref_te_bed = snakemake.input.ref_te_bed
     taxonomy = snakemake.input.taxonomy
+    log = snakemake.params.log
+
+    with open(log,"a") as l:
+        l.write("consensus fasta: "+consensus_fasta+"\n")
+        l.write("BAM: "+bam+"\n")
+        l.write("reference fasta: "+ref_fasta+"\n")
+        l.write("taxonomy TSV: "+ taxonomy+"\n")
+        
 
     script_dir = snakemake.params.script_dir
     out_dir = snakemake.params.out_dir
     ref_name = snakemake.params.ref_name
     sample_name = snakemake.params.sample_name
-    log = snakemake.params.log
+    
 
     elements = split_consensus_fasta(consensus_fasta, ref_name, out_dir)
 

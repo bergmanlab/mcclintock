@@ -67,7 +67,10 @@ rule make_reference_te_files:
     threads: config['args']['max_threads_per_rule']
 
     params:
-        log=config['args']['log_dir']+"processing.log"
+        log=config['args']['log_dir']+"processing.log",
+        raw_ref_tes = config['in']['locations'],
+        out_dir = config['args']['out'],
+        run_id = config['args']['run_id']
 
     output:
         config['mcc']['masked_fasta'],
@@ -737,7 +740,7 @@ rule summary_report:
         out_dir = config['args']['out']+"/results/summary/"
 
 
-    threads: workflow.cores
+    threads: config['args']['max_threads_per_rule']
 
     conda: config['envs']['mcc_processing']
 

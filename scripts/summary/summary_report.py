@@ -146,6 +146,11 @@ def make_te_csv(methods, out_file_map, taxonomy, out_csv):
                             print("ERROR: couldn't find TE name in:", name)
                     
                         else:
+                            if te_name not in te_counts.keys():
+                                te_counts[te_name] = {method:[0,0]}
+                            elif method not in te_counts[te_name].keys():
+                                te_counts[te_name][method] = [0,0]
+                                
                             if "non-reference" in name:
                                 te_counts[te_name][method][1] += 1
                             else:
@@ -179,9 +184,7 @@ def make_run_summary(fq1, fq2, ref, bam, flagstat, median_insert_size, command, 
     out_lines.append("Command:\n"+command+"\n")
     out_lines.append("\nrun from directory: "+execution_dir+"\n")
     out_lines.append(pad("Started:",12)+start_time+"\n")
-    now = datetime.now()
-    completed = now.strftime("%Y-%m-%d %H:%M:%S")
-    out_lines.append(pad("Completed:",12)+completed+"\n\n")
+    out_lines.append(pad("Completed:",12)+"{{END_TIME}}"+"\n\n")
 
     out_lines.append(("-"*34)+"\n")
     out_lines.append("MAPPED READ INFORMATION\n")
@@ -210,8 +213,14 @@ def make_run_summary(fq1, fq2, ref, bam, flagstat, median_insert_size, command, 
     out_lines.append(pad("avg genome coverage:",24) + str(get_avg_coverage(ref, bam, out_dir)) + "\n")
     out_lines.append(("-"*34)+"\n")
 
+
+    
     with open(out_file,"w") as out:
         for line in out_lines:
+            if "{{END_TIME}}" in line:
+                now = datetime.now()
+                completed = now.strftime("%Y-%m-%d %H:%M:%S")
+                line = line.replace("{{END_TIME}}",completed)
             print(line, end="")
             out.write(line)
         

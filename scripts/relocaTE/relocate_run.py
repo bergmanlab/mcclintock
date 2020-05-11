@@ -11,18 +11,28 @@ def main():
     te_gff = snakemake.input.te_gff
     reference_fasta = snakemake.input.reference_fasta
     fq1 = snakemake.input.fq1
-    sq2 = snakemake.input.fq2
+    fq2 = snakemake.input.fq2
 
     log = snakemake.params.log
     raw_fq2 = snakemake.params.raw_fq2
-    script_dir = snakemake.params.script_dir
-    out_dir = snakemake.params.out_dir
-
-    out_gff = snakemake.output[0]
-
     is_paired = True
     if snakemake.params.raw_fq2 == "None":
         is_paired = False
+
+    with open(log,"a") as l:
+        l.write("consensus fasta: "+consensus_fasta+"\n")
+        l.write("TE GFF: "+te_gff+"\n")
+        l.write("reference fasta: "+reference_fasta+"\n")
+        l.write("fastq1: "+fq1+"\n")
+        if is_paired:
+            l.write("fastq2: "+fq2+"\n")
+
+
+    script_dir = snakemake.params.script_dir
+    out_dir = snakemake.params.out_dir
+    out_gff = snakemake.output[0]
+
+
 
     annotation = make_annotation_file(te_gff, out_dir)
     os.chdir(out_dir)
@@ -47,8 +57,6 @@ def main():
         command += ["-u", "unPaired"]
     
     print("<RELOCATE> Running RelocaTE...")
-    # mccutils.run_command(command, log=log)
-    print(" ".join(command))
     mccutils.run_command(command, log=log)
     combine_gffs(out_dir, out_gff)
     print("<RELOCATE> RelocaTE run complete")

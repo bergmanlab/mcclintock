@@ -15,11 +15,18 @@ def main():
     ref_te_bed = snakemake.input.ref_te_bed
     taxonomy = snakemake.input.taxonomy
     median_insert_size_file = snakemake.input.median_insert_size
+    log = snakemake.params.log
+    with open(log,"a") as l:
+        l.write("BAM: "+bam+"\n")
+        l.write("2bit: "+twobit+"\n")
+        l.write("consensus fasta: "+consensus+"\n")
+        l.write("reference TE BED: "+ref_te_bed+"\n")
+        l.write("Taxonomy TSV: "+taxonomy+"\n")
+
+
     threads = snakemake.threads
     out_dir = snakemake.params.out_dir
     scripts_dir = snakemake.params.scripts_dir
-    log = snakemake.params.log
-
     sample_name = snakemake.params.sample_name
 
     print("<TEMP> Running TEMP Module...")
