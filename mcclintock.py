@@ -3,15 +3,22 @@
 import argparse
 import os
 import sys
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-import scripts.mccutils as mccutils
-import config.config as config
-import config.install.install as config_install
 import json
 import random
 import gzip
 from datetime import datetime
-from Bio import SeqIO
+
+try:
+    sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+    import scripts.mccutils as mccutils
+    import config.config as config
+    import config.install.install as config_install
+    from Bio import SeqIO
+except ImportError as e:
+    print(e)
+    sys.exit("ERROR...unable to load required python modules\ntry reinstalling and/or activating mcclintock environment:\n\tconda env create -f install/envs/mcclintock.yml --name mcclintock\n\tconda activate mcclintock\n")
+
+
 
 
 
@@ -63,6 +70,7 @@ def parse_args():
 
     if args.install:
         print("installing dependencies...")
+        print("WARNING...this could take awhile...")
         install(clean=args.clean, debug=args.debug)
         sys.exit(0)
 
@@ -248,8 +256,8 @@ def install(clean=False, debug=False):
     for method in data['ENVs'].keys():
         data['ENVs'][method] = data['ENVs'][method].replace(config_install.ENV_PATH, install_path+"envs/")
 
-    with open(install_config,"w") as config:
-        json.dump(data, config, indent=4)
+    with open(install_config,"w") as c:
+        json.dump(data, c, indent=4)
 
     if os.path.exists(install_path+"install.log"):
         os.remove(install_path+"install.log")
@@ -265,10 +273,21 @@ def install(clean=False, debug=False):
     mccutils.mkdir(conda_env_dir)
     os.chdir(install_path)
     mccutils.mkdir(log_dir)
-    command = ["snakemake","--use-conda", "--conda-prefix", conda_env_dir, "--configfile", install_config, "-R", "install_all", "--cores", "1", "--nolock"]
-    if not debug:
-        command.append("--quiet")
-    mccutils.run_command(command)
+
+    for env in config.ALL_METHODS:
+        if env not in config.NO_INSTALL_METHODS:
+            env = env.replace("-","")
+            print("Installing conda environment for:",env)
+            command = ["snakemake","--use-conda", "--conda-prefix", conda_env_dir, "--configfile", install_config, "-R", env, "--cores", "1", "--nolock", "--create-envs-only"]
+            if not debug:
+                command.append("--quiet")
+            mccutils.run_command(command)
+
+            print("Installing scripts for:", env)
+            command = ["snakemake","--use-conda", "--conda-prefix", conda_env_dir, "--configfile", install_config, "-R", env, "--cores", "1", "--nolock"]
+            if not debug:
+                command.append("--quiet")
+            mccutils.run_command(command)
 
 def make_run_config(args, sample_name, ref_name, full_command, current_directory):
     run_id = random.randint(1000000,9999999)

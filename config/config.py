@@ -1,8 +1,8 @@
 
 ALL_METHODS = ["ngs_te_mapper", "relocate", "relocate2", "temp", "retroseq", "popoolationte", "te-locate", "coverage", "trimgalore"]
 SINGLE_END_METHODS = ["ngs_te_mapper","relocate", "relocate2", "coverage", "trimgalore"]
-
 MULTI_THREAD_METHODS = ["coverage", "temp", "relocate2", "ngs_te_mapper", "popoolationte"]
+NO_INSTALL_METHODS = ["trimgalore"]
 
 INPUT_DIR = "{{indir}}"
 REF_NAME = "{{refname}}"

@@ -1,4 +1,4 @@
-rule install_telocate:
+rule telocate:
     params:
         url = config['URLs']['te-locate'],
         md5 = config['MD5s']['te-locate'],
@@ -15,7 +15,7 @@ rule install_telocate:
         config['paths']['install']+"scripts/te-locate.py"
 
 
-rule install_retroseq:
+rule retroseq:
     params:
         url = config['URLs']['retroseq'],
         md5 = config['MD5s']['retroseq'],
@@ -30,7 +30,7 @@ rule install_retroseq:
     script:
         config['paths']['install']+"scripts/retroseq.py"
 
-rule install_temp:
+rule temp:
     params:
         url = config['URLs']['temp'],
         md5 = config['MD5s']['temp'],
@@ -47,7 +47,7 @@ rule install_temp:
     script:
         config['paths']['install']+"scripts/temp.py"
 
-rule install_relocaTE:
+rule relocate:
     params:
         url = config['URLs']['relocate'],
         md5 = config['MD5s']['relocate'],
@@ -63,7 +63,7 @@ rule install_relocaTE:
     script:
        config['paths']['install']+"scripts/relocate.py" 
 
-rule install_relocaTE2:
+rule relocate2:
     conda: config['ENVs']['relocate2']
 
     output:
@@ -72,7 +72,7 @@ rule install_relocaTE2:
     shell:
         "echo 'RelocaTE2 env installed' > {output}"
 
-rule install_ngs_te_mapper:
+rule ngs_te_mapper:
     params:
         url = config['URLs']['ngs_te_mapper'],
         md5 = config['MD5s']['ngs_te_mapper'],
@@ -87,7 +87,7 @@ rule install_ngs_te_mapper:
     script:
         config['paths']['install']+"scripts/ngs_te_mapper.py"
     
-rule install_popoolationTE:
+rule popoolationte:
     params:
         url = config['URLs']['popoolationte'],
         md5 = config['MD5s']['popoolationte'],
@@ -109,7 +109,7 @@ rule install_popoolationTE:
     script:
         config['paths']['install']+"scripts/popoolationte.py"
 
-rule install_coverage:
+rule coverage:
     output:
         config['paths']['install']+"tools/coverage/coverage.log"    
 
