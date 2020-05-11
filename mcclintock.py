@@ -170,7 +170,7 @@ def check_input_files(ref, consensus, fq1, fq2=None, locations=None, taxonomy=No
     #check locations gff
     gff_ids = []
     if locations is not None:
-        print("checking lcations gff:", locations)
+        print("checking locations gff:", locations)
         with open(locations,"r") as gff:
             for line in gff:
                 if "#" not in line:
@@ -193,21 +193,34 @@ def check_input_files(ref, consensus, fq1, fq2=None, locations=None, taxonomy=No
                         
     
     # check taxonomy
-    with open(taxonomy, "r") as tsv:
-        for line in tsv:
-            split_line = line.split("\t")
-            if len(split_line) != 2:
-                sys.exit(taxonomy+" does not have two columns. Should be tab-separated file with feature ID and TE family as columns\n")
-            else:
-                te_id = split_line[0]
-                te_family = split_line[1].replace("\n","")
+    if taxonomy is not None:
+        print("checking taxonomy TSV:", taxonomy)
+        with open(taxonomy, "r") as tsv:
+            for line in tsv:
+                split_line = line.split("\t")
+                if len(split_line) != 2:
+                    sys.exit(taxonomy+" does not have two columns. Should be tab-separated file with feature ID and TE family as columns\n")
+                else:
+                    te_id = split_line[0]
+                    te_family = split_line[1].replace("\n","")
 
-                if te_id not in gff_ids:
-                    sys.exit("TE ID: "+te_id+" not found in IDs from GFF: "+locations+"\nplease make sure each ID in: "+taxonomy+" is found in:"+locations+"\n")
+                    if te_id not in gff_ids:
+                        sys.exit("TE ID: "+te_id+" not found in IDs from GFF: "+locations+"\nplease make sure each ID in: "+taxonomy+" is found in:"+locations+"\n")
+                    
+                    if te_family not in consensus_seq_names:
+                        sys.exit("TE Family: "+te_family+" not found in sequence names from: "+consensus+"\nplease make sure each family in: "+taxonomy+" is found in: "+consensus+"\n")
                 
-                if te_family not in consensus_seq_names:
-                    sys.exit("TE Family: "+te_family+" not found in sequence names from: "+consensus+"\nplease make sure each family in: "+taxonomy+" is found in: "+consensus+"\n")
-                
+
+    #check coverage fasta
+    if coverage_fasta is not None:
+        print("checking coverage fasta: ", coverage_fasta)
+        try:
+            with open(coverage_fasta,"r") as fa:
+                for record in SeqIO.parse(fa, "fasta"):
+                    pass
+        except Exception as e:
+            print(e)
+            sys.exit(coverage_fasta+" appears to be a malformed FastA file..exiting...\n")       
 
 
 
