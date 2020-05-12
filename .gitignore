@@ -13,6 +13,5 @@ install/envs/conda/*
 envs/conda/*
 install/log/*
 config/TEMP/__pycache__/*
-test/SRR800842_1.fastq
-test/SRR800842_2.fastq
-test/sacCer2.fasta
+test/SRR800842_1.fastq*
+test/SRR800842_2.fastq*

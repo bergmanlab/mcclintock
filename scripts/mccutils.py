@@ -124,6 +124,7 @@ def download(url, out_file, md5=None, timeout=15):
         sys.exit(1)
 
     except:
+        print(sys.exc_info())
         print("download failed...")
         return False
 
@@ -142,7 +143,7 @@ def download(url, out_file, md5=None, timeout=15):
                 print("MD5 of", out_file, " : ", this_md5, "does not match currect MD5 hash: ", md5)
                 return False
             else:
-                print("MD5 hash of ", out_file, "matches")
+                print("MD5 hash of ", out_file, "matches expected")
                 return True
 
 

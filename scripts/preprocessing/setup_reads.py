@@ -28,9 +28,12 @@ def main():
         else:
             flags = trimgalore.PAIRED_END_FLAGS
             trimmedfq, trimmedfq2 = run_trim_galore(fq1, run_id, log, mcc_out, fq2=fq2, cores=processors, flags=flags)
-            mccutils.run_command(["mv", trimmedfq2, snakemake.output[1]])
+            if ".gz" in fq2:
+                mccutils.run_command_stdout(["zcat", trimmedfq2], snakemake.output[1])
+                mccutils.remove(trimmedfq2)
         
-        mccutils.run_command(["mv", trimmedfq, snakemake.output[0]])
+        mccutils.run_command_stdout(["zcat", trimmedfq], snakemake.output[0])
+        mccutils.remove(trimmedfq)
     
     # makes local unzipped copies of input fastq files
     else:
