@@ -3,9 +3,17 @@
 import os
 import sys
 import subprocess
-sys.path.append(snakemake.config['args']['mcc_path'])
-import scripts.mccutils as mccutils
-import config.preprocessing.trimgalore as trimgalore
+import traceback
+try:
+    sys.path.append(snakemake.config['args']['mcc_path'])
+    import scripts.mccutils as mccutils
+    import config.preprocessing.trimgalore as trimgalore
+except Exception as e:
+    track = traceback.format_exc()
+    print(track, file=sys.stderr)
+    print("ERROR...unable to locate required external scripts at: "+snakemake.config['args']['mcc_path']+"/scripts/ or "+snakemake.config['args']['mcc_path']+"/config/preprocessing/", file=sys.stderr)
+    sys.exit(1)
+    
 
 
 def main():

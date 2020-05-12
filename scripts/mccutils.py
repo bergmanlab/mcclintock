@@ -25,7 +25,11 @@ def get_abs_path(in_file, log=None):
 
 def get_base_name(path, fastq=False):
     no_path = os.path.basename(path)
+    if no_path.split(".")[-1] == ".gz":
+        # removes .gz from end of file
+        no_path = ".".join(no_path.split(".")[:-1])
     no_ext = os.path.splitext(no_path)[0]
+    
 
     if fastq == True:
         no_ext = no_ext.replace("_1","")

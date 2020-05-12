@@ -40,12 +40,11 @@ def main():
     print("<NGS_TE_MAPPER> Running ngs_te_mapper...")
     mccutils.run_command(command, log=log)
 
-    fq1_basename = mccutils.get_base_name(fastq1)
-    fq2_basename = mccutils.get_base_name(fastq2)
-    if is_paired:
-        raw_bed = out_dir+"/bed_tsd/"+fq1_basename+"_"+fq2_basename+"insertions.bed"
-    else:
-        raw_bed = out_dir+"/bed_tsd/"+fq1_basename+"insertions.bed"
+
+    raw_bed = ""
+    for f in os.listdir(out_dir+"/bed_tsd/"):
+        if "insertions.bed" in f:
+            raw_bed = out_dir+"/bed_tsd/"+f
 
     mccutils.run_command(["cp", raw_bed, out_bed])
 
