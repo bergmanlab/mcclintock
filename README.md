@@ -47,7 +47,7 @@ git checkout refactor ## OMIT WHEN REFACTOR BRANCH IS MERGED WITH MASTER
 conda env create -f install/envs/mcclintock.yml --name mcclintock
 conda activate mcclintock
 ```
-**NOTE: the `mcclintock` conda environment must always be activate when executing the mcclintock.py script.**
+**NOTE: the `mcclintock` conda environment must always be activate when executing mcclintock scripts.**
 
 4. Create component method conda environments and install their depenencies. Each software method has their own set of dependencies. To avoid dependency clashes, McClintock creates a separate conda environment for each method and installs their dependencies separately.
 ```
@@ -57,10 +57,10 @@ python3 mcclintock.py --install
 How to run 
 ------
 ### Running on a test dataset
-Some test data is provided in the `test/` directory, though the larger files (reads, reference genome) must be downloaded using the `test/download_test_data.sh` script.
+Some test data is provided in the `test/` directory, though the larger files (reads, reference genome) must be downloaded using the `test/download_test_data.py` script.
 
 ```
-sh test/download_test_data.sh
+python test/download_test_data.py
 ```
 
 The test data provided is a UCSC sacCer2 yeast reference genome, an annotation of TEs in the yeast reference genome from [Carr, Bensasson and Bergman (2012)](http://www.plosone.org/article/info%3Adoi%2F10.1371%2Fjournal.pone.0050978), and a pair of fastq files from SRA.
