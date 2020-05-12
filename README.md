@@ -57,7 +57,7 @@ python3 mcclintock.py --install
 How to run 
 ------
 ### Running on a test dataset
-Some test data is provided in the `test/` directory, though the larger files (reads, reference genome) must be downloaded using the `test/download_test_data.py` script.
+Some test data is provided in the `test/` directory, though the FastQ files must be downloaded using the `test/download_test_data.py` script.
 
 ```
 python3 test/download_test_data.py
