@@ -60,7 +60,7 @@ How to run
 Some test data is provided in the `test/` directory, though the larger files (reads, reference genome) must be downloaded using the `test/download_test_data.py` script.
 
 ```
-python test/download_test_data.py
+python3 test/download_test_data.py
 ```
 
 The test data provided is a UCSC sacCer2 yeast reference genome, an annotation of TEs in the yeast reference genome from [Carr, Bensasson and Bergman (2012)](http://www.plosone.org/article/info%3Adoi%2F10.1371%2Fjournal.pone.0050978), and a pair of fastq files from SRA.
