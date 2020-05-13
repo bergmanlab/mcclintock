@@ -1,5 +1,5 @@
-# <p align="center"> MCCLINTOCK </p>
-### <p align="center"> Meta-pipeline to identify transposable element insertions using next generation sequencing data </p>
+#  MCCLINTOCK
+### Meta-pipeline to identify transposable element insertions using next generation sequencing data
 <p align="center">
     <img src="https://github.com/bergmanlab/mcclintock/blob/master/img/mcclintock.jpg?raw=true" alt="McClintock in action"/>
 </p>
