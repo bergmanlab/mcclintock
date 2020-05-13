@@ -18,7 +18,6 @@ def main():
     is_paired = True
     if snakemake.params.raw_fq2 == "None":
         is_paired = False
-    
     with open(log,"a") as l:
         l.write("reference fasta: "+reference+"\n")
         l.write("TE fasta: "+te_seqs+"\n")
@@ -27,7 +26,6 @@ def main():
         l.write("fastq1: "+fq1+"\n")
         if is_paired:
             l.write("fastq2: "+fq2+"\n")
-
 
     threads = snakemake.threads
     out_dir = snakemake.params.out_dir
