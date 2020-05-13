@@ -91,7 +91,7 @@ conda activate mcclintock
 ```
 * This adds the dependencies installed in the mclintock conda environment to the environment `PATH` so that they can be used by the McClintock scripts.
 * **This environment must <ins>always</ins> be activated prior to running any of the McClintock scripts**
-* **NOTE: Sometimes activating conda environments does not work via `conda activate myenv` when run through a script submitted to a queuing system, this can be fixed by activating the environment in the script as shown below**
+* *NOTE: Sometimes activating conda environments does not work via `conda activate myenv` when run through a script submitted to a queuing system, this can be fixed by activating the environment in the script as shown below*
 ```bash
 CONDA_BASE=$(conda info --base)
 source ${CONDA_BASE}/etc/profile.d/conda.sh
