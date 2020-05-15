@@ -5,6 +5,7 @@ import urllib.request
 import hashlib
 import socket
 import shutil
+import errno
 
 def mkdir(indir, log=None):
     if os.path.isdir(indir) == False:
@@ -25,12 +26,8 @@ def get_abs_path(in_file, log=None):
 
 def get_base_name(path, fastq=False):
     no_path = os.path.basename(path)
-    if no_path.split(".")[-1] == "gz":
-        # removes .gz from end of file
-        no_path = ".".join(no_path.split(".")[:-1])
-    no_ext = os.path.splitext(no_path)[0]
+    no_ext = no_path.split(".")[0]
     
-
     if fastq == True:
         no_ext = no_ext.replace("_1","")
         no_ext = no_ext.replace("_2","")
@@ -171,3 +168,11 @@ def get_median_insert_size(infile):
             median_insert_size = int(float(insert))
     
     return median_insert_size
+
+
+
+def check_file_exists(infile):
+    if os.path.exists(infile):
+        return True
+    else:
+        raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), infile)

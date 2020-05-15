@@ -1,11 +1,13 @@
 
 rule setup_reads:
     input:
-        config['in']['fq1'],
+        fq1 = config['in']['fq1']
         
-
     params:
         fq2 = config['in']['fq2'],
+        methods = config['args']['methods'],
+        out = config['args']['out'],
+        run_id = config['args']['run_id'],
         log = config['args']['log_dir']+"trimgalore.log"
 
     output:
@@ -351,7 +353,7 @@ rule coverage:
     conda: config['envs']['coverage']
 
     output:
-        config['args']['out']+"/results/coverage/te_depth.csv"
+        config['args']['out']+"/results/summary/te_depth.csv"
 
     script:
         config['args']['mcc_path']+"/scripts/coverage/coverage.py"   
@@ -428,6 +430,7 @@ rule relocaTE_run:
         out_dir = config['args']['out']+"/results/relocaTE/unfiltered/",
         log = config['args']['log_dir']+"relocaTE.log",
         script_dir = config['args']['mcc_path']+"/install/tools/relocate/scripts/",
+        sample_name = config['args']['sample_name']
 
     output:
         config['args']['out']+"/results/relocaTE/unfiltered/combined.gff"
@@ -465,9 +468,8 @@ rule relocaTE2_run:
         reference = config['mcc']['augmented_reference'],
         te_seqs = config['mcc']['formatted_consensus'],
         rm_out = config['mcc']['repeatmasker_out'],
-        fastq1 = config['mcc']['fq1'],
-        fastq2 = config['mcc']['fq2'],
-        bam = config['mcc']['bam'],
+        fq1 = config['mcc']['fq1'],
+        fq2 = config['mcc']['fq2'],
         median_insert_size = config['mcc']['median_insert_size']
 
     threads: config['args']['max_threads_per_rule']
@@ -477,7 +479,9 @@ rule relocaTE2_run:
     params:
         raw_fq2 = config['in']['fq2'],
         out_dir = config['args']['out']+"/results/relocaTE2/unfiltered/",
-        log = config['args']['log_dir']+"relocaTE2.log"
+        log = config['args']['log_dir']+"relocaTE2.log",
+        sample_name = config['args']['sample_name']
+        
     
     output:
         config['args']['out']+"/results/relocaTE2/unfiltered/repeat/results/ALL.all_nonref_insert.gff",
@@ -723,13 +727,13 @@ rule summary_report:
         fq1 = config['mcc']['fq1'],
         fq2 = config['mcc']['fq2'],
         ref = config['mcc']['reference'],
-        bam = config['mcc']['bam'],
-        flagstat = config['mcc']['flagstat'],
-        median_insert_size = config['mcc']['median_insert_size'],
         taxonomy = config['mcc']['formatted_taxonomy']
 
 
     params:
+        bam = config['mcc']['bam'],
+        flagstat = config['mcc']['flagstat'],
+        median_insert_size = config['mcc']['median_insert_size'],
         methods = config['args']['methods'].split(","),
         results_dir = config['args']['out']+"/results/",
         sample_name = config['args']['sample_name'],
@@ -745,7 +749,6 @@ rule summary_report:
     conda: config['envs']['mcc_processing']
 
     output:
-        te_summary = config['args']['out']+"/results/summary/te_summary.txt",
         te_csv = config['args']['out']+"/results/summary/te_summary.csv",
         summary_report = config['args']['out']+"/results/summary/summary_report.txt"
     

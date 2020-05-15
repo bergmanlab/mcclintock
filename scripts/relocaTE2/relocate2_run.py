@@ -7,32 +7,42 @@ import config.relocate2.relocate2_run as config
 
 
 def main():
-    reference = snakemake.input.reference
-    te_seqs = snakemake.input.te_seqs
-    rm_out = snakemake.input.rm_out
-    fq1 = snakemake.input.fastq1
-    fq2 = snakemake.input.fastq2
-    bam = snakemake.input.bam
-    log = snakemake.params.log
-    raw_fq2 = snakemake.params.raw_fq2
-    is_paired = True
-    if snakemake.params.raw_fq2 == "None":
-        is_paired = False
-    with open(log,"a") as l:
-        l.write("reference fasta: "+reference+"\n")
-        l.write("TE fasta: "+te_seqs+"\n")
-        l.write("repeatmasker out: "+rm_out+"\n")
-        l.write("BAM: "+bam+"\n")
-        l.write("fastq1: "+fq1+"\n")
-        if is_paired:
-            l.write("fastq2: "+fq2+"\n")
-
+    sample_name = snakemake.params.sample_name
     threads = snakemake.threads
     out_dir = snakemake.params.out_dir
     median_insert_size_file = snakemake.input.median_insert_size
+    log = snakemake.params.log
+
+    is_paired = True
+    if snakemake.params.raw_fq2 == "None":
+        is_paired = False
+
+    input_dir = snakemake.params.out_dir+"/input/"
+    mccutils.remove(input_dir)
+    mccutils.mkdir(input_dir)
+    fq_dir = snakemake.params.out_dir+"/input/fastq/"
+    mccutils.mkdir(fq_dir)
+
+    reference = input_dir+"reference.fasta"
+    te_seqs = input_dir+"consensus.fasta"
+    rm_out = input_dir+"repeatmasker.out"
+
+    os.symlink(snakemake.input.reference, reference)
+    os.symlink(snakemake.input.te_seqs, te_seqs)
+    os.symlink(snakemake.input.rm_out, rm_out)
+
+    if is_paired:
+        fq1 = fq_dir+sample_name+"_1.fq"
+        fq2 = fq_dir+sample_name+"_2.fq"
+        os.symlink(snakemake.input.fq1, fq1)
+        os.symlink(snakemake.input.fq2, fq2)
+    else:
+        fq1 = fq_dir+sample_name+".unPaired.fq"
+        os.symlink(snakemake.input.fq1, fq1)
+
+
 
     median_insert_size = get_median_insert_size(median_insert_size_file)
-    fq_dir = os.path.dirname(fq1)
     output = subprocess.Popen(["which", "relocaTE2.py"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     script = output.stdout.read()
     script = script.decode()
@@ -56,17 +66,15 @@ def main():
                         "--len_cut_match", str(config.RELOCATE2["len_cut_match"]),
                         "--len_cut_trim", str(config.RELOCATE2["len_cut_trim"]),
                         "--mismatch", str(config.RELOCATE2["mismatch"]),
-                        "--mismatch_junction", str(config.RELOCATE2["mismatch_junction"])
+                        "--mismatch_junction", str(config.RELOCATE2["mismatch_junction"]),
+                        "-d", fq_dir
     ]
 
     if is_paired:
-        command += ["-1", "_1", "-2", "_2", "-d", fq_dir+"/"]
+        command += ["-1", "_1", "-2", "_2"]
     
     else:
-        mccutils.mkdir(out_dir+"/tmp")
-        mccutils.mkdir(out_dir+"/tmp/fastq")
-        mccutils.run_command(["cp", fq1, out_dir+"/tmp/fastq"])
-        command += ["-u", "_1", "-d", out_dir+"/tmp/fastq"]
+        command += ["-u", ".unPaired"]
 
 
     print(" ".join(command))

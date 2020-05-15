@@ -13,11 +13,11 @@ def main():
     fq1 = snakemake.input.fq1
     fq2 = snakemake.input.fq2
     ref = snakemake.input.ref
-    bam = snakemake.input.bam
-    flagstat = snakemake.input.flagstat
-    median_insert_size = snakemake.input.median_insert_size
     taxonomy = snakemake.input.taxonomy
 
+    bam = snakemake.params.bam
+    flagstat = snakemake.params.flagstat
+    median_insert_size = snakemake.params.median_insert_size
     methods = snakemake.params.methods
     results_dir = snakemake.params.results_dir
     sample_name = snakemake.params.sample_name
@@ -37,9 +37,9 @@ def main():
         out_file_map[method] = out_file_map[method].replace("{{results}}", results_dir)
         out_file_map[method] = out_file_map[method].replace("{{samplename}}", sample_name)
 
-    make_te_summary_table(methods, out_file_map, snakemake.output.te_summary)
+    # make_te_summary_table(methods, out_file_map, snakemake.output.te_summary)
     make_te_csv(methods, out_file_map, taxonomy, snakemake.output.te_csv)
-    make_run_summary(fq1, fq2, ref, bam, flagstat, median_insert_size, command, execution_dir, start_time, out_dir, snakemake.output.summary_report, paired=paired)
+    make_run_summary(out_file_map, methods, fq1, fq2, ref, bam, flagstat, median_insert_size, command, execution_dir, start_time, out_dir, snakemake.output.summary_report, paired=paired)
     
 
 
@@ -171,7 +171,7 @@ def make_te_csv(methods, out_file_map, taxonomy, out_csv):
             out.write(",".join(line)+"\n")
     
 
-def make_run_summary(fq1, fq2, ref, bam, flagstat, median_insert_size, command, execution_dir, start_time, out_dir, out_file, paired=False):
+def make_run_summary(out_file_map, methods, fq1, fq2, ref, bam, flagstat, median_insert_size, command, execution_dir, start_time, out_dir, out_file, paired=False):
     out_lines = []
     out_lines.append(("-"*34)+"\n")
     out_lines.append("MCCLINTOCK SUMMARY REPORT\n")
@@ -186,33 +186,59 @@ def make_run_summary(fq1, fq2, ref, bam, flagstat, median_insert_size, command, 
     out_lines.append(pad("Started:",12)+start_time+"\n")
     out_lines.append(pad("Completed:",12)+"{{END_TIME}}"+"\n\n")
 
-    out_lines.append(("-"*34)+"\n")
-    out_lines.append("MAPPED READ INFORMATION\n")
-    out_lines.append(("-"*34) + "\n")
+    if os.path.exists(bam) and os.path.exists(flagstat) and os.path.exists(median_insert_size):
+        out_lines.append(("-"*34)+"\n")
+        out_lines.append("MAPPED READ INFORMATION\n")
+        out_lines.append(("-"*34) + "\n")
 
-    out_lines.append(pad("read1 sequence length:",24) + str(estimate_read_length(fq1))+"\n")
-    if paired:
-        out_lines.append(pad("read2 sequence length:",24) + str(estimate_read_length(fq2))+"\n")
-    
-    with open(flagstat,"r") as stat:
-        for line in stat:
-            if "read1" in line:
-                reads = line.split("+")[0].replace(" ","")
-                out_lines.append(pad("read1 reads:",24) + str(reads) + "\n")
-            
-            if paired and "read2" in line:
-                reads = line.split("+")[0].replace(" ","")
-                out_lines.append(pad("read2 reads:",24) + str(reads) + "\n")
-
+        out_lines.append(pad("read1 sequence length:",24) + str(estimate_read_length(fq1))+"\n")
+        if paired:
+            out_lines.append(pad("read2 sequence length:",24) + str(estimate_read_length(fq2))+"\n")
         
-    with open(median_insert_size,"r") as median_insert:
-        for line in median_insert:
-            line = line.split("=")[1].replace("\n","")
-            out_lines.append(pad("median insert size:",24) + str(int(float(line))) + "\n")
-    
-    out_lines.append(pad("avg genome coverage:",24) + str(get_avg_coverage(ref, bam, out_dir)) + "\n")
-    out_lines.append(("-"*34)+"\n")
+        with open(flagstat,"r") as stat:
+            for line in stat:
+                if "read1" in line:
+                    reads = line.split("+")[0].replace(" ","")
+                    out_lines.append(pad("read1 reads:",24) + str(reads) + "\n")
+                
+                if paired and "read2" in line:
+                    reads = line.split("+")[0].replace(" ","")
+                    out_lines.append(pad("read2 reads:",24) + str(reads) + "\n")
 
+            
+        with open(median_insert_size,"r") as median_insert:
+            for line in median_insert:
+                line = line.split("=")[1].replace("\n","")
+                out_lines.append(pad("median insert size:",24) + str(int(float(line))) + "\n")
+        
+        out_lines.append(pad("avg genome coverage:",24) + str(get_avg_coverage(ref, bam, out_dir)) + "\n")
+        out_lines.append(("-"*34)+"\n")
+
+
+    len_longest_name = 0
+    for method in config.ALL_METHODS:
+        if len(method) > len_longest_name:
+            len_longest_name = len(method)
+
+
+    width1 = len_longest_name+2
+    width2 = 10
+    width3 = 13
+    width4 = 14
+
+    out_lines.append("\n")
+    out_lines.append("-"*(width1) + "-"*width2 + "-"*width3 + "-"*width4 + "\n")
+    out_lines.append(pad("METHOD", width1) + pad("ALL",width2) + pad("REFERENCE",width3) + pad("NON-REFERENCE", width4) + "\n")
+    out_lines.append("-"*(width1) + "-"*width2 + "-"*width3 + "-"*width4 + "\n")
+    for method in config.ALL_METHODS:
+        if "nonredundant.bed" in out_file_map[method]:
+            if method in methods:
+                all_te, ref_te, nonref_te = get_te_counts(out_file_map[method])
+                out_lines.append(pad(method, width1) + pad(str(all_te), width2) + pad(str(ref_te), width3) + pad(str(nonref_te), width4) + "\n")
+            else:
+                out_lines.append(pad(method, width1) + pad("NA", width2) + pad("NA", width3) + pad("NA", width4) + "\n")
+
+    out_lines.append("-"*(width1) + "-"*width2 + "-"*width3 + "-"*width4 + "\n")
 
     
     with open(out_file,"w") as out:

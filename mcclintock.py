@@ -7,6 +7,7 @@ import json
 import random
 import gzip
 from datetime import datetime
+import traceback
 
 try:
     sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -62,6 +63,7 @@ def parse_args():
     parser.add_argument("--clean", action="store_true", help="This option will make sure mcclintock runs from scratch and doesn't reuse files already created", required=False)
     parser.add_argument("--install", action="store_true", help="This option will install the dependencies of mcclintock", required=False)
     parser.add_argument("--debug", action="store_true", help="This option will allow snakemake to print progress to stdout", required=False)
+    parser.add_argument("--fast", action="store_true", help="This option attempts to speed up the pipeline by allowing more rules to run concurrently, may require additional memory", required=False)
 
     args = parser.parse_args()
 
@@ -97,7 +99,14 @@ def parse_args():
         args.out = os.path.abspath(".")
     else:
         args.out = os.path.abspath(args.out)
-        mccutils.mkdir(args.out)
+        try:
+            mccutils.mkdir(args.out)
+        except Exception as e:
+            track = traceback.format_exc()
+            print(track, file=sys.stderr)
+            print("cannot create output directory: ",args.out,"exiting...", file=sys.stderr)
+            sys.exit(1)
+
     
 
     #check -m
@@ -326,7 +335,7 @@ def make_run_config(args, sample_name, ref_name, full_command, current_directory
         'methods' : ",".join(args.methods),
         'out_files': ",".join(out_files_to_make),
         'save_comments' : str(args.comments),
-        'max_threads_per_rule' : max(1, calculate_max_threads(args.proc, args.methods, config.MULTI_THREAD_METHODS)),
+        'max_threads_per_rule' : max(1, calculate_max_threads(args.proc, args.methods, config.MULTI_THREAD_METHODS, fast=args.fast)),
         'full_command' : full_command,
         'call_directory': current_directory,
         'time': now.strftime("%Y-%m-%d %H:%M:%S")
@@ -401,31 +410,39 @@ def run_workflow(args, sample_name, run_id, debug=False):
 
 
     
-    command.append(args.out+"/results/summary/te_summary.txt")
+    command.append(args.out+"/results/summary/summary_report.txt")
 
 
 
     print(" ".join(command))
-    mccutils.run_command(command)
+    try:
+        mccutils.run_command(command)
+        mccutils.check_file_exists(args.out+"/results/summary/summary_report.txt")
+    except Exception as e:
+        track = traceback.format_exc()
+        print(track, file=sys.stderr)
+        print("McClintock Pipeline Failed... please open an issue at https://github.com/bergmanlab/mcclintock/issues if you are having trouble using McClintock", file=sys.stderr)
+        sys.exit(1)
     mccutils.remove(args.out+"/tmp")
 
 
-def calculate_max_threads(avail_procs, methods_used, multithread_methods):
+def calculate_max_threads(avail_procs, methods_used, multithread_methods, fast=False):
     max_threads = avail_procs
 
-    multi_methods_used = 0
-    for method in methods_used:
-        if method in multithread_methods:
-            multi_methods_used += 1
+    if fast:
+        multi_methods_used = 0
+        for method in methods_used:
+            if method in multithread_methods:
+                multi_methods_used += 1
 
-    if multi_methods_used > 1:
-        is_even = False
-        if max_threads%2 == 0:
-            is_even = True
-        
-        max_threads = max_threads//2
-        if is_even:
-            max_threads = max_threads-1
+        if multi_methods_used > 1:
+            is_even = False
+            if max_threads%2 == 0:
+                is_even = True
+            
+            max_threads = max_threads//2
+            if is_even:
+                max_threads = max_threads-1
 
     return max_threads        
 

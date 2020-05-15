@@ -14,7 +14,9 @@ import scripts.mccutils as mccutils
 
 def main():
     mcc_out = snakemake.config["args"]['out']
-    coverage_out = snakemake.config["args"]['out']+"/results/coverage/"
+    mccutils.mkdir(mcc_out+"/results/")
+    coverage_out = mcc_out+"/results/coverage/"
+    mccutils.mkdir(coverage_out)
     run_id = snakemake.config['args']['run_id']
     te_seqs = snakemake.input.consensus
     log = snakemake.params.log
@@ -39,7 +41,7 @@ def main():
 
     genome_depth = get_genome_depth(nonte_bed, bam, run_id, coverage_out, log)
 
-    te_names, all_coverage_files, uniq_coverage_files, avg_norm_te_depths = make_depth_table(te_seqs, bam, genome_depth, run_id, coverage_out, log)
+    te_names, all_coverage_files, uniq_coverage_files, avg_norm_te_depths = make_depth_table(te_seqs, bam, genome_depth, run_id, coverage_out, snakemake.output[0], log)
 
     make_plots(te_names, all_coverage_files, uniq_coverage_files, avg_norm_te_depths, genome_depth, snakemake.params.sample, coverage_out)
 
@@ -206,9 +208,8 @@ def get_avg_depth(depth_file):
 
     return avg_depth
 
-def make_depth_table(te_fasta, bam, genome_depth, run_id, out, log):
+def make_depth_table(te_fasta, bam, genome_depth, run_id, out, depth_csv, log):
     print("<COVERAGE> Creating TE depth coverage table...log:"+log)
-    depth_csv = out+"/te_depth.csv"
     with open(depth_csv, "w") as table:
             table.write("TE-Family,Normalized-Depth"+"\n")
     

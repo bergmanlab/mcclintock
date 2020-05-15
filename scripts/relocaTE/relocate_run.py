@@ -7,37 +7,45 @@ import config.relocate.relocate_run as config
 
 
 def main():
-    consensus_fasta = snakemake.input.consensus_fasta
-    te_gff = snakemake.input.te_gff
-    reference_fasta = snakemake.input.reference_fasta
-    fq1 = snakemake.input.fq1
-    fq2 = snakemake.input.fq2
+    print("<RELOCATE> Running RelocaTE...")
 
+    sample_name = snakemake.params.sample_name
     log = snakemake.params.log
     raw_fq2 = snakemake.params.raw_fq2
     is_paired = True
-    if snakemake.params.raw_fq2 == "None":
+    if raw_fq2 == "None":
         is_paired = False
-
-    with open(log,"a") as l:
-        l.write("consensus fasta: "+consensus_fasta+"\n")
-        l.write("TE GFF: "+te_gff+"\n")
-        l.write("reference fasta: "+reference_fasta+"\n")
-        l.write("fastq1: "+fq1+"\n")
-        if is_paired:
-            l.write("fastq2: "+fq2+"\n")
 
 
     script_dir = snakemake.params.script_dir
     out_dir = snakemake.params.out_dir
     out_gff = snakemake.output[0]
 
+    input_dir = snakemake.params.out_dir+"/input/"
+    mccutils.remove(input_dir)
+    mccutils.mkdir(input_dir)
+    fq_dir = input_dir+"fastq/"
+    mccutils.mkdir(fq_dir)
+
+    consensus_fasta = input_dir+"consensus.fasta"
+    te_gff = input_dir+"te.gff"
+    reference_fasta = input_dir+"reference.fasta"
+
+    os.symlink(snakemake.input.consensus_fasta, consensus_fasta)
+    os.symlink(snakemake.input.te_gff, te_gff)
+    os.symlink(snakemake.input.reference_fasta, reference_fasta)
+    if is_paired:
+        os.symlink(snakemake.input.fq1, fq_dir+sample_name+"_1.fq")
+        os.symlink(snakemake.input.fq2, fq_dir+sample_name+"_2.fq")
+    else:
+        os.symlink(snakemake.input.fq1, fq_dir+sample_name+".unPaired.fq")
+
+
 
 
     annotation = make_annotation_file(te_gff, out_dir)
     os.chdir(out_dir)
 
-    fq_dir = os.path.dirname(fq1)
     command = ["perl", script_dir+"/relocaTE.pl", 
                     "-t", consensus_fasta, 
                     "-d", fq_dir, 
@@ -56,7 +64,7 @@ def main():
     else:
         command += ["-u", "unPaired"]
     
-    print("<RELOCATE> Running RelocaTE...")
+    
     mccutils.run_command(command, log=log)
     combine_gffs(out_dir, out_gff)
     print("<RELOCATE> RelocaTE run complete")

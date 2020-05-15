@@ -43,7 +43,7 @@ INTERMEDIATE_PATHS = {
 
 RESULTS_DIR = "{{results}}"
 OUT_PATHS = {
-        'coverage': RESULTS_DIR+"coverage/te_depth.csv",
+        'coverage': RESULTS_DIR+"summary/te_depth.csv",
         'ngs_te_mapper': RESULTS_DIR+"ngs_te_mapper/"+SAMPLE_NAME+"_ngs_te_mapper_nonredundant.bed",
         'relocate': RESULTS_DIR+"relocaTE/"+SAMPLE_NAME+"_relocate_nonredundant.bed",
         'temp': RESULTS_DIR+"TEMP/"+SAMPLE_NAME+"_temp_nonredundant.bed",

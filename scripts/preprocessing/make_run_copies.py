@@ -1,8 +1,15 @@
 import os
 import sys
 import subprocess
-sys.path.append(snakemake.config['args']['mcc_path'])
-import scripts.mccutils as mccutils
+import traceback
+try:
+    sys.path.append(snakemake.config['args']['mcc_path'])
+    import scripts.mccutils as mccutils
+except Exception as e:
+    track = traceback.format_exc()
+    print(track, file=sys.stderr)
+    print("ERROR...unable to locate required external scripts at: "+snakemake.config['args']['mcc_path']+"/scripts/", file=sys.stderr)
+    sys.exit(1)
 
 
 def main():

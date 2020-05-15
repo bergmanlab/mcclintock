@@ -3,66 +3,87 @@
 import os
 import sys
 import subprocess
-sys.path.append(snakemake.config['args']['mcc_path'])
-import scripts.mccutils as mccutils
-import scripts.fix_fasta as fix_fasta
 from Bio import SeqIO
+import traceback
+try:
+    sys.path.append(snakemake.config['args']['mcc_path'])
+    import scripts.mccutils as mccutils
+    import scripts.fix_fasta as fix_fasta
+except Exception as e:
+    track = traceback.format_exc()
+    print(track, file=sys.stderr)
+    print("ERROR...unable to locate required external scripts at: "+snakemake.config['args']['mcc_path']+"/scripts/", file=sys.stderr)
+    sys.exit(1)
+
 
 
 def main():
-    reference_fa = snakemake.input[0]
-    consensus_TEs = snakemake.input[1]
-    locations_gff = snakemake.input[2]
-    taxonomy_tsv = snakemake.input[3]
+    try:
+        reference_fa = snakemake.input[0]
+        consensus_TEs = snakemake.input[1]
+        locations_gff = snakemake.input[2]
+        taxonomy_tsv = snakemake.input[3]
 
-    processors = snakemake.threads
-    ref_tes = snakemake.params.raw_ref_tes
-    mcc_out = snakemake.params.out_dir
-    run_id = snakemake.params.run_id
-    log = snakemake.params.log
+        processors = snakemake.threads
+        ref_tes = snakemake.params.raw_ref_tes
+        mcc_out = snakemake.params.out_dir
+        run_id = snakemake.params.run_id
+        log = snakemake.params.log
 
-    print("<PROCESSING> creating reference TE files...")
-    # if no reference TEs were provided, they must be found with repeatmasker
-    if ref_tes == "None":
-        print("<PROCESSING> no reference TEs provided... finding reference TEs with RepeatMasker...")
-        masked_reference, formatted_ref_tes = repeat_mask(reference_fa, consensus_TEs, processors, run_id, log, mcc_out)
-        formatted_consensus_TEs, te_families = format_consensus_tes(consensus_TEs, run_id, mcc_out)
-        formatted_taxonomy_tsv, formatted_ref_tes = make_te_taxonomy_map(formatted_ref_tes, te_families, run_id, mcc_out)
+        print("<PROCESSING> creating reference TE files...")
+        # if no reference TEs were provided, they must be found with repeatmasker
+        if ref_tes == "None":
+            print("<PROCESSING> no reference TEs provided... finding reference TEs with RepeatMasker...")
+            masked_reference, formatted_ref_tes = repeat_mask(reference_fa, consensus_TEs, processors, run_id, log, mcc_out)
+            formatted_consensus_TEs, te_families = format_consensus_tes(consensus_TEs, run_id, mcc_out)
+            formatted_taxonomy_tsv, formatted_ref_tes = make_te_taxonomy_map(formatted_ref_tes, te_families, run_id, mcc_out)
 
-    # use provided reference TEs to mask genome
-    else:
-        formatted_ref_tes = format_ref_te_gff(ref_tes, run_id, mcc_out)
-        masked_reference = mask_reference(reference_fa, formatted_ref_tes, run_id, log, mcc_out)
-        formatted_taxonomy_tsv = taxonomy_tsv
-        formatted_consensus_TEs = consensus_TEs
+        # use provided reference TEs to mask genome
+        else:
+            formatted_ref_tes = format_ref_te_gff(locations_gff, run_id, mcc_out)
+            masked_reference = mask_reference(reference_fa, formatted_ref_tes, run_id, log, mcc_out)
+            formatted_taxonomy_tsv = taxonomy_tsv
+            formatted_consensus_TEs = consensus_TEs
 
 
-    ref_te_fasta = get_ref_te_fasta(reference_fa, formatted_ref_tes, run_id, log, mcc_out)
+        ref_te_fasta = get_ref_te_fasta(reference_fa, formatted_ref_tes, run_id, log, mcc_out)
 
-    popoolationTE_tsv = make_popoolationTE_taxonomy(formatted_taxonomy_tsv, formatted_consensus_TEs, run_id, mcc_out)
+        popoolationTE_tsv = make_popoolationTE_taxonomy(formatted_taxonomy_tsv, formatted_consensus_TEs, run_id, mcc_out)
 
-    mccutils.run_command(["cp", formatted_ref_tes, snakemake.output[7]])
+        mccutils.run_command(["cp", formatted_ref_tes, snakemake.output[7]])
 
-    augmented_reference = augment_reference(reference_fa, ref_te_fasta, formatted_consensus_TEs, run_id, mcc_out, 
-                                            add_consensus=eval(snakemake.config['args']['include_consensus']), 
-                                            add_reference=eval(snakemake.config['args']['include_reference']))
+        augmented_reference = augment_reference(reference_fa, ref_te_fasta, formatted_consensus_TEs, run_id, mcc_out, 
+                                                add_consensus=eval(snakemake.config['args']['include_consensus']), 
+                                                add_reference=eval(snakemake.config['args']['include_reference']))
+        
+        formatted_ref_tes = augment_ref_te_gff(formatted_ref_tes, ref_te_fasta, formatted_consensus_TEs, run_id, mcc_out,
+                                                add_consensus=eval(snakemake.config['args']['include_consensus']),
+                                                add_reference=eval(snakemake.config['args']['include_reference']))
+        
+        formatted_taxonomy_tsv = augment_taxonomy_map(formatted_taxonomy_tsv, ref_te_fasta, formatted_consensus_TEs, run_id, mcc_out,
+                                                add_consensus=eval(snakemake.config['args']['include_consensus']),
+                                                add_reference=eval(snakemake.config['args']['include_reference']))
+
+
+        mccutils.run_command(["mv", masked_reference, snakemake.output[0]])
+        mccutils.run_command(["mv", formatted_ref_tes, snakemake.output[1]])
+        mccutils.run_command(["mv", formatted_taxonomy_tsv, snakemake.output[2]])
+        mccutils.run_command(["cp", formatted_consensus_TEs, snakemake.output[3]])
+        mccutils.run_command(["mv", ref_te_fasta, snakemake.output[4]])
+        mccutils.run_command(["mv", augmented_reference, snakemake.output[5]])
+        mccutils.run_command(["mv", popoolationTE_tsv, snakemake.output[6]])
     
-    formatted_ref_tes = augment_ref_te_gff(formatted_ref_tes, ref_te_fasta, formatted_consensus_TEs, run_id, mcc_out,
-                                            add_consensus=eval(snakemake.config['args']['include_consensus']),
-                                            add_reference=eval(snakemake.config['args']['include_reference']))
-    
-    formatted_taxonomy_tsv = augment_taxonomy_map(formatted_taxonomy_tsv, ref_te_fasta, formatted_consensus_TEs, run_id, mcc_out,
-                                            add_consensus=eval(snakemake.config['args']['include_consensus']),
-                                            add_reference=eval(snakemake.config['args']['include_reference']))
-
-
-    mccutils.run_command(["mv", masked_reference, snakemake.output[0]])
-    mccutils.run_command(["mv", formatted_ref_tes, snakemake.output[1]])
-    mccutils.run_command(["mv", formatted_taxonomy_tsv, snakemake.output[2]])
-    mccutils.run_command(["cp", formatted_consensus_TEs, snakemake.output[3]])
-    mccutils.run_command(["mv", ref_te_fasta, snakemake.output[4]])
-    mccutils.run_command(["mv", augmented_reference, snakemake.output[5]])
-    mccutils.run_command(["mv", popoolationTE_tsv, snakemake.output[6]])
+    except Exception as e:
+        track = traceback.format_exc()
+        print(track, file=sys.stderr)
+        if ref_tes == "None":
+            print("ERROR...failed while generating the reference TE files...check the formatting of:",",".join([reference_fa, consensus_TEs]), file=sys.stderr)
+        else:
+            print("ERROR...failed while generating the reference TE files...check the formatting of:",",".join([reference_fa, consensus_TEs, locations_gff, taxonomy_tsv]), file=sys.stderr)
+        
+        for out in snakemake.output:
+            mccutils.remove(out)
+        sys.exit(1)
 
     print("<PROCESSING> reference TE files created")
 
@@ -70,44 +91,54 @@ def main():
 
 # creates reference TE gff using repeatmasker and consensus TE fasta
 def repeat_mask(reference, te_fasta, procs, run_id, log, out):
-    outdir = out+"/tmp/repeatmasker_"+run_id
-    mccutils.mkdir(outdir)
-    os.chdir(outdir)
-    command = ["RepeatMasker","-pa", procs, "-lib", te_fasta, "-dir", outdir, "-s", "-gff", "-nolow", "-no_is", reference]
-    mccutils.run_command(command, log=log)
-    os.chdir(out)
+    try:
+        outdir = out+"/tmp/repeatmasker_"+run_id
+        mccutils.mkdir(outdir)
+        os.chdir(outdir)
+        command = ["RepeatMasker","-pa", procs, "-lib", te_fasta, "-dir", outdir, "-s", "-gff", "-nolow", "-no_is", reference]
+        mccutils.run_command(command, log=log)
+        os.chdir(out)
 
-    # RepeatMasker appears to override the custom database names during the ProcessRepeats
-    # this step changes them back, more rules may be needed for other reference genomes
-    ref_name = os.path.basename(reference)
-    repeatmasker_gff = outdir+"/"+ref_name+".out.gff"
-    formatted_ref_tes = out+"/tmp/"+run_id+"tmpreferenceTEs.gff"
-    with open(repeatmasker_gff,"r") as rmgff:
-        with open(formatted_ref_tes,"w") as outgff:
-            for line in rmgff:
-                if "#" not in line:
-                    line = line.replace("McClintock-int","McClintock")
-                    line = line.replace("POGON1", "pogo")
-                    split_line = line.split("\t")
-                    feats = split_line[8]
-                    te = feats.split(" ")[1]
-                    te = te.replace('"','').split(":")[1]
-                    feats = ";".join(["ID="+te, "Name="+te, "Alias="+te])
-                    split_line[2] = te
-                    split_line[8] = feats
-                    line = "\t".join(split_line)
+        # RepeatMasker appears to override the custom database names during the ProcessRepeats
+        # this step changes them back, more rules may be needed for other reference genomes
+        ref_name = os.path.basename(reference)
+        repeatmasker_gff = outdir+"/"+ref_name+".out.gff"
+        formatted_ref_tes = out+"/tmp/"+run_id+"tmpreferenceTEs.gff"
+        with open(repeatmasker_gff,"r") as rmgff:
+            with open(formatted_ref_tes,"w") as outgff:
+                for line in rmgff:
+                    if "#" not in line:
+                        line = line.replace("McClintock-int","McClintock")
+                        line = line.replace("POGON1", "pogo")
+                        split_line = line.split("\t")
+                        feats = split_line[8]
+                        te = feats.split(" ")[1]
+                        te = te.replace('"','').split(":")[1]
+                        feats = ";".join(["ID="+te, "Name="+te, "Alias="+te])
+                        split_line[2] = te
+                        split_line[8] = feats
+                        line = "\t".join(split_line)
 
-                    outgff.write(line+'\n')
+                        outgff.write(line+'\n')
 
 
-    masked_fasta = outdir+"/"+ref_name+".masked"
-    fasta_lines = fix_fasta.fix_fasta_lines(masked_fasta, 80)
+        masked_fasta = outdir+"/"+ref_name+".masked"
+        fasta_lines = fix_fasta.fix_fasta_lines(masked_fasta, 80)
 
-    masked_ref = out+"/tmp/"+run_id+"tmpmaskedreference.fasta"
-    with open(masked_ref,"w") as fa:
-        for line in fasta_lines:
-            fa.write(line+"\n")
-    
+        masked_ref = out+"/tmp/"+run_id+"tmpmaskedreference.fasta"
+        with open(masked_ref,"w") as fa:
+            for line in fasta_lines:
+                fa.write(line+"\n")
+
+        mccutils.check_file_exists(masked_ref)
+        mccutils.check_file_exists(formatted_ref_tes)
+
+    except Exception as e:
+        track = traceback.format_exc()
+        print(track, file=sys.stderr)
+        print("ERROR...Failed to run repeatmasker on: ", reference, "with lib:", te_fasta, "check file formatting...exiting...", file=sys.stderr)
+        sys.exit(1)
+
     return masked_ref, formatted_ref_tes
 
 def format_consensus_tes(consensus_TEs, run_id, out):
@@ -189,21 +220,32 @@ def format_ref_te_gff(ref_tes, run_id, out):
     
 # masks reference genome using reference TEs provided by user
 def mask_reference(reference, ref_tes_gff, run_id, log, out):
-    masked_reference = out+"/tmp/"+run_id+"tmpmaskedreference.fasta"
-    command = ["bedtools", "maskfasta", "-fi", reference, "-fo", masked_reference, "-bed", ref_tes_gff]
-    mccutils.run_command(command, log=log)
+    try:
+        masked_reference = out+"/tmp/"+run_id+"tmpmaskedreference.fasta"
+        command = ["bedtools", "maskfasta", "-fi", reference, "-fo", masked_reference, "-bed", ref_tes_gff]
+        mccutils.run_command(command, log=log)
+
+        mccutils.check_file_exists(masked_reference)
+    except Exception as e:
+        track = traceback.format_exc()
+        print(track, file=sys.stderr)
+        print("ERROR...Failed to mask repeats (bedtools maskfasta) in reference: ", reference, " using repeat file:", ref_tes_gff, "check file formatting...exiting...", file=sys.stderr)
+        sys.exit(1)
 
     return masked_reference
 
 def get_ref_te_fasta(reference, ref_tes_gff, run_id, log, out):
-    ref_te_fasta = out+"/tmp/"+run_id+"tmpreferencetes.fasta"
-    command = ["bedtools", "getfasta", "-name", "-fi", reference, "-bed", ref_tes_gff, "-fo", ref_te_fasta]
-    mccutils.run_command(command, log=log)
+    try:
+        ref_te_fasta = out+"/tmp/"+run_id+"tmpreferencetes.fasta"
+        command = ["bedtools", "getfasta", "-name", "-fi", reference, "-bed", ref_tes_gff, "-fo", ref_te_fasta]
+        mccutils.run_command(command, log=log)
+        mccutils.check_file_exists(ref_te_fasta)
 
-    # fasta_lines = fixfasta.fix_fasta_lines(ref_te_fasta, 80)
-    # with open(ref_te_fasta, "w") as outfa:
-    #     for line in fasta_lines:
-    #         outfa.write(line+"\n")
+    except Exception as e:
+        track = traceback.format_exc()
+        print(track, file=sys.stderr)
+        print("ERROR...Failed to create TE fasta (bedtools getfasta) using reference:", reference, " and TE annotations:", ref_tes_gff, "check file formatting...exiting...", file=sys.stderr)
+        sys.exit(1) 
 
     return ref_te_fasta
 

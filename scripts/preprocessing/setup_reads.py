@@ -17,48 +17,58 @@ except Exception as e:
 
 
 def main():
-    fq1 = snakemake.input[0]
+    fq1 = snakemake.input.fq1
     fq2 = snakemake.params.fq2
-    methods = snakemake.config['args']['methods'].split(",")
-    processors = snakemake.config['args']['proc']
-    mcc_out = snakemake.config['args']['out']
-    run_id = snakemake.config['args']['run_id']
+    methods = snakemake.params.methods.split(",")
+    processors = snakemake.threads
+    mcc_out = snakemake.params.out
+    run_id = snakemake.params.run_id
     log = snakemake.params.log
 
     print("<PROCESSING> prepping reads for McClintock....")
-    # trims adaptors of input fastq(s)
-    if "trimgalore" in methods:
-        print("<PROCESSING> running trim_galore...log:"+log)
-        if fq2 == "None":
-            flags = trimgalore.SINGLE_END_FLAGS
-            trimmedfq = run_trim_galore(fq1, run_id, log, mcc_out, cores=processors, flags=flags)
-            mccutils.run_command(["touch", snakemake.output[1]])
-        else:
-            flags = trimgalore.PAIRED_END_FLAGS
-            trimmedfq, trimmedfq2 = run_trim_galore(fq1, run_id, log, mcc_out, fq2=fq2, cores=processors, flags=flags)
-            if ".gz" in fq2:
-                mccutils.run_command_stdout(["zcat", trimmedfq2], snakemake.output[1])
-                mccutils.remove(trimmedfq2)
+    try:
+        # trims adaptors of input fastq(s)
+        trimmedfq = fq1
+        trimmedfq2 = fq2
+        if "trimgalore" in methods:
+            print("<PROCESSING> running trim_galore...log:"+log)
+            if fq2 == "None":
+                flags = trimgalore.SINGLE_END_FLAGS
+                trimmedfq = run_trim_galore(fq1, run_id, log, mcc_out, cores=processors, flags=flags)
+            else:
+                flags = trimgalore.PAIRED_END_FLAGS
+                trimmedfq, trimmedfq2 = run_trim_galore(fq1, run_id, log, mcc_out, fq2=fq2, cores=processors, flags=flags)
+            
         
-        mccutils.run_command_stdout(["zcat", trimmedfq], snakemake.output[0])
-        mccutils.remove(trimmedfq)
-    
-    # makes local unzipped copies of input fastq files
-    else:
-        if ".gz" in fq1:
-            mccutils.run_command_stdout(["zcat",fq1], snakemake.output[0])
+        # make unzipped copies in mcc input dir        
+        if "gz" in trimmedfq.split(".")[-1]:
+            mccutils.run_command_stdout(["zcat",trimmedfq], snakemake.output[0])
         else:
-            mccutils.run_command(["cp", fq1, snakemake.output[0]])
+            mccutils.run_command(["cp", trimmedfq, snakemake.output[0]])
         
-        if fq2 == "None":
+        if trimmedfq2 == "None":
             mccutils.run_command(["touch", snakemake.output[1]])
         
-        elif ".gz" in fq2:
-            mccutils.run_command_stdout(["zcat",fq2], snakemake.output[1])
+        elif "gz" in trimmedfq2.split(".")[-1]:
+            mccutils.run_command_stdout(["zcat",trimmedfq2], snakemake.output[1])
         
         else:
-            mccutils.run_command(["cp", fq2, snakemake.output[1]])
+            mccutils.run_command(["cp", trimmedfq2, snakemake.output[1]])
     
+        # removes trimmed read files from trimgalore directory
+        if trimmedfq != fq1:
+            mccutils.remove(trimmedfq)
+        if trimmedfq2 != fq2:
+            mccutils.remove(trimmedfq2)
+
+    except Exception as e:
+        track = traceback.format_exc()
+        print(track, file=sys.stderr)
+        print("ERROR processing of FastQ files failed...check that your FastQ files are formatted correctly...Exiting...", file=sys.stderr)
+        mccutils.remove(snakemake.output[0])
+        mccutils.remove(snakemake.output[1])
+        sys.exit(1)
+
     print("<PROCESSING> read setup complete")
 
 
@@ -77,11 +87,9 @@ def run_trim_galore(fq1, run_id, log, out, fq2=None, cores=1, flags=[]):
         for f in os.listdir(out+"/results/trimgalore"):
             if "_trimmed.fq" in f:
                 outfq = out+"/results/trimgalore/"+f
-        if outfq != "":
-            return outfq
-        else:
-            sys.exit("can't find trimgalore output fastq...exiting...\n")
 
+        file_exists = mccutils.check_file_exists(outfq)
+        return outfq
 
     else:
         outfq1 = ""
@@ -92,10 +100,9 @@ def run_trim_galore(fq1, run_id, log, out, fq2=None, cores=1, flags=[]):
             elif "_val_2.fq" in f:
                 outfq2= out+"/results/trimgalore/"+f
 
-        if outfq1 != "" and outfq2 != "":
-            return outfq1, outfq2
-        else:
-            sys.exit("can't find trimgalore output fastq(s)...exiting...\n")
+        file_exists = mccutils.check_file_exists(outfq1)
+        file_exists = mccutils.check_file_exists(outfq2)
+        return outfq1, outfq2
 
         
 
