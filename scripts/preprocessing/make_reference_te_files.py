@@ -95,7 +95,7 @@ def repeat_mask(reference, te_fasta, procs, run_id, log, out):
         outdir = out+"/tmp/repeatmasker_"+run_id
         mccutils.mkdir(outdir)
         os.chdir(outdir)
-        command = ["RepeatMasker","-pa", procs, "-lib", te_fasta, "-dir", outdir, "-s", "-gff", "-nolow", "-no_is", reference]
+        command = ["RepeatMasker","-pa", str(procs), "-lib", te_fasta, "-dir", outdir, "-s", "-gff", "-nolow", "-no_is", reference]
         mccutils.run_command(command, log=log)
         os.chdir(out)
 

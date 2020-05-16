@@ -725,12 +725,11 @@ rule summary_report:
     input:
         out_files = config['args']['out_files'].split(","),
         fq1 = config['mcc']['fq1'],
-        fq2 = config['mcc']['fq2'],
-        ref = config['mcc']['reference'],
-        taxonomy = config['mcc']['formatted_taxonomy']
-
+        fq2 = config['mcc']['fq2']
 
     params:
+        ref = config['mcc']['reference'],
+        taxonomy = config['mcc']['formatted_taxonomy'],
         bam = config['mcc']['bam'],
         flagstat = config['mcc']['flagstat'],
         median_insert_size = config['mcc']['median_insert_size'],
@@ -749,7 +748,6 @@ rule summary_report:
     conda: config['envs']['mcc_processing']
 
     output:
-        te_csv = config['args']['out']+"/results/summary/te_summary.csv",
         summary_report = config['args']['out']+"/results/summary/summary_report.txt"
     
     script:

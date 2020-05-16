@@ -63,7 +63,7 @@ def parse_args():
     parser.add_argument("--clean", action="store_true", help="This option will make sure mcclintock runs from scratch and doesn't reuse files already created", required=False)
     parser.add_argument("--install", action="store_true", help="This option will install the dependencies of mcclintock", required=False)
     parser.add_argument("--debug", action="store_true", help="This option will allow snakemake to print progress to stdout", required=False)
-    parser.add_argument("--fast", action="store_true", help="This option attempts to speed up the pipeline by allowing more rules to run concurrently, may require additional memory", required=False)
+    parser.add_argument("--fast", action="store_true", help="This option attempts to speed up the pipeline by allowing more rules to run concurrently", required=False)
 
     args = parser.parse_args()
 
