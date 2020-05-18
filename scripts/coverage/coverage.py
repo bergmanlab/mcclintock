@@ -20,12 +20,17 @@ def main():
     run_id = snakemake.config['args']['run_id']
     te_seqs = snakemake.input.consensus
     log = snakemake.params.log
-    if snakemake.config['in']['coverage_fasta'] != "None":
-        te_seqs = snakemake.input.coverage_fa
     
+    # always use consensus fasta for masking the genome
     mccutils.mkdir(coverage_out+"/input")
     te_seqs = format_consensus_fasta(te_seqs, run_id, coverage_out)
     masked_reference, masked_gff = repeatmask_genome(snakemake.input.ref, te_seqs, snakemake.threads, run_id, coverage_out, log)
+
+    # uses coverage fasta (if exists) for augmenting and coverage analysis
+    if snakemake.config['in']['coverage_fasta'] != "None":
+        te_seqs = snakemake.input.coverage_fa
+        te_seqs = format_consensus_fasta(te_seqs, run_id, coverage_out)
+
     augmented_reference = augment_genome(masked_reference, te_seqs, run_id, coverage_out)
     index_genome(snakemake.input.ref, log)
     index_genome(augmented_reference, log)
@@ -37,7 +42,7 @@ def main():
 
     bam = sam_to_bam(sam, augmented_reference, snakemake.params.sample, snakemake.threads, run_id, coverage_out, log)
 
-    nonte_bed = make_nonte_bed(snakemake.input.ref, augmented_reference, masked_gff, run_id, coverage_out, log)
+    nonte_bed = make_nonte_bed(snakemake.input.ref, masked_gff, run_id, coverage_out, log)
 
     genome_depth = get_genome_depth(nonte_bed, bam, run_id, coverage_out, log)
 
@@ -130,7 +135,7 @@ def sam_to_bam(sam, reference, sample_name, threads, run_id, out, log):
 
     return sorted_bam
 
-def make_nonte_bed(reference, augmented_reference, masked_gff, run_id, out, log):
+def make_nonte_bed(reference, masked_gff, run_id, out, log):
     print("<COVERAGE> creating BED file of non-TE regions...log:"+log)
     masked_bed = out+"/input/"+run_id+"_ref_tes.bed"
     repeatmasker_gff_to_bed(masked_gff, masked_bed)

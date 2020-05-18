@@ -63,7 +63,7 @@ def parse_args():
     parser.add_argument("--clean", action="store_true", help="This option will make sure mcclintock runs from scratch and doesn't reuse files already created", required=False)
     parser.add_argument("--install", action="store_true", help="This option will install the dependencies of mcclintock", required=False)
     parser.add_argument("--debug", action="store_true", help="This option will allow snakemake to print progress to stdout", required=False)
-    parser.add_argument("--fast", action="store_true", help="This option attempts to speed up the pipeline by allowing more rules to run concurrently", required=False)
+    parser.add_argument("--slow", action="store_true", help="This option runs without attempting to optimize thread usage to run rules concurrently. Each multithread rule will use the max processors designated by -p/--proc", required=False)
 
     args = parser.parse_args()
 
@@ -335,7 +335,7 @@ def make_run_config(args, sample_name, ref_name, full_command, current_directory
         'methods' : ",".join(args.methods),
         'out_files': ",".join(out_files_to_make),
         'save_comments' : str(args.comments),
-        'max_threads_per_rule' : max(1, calculate_max_threads(args.proc, args.methods, config.MULTI_THREAD_METHODS, fast=args.fast)),
+        'max_threads_per_rule' : max(1, calculate_max_threads(args.proc, args.methods, config.MULTI_THREAD_METHODS, slow=args.slow)),
         'full_command' : full_command,
         'call_directory': current_directory,
         'time': now.strftime("%Y-%m-%d %H:%M:%S")
@@ -426,10 +426,10 @@ def run_workflow(args, sample_name, run_id, debug=False):
     mccutils.remove(args.out+"/tmp")
 
 
-def calculate_max_threads(avail_procs, methods_used, multithread_methods, fast=False):
+def calculate_max_threads(avail_procs, methods_used, multithread_methods, slow=False):
     max_threads = avail_procs
 
-    if fast:
+    if not slow:
         multi_methods_used = 0
         for method in methods_used:
             if method in multithread_methods:
