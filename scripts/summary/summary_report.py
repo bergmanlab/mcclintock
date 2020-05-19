@@ -38,7 +38,7 @@ def main():
         out_file_map[method] = out_file_map[method].replace("{{samplename}}", sample_name)
 
     if os.path.exists(taxonomy):
-        make_te_csv(methods, out_file_map, taxonomy, snakemake.output.te_csv)
+        make_te_csv(methods, out_file_map, taxonomy, out_dir+"te_summary.csv")
 
     make_run_summary(out_file_map, methods, fq1, fq2, ref, bam, flagstat, median_insert_size, command, execution_dir, start_time, out_dir, snakemake.output.summary_report, paired=paired)
     

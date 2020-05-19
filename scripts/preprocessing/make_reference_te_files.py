@@ -30,6 +30,9 @@ def main():
         run_id = snakemake.params.run_id
         log = snakemake.params.log
 
+        reference_fa = mccutils.replace_special_chars_fasta(reference_fa, mcc_out+"/tmp/"+str(run_id)+"reference.fasta")
+        consensus_TEs = mccutils.replace_special_chars_fasta(consensus_TEs, mcc_out+"/tmp/"+str(run_id)+"consensus.fasta")
+
         print("<PROCESSING> creating reference TE files...")
         # if no reference TEs were provided, they must be found with repeatmasker
         if ref_tes == "None":
@@ -40,6 +43,7 @@ def main():
 
         # use provided reference TEs to mask genome
         else:
+            taxonomy_tsv = mccutils.replace_special_chars_taxonomy(taxonomy_tsv, mcc_out+"/tmp/"+str(run_id)+"taxonomy.tsv")
             formatted_ref_tes = format_ref_te_gff(locations_gff, run_id, mcc_out)
             masked_reference = mask_reference(reference_fa, formatted_ref_tes, run_id, log, mcc_out)
             formatted_taxonomy_tsv = taxonomy_tsv
@@ -208,6 +212,7 @@ def format_ref_te_gff(ref_tes, run_id, out):
                         if "ID=" in feat:
                             te_id = feat.split("=")[1]
                     
+                    te_id = mccutils.replace_special_chars(te_id)
                     split_line[2] = te_id
                     features = ";".join(["ID="+te_id, "Name="+te_id, "Alias="+te_id])
                     line = "\t".join(split_line[0:8])
@@ -308,7 +313,7 @@ def augment_ref_te_gff(ref_tes_gff, ref_te_fasta, consensus_te_fasta, run_id, ou
             length = len(str(record.seq))
             te = str(record.id)
             features = ";".join(["ID=instance"+te,"Name=instance"+te,"Alias=instance"+te])
-            line = "\t".join([te, "reannotate", te, "1", str(length), ".", "+", ".", features])
+            line = "\t".join([te, "reannotate", "instance"+te, "1", str(length), ".", "+", ".", features])
             line = line+"\n"
             gff_lines.append(line)
     
@@ -318,7 +323,7 @@ def augment_ref_te_gff(ref_tes_gff, ref_te_fasta, consensus_te_fasta, run_id, ou
             length = len(str(record.seq))
             te = str(record.id)
             features = ";".join(["ID=instance"+te,"Name=instance"+te,"Alias=instance"+te])
-            line = "\t".join([te, "reannotate", "transposable_element", "1", str(length), ".", "+", ".", features])
+            line = "\t".join([te, "reannotate", "instance"+te, "1", str(length), ".", "+", ".", features])
             line = line+"\n"
             gff_lines.append(line)
     
@@ -343,16 +348,16 @@ def augment_taxonomy_map(family_map, ref_te_fasta, consensus_te_fasta, run_id, o
         fasta_records = SeqIO.parse(consensus_te_fasta,"fasta")
         for record in fasta_records:
             te = str(record.id)
-            line = te+"\t"+te+"\n"
+            line = "instance"+te+"\t"+te+"\n"
             map_lines.append(line)
     
-    # if add_reference:
-    #     fasta_records = SeqIO.parse(ref_te_fasta,"fasta")
-    #     for record in fasta_records:
-    #         te = str(record.id)
-    #         family = families[te]
-    #         line = te+"\t"+family+"\n"
-    #         map_lines.append(line)
+    if add_reference:
+        fasta_records = SeqIO.parse(ref_te_fasta,"fasta")
+        for record in fasta_records:
+            te = str(record.id)
+            family = families[te]
+            line = "instance"+te+"\t"+family+"\n"
+            map_lines.append(line)
 
     with open(family_map, "w") as outtsv:
         for line in map_lines:

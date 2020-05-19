@@ -25,8 +25,12 @@ def main():
     sample_name = snakemake.params.sample_name
 
     insertions = read_insertions(retroseq_out, sample_name, support_threshold=config.READ_SUPPORT_THRESHOLD, breakpoint_threshold=config.BREAKPOINT_CONFIDENCE_THRESHOLD)
-    insertions = make_redundant_bed(insertions, sample_name, out_dir)
-    make_nonredundant_bed(insertions, sample_name, out_dir)
+    if len(insertions) > 1:
+        insertions = make_redundant_bed(insertions, sample_name, out_dir)
+        make_nonredundant_bed(insertions, sample_name, out_dir)
+    else:
+        mccutils.run_command(["touch",out_dir+"/"+sample_name+"_retroseq_redundant.bed"])
+        mccutils.run_command(["touch",out_dir+"/"+sample_name+"_retroseq_nonredundant.bed"])
     print("<RETROSEQ POST> RetroSeq post processing complete")
 
 def read_insertions(retroseq_vcf, sample_name, support_threshold=0, breakpoint_threshold=6):

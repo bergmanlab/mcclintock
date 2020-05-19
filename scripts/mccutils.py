@@ -176,3 +176,33 @@ def check_file_exists(infile):
         return True
     else:
         raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), infile)
+
+
+def replace_special_chars(string, encode="_"):
+    special_chars = [";","&","(",")","|","*","?","[","]","~","{","}","<","!","^",'"',"'","\\","$","/","+","-"]
+    for char in special_chars:
+        string = string.replace(char,encode)
+    
+    return string
+
+
+def replace_special_chars_fasta(fasta, new_fasta):
+    with open(fasta,"r") as fa:
+        with open(new_fasta, "w") as out:
+            for line in fa:
+                if ">" in line:
+                    line = replace_special_chars(line)
+                
+                out.write(line)
+    
+    return new_fasta
+
+def replace_special_chars_taxonomy(infile, outfile):
+    with open(infile,"r") as i:
+        with open(outfile, "w") as o:
+            for line in i:
+                line = replace_special_chars(line)
+                o.write(line)
+    
+    return outfile
+
