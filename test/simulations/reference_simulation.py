@@ -16,7 +16,7 @@ def main():
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(prog='McClintock', description="Meta-pipeline to identify transposable element insertions using next generation sequencing data")
+    parser = argparse.ArgumentParser(prog='McClintock', description="Script to run McClintock on genomes with synthetic reads to measure recovery of reference TEs in each tool")
 
     ## required ##
     parser.add_argument("-r", "--reference", type=str, help="A reference genome sequence in fasta format", required=True)
