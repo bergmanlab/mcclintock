@@ -23,8 +23,9 @@ def main():
     out_dir = snakemake.params.out_dir
     ref_name = snakemake.params.ref_name
     sample_name = snakemake.params.sample_name
+    chromosomes = snakemake.params.chromosomes.split(",")
 
-    insertions = read_insertions(retroseq_out, sample_name, support_threshold=config.READ_SUPPORT_THRESHOLD, breakpoint_threshold=config.BREAKPOINT_CONFIDENCE_THRESHOLD)
+    insertions = read_insertions(retroseq_out, sample_name, chromosomes, support_threshold=config.READ_SUPPORT_THRESHOLD, breakpoint_threshold=config.BREAKPOINT_CONFIDENCE_THRESHOLD)
     if len(insertions) > 1:
         insertions = make_redundant_bed(insertions, sample_name, out_dir)
         make_nonredundant_bed(insertions, sample_name, out_dir)
@@ -33,7 +34,7 @@ def main():
         mccutils.run_command(["touch",out_dir+"/"+sample_name+"_retroseq_nonredundant.bed"])
     print("<RETROSEQ POST> RetroSeq post processing complete")
 
-def read_insertions(retroseq_vcf, sample_name, support_threshold=0, breakpoint_threshold=6):
+def read_insertions(retroseq_vcf, sample_name, chromosomes, support_threshold=0, breakpoint_threshold=6):
     insertions = []
 
     with open(retroseq_vcf, "r") as vcf:
@@ -51,7 +52,7 @@ def read_insertions(retroseq_vcf, sample_name, support_threshold=0, breakpoint_t
                 insert.name = split_line[9]+"_non-reference_"+sample_name+"_retroseq_rp_"
                 insert.breakpoint_confidence = int(split_line[20])
 
-                if insert.read_support >= support_threshold and insert.breakpoint_confidence >= breakpoint_threshold:
+                if insert.read_support >= support_threshold and insert.breakpoint_confidence >= breakpoint_threshold and insert.chromosome in chromosomes:
                     insertions.append(insert)
     
     return insertions

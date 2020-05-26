@@ -5,6 +5,7 @@ import traceback
 import subprocess
 from multiprocessing import Process, Pool
 from Bio import SeqIO
+from Bio.Seq import Seq
 
 
 class ModifiedChrom:
@@ -12,8 +13,9 @@ class ModifiedChrom:
         self.name = ""
         self.seq = ""
         self.insert = ""
-        self.instert_start = -1
+        self.insert_start = -1
         self.insert_end = -1
+        self.strand = "?"
 
 class Feature:
     def __init__(self):
@@ -26,13 +28,27 @@ def main():
     args = parse_args()
     
     trnas = get_trnas(args.trna)
-    chroms_with_inserts = make_inserts(args.reference, args.consensus, trnas)
-    if not os.path.exists(args.out+"/data"):
-        os.mkdir(args.out+"/data")
-    fastas = make_fastas(args.reference, chroms_with_inserts, args.out+"/data", start=args.start, end=args.end)
+    chroms_with_inserts = make_inserts(args.reference, args.consensus, trnas, strand="+")
+    if not os.path.exists(args.out+"/forward_data"):
+        os.mkdir(args.out+"/forward_data")
+    fastas = make_fastas(args.reference, chroms_with_inserts, args.out+"/forward_data", start=args.start, end=args.end)
+    make_beds(chroms_with_inserts, args.out+"/forward_data", start=args.start, end=args.end)
+    fastqs = threaded_make_fastqs(fastas, args.out+"/forward_data", threads=args.proc)
+    if not os.path.exists(args.out+"/forward_results"):
+        os.mkdir(args.out+"/forward_results")
+    threaded_mcclintock_run(fastqs, args.reference, args.consensus, args.locations, args.taxonomy, args.out+"/forward_results", threads=args.proc)
 
 
 
+    if not os.path.exists(args.out+"/reverse_data"):
+        os.mkdir(args.out+"/reverse_data")
+    chroms_with_inserts = make_inserts(args.reference, args.consensus, trnas, strand="-")
+    fastas = make_fastas(args.reference, chroms_with_inserts, args.out+"/reverse_data", start=args.start, end=args.end)
+    make_beds(chroms_with_inserts, args.out+"/reverse_data", start=args.start, end=args.end)
+    fastqs = threaded_make_fastqs(fastas, args.out+"/reverse_data", threads=args.proc)
+    if not os.path.exists(args.out+"/reverse_results"):
+        os.mkdir(args.out+"/reverse_results")
+    threaded_mcclintock_run(fastqs, args.reference, args.consensus, args.locations, args.taxonomy, args.out+"/reverse_results", threads=args.proc)
 
 
 
@@ -114,7 +130,7 @@ def get_trnas(trna_gff):
     
     return trnas
 
-def make_inserts(reference, consensus, trnas):
+def make_inserts(reference, consensus, trnas, strand="+"):
     ref_records = SeqIO.parse(reference, "fasta")
     ref_chroms = {}
     for record in ref_records:
@@ -124,7 +140,10 @@ def make_inserts(reference, consensus, trnas):
     
     consensus_contigs = {}
     for record in consensus_records:
-        consensus_contigs[str(record.id)] = str(record.seq)
+        seq = Seq(str(record.seq))
+        if strand != "+":
+            seq = seq.reverse_complement()
+        consensus_contigs[str(record.id)] = str(seq)
     
     
     te_types = ["TY1", "TY2", "TY3", "TY4"]
@@ -154,10 +173,12 @@ def make_inserts(reference, consensus, trnas):
                 # print(seq_start[-5:], seq_end[0:5], len(seq_start+seq_end) - len(seq))
         
         
+        insertion.strand = strand
         insertion.name = trna.chrom
+        insertion.insert = te_types[te_idx]
         insertion.seq = seq_start+consensus_contigs[te_types[te_idx]]+seq_end
-        insertion.start = len(seq_start)
-        insertion.end = len(seq_start+consensus_contigs[te_types[te_idx]])
+        insertion.insert_start = len(seq_start)
+        insertion.insert_end = len(seq_start+consensus_contigs[te_types[te_idx]])
         synthetic_insertions.append(insertion)
         te_idx += 1
 
@@ -199,6 +220,169 @@ def make_fastas(reference, chroms_with_inserts, out, start=1, end=299):
     
     return fastas
 
+def make_beds(chroms_with_inserts, out, start=1, end=299):
+    for x in range(start-1, end):
+        out_bed = out+"/insertion"+str(x+1)+"_genome.bed"
+        with open(out_bed,"w") as bed:
+            line = [chroms_with_inserts[x].name, str(chroms_with_inserts[x].insert_start), str(chroms_with_inserts[x].insert_end), chroms_with_inserts[x].insert, "0", chroms_with_inserts[x].strand]
+            bed.write("\t".join(line)+"\n")
+
+def calculate_num_pairs(fasta):
+    command = ["samtools","faidx", fasta]
+    run_command(command)
+
+    total_length = 0
+    with open(fasta+".fai", "r") as faidx:
+        for line in faidx:
+            split_line = line.split("\t")
+            contig_length = int(split_line[1])
+            total_length += contig_length
+    
+    num_pairs = (total_length * 100)/202
+    return num_pairs
+
+
+def threaded_make_fastqs(refs, out, threads=1):
+    print("Creating simulated fastq files...")
+    fastqs = []
+    inputs = []
+    for ref in refs:
+        num_pairs = calculate_num_pairs(ref)
+        fastq_base_name = ref.replace(".fasta", "")
+        inputs.append([ref, num_pairs, fastq_base_name])
+        fastqs.append(fastq_base_name)
+    
+    pool = Pool(processes=threads)
+    pool.map(make_fastq, inputs)
+    pool.close()
+    pool.join()
+
+    return fastqs
+
+
+
+def make_fastq(args):
+    ref = args[0]
+    num_pairs = args[1]
+    fq_base_name = args[2]
+
+    command = ["wgsim", "-1", "101", "-2", "101", "-d", "300", "-N", str(num_pairs), "-S", "42", "-e", "0.01", "-h", ref, fq_base_name+"_1.fastq", fq_base_name+"_2.fastq"]
+    run_command_stdout(command, fq_base_name+"_wgsim_report.txt")
+
+
+def threaded_mcclintock_run(fastqs, ref, consensus, locations, taxonomy, out, threads=1):
+    print("Starting McClintock runs on simulated reads")
+    inputs = []
+    for fq in fastqs:
+        basename = fq.split("/")[-1]
+        os.mkdir(out+"/"+basename)
+        inputs.append([fq+"_1.fastq", fq+"_2.fastq", ref, consensus, locations, taxonomy, out+"/"+basename, False, False])
+    
+    pool = Pool(processes=threads)
+    pool.map(mcclintock_run, inputs)
+    pool.close()
+    pool.join()
+
+
+def mcclintock_run(args):
+    fq1 = args[0]
+    fq2 = args[1]
+    ref = args[2]
+    consensus = args[3]
+    locations = args[4]
+    taxonomy = args[5]
+    out = args[6]
+    add_ref = args[7]
+    add_cons = args[8]
+
+    mcc_path = str(os.path.dirname(os.path.abspath(__file__)))+"/../../"
+
+    command = ["python3",mcc_path+"/mcclintock.py", "-r", ref, "-c", consensus, "-1", fq1, "-2", fq2, "-p", "1", "-o", out, "-g", locations, "-t", taxonomy]
+
+    if add_ref:
+        command.append("-R")
+    
+    if add_cons:
+        command.append("-C")
+
+    print("running mcclintock... output:", out)
+    run_command_stdout(command, out+"/run.stdout", log=out+"/run.stderr")
+
+    if not os.path.exists(out+"/results/summary/summary_report.txt"):
+        sys.stderr.write("run at: "+out+" failed...")
+
+
+def run_command_stdout(cmd_list, out_file, log=None):
+    msg = ""
+    if log is None:
+        try:
+            # print(" ".join(cmd_list)+" > "+out_file)
+            out = open(out_file,"w")
+            subprocess.check_call(cmd_list, stdout=out)
+            out.close()
+        except subprocess.CalledProcessError as e:
+            if e.output is not None:
+                msg = str(e.output)+"\n"
+            if e.stderr is not None:
+                msg += str(e.stderr)+"\n"
+            cmd_string = " ".join(cmd_list)
+            msg += msg + cmd_string + "\n"
+            sys.stderr.write(msg)
+            sys.exit(1)
+    
+    else:
+        try:
+            out_log = open(log,"a")
+            out_log.write(" ".join(cmd_list)+" > "+out_file+"\n")
+            out = open(out_file,"w")
+            subprocess.check_call(cmd_list, stdout=out, stderr=out_log)
+            out.close()
+            out_log.close()
+
+        except subprocess.CalledProcessError as e:
+            if e.output is not None:
+                msg = str(e.output)+"\n"
+            if e.stderr is not None:
+                msg += str(e.stderr)+"\n"
+            cmd_string = " ".join(cmd_list)
+            msg += msg + cmd_string + "\n"
+            writelog(log, msg)
+            sys.stderr.write(msg)
+            sys.exit(1)
+
+def run_command(cmd_list, log=None):
+    msg = ""
+    if log is None:
+        try:
+            # print(" ".join(cmd_list))
+            subprocess.check_call(cmd_list)
+        except subprocess.CalledProcessError as e:
+            if e.output is not None:
+                msg = str(e.output)+"\n"
+            if e.stderr is not None:
+                msg += str(e.stderr)+"\n"
+            cmd_string = " ".join(cmd_list)
+            msg += msg + cmd_string + "\n"
+            sys.stderr.write(msg)
+            sys.exit(1)
+    
+    else:
+        try:
+            out = open(log,"a")
+            out.write(" ".join(cmd_list)+"\n")
+            subprocess.check_call(cmd_list, stdout=out, stderr=out)
+            out.close()
+
+        except subprocess.CalledProcessError as e:
+            if e.output is not None:
+                msg = str(e.output)+"\n"
+            if e.stderr is not None:
+                msg += str(e.stderr)+"\n"
+            cmd_string = " ".join(cmd_list)
+            msg += msg + cmd_string + "\n"
+            writelog(log, msg)
+            sys.stderr.write(msg)
+            sys.exit(1)
 
 if __name__ == "__main__":                
     main()

@@ -31,12 +31,14 @@ def main():
     te_gff = snakemake.input.te_gff
     log = snakemake.params.log
     sample_name = snakemake.params.sample_name
+    chromosomes = snakemake.params.chromosomes.split(",")
     out_dir = snakemake.params.out_dir
 
     insertions = read_insertion_summary(insert_summary, sample_name)
     absence_bed = make_absence_bed(absence_summary, sample_name, out_dir)
     non_absent_ref_insertions = get_non_absent_ref_tes(te_gff, absence_bed, sample_name, out_dir, log)
     insertions += non_absent_ref_insertions
+    insertions = filter_insertions(insertions, chromosomes)
     insertions = sort_insertions(insertions)
     make_raw_bed(insertions, sample_name, out_dir)
     make_redundant_bed(insertions, sample_name, out_dir, log, acceptable_classes=config.ACCEPTABLE_INSERTION_SUPPORT_CLASSES, frequency_theshold=config.FREQUENCY_THRESHOLD)
@@ -151,6 +153,14 @@ def get_non_absent_ref_tes(te_gff, absence_bed, sample, out, log):
 
     return insertions
     
+
+def filter_insertions(insertions, chromosomes):
+    out = []
+    for insert in insertions:
+        if insert.chromosome in chromosomes:
+            out.append(insert)
+    
+    return out
 
 def sort_insertions(insertions):
     # sorts insertions by chromosome and start position

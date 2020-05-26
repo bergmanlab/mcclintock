@@ -317,15 +317,15 @@ def augment_ref_te_gff(ref_tes_gff, ref_te_fasta, consensus_te_fasta, run_id, ou
             line = line+"\n"
             gff_lines.append(line)
     
-    if add_reference:
-        fasta_records = SeqIO.parse(ref_te_fasta,"fasta")
-        for record in fasta_records:
-            length = len(str(record.seq))
-            te = str(record.id)
-            features = ";".join(["ID=instance"+te,"Name=instance"+te,"Alias=instance"+te])
-            line = "\t".join([te, "reannotate", "instance"+te, "1", str(length), ".", "+", ".", features])
-            line = line+"\n"
-            gff_lines.append(line)
+    # if add_reference:
+    #     fasta_records = SeqIO.parse(ref_te_fasta,"fasta")
+    #     for record in fasta_records:
+    #         length = len(str(record.seq))
+    #         te = str(record.id)
+    #         features = ";".join(["ID=instance"+te,"Name=instance"+te,"Alias=instance"+te])
+    #         line = "\t".join([te, "reannotate", "instance"+te, "1", str(length), ".", "+", ".", features])
+    #         line = line+"\n"
+    #         gff_lines.append(line)
     
     with open(ref_tes_gff, "w") as outgff:
         for line in gff_lines:
@@ -351,13 +351,13 @@ def augment_taxonomy_map(family_map, ref_te_fasta, consensus_te_fasta, run_id, o
             line = "instance"+te+"\t"+te+"\n"
             map_lines.append(line)
     
-    if add_reference:
-        fasta_records = SeqIO.parse(ref_te_fasta,"fasta")
-        for record in fasta_records:
-            te = str(record.id)
-            family = families[te]
-            line = "instance"+te+"\t"+family+"\n"
-            map_lines.append(line)
+    # if add_reference:
+    #     fasta_records = SeqIO.parse(ref_te_fasta,"fasta")
+    #     for record in fasta_records:
+    #         te = str(record.id)
+    #         family = families[te]
+    #         line = "instance"+te+"\t"+family+"\n"
+    #         map_lines.append(line)
 
     with open(family_map, "w") as outtsv:
         for line in map_lines:

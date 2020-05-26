@@ -27,10 +27,12 @@ def main():
     log = snakemake.params.log
     out_dir = snakemake.params.out_dir
     sample_name = snakemake.params.sample_name
+    chromosomes = snakemake.params.chromosomes.split(",")
     
 
     ref_insertions = get_insertions(ref_gff, 
-                                    sample_name, 
+                                    sample_name,
+                                    chromosomes, 
                                     insert_type="ref", 
                                     l_support_threshold=config.REF_LEFT_SUPPORT_THRESHOLD, 
                                     r_support_threshold=config.REF_RIGHT_SUPPORT_THRESHOLD,
@@ -39,7 +41,8 @@ def main():
                                     )
 
     nonref_insertions = get_insertions(nonref_gff, 
-                                    sample_name, 
+                                    sample_name,
+                                    chromosomes, 
                                     insert_type="nonref", 
                                     l_support_threshold=config.NONREF_LEFT_SUPPORT_THRESHOLD, 
                                     r_support_threshold=config.NONREF_RIGHT_SUPPORT_THRESHOLD,
@@ -56,7 +59,7 @@ def main():
     make_nonredundant_bed(all_insertions, sample_name, out_dir)
 
 
-def get_insertions(gff, sample_name, l_support_threshold=0, r_support_threshold=0, l_junction_threshold=0, r_junction_threshold=0, insert_type="ref"):
+def get_insertions(gff, sample_name, chromosomes, l_support_threshold=0, r_support_threshold=0, l_junction_threshold=0, r_junction_threshold=0, insert_type="ref"):
     insertions = []
     with open(gff, "r") as ingff:
         for line in ingff:
@@ -85,7 +88,7 @@ def get_insertions(gff, sample_name, l_support_threshold=0, r_support_threshold=
                     insert.right_support = int(split_line[14].split("=")[1])
                     insert.left_support = int(split_line[15].split("=")[1])
 
-                if insert.right_junction >= r_junction_threshold and insert.left_junction >= l_junction_threshold and insert.right_support >= r_support_threshold and insert.left_support >= l_support_threshold:
+                if insert.right_junction >= r_junction_threshold and insert.left_junction >= l_junction_threshold and insert.right_support >= r_support_threshold and insert.left_support >= l_support_threshold and insert.chromosome in chromosomes:
                     insertions.append(insert)
     
     return insertions

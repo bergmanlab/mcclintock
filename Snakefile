@@ -399,7 +399,8 @@ rule process_temp:
     params:
         log = config['args']['log_dir']+"TEMP.log",
         out_dir = config['args']['out']+"/results/TEMP/",
-        sample_name = config['args']['sample_name']
+        sample_name = config['args']['sample_name'],
+        chromosomes = config['args']['chromosomes']
 
     threads: 1
 
@@ -452,7 +453,8 @@ rule relocaTE_post:
         raw_fq2 = config['in']['fq2'],
         out_dir = config['args']['out']+"/results/relocaTE/",
         log = config['args']['log_dir']+"relocaTE.log",
-        sample_name = config['args']['sample_name']
+        sample_name = config['args']['sample_name'],
+        chromosomes = config['args']['chromosomes']
 
     output:
         config['args']['out']+"/results/relocaTE/"+config['args']['sample_name']+"_relocate_redundant.bed",
@@ -506,7 +508,8 @@ rule relocaTE2_post:
     params:
         out_dir = config['args']['out']+"/results/relocaTE2/",
         log = config['args']['log_dir']+"relocaTE2.log",
-        sample_name = config['args']['sample_name']
+        sample_name = config['args']['sample_name'],
+        chromosomes = config['args']['chromosomes']
     
     output:
         config['args']['out']+"/results/relocaTE2/"+config['args']['sample_name']+"_relocate2_redundant.bed",
@@ -550,7 +553,8 @@ rule ngs_te_mapper_post:
     params:
         out_dir = config['args']['out']+"/results/ngs_te_mapper/",
         log = config['args']['log_dir']+"ngs_te_mapper.log",
-        sample_name = config['args']['sample_name']
+        sample_name = config['args']['sample_name'],
+        chromosomes = config['args']['chromosomes']
     
     threads: 1
 
@@ -594,7 +598,8 @@ rule telocate_post:
     
     params:
         out_dir = config['args']['out']+"/results/te-locate/",
-        sample_name = config['args']['sample_name']
+        sample_name = config['args']['sample_name'],
+        chromosomes = config['args']['chromosomes']
     
     threads: 1
 
@@ -643,7 +648,8 @@ rule retroseq_post:
     params:
         out_dir = config['args']['out']+"/results/retroseq/",
         ref_name=config['args']['ref_name'],
-        sample_name=config['args']['sample_name']
+        sample_name=config['args']['sample_name'],
+        chromosomes = config['args']['chromosomes']
     
     output:
         config['args']['out']+"/results/retroseq/"+config['args']['sample_name']+"_retroseq_nonredundant.bed"
@@ -712,6 +718,7 @@ rule popoolationTE_post:
     params:
         out_dir = config['args']['out']+"/results/popoolationTE/",
         sample_name=config['args']['sample_name'],
+        chromosomes = config['args']['chromosomes'],
         log = config['args']['log_dir']+"popoolationTE.log"
 
     output:

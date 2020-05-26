@@ -320,6 +320,13 @@ def make_run_config(args, sample_name, ref_name, full_command, current_directory
     now_str = now.strftime("%Y-%m-%d_%H.%M.%S")
     mccutils.mkdir(args.out+"/logs/"+now_str+"_"+str(run_id))
 
+    chromosomes = []
+    for record in SeqIO.parse(args.reference, "fasta"):
+        chrom = str(record.id)
+        chrom = mccutils.replace_special_chars(chrom)
+        chromosomes.append(chrom)
+
+
     data = {}
     data['args'] = {
         'proc': str(args.proc),
@@ -338,7 +345,8 @@ def make_run_config(args, sample_name, ref_name, full_command, current_directory
         'max_threads_per_rule' : max(1, calculate_max_threads(args.proc, args.methods, config.MULTI_THREAD_METHODS, slow=args.slow)),
         'full_command' : full_command,
         'call_directory': current_directory,
-        'time': now.strftime("%Y-%m-%d %H:%M:%S")
+        'time': now.strftime("%Y-%m-%d %H:%M:%S"),
+        "chromosomes" : ",".join(chromosomes)
     }
 
     # input paths for files

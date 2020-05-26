@@ -16,18 +16,20 @@ def main():
 
     out_bed = snakemake.output[0]
 
+    chromosomes = snakemake.params.chromosomes.split(",")
+
     print("<NGS_TE_MAPPER POST> Processing ngs_te_mapper results...")
 
-    process_bed(raw_bed, sample_name, log, out_dir, min_read_cutoff=config.MIN_READ_SUPPORT)
+    process_bed(raw_bed, chromosomes, sample_name, log, out_dir, min_read_cutoff=config.MIN_READ_SUPPORT)
 
-def process_bed(bed, sample_name, log, out_dir, min_read_cutoff=0):
+def process_bed(bed, chromosomes, sample_name, log, out_dir, min_read_cutoff=0):
     unsorted_bed = out_dir+"/unsorted.bed"
     with open(unsorted_bed, "w") as outbed:
         with open(bed,"r") as inbed:
             for x,line in enumerate(inbed):
                 line = line.replace(";","\t")
                 split_line = line.split("\t")
-                if int(split_line[7]) > min_read_cutoff:
+                if int(split_line[7]) > min_read_cutoff and split_line[0] in chromosomes:
                     outline = "\t".join([split_line[0], split_line[1], split_line[2], split_line[5]+"_"+split_line[8].replace("\n","")+"_"+sample_name+"_ngs_te_mapper_sr_"+str(x+1),"0", split_line[4]])
                     outbed.write(outline+"\n")
     

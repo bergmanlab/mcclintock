@@ -5,6 +5,15 @@ import traceback
 import subprocess
 import statistics
 
+# class Value:
+#     def __init__(self):
+#         self.coverage = ""
+#         self.run_name = ""
+#         self.run_type = ""
+#         self.method = ""
+#         self.prediction_type = ""
+#         self.prediction = 0
+
 def main():
     args = parse_args()
     if not os.path.exists(args.out+"/summary/"):
@@ -12,15 +21,9 @@ def main():
 
     ref_te_counts = get_ref_te_counts(args.locations, args.taxonomy)
 
-    runs = ["default", "ref", "cons", "ref_cons"]
-    for run in runs:
-        results, methods, families = read_mcclintock_summary( args.out+"/100X", run_type=run)
-        write_res_table(results, methods, families, ref_te_counts, args.out+"/summary/100X_"+run+"_results.csv")
-
-    for run in runs:
-        results, methods, families = read_mcclintock_summary( args.out+"/10X", run_type=run)
-        write_res_table(results, methods, families, ref_te_counts, args.out+"/summary/10X_"+run+"_results.csv")
-
+    mcclintock_values, coverages, run_types, methods, pred_types = read_mcclintock_summary(args.out)
+    write_allrun_tables(mcclintock_values, coverages, run_types, methods, pred_types, args.out+"/summary/")
+    write_summary_tables(mcclintock_values, coverages, run_types, methods, pred_types, args.out+"/summary/")
 
     
 
@@ -73,72 +76,109 @@ def get_ref_te_counts(tegff, taxontsv):
     
     return fam_counts
 
-def read_mcclintock_summary(out, run_type="default"):
-    results = {}
-    methods = []
-    families = []
+def read_mcclintock_summary(out):
+    coverages = ["10X", "100X"]
+    all_run_types = []
+    all_methods = []
+    all_pred_types = []
+    values = {}
 
-    for d in os.listdir(out):
-        d_dir = out+"/"+d
-        for e in os.listdir(d_dir):
-            if e == run_type:
-                csv = d_dir+"/"+e+"/results/summary/te_summary.csv"
+    for cov in coverages:
+        reps_dir = out+"/"+cov
+        for rep in os.listdir(reps_dir):
+            rep_dir = reps_dir+"/"+rep
+            for run_type in os.listdir(rep_dir):
+                if run_type not in all_run_types:
+                    all_run_types.append(run_type)
+                csv = rep_dir+"/"+run_type+"/results/summary/te_summary.csv"
                 if os.path.exists(csv):
                     with open(csv,"r") as c:
                         for x, line in enumerate(c):
                             line = line.replace("\n","")
                             if x == 0:
-                                res = line.split(",")
-                                for j, r in enumerate(res):
-                                    if j > 0 and r not in methods and "_ref" in r:
-                                        methods.append(r)
-                            
+                                header = line.split(",")
+                                methods = []
+                                prediction_types = []
+                                for j, r in enumerate(header):
+                                    if j > 0:
+                                        method = r.split("_")[:-1]
+                                        method = "_".join(method)
+                                        methods.append(method)
+                                        if method not in all_methods:
+                                            all_methods.append(method)
+                                        prediction_type = r.split("_")[-1]
+                                        prediction_types.append(prediction_type)
+                                        if prediction_type not in all_pred_types:
+                                            all_pred_types.append(prediction_type)
+                                totals = [0]*len(methods)
                             else:
                                 split_line = line.split(",")
-                                if split_line[0] not in families:
-                                    families.append(split_line[0])
-                                
                                 for i in range(1, len(split_line)):
-                                    method = res[i]
-                                    if "_ref" in method:
-                                        family = split_line[0]
-                                        val = int(split_line[i])
+                                    val = int(split_line[i])
+                                    totals[i-1] += val
+                    
+                    for col in range(0,len(methods)):
+                        if cov not in values.keys():
+                            values[cov] = {
+                                run_type : { 
+                                    prediction_types[col]:{ 
+                                        methods[col]: [totals[col]]
+                                    } 
+                                }
+                            }
+                        
+                        elif run_type not in values[cov].keys():
+                            values[cov][run_type] = {
+                                prediction_types[col] : {
+                                    methods[col] : [totals[col]]
+                                }
+                            }
+                        
+                        elif prediction_types[col] not in values[cov][run_type].keys():
+                            values[cov][run_type][prediction_types[col]] = {
+                                methods[col] : [totals[col]]
+                            }
+                        
+                        elif methods[col] not in values[cov][run_type][prediction_types[col]].keys():
+                            values[cov][run_type][prediction_types[col]][methods[col]] = [totals[col]]
+                        
+                        else:
+                            values[cov][run_type][prediction_types[col]][methods[col]].append(totals[col])
 
-                                        if method not in results.keys():
-                                            results[method] = {family: [val]}
-                                        elif family not in results[method].keys():
-                                            results[method][family] = [val]
-                                        else:
-                                            results[method][family].append(val)
 
-    return results, methods, families
+    return values, coverages, all_run_types, all_methods, all_pred_types
                                     
 
+def write_allrun_tables(values, coverages, run_types, methods, pred_types, out):
+    for pred_type in pred_types:
+        out_csv = out+"/"+pred_type+"_runs.csv"        
+        for cov in coverages:
+            for run_type in run_types:
+                out_csv = out+"/"+pred_type+"_"+cov+"_"+run_type+"_runs.csv"
+                with open(out_csv,"w") as csv:
+                    csv.write(",".join(methods)+"\n")
+                    for method in methods:
+                        num_runs = len(values[cov][run_type][pred_type][method])
+                    for x in range(0,num_runs):
+                        out_line = []
+                        for method in methods:
+                            out_line.append(str(values[cov][run_type][pred_type][method][x]))
+                        csv.write(",".join(out_line)+"\n")
+                    
 
-def write_res_table(data, methods, families, ref_tes, out):
-    with open(out,"w") as o:
-        header = ["TE Family"] + methods
-        o.write(",".join(header)+",Actual\n")
-        ref_total = 0
-        for family in families:
-            line = [family]
-            for method in methods:
-                val = statistics.mean(data[method][family])
-                line.append(str(val))
-
-            ref_total += ref_tes[family]
-            line.append(str(ref_tes[family]))
-            o.write(",".join(line)+"\n")
-        
-        line = ["total"]
-        for method in methods:
-            total = 0
-            for family in families:
-                total += statistics.mean(data[method][family])
-            line.append(str(total))
-        
-        line.append(str(ref_total))
-        o.write(",".join(line)+"\n")
+def write_summary_tables(values, coverages, run_types, methods, pred_types, out):
+    for pred_type in pred_types:
+        out_csv = out+"/"+pred_type+"_mean.csv"
+        with open(out_csv,"w") as csv:
+            csv.write(",".join(["cov","ref_type"]+methods)+"\n")
+            for cov in coverages:
+                for run_type in run_types:
+                    line = [cov, run_type]
+                    for method in methods:
+                        mean = statistics.mean(values[cov][run_type][pred_type][method])
+                        line.append(str(mean))
+                    
+                    csv.write(",".join(line)+"\n")
 
 
 def writelog(log, msg):

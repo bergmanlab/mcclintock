@@ -26,14 +26,15 @@ def main():
     out_dir = snakemake.params.out_dir
     sample_name = snakemake.params.sample_name
     log = snakemake.params.log
+    chromosomes = snakemake.params.chromosomes.split(",")
 
-    insertions = read_insertions(popoolationte_out, sample_name, require_both_end_support=config.REQUIRE_BOTH_END_SUPPORT, percent_read_support_threshold=config.PERCENT_READ_SUPPORT_THRESHOLD)
+    insertions = read_insertions(popoolationte_out, sample_name, chromosomes, require_both_end_support=config.REQUIRE_BOTH_END_SUPPORT, percent_read_support_threshold=config.PERCENT_READ_SUPPORT_THRESHOLD)
     insertions = make_redundant_bed(insertions, sample_name, out_dir)
     make_nonredundant_bed(insertions, sample_name, out_dir)
     print("<POPOOLATIONTE POSTPROCESSING> PopoolationTE postprocessing complete")
 
 
-def read_insertions(popoolationte, sample_name, require_both_end_support=True, percent_read_support_threshold=0.1):
+def read_insertions(popoolationte, sample_name, chromosomes, require_both_end_support=True, percent_read_support_threshold=0.1):
     insertions = []
 
     with open(popoolationte, "r") as tsv:
@@ -69,11 +70,11 @@ def read_insertions(popoolationte, sample_name, require_both_end_support=True, p
                 insert.r_read_support_percent = float(split_line[17])
 
             if not require_both_end_support:
-                if insert.f_read_support_percent >= percent_read_support_threshold or insert.r_read_support_percent >= percent_read_support_threshold:
+                if (insert.f_read_support_percent >= percent_read_support_threshold or insert.r_read_support_percent >= percent_read_support_threshold) and insert.chromosome in chromosomes:
                     insertions.append(insert)
             
             else:
-                if "FR" in insert.support_type and (insert.f_read_support_percent >= percent_read_support_threshold or insert.r_read_support_percent >= percent_read_support_threshold):
+                if "FR" in insert.support_type and (insert.f_read_support_percent >= percent_read_support_threshold or insert.r_read_support_percent >= percent_read_support_threshold) and insert.chromosome in chromosomes:
                     insertions.append(insert)
             
     return insertions

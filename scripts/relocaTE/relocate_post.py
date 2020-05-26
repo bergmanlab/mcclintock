@@ -23,10 +23,11 @@ def main():
     out_dir = snakemake.params.out_dir
     log = snakemake.params.log
     sample_name = snakemake.params.sample_name
+    chromosomes = snakemake.params.chromosomes.split(",")
 
     print("<RELOCATE POST> Processing RelocaTE results...")
 
-    insertions = get_insertions(relocate_gff, sample_name, ref_l_threshold=config.REF_LEFT_THRESHOLD, ref_r_threshold=config.REF_RIGHT_THRESHOLD, nonref_l_threshold=config.NONREF_LEFT_THRESHOLD, nonref_r_threshold=config.NONREF_RIGHT_THRESHOLD)
+    insertions = get_insertions(relocate_gff, sample_name, chromosomes, ref_l_threshold=config.REF_LEFT_THRESHOLD, ref_r_threshold=config.REF_RIGHT_THRESHOLD, nonref_l_threshold=config.NONREF_LEFT_THRESHOLD, nonref_r_threshold=config.NONREF_RIGHT_THRESHOLD)
 
     insertions = set_ref_orientations(insertions, te_gff)
 
@@ -37,7 +38,7 @@ def main():
     print("<RELOCATE POST> RelocaTE postprocessing results...")
 
 
-def get_insertions(gff, sample_name, ref_l_threshold=0, ref_r_threshold=0, nonref_l_threshold=0, nonref_r_threshold=0):
+def get_insertions(gff, sample_name, chromosomes, ref_l_threshold=0, ref_r_threshold=0, nonref_l_threshold=0, nonref_r_threshold=0):
     insertions = []
     with open(gff, "r") as ingff:
         for line in ingff:
@@ -77,9 +78,9 @@ def get_insertions(gff, sample_name, ref_l_threshold=0, ref_r_threshold=0, nonre
                     feat_te_name = feat_id.split(".")[0]
                     insert.name = feat_te_name+"_non-reference_"+sample_name+"_relocate_sr_"
             
-            if insert.type == "ref" and insert.left_support >= ref_l_threshold and insert.right_support >= ref_r_threshold:
+            if insert.type == "ref" and insert.left_support >= ref_l_threshold and insert.right_support >= ref_r_threshold and insert.chromosome in chromosomes:
                 insertions.append(insert)
-            elif insert.type == "nonref" and insert.left_support >= nonref_l_threshold and insert.right_support >= nonref_r_threshold:
+            elif insert.type == "nonref" and insert.left_support >= nonref_l_threshold and insert.right_support >= nonref_r_threshold and insert.chromosome in chromosomes:
                 insertions.append(insert)
     
     return insertions

@@ -23,8 +23,9 @@ def main():
 
     out_dir = snakemake.params.out_dir
     sample_name = snakemake.params.sample_name
+    chromosomes = snakemake.params.chromosomes.split(",")
 
-    insertions = read_insertions(telocate_raw, sample_name, rp_threshold=config.READ_PAIR_SUPPORT_THRESHOLD)
+    insertions = read_insertions(telocate_raw, sample_name, chromosomes, rp_threshold=config.READ_PAIR_SUPPORT_THRESHOLD)
     insertions = filter_by_reference(insertions, te_gff)
     insertions = make_redundant_bed(insertions, sample_name, out_dir)
     make_nonredundant_bed(insertions, sample_name, out_dir)
@@ -32,7 +33,7 @@ def main():
 
 
 
-def read_insertions(telocate_out, sample_name, rp_threshold=0):
+def read_insertions(telocate_out, sample_name, chromosomes, rp_threshold=0):
     insertions = []
     with open(telocate_out,"r") as raw:
         for x, line in enumerate(raw):
@@ -61,7 +62,7 @@ def read_insertions(telocate_out, sample_name, rp_threshold=0):
 
                 insert.read_pair_support = int(split_line[7])
 
-                if insert.read_pair_support >= rp_threshold:
+                if insert.read_pair_support >= rp_threshold and insert.chromosome in chromosomes:
                     insertions.append(insert)
     
     return insertions
