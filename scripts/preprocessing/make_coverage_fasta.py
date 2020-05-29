@@ -15,37 +15,28 @@ except Exception as e:
 
 
 def main():
-    print("<PROCESSING> running rule: fix_line_lengths")
+    print("<PROCESSING> making coverage fasta...")
     fastas = []
     try:
         length = 80
-        fasta1 = snakemake.input[0]
-        lines = fix_fasta.fix_fasta_lines(fasta1, length)
-        write_fasta(lines, snakemake.output[0])
-
-        fasta2 = snakemake.input[1]
-        lines = fix_fasta.fix_fasta_lines(fasta2, length)
-        write_fasta(lines, snakemake.output[1])
-
-        fastas = [fasta1, fasta2]
         if snakemake.params.coverage_fasta == "None":
-            mccutils.run_command(["touch",snakemake.output[2]])
+            mccutils.run_command(["touch", snakemake.output.coverage_fasta])
         else:
             fasta3 = snakemake.params.coverage_fasta
             fastas.append(fasta3)
             lines = fix_fasta.fix_fasta_lines(fasta3, length)
-            write_fasta(lines, snakemake.output[2])
+            write_fasta(lines, snakemake.output.coverage_fasta)
     
     except Exception as e:
         track = traceback.format_exc()
         print(track, file=sys.stderr)
-        print("ERROR...failed to fix the line lengths of the input fasta files, check the formatting of :"+",".join(fastas), file=sys.stderr)
+        print("ERROR...failed to create coverage fasta, check the formatting of :", snakemake.params.coverage_fasta, file=sys.stderr)
         mccutils.remove(snakemake.output[0])
         mccutils.remove(snakemake.output[1])
         mccutils.remove(snakemake.output[2])
         sys.exit(1)        
 
-    print("<PROCESSING> rule: fix_line_lengths Complete")
+    print("<PROCESSING> coverage fasta created")
         
 
 

@@ -56,11 +56,12 @@ def repeatmask_genome(reference, lib, threads, run_id, out, log):
     outdir = out+"/input/repeatmasker_"+run_id
     mccutils.mkdir(outdir)
     os.chdir(outdir)
-
+    ref_name = os.path.basename(reference)
+    tmp_ref = outdir+"/"+ref_name+".fasta"
+    reference = mccutils.replace_special_chars_fasta(reference, tmp_ref)
     command = ["RepeatMasker","-pa", str(threads), "-lib", lib, "-dir", outdir, "-s", "-gff", "-nolow", "-no_is", reference]
     mccutils.run_command(command, log=log)
 
-    ref_name = os.path.basename(reference)
     masked_fasta = outdir+"/"+ref_name+".masked"
     repeat_masker_gff = outdir+"/"+ref_name+".out.gff"
 

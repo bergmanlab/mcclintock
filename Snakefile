@@ -22,76 +22,225 @@ rule setup_reads:
         config['args']['mcc_path']+"/scripts/preprocessing/setup_reads.py"
 
 
-rule fix_line_lengths:
+rule make_coverage_fasta:
+    params:
+        coverage_fasta = config['in']['coverage_fasta']
+    
+    threads: 1
+
+    conda: config['envs']['mcc_processing']
+
+    output:
+        coverage_fasta = config['mcc']['coverage_fasta']
+    
+    script:
+        config['args']['mcc_path']+"/scripts/preprocessing/make_coverage_fasta.py"
+
+# rule fix_line_lengths:
+#     input:
+#         ref = config['in']['reference'],
+#         consensus = config['in']['consensus']
+
+#     params:
+#         coverage_fasta = config['in']['coverage_fasta'],
+#         log=config['args']['log_dir']+"processing.log"
+
+#     output:
+#         config['mcc']['reference'],
+#         config['mcc']['consensus'],
+#         config['mcc']['coverage_fasta']
+
+#     threads: 1
+
+#     conda: config['envs']['mcc_processing']
+
+#     script:
+#         config['args']['mcc_path']+"/scripts/preprocessing/fix_line_lengths.py"
+
+
+# rule make_run_copies:
+#     params:
+#         log=config['args']['log_dir']+"processing.log"
+
+#     output:
+#         config['mcc']['locations'],
+#         config['mcc']['taxonomy']
+
+#     threads: 1
+
+#     conda: config['envs']['mcc_processing']
+
+#     script:
+#         config['args']['mcc_path']+"/scripts/preprocessing/make_run_copies.py"
+
+
+rule make_reference_fasta:
     input:
-        ref = config['in']['reference'],
+        ref = config['in']['reference']
+    
+    threads: 1
+
+    params: 
+        log = config['args']['log_dir']+"processing.log",
+        augment = config['args']['augment_fasta'],
+        mcc_out = config['args']['out'],
+        run_id = config['args']['run_id']
+    
+    output: 
+        ref = config['mcc']['reference']
+
+    conda: 
+        config['envs']['mcc_processing']
+
+    script:
+        config['args']['mcc_path']+"/scripts/preprocessing/make_reference_fasta.py"
+
+rule make_consensus_fasta:
+    input:
         consensus = config['in']['consensus']
-
+    
     params:
-        coverage_fasta = config['in']['coverage_fasta'],
-        log=config['args']['log_dir']+"processing.log"
-
-    output:
-        config['mcc']['reference'],
-        config['mcc']['consensus'],
-        config['mcc']['coverage_fasta']
+        mcc_out = config['args']['out'],
+        run_id = config['args']['run_id']
 
     threads: 1
 
-    conda: config['envs']['mcc_processing']
-
-    script:
-        config['args']['mcc_path']+"/scripts/preprocessing/fix_line_lengths.py"
-
-
-rule make_run_copies:
-    params:
-        log=config['args']['log_dir']+"processing.log"
-
+    conda:
+        config['envs']['mcc_processing']
+    
     output:
-        config['mcc']['locations'],
-        config['mcc']['taxonomy']
-
-    threads: 1
-
-    conda: config['envs']['mcc_processing']
+        consensus = config['mcc']['consensus']
 
     script:
-        config['args']['mcc_path']+"/scripts/preprocessing/make_run_copies.py"
+        config['args']['mcc_path']+"/scripts/preprocessing/make_consensus_fasta.py"
 
-rule make_reference_te_files:
+rule make_te_annotations:
     input:
-        config['mcc']['reference'],
-        config['mcc']['consensus'],
-        config['mcc']['locations'],
-        config['mcc']['taxonomy']
+        ref = config['mcc']['reference'],
+        consensus = config['mcc']['consensus']
+
+    params:
+        te_gff = config['in']['locations'],
+        taxonomy = config['in']['taxonomy'],
+        mcc_out = config['args']['out'],
+        run_id = config['args']['run_id'],
+        log = config['args']['log_dir']+"processing.log",
+        chromosomes = config['args']['chromosomes'],
+        augment = config['args']['augment_fasta']
     
     threads: config['args']['max_threads_per_rule']
 
-    params:
-        log=config['args']['log_dir']+"processing.log",
-        raw_ref_tes = config['in']['locations'],
-        out_dir = config['args']['out'],
-        run_id = config['args']['run_id']
+    conda: config['envs']['mcc_processing']
 
     output:
-        config['mcc']['masked_fasta'],
-        config['mcc']['formatted_ref_tes'],
-        config['mcc']['formatted_taxonomy'],
-        config['mcc']['formatted_consensus'],
-        config['mcc']['ref_te_fasta'],
-        config['mcc']['augmented_reference'],
-        config['mcc']['popoolationTE_taxonomy'],
-        config['mcc']['popoolationTE_gff']
-    
-    conda: config['envs']['mcc_processing']
+        te_gff = config['mcc']['locations'],
+        taxonomy = config['mcc']['taxonomy']
     
     script:
-        config['args']['mcc_path']+"/scripts/preprocessing/make_reference_te_files.py"
+        config['args']['mcc_path']+"/scripts/preprocessing/make_te_annotations.py"
+
+
+rule mask_reference_fasta:
+    input:
+        ref_fasta = config['mcc']['reference'],
+        te_gff = config['mcc']['locations']
+    
+    params:
+        mcc_out = config['args']['out'],
+        run_id = config['args']['run_id'],
+        log = config['args']['log_dir']+"processing.log",
+        chromosomes = config['args']['chromosomes'],
+        augment = config['args']['augment_fasta']
+    
+    threads: 1
+
+    conda: config['envs']['mcc_processing']
+
+    output:
+        masked_ref = config['mcc']['masked_fasta']
+
+    script:
+        config['args']['mcc_path']+"/scripts/preprocessing/mask_reference_fasta.py"
+
+rule make_ref_te_fasta:
+    input:
+        ref_fasta = config['mcc']['reference'],
+        te_gff = config['mcc']['locations']
+    
+    params:
+        mcc_out = config['args']['out'],
+        run_id = config['args']['run_id'],
+        log = config['args']['log_dir']+"processing.log",
+        chromosomes = config['args']['chromosomes'],
+        augment = config['args']['augment_fasta']
+    
+    threads: 1
+
+    conda: config['envs']['mcc_processing']
+
+    output:
+        ref_te_fasta = config['mcc']['ref_te_fasta']
+
+    script:
+        config['args']['mcc_path']+"/scripts/preprocessing/make_ref_te_fasta.py"
+
+rule make_popoolationte_annotations:
+    input:
+        te_gff = config['mcc']['locations'],
+        taxonomy = config['mcc']['taxonomy'],
+        consensus = config['mcc']['consensus']
+
+    params:
+        mcc_out = config['args']['out'],
+        run_id = config['args']['run_id'],
+        log = config['args']['log_dir']+"processing.log",
+        chromosomes = config['args']['chromosomes'],
+        augment = config['args']['augment_fasta']
+
+    threads: 1
+
+    conda: config['envs']['mcc_processing']
+
+    output:
+        taxonomy = config['mcc']['popoolationTE_taxonomy'],
+        te_gff = config['mcc']['popoolationTE_gff']
+    
+    script:
+        config['args']['mcc_path']+"/scripts/preprocessing/make_popoolationte_annotations.py"
+
+# rule make_reference_te_files:
+#     input:
+#         config['mcc']['reference'],
+#         config['mcc']['consensus'],
+#         config['mcc']['locations'],
+#         config['mcc']['taxonomy']
+    
+#     threads: config['args']['max_threads_per_rule']
+
+#     params:
+#         log=config['args']['log_dir']+"processing.log",
+#         raw_ref_tes = config['in']['locations'],
+#         out_dir = config['args']['out'],
+#         run_id = config['args']['run_id']
+
+#     output:
+#         config['mcc']['masked_fasta'],
+#         config['mcc']['formatted_ref_tes'],
+#         config['mcc']['formatted_taxonomy'],
+#         config['mcc']['formatted_consensus'],
+#         config['mcc']['ref_te_fasta'],
+#         config['mcc']['augmented_reference'],
+#         config['mcc']['popoolationTE_taxonomy'],
+#         config['mcc']['popoolationTE_gff']
+    
+#     conda: config['envs']['mcc_processing']
+    
+#     script:
+#         config['args']['mcc_path']+"/scripts/preprocessing/make_reference_te_files.py"
 
 rule index_reference_genome:
     input:
-        ref = config['mcc']['augmented_reference']
+        ref = config['mcc']['reference']
     
     threads: 1
 
@@ -101,8 +250,8 @@ rule index_reference_genome:
     conda: config['envs']['mcc_processing']
 
     output:
-        config['mcc']['augmented_reference']+".fai",
-        config['mcc']['augmented_reference']+".bwt"
+        config['mcc']['reference']+".fai",
+        config['mcc']['reference']+".bwt"
     
     script:
         config['args']['mcc_path']+"/scripts/preprocessing/index_reference_genome.py"
@@ -110,10 +259,10 @@ rule index_reference_genome:
 
 rule map_reads:
     input:
-        ref = config['mcc']['augmented_reference'],
+        ref = config['mcc']['reference'],
         fq1 = config['mcc']['fq1'],
         fq2 = config['mcc']['fq2'],
-        idx = config['mcc']['augmented_reference']+".bwt"
+        idx = config['mcc']['reference']+".bwt"
     
     params:
         sample=config['args']['sample_name'],
@@ -133,7 +282,7 @@ rule map_reads:
 rule sam_to_bam:
     input:
         sam = config['mcc']['sam'],
-        ref_idx = config['mcc']['augmented_reference']+".fai"
+        ref_idx = config['mcc']['reference']+".fai"
 
     params:
         log=config['args']['log_dir']+"processing.log"
@@ -153,7 +302,7 @@ rule sam_to_bam:
 
 rule make_ref_te_bed:
     input:
-        config['mcc']['formatted_ref_tes']
+        config['mcc']['locations']
     
     threads: 1
 
@@ -171,8 +320,8 @@ rule make_ref_te_bed:
 rule telocate_taxonomy:
     input:
         script = config['args']['mcc_path']+"/install/tools/te-locate/TE_hierarchy.pl",
-        ref_gff = config['mcc']['formatted_ref_tes'],
-        taxonomy = config['mcc']['formatted_taxonomy']
+        ref_gff = config['mcc']['locations'],
+        taxonomy = config['mcc']['taxonomy']
     
     threads: 1
 
@@ -225,7 +374,7 @@ rule telocate_sam:
 
 rule telocate_ref:
     input:
-        config['mcc']['augmented_reference']
+        config['mcc']['reference']
     
     threads: 1
 
@@ -242,7 +391,7 @@ rule telocate_ref:
 
 rule reference_2bit:
     input:
-        config['mcc']['augmented_reference']
+        config['mcc']['reference']
     
     threads: 1
 
@@ -259,7 +408,7 @@ rule reference_2bit:
 
 rule relocaTE_consensus:
     input:
-        config['mcc']['formatted_consensus']
+        config['mcc']['consensus']
     
     threads: 1
 
@@ -276,8 +425,8 @@ rule relocaTE_consensus:
     
 rule relocaTE_ref_gff:
     input:
-        config['mcc']['formatted_ref_tes'],
-        config['mcc']['formatted_taxonomy']
+        config['mcc']['locations'],
+        config['mcc']['taxonomy']
 
     threads: 1
 
@@ -296,7 +445,7 @@ rule relocaTE_ref_gff:
 rule popoolationTE_ref_fasta:
     input:
         config['mcc']['masked_fasta'],
-        config['mcc']['formatted_consensus'],
+        config['mcc']['consensus'],
         config['mcc']['ref_te_fasta']
     
     threads: 1
@@ -315,8 +464,8 @@ rule popoolationTE_ref_fasta:
 
 rule repeatmask:
     input:
-        reference = config['mcc']['augmented_reference'],
-        te_seqs = config['mcc']['formatted_consensus']
+        reference = config['mcc']['reference'],
+        te_seqs = config['mcc']['consensus']
     
     params:
         ref_name = config['args']['ref_name'],
@@ -340,7 +489,7 @@ rule coverage:
     input:
         fq1 = config['mcc']['fq1'],
         fq2 = config['mcc']['fq2'],
-        ref = config['mcc']['reference'],
+        ref = config['in']['reference'],
         consensus = config['mcc']['consensus'],
         coverage_fa = config['mcc']['coverage_fasta']
     
@@ -364,9 +513,9 @@ rule run_temp:
         config['args']['mcc_path']+"/config/TEMP/temp_run.py",
         bam = config['mcc']['bam'],
         twobit = config['mcc']['ref_2bit'],
-        consensus = config['mcc']['formatted_consensus'],
+        consensus = config['mcc']['consensus'],
         ref_te_bed = config['mcc']['ref_tes_bed'],
-        taxonomy = config['mcc']['formatted_taxonomy'],
+        taxonomy = config['mcc']['taxonomy'],
         median_insert_size = config['mcc']['median_insert_size']
         
     
@@ -418,7 +567,7 @@ rule relocaTE_run:
         config['args']['mcc_path']+"/config/relocate/relocate_run.py",
         consensus_fasta = config['mcc']['relocaTE_consensus'],
         te_gff = config['mcc']['relocaTE_ref_TEs'],
-        reference_fasta = config['mcc']['augmented_reference'],
+        reference_fasta = config['mcc']['reference'],
         fq1 = config['mcc']['fq1'],
         fq2 = config['mcc']['fq2']
 
@@ -467,8 +616,8 @@ rule relocaTE_post:
 rule relocaTE2_run:
     input:
         config['args']['mcc_path']+"/config/relocate2/relocate2_run.py",
-        reference = config['mcc']['augmented_reference'],
-        te_seqs = config['mcc']['formatted_consensus'],
+        reference = config['mcc']['reference'],
+        te_seqs = config['mcc']['consensus'],
         rm_out = config['mcc']['repeatmasker_out'],
         fq1 = config['mcc']['fq1'],
         fq2 = config['mcc']['fq2'],
@@ -523,8 +672,8 @@ rule relocaTE2_post:
 rule ngs_te_mapper_run:
     input:
         config = config['args']['mcc_path']+"/config/ngs_te_mapper/ngs_te_mapper_run.py",
-        consensus_fasta = config['mcc']['formatted_consensus'],
-        reference_fasta = config['mcc']['augmented_reference'],
+        consensus_fasta = config['mcc']['consensus'],
+        reference_fasta = config['mcc']['reference'],
         fastq1 = config['mcc']['fq1'],
         fastq2 = config['mcc']['fq2']
 
@@ -614,11 +763,11 @@ rule telocate_post:
 
 rule retroseq_run:
     input:
-        consensus_fasta = config['mcc']['formatted_consensus'],
+        consensus_fasta = config['mcc']['consensus'],
         bam = config['mcc']['bam'],
-        ref_fasta = config['mcc']['augmented_reference'],
+        ref_fasta = config['mcc']['reference'],
         ref_te_bed = config['mcc']['ref_tes_bed'],
-        taxonomy = config['mcc']['formatted_taxonomy']
+        taxonomy = config['mcc']['taxonomy']
 
     threads: 1
 
@@ -736,7 +885,7 @@ rule summary_report:
 
     params:
         ref = config['mcc']['reference'],
-        taxonomy = config['mcc']['formatted_taxonomy'],
+        taxonomy = config['mcc']['taxonomy'],
         bam = config['mcc']['bam'],
         flagstat = config['mcc']['flagstat'],
         median_insert_size = config['mcc']['median_insert_size'],

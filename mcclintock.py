@@ -27,7 +27,7 @@ def main():
     full_command = " ".join(["python3"] + sys.argv)
     current_directory = os.getcwd()
     args = parse_args()
-    check_input_files(args.reference, args.consensus, args.first, fq2=args.second, locations=args.locations, taxonomy=args.taxonomy, coverage_fasta=args.coverage_fasta)
+    check_input_files(args.reference, args.consensus, args.first, fq2=args.second, locations=args.locations, taxonomy=args.taxonomy, coverage_fasta=args.coverage_fasta, augment_fasta=args.augment)
     mccutils.mkdir(args.out+"/logs")
     mccutils.mkdir(args.out+"/tmp")
     sample_name = mccutils.get_base_name(args.first, fastq=True)
@@ -58,8 +58,7 @@ def parse_args():
     parser.add_argument("-T", "--comments", action="store_true", help="If this option is specified then fastq comments (e.g. barcode) will be incorporated to SAM output. Warning: do not use this option if the input fastq files do not have comments", required=False)
     # parser.add_argument("-b", "--keep_bam", action="store_true", help="Retain the sorted and indexed BAM file of the paired end data aligned to the reference genome", required=False)
     # parser.add_argument("-i", "--remove_intermediate", action="store_true", help="If this option is specified then all sample specific intermediate files will be removed, leaving only the overall results. The default is to leave sample specific intermediate files", required=False)
-    parser.add_argument("-C", "--include_consensus_te", action="store_true", help="This option will include the consensus TE sequences as extra chromosomes in the reference file (useful if the organism is known to have TEs that are not present in the reference strain)", required=False)
-    parser.add_argument("-R", "--include_reference_te", action="store_true", help="This option will include the reference TE sequences as extra chromosomes in the reference file", required=False)
+    parser.add_argument("-a", "--augment", type=str, help="A fasta file of TE sequences that will be included as extra chromosomes in the reference file (useful if the organism is known to have TEs that are not present in the reference strain)", required=False)
     parser.add_argument("--clean", action="store_true", help="This option will make sure mcclintock runs from scratch and doesn't reuse files already created", required=False)
     parser.add_argument("--install", action="store_true", help="This option will install the dependencies of mcclintock", required=False)
     parser.add_argument("--debug", action="store_true", help="This option will allow snakemake to print progress to stdout", required=False)
@@ -147,10 +146,14 @@ def parse_args():
     # check -T
     if args.comments is None:
         args.comments = False
+
+    # check -a
+    if args.augment is not None:
+        args.augment = mccutils.get_abs_path(args.augment)
     
     return args
 
-def check_input_files(ref, consensus, fq1, fq2=None, locations=None, taxonomy=None, coverage_fasta=None):
+def check_input_files(ref, consensus, fq1, fq2=None, locations=None, taxonomy=None, coverage_fasta=None, augment_fasta=None):
     # check reference fasta
     print("checking reference fasta:", ref)
     try:
@@ -237,7 +240,18 @@ def check_input_files(ref, consensus, fq1, fq2=None, locations=None, taxonomy=No
                     pass
         except Exception as e:
             print(e)
-            sys.exit(coverage_fasta+" appears to be a malformed FastA file..exiting...\n")       
+            sys.exit(coverage_fasta+" appears to be a malformed FastA file..exiting...\n")
+
+    #check augment fasta
+    if augment_fasta is not None:
+        print("checking augment fasta: ", augment_fasta)
+        try:
+            with open(augment_fasta,"r") as fa:
+                for record in SeqIO.parse(fa, "fasta"):
+                    pass
+        except Exception as e:
+            print(e)
+            sys.exit(augment_fasta+" appears to be a malformed FastA file..exiting...\n")       
 
 
 
@@ -333,8 +347,7 @@ def make_run_config(args, sample_name, ref_name, full_command, current_directory
         'mem': str(args.mem),
         'out': str(args.out),
         'log_dir': args.out+"/logs/"+now_str+"_"+str(run_id)+"/",
-        'include_consensus': str(args.include_consensus_te),
-        'include_reference': str(args.include_reference_te),
+        'augment_fasta': str(args.augment),
         'mcc_path': os.path.dirname(os.path.abspath(__file__)),
         'sample_name': sample_name,
         'ref_name': ref_name,
@@ -415,12 +428,8 @@ def run_workflow(args, sample_name, run_id, debug=False):
 
     for method in args.methods:
         command.append(out_files[method])
-
-
     
     command.append(args.out+"/results/summary/summary_report.txt")
-
-
 
     print(" ".join(command))
     try:
