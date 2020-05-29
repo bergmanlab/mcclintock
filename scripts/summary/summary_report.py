@@ -164,9 +164,9 @@ def make_run_summary(out_file_map, methods, fq1, fq2, ref, bam, flagstat, median
         out_lines.append("MAPPED READ INFORMATION\n")
         out_lines.append(("-"*34) + "\n")
 
-        out_lines.append(pad("read1 sequence length:",24) + str(estimate_read_length(fq1))+"\n")
+        out_lines.append(pad("read1 sequence length:",24) + str(mccutils.estimate_read_length(fq1))+"\n")
         if paired:
-            out_lines.append(pad("read2 sequence length:",24) + str(estimate_read_length(fq2))+"\n")
+            out_lines.append(pad("read2 sequence length:",24) + str(mccutils.estimate_read_length(fq2))+"\n")
         
         with open(flagstat,"r") as stat:
             for line in stat:
@@ -222,23 +222,6 @@ def make_run_summary(out_file_map, methods, fq1, fq2, ref, bam, flagstat, median
                 line = line.replace("{{END_TIME}}",completed)
             print(line, end="")
             out.write(line)
-    
-
-
-
-def estimate_read_length(fq, reads=100):
-    lengths = []
-    with open(fq,"r") as f:
-        for x, line in enumerate(f):
-            if x%4 == 1:
-                lengths.append(len(line.replace('\n',"")))
-            
-            if x >= reads:
-                break
-    
-    length = sum(lengths)//len(lengths)
-
-    return length
 
 
 def get_avg_coverage(ref, bam, out):

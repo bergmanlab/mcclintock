@@ -10,6 +10,7 @@ import matplotlib.pyplot
 import matplotlib.patches as mpatches
 sys.path.append(snakemake.config['args']['mcc_path'])
 import scripts.mccutils as mccutils
+import config.coverage.coverage as config
 
 
 def main():
@@ -23,13 +24,11 @@ def main():
     
     # always use consensus fasta for masking the genome
     mccutils.mkdir(coverage_out+"/input")
-    te_seqs = format_consensus_fasta(te_seqs, run_id, coverage_out)
     masked_reference, masked_gff = repeatmask_genome(snakemake.input.ref, te_seqs, snakemake.threads, run_id, coverage_out, log)
 
     # uses coverage fasta (if exists) for augmenting and coverage analysis
     if snakemake.config['in']['coverage_fasta'] != "None":
         te_seqs = snakemake.input.coverage_fa
-        te_seqs = format_consensus_fasta(te_seqs, run_id, coverage_out)
 
     augmented_reference = augment_genome(masked_reference, te_seqs, run_id, coverage_out)
     index_genome(snakemake.input.ref, log)
@@ -41,13 +40,13 @@ def main():
         sam = map_reads(augmented_reference, snakemake.input.fq1, snakemake.threads, snakemake.params.sample, run_id, coverage_out, log, fq2=snakemake.input.fq2)
 
     bam = sam_to_bam(sam, augmented_reference, snakemake.params.sample, snakemake.threads, run_id, coverage_out, log)
-
     nonte_bed = make_nonte_bed(snakemake.input.ref, masked_gff, run_id, coverage_out, log)
-
     genome_depth = get_genome_depth(nonte_bed, bam, run_id, coverage_out, log)
 
-    te_names, all_coverage_files, uniq_coverage_files, avg_norm_te_depths = make_depth_table(te_seqs, bam, genome_depth, run_id, coverage_out, snakemake.output[0], log)
-
+    edge_trim = 0
+    if config.OMIT_EDGES:
+        edge_trim = mccutils.estimate_read_length(snakemake.input.fq1)
+    te_names, all_coverage_files, uniq_coverage_files, avg_norm_te_depths = make_depth_table(te_seqs, bam, genome_depth, run_id, coverage_out, snakemake.output[0], log, trim_edges=edge_trim)
     make_plots(te_names, all_coverage_files, uniq_coverage_files, avg_norm_te_depths, genome_depth, snakemake.params.sample, coverage_out)
 
 
@@ -57,8 +56,6 @@ def repeatmask_genome(reference, lib, threads, run_id, out, log):
     mccutils.mkdir(outdir)
     os.chdir(outdir)
     ref_name = os.path.basename(reference)
-    tmp_ref = outdir+"/"+ref_name+".fasta"
-    reference = mccutils.replace_special_chars_fasta(reference, tmp_ref)
     command = ["RepeatMasker","-pa", str(threads), "-lib", lib, "-dir", outdir, "-s", "-gff", "-nolow", "-no_is", reference]
     mccutils.run_command(command, log=log)
 
@@ -90,21 +87,6 @@ def index_genome(fasta, log):
     print("<COVERAGE> samtools and bwa indexing", fasta, "Log:"+log)
     mccutils.run_command(["samtools", "faidx", fasta], log=log)
     mccutils.run_command(["bwa", "index", fasta], log=log)
-
-def format_consensus_fasta(te_seqs, run_id, out):
-    print("<COVERAGE> Removing special characters from TE sequence fasta headers...")
-    special_chars = [";","&","(",")","|","*","?","[","]","~","{","}","<","!","^",'"',"'","\\","$","/"]
-    # removes any special characters from TE names
-    formatted_fasta = out+"/input/formattedTEsequences_"+run_id+".fasta"
-    with open(te_seqs,"r") as infa:
-        with open(formatted_fasta,"w") as outfa:
-            for line in infa:
-                if ">" in line:
-                    for special_char in special_chars:
-                        line = line.replace(special_char,"_")
-                outfa.write(line)
-    
-    return formatted_fasta
 
 
 def map_reads(reference, fq1, threads, sample_name, run_id, out, log, fq2=None):
@@ -199,22 +181,26 @@ def get_genome_depth(non_te_bed, bam, run_id, out, log):
     return genome_depth
 
 
-def get_avg_depth(depth_file):
+def get_avg_depth(depth_file, trim_edges=0):
     total = 0
     positions = 0
 
+    depth_lines = []
     with open(depth_file, "r") as depth:
         for line in depth:
+            depth_lines.append(line)
+    
+    for x in range(trim_edges, len(depth_lines)-trim_edges):
+            line = depth_lines[x]
             positions += 1
             split_line = line.split("\t")
-
             total += int(split_line[2])
     
     avg_depth = total/positions
 
     return avg_depth
 
-def make_depth_table(te_fasta, bam, genome_depth, run_id, out, depth_csv, log):
+def make_depth_table(te_fasta, bam, genome_depth, run_id, out, depth_csv, log, trim_edges=0):
     print("<COVERAGE> Creating TE depth coverage table...log:"+log)
     with open(depth_csv, "w") as table:
             table.write("TE-Family,Normalized-Depth"+"\n")
@@ -239,7 +225,7 @@ def make_depth_table(te_fasta, bam, genome_depth, run_id, out, depth_csv, log):
                 command = ["samtools", "depth", "-aa", "-r", te_name, bam, "-d", "0", "-Q", "0"]
                 mccutils.run_command_stdout(command, allQ, log=log)
 
-                avg_depth = get_avg_depth(allQ)
+                avg_depth = get_avg_depth(allQ, trim_edges)
                 avg_norm_depth = avg_depth/genome_depth
 
                 with open(depth_csv, "a") as table:

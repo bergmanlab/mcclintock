@@ -26,7 +26,9 @@ def main():
     augment = snakemake.params.augment
     processors = snakemake.threads
     out_te_gff = snakemake.output.te_gff
+    out_aug_te_gff = snakemake.output.aug_te_gff
     out_taxonomy = snakemake.output.taxonomy
+    out_aug_taxonomy = snakemake.output.aug_taxonomy
 
     if not os.path.exists(mcc_out+"/tmp"):
         mccutils.mkdir(mcc_out+"/tmp")
@@ -39,13 +41,16 @@ def main():
     taxonomy = mccutils.replace_special_chars_taxonomy(taxonomy, mcc_out+"/tmp/"+str(run_id)+"taxonomy.tsv")
     te_gff = format_ref_te_gff(te_gff, run_id, mcc_out)
 
+    mccutils.run_command(["cp", te_gff, out_te_gff])
+    mccutils.run_command(["cp", taxonomy, out_taxonomy])
+
     if augment != "None":
         augment = mccutils.replace_special_chars_fasta(augment, mcc_out+"/tmp/"+str(run_id)+"augment.tmp")
         taxonomy = augment_taxonomy(taxonomy, augment, mcc_out+"/tmp/"+str(run_id)+"taxonomy2.tsv")
         te_gff = augment_gff(te_gff, augment, mcc_out+"/tmp/"+str(run_id)+"reference_tes.gff")
     
-    mccutils.run_command(["mv", te_gff, out_te_gff])
-    mccutils.run_command(["mv", taxonomy, out_taxonomy])
+    mccutils.run_command(["cp", te_gff, out_aug_te_gff])
+    mccutils.run_command(["cp", taxonomy, out_aug_taxonomy])
 
 
 

@@ -21,16 +21,23 @@ def main():
     run_id = snakemake.params.run_id
     log = snakemake.params.log
     out_ref = snakemake.output.ref
+    out_aug_ref = snakemake.output.aug_ref
 
     if not os.path.exists(mcc_out+"/tmp"):
         mccutils.mkdir(mcc_out+"/tmp")
 
     tmp = mcc_out+"/tmp/"+str(run_id)+"reference.tmp"
+    reference = fix_fasta_lines(reference, tmp)
+    reference = mccutils.replace_special_chars_fasta(reference, tmp+"1")
+    augmented_reference = reference
     if augment != "None":
-        augment = mccutils.replace_special_chars_fasta(augment, mcc_out+"/tmp/"+str(run_id)+"augment.tmp")
-        reference = augment_reference(reference, augment, tmp)
-    reference = fix_fasta_lines(reference, tmp+"1")
-    reference = mccutils.replace_special_chars_fasta(reference, out_ref)
+        augment = fix_fasta_lines(augment, tmp+"2")
+        augment = mccutils.replace_special_chars_fasta(augment, tmp+"3")
+        augmented_reference = augment_reference(reference, augment, tmp+"4")
+    
+    mccutils.run_command(["cp", reference, out_ref])
+    mccutils.run_command(["cp", augmented_reference, out_aug_ref])
+
 
 
 

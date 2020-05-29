@@ -24,32 +24,11 @@ def main():
     chromosomes = snakemake.params.chromosomes.split(",")
     masked_ref = snakemake.output.masked_ref
 
-    if augment != "None":
-        te_gff = remove_augmented_annotations(te_gff, chromosomes, mcc_out+"/tmp/"+str(run_id)+"ref_tes.gff")
 
     ref_fasta = mask_reference(ref_fasta, te_gff, run_id, log, mcc_out)
 
     mccutils.run_command(["mv", ref_fasta, masked_ref])
 
-
-
-
-def remove_augmented_annotations(ingff, chromosomes, outgff):
-    gff_lines = []
-    with open(ingff,"r") as gff:
-        for line in gff:
-            if "#" not in line:
-                split_line = line.split("\t")
-                if split_line[0] in chromosomes:
-                    gff_lines.append(line)
-            else:
-                gff_lines.append(line)
-    
-    with open(outgff,"w") as out:
-        for line in gff_lines:
-            out.write(line)
-    
-    return outgff
 
 # masks reference genome using reference TEs
 def mask_reference(reference, ref_tes_gff, run_id, log, out):

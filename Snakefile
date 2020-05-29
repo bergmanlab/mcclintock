@@ -36,43 +36,6 @@ rule make_coverage_fasta:
     script:
         config['args']['mcc_path']+"/scripts/preprocessing/make_coverage_fasta.py"
 
-# rule fix_line_lengths:
-#     input:
-#         ref = config['in']['reference'],
-#         consensus = config['in']['consensus']
-
-#     params:
-#         coverage_fasta = config['in']['coverage_fasta'],
-#         log=config['args']['log_dir']+"processing.log"
-
-#     output:
-#         config['mcc']['reference'],
-#         config['mcc']['consensus'],
-#         config['mcc']['coverage_fasta']
-
-#     threads: 1
-
-#     conda: config['envs']['mcc_processing']
-
-#     script:
-#         config['args']['mcc_path']+"/scripts/preprocessing/fix_line_lengths.py"
-
-
-# rule make_run_copies:
-#     params:
-#         log=config['args']['log_dir']+"processing.log"
-
-#     output:
-#         config['mcc']['locations'],
-#         config['mcc']['taxonomy']
-
-#     threads: 1
-
-#     conda: config['envs']['mcc_processing']
-
-#     script:
-#         config['args']['mcc_path']+"/scripts/preprocessing/make_run_copies.py"
-
 
 rule make_reference_fasta:
     input:
@@ -87,7 +50,8 @@ rule make_reference_fasta:
         run_id = config['args']['run_id']
     
     output: 
-        ref = config['mcc']['reference']
+        ref = config['mcc']['unaugmented_reference'],
+        aug_ref = config['mcc']['reference']
 
     conda: 
         config['envs']['mcc_processing']
@@ -116,7 +80,7 @@ rule make_consensus_fasta:
 
 rule make_te_annotations:
     input:
-        ref = config['mcc']['reference'],
+        ref = config['mcc']['unaugmented_reference'],
         consensus = config['mcc']['consensus']
 
     params:
@@ -133,8 +97,10 @@ rule make_te_annotations:
     conda: config['envs']['mcc_processing']
 
     output:
-        te_gff = config['mcc']['locations'],
-        taxonomy = config['mcc']['taxonomy']
+        te_gff = config['mcc']['unaugmented_locations'],
+        aug_te_gff = config['mcc']['locations'],
+        taxonomy = config['mcc']['unaugmented_taxonomy'],
+        aug_taxonomy = config['mcc']['taxonomy']
     
     script:
         config['args']['mcc_path']+"/scripts/preprocessing/make_te_annotations.py"
@@ -142,8 +108,8 @@ rule make_te_annotations:
 
 rule mask_reference_fasta:
     input:
-        ref_fasta = config['mcc']['reference'],
-        te_gff = config['mcc']['locations']
+        ref_fasta = config['mcc']['unaugmented_reference'],
+        te_gff = config['mcc']['unaugmented_locations']
     
     params:
         mcc_out = config['args']['out'],
@@ -164,8 +130,8 @@ rule mask_reference_fasta:
 
 rule make_ref_te_fasta:
     input:
-        ref_fasta = config['mcc']['reference'],
-        te_gff = config['mcc']['locations']
+        ref_fasta = config['mcc']['unaugmented_reference'],
+        te_gff = config['mcc']['unaugmented_locations']
     
     params:
         mcc_out = config['args']['out'],
@@ -186,8 +152,8 @@ rule make_ref_te_fasta:
 
 rule make_popoolationte_annotations:
     input:
-        te_gff = config['mcc']['locations'],
-        taxonomy = config['mcc']['taxonomy'],
+        te_gff = config['mcc']['unaugmented_locations'],
+        taxonomy = config['mcc']['unaugmented_taxonomy'],
         consensus = config['mcc']['consensus']
 
     params:
@@ -208,35 +174,6 @@ rule make_popoolationte_annotations:
     script:
         config['args']['mcc_path']+"/scripts/preprocessing/make_popoolationte_annotations.py"
 
-# rule make_reference_te_files:
-#     input:
-#         config['mcc']['reference'],
-#         config['mcc']['consensus'],
-#         config['mcc']['locations'],
-#         config['mcc']['taxonomy']
-    
-#     threads: config['args']['max_threads_per_rule']
-
-#     params:
-#         log=config['args']['log_dir']+"processing.log",
-#         raw_ref_tes = config['in']['locations'],
-#         out_dir = config['args']['out'],
-#         run_id = config['args']['run_id']
-
-#     output:
-#         config['mcc']['masked_fasta'],
-#         config['mcc']['formatted_ref_tes'],
-#         config['mcc']['formatted_taxonomy'],
-#         config['mcc']['formatted_consensus'],
-#         config['mcc']['ref_te_fasta'],
-#         config['mcc']['augmented_reference'],
-#         config['mcc']['popoolationTE_taxonomy'],
-#         config['mcc']['popoolationTE_gff']
-    
-#     conda: config['envs']['mcc_processing']
-    
-#     script:
-#         config['args']['mcc_path']+"/scripts/preprocessing/make_reference_te_files.py"
 
 rule index_reference_genome:
     input:
@@ -489,7 +426,7 @@ rule coverage:
     input:
         fq1 = config['mcc']['fq1'],
         fq2 = config['mcc']['fq2'],
-        ref = config['in']['reference'],
+        ref = config['mcc']['unaugmented_reference'],
         consensus = config['mcc']['consensus'],
         coverage_fa = config['mcc']['coverage_fasta']
     

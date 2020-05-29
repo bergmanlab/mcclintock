@@ -206,3 +206,17 @@ def replace_special_chars_taxonomy(infile, outfile):
     
     return outfile
 
+
+def estimate_read_length(fq, reads=10000):
+    lengths = []
+    with open(fq,"r") as f:
+        for x, line in enumerate(f):
+            if x%4 == 1:
+                lengths.append(len(line.replace('\n',"")))
+            
+            if x >= reads:
+                break
+    
+    length = sum(lengths)//len(lengths)
+
+    return length

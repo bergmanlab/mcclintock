@@ -27,8 +27,12 @@ def main():
 
     insertions = read_insertions(telocate_raw, sample_name, chromosomes, rp_threshold=config.READ_PAIR_SUPPORT_THRESHOLD)
     insertions = filter_by_reference(insertions, te_gff)
-    insertions = make_redundant_bed(insertions, sample_name, out_dir)
-    make_nonredundant_bed(insertions, sample_name, out_dir)
+    if len(insertions) > 0:
+        insertions = make_redundant_bed(insertions, sample_name, out_dir)
+        make_nonredundant_bed(insertions, sample_name, out_dir)
+    else:
+        mccutils.run_command(["touch", out_dir+"/"+sample_name+"_telocate_redundant.bed"])
+        mccutils.run_command(["touch", out_dir+"/"+sample_name+"_telocate_nonredundant.bed"])
     print("<TELOCATE> TE-Locate post processing complete")
 
 
@@ -94,7 +98,7 @@ def filter_by_reference(insertions, te_gff):
 
 
 def make_redundant_bed(insertions, sample_name, out_dir):
-    tmp_bed = out_dir+"/tmp.bed"
+    tmp_bed = out_dir+"/tmp_telocate_redundant.bed"
 
     insertion_dict = {}
     out_inserts = []
@@ -147,7 +151,7 @@ def make_nonredundant_bed(insertions, sample_name, out_dir):
             if uniq_inserts[key].read_pair_support >  insert.read_pair_support:
                 uniq_inserts[key] = insert
     
-    tmp_bed = out_dir+"/tmp.bed"
+    tmp_bed = out_dir+"/tmp_telocate_nonredundant.bed"
     with open(tmp_bed, "w") as outbed:
         for key in uniq_inserts.keys():
             insert = uniq_inserts[key]

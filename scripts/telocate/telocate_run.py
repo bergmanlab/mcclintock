@@ -24,8 +24,10 @@ def main():
     out_dir = snakemake.params.out_dir
     
 
-
-    sam_dir = os.path.dirname(sam)
+    sam_dir = out_dir+"/sam/"
+    mccutils.mkdir(sam_dir)
+    te_locate_sam = sam_dir+"te-locate.sam"
+    os.symlink(sam, te_locate_sam)
 
     os.chdir(os.path.dirname(telocate))
 
