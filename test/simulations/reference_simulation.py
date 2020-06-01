@@ -139,15 +139,12 @@ def threaded_mcclintock_run(fastqs_100x, fastqs_10x, ref, consensus, locations, 
         idx = x+start
         os.mkdir(out+"/100X/100X"+str(idx))
         inputs.append([fastqs_100x[x]+"_1.fastq", fastqs_100x[x]+"_2.fastq", ref, consensus, locations, taxonomy, out+"/100X/100X"+str(idx)+"/default", False, False])
-        inputs.append([fastqs_100x[x]+"_1.fastq", fastqs_100x[x]+"_2.fastq", ref, consensus, locations, taxonomy, out+"/100X/100X"+str(idx)+"/ref", True, False])
         inputs.append([fastqs_100x[x]+"_1.fastq", fastqs_100x[x]+"_2.fastq", ref, consensus, locations, taxonomy, out+"/100X/100X"+str(idx)+"/cons", False, True])
-        inputs.append([fastqs_100x[x]+"_1.fastq", fastqs_100x[x]+"_2.fastq", ref, consensus, locations, taxonomy, out+"/100X/100X"+str(idx)+"/ref_cons", True, True])
+
 
         os.mkdir(out+"/10X/10X"+str(idx))
         inputs.append([fastqs_10x[x]+"_1.fastq", fastqs_10x[x]+"_2.fastq", ref, consensus, locations, taxonomy, out+"/10X/10X"+str(idx)+"/default", False, False])
-        inputs.append([fastqs_10x[x]+"_1.fastq", fastqs_10x[x]+"_2.fastq", ref, consensus, locations, taxonomy, out+"/10X/10X"+str(idx)+"/ref", True, False])
         inputs.append([fastqs_10x[x]+"_1.fastq", fastqs_10x[x]+"_2.fastq", ref, consensus, locations, taxonomy, out+"/10X/10X"+str(idx)+"/cons", False, True])
-        inputs.append([fastqs_10x[x]+"_1.fastq", fastqs_10x[x]+"_2.fastq", ref, consensus, locations, taxonomy, out+"/10X/10X"+str(idx)+"/ref_cons", True, True])
     
     pool = Pool(processes=threads)
     pool.map(mcclintock_run, inputs)
@@ -176,7 +173,7 @@ def mcclintock_run(args):
         command.append("-R")
     
     if add_cons:
-        command.append("-C")
+        command.append("-a", consensus)
 
     print("running mcclintock... output:", out)
     run_command_stdout(command, out+"/run.stdout", log=out+"/run.stderr")

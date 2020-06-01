@@ -9,6 +9,7 @@ import statistics
 class Insertion:
     def __init__(self):
         self.chromosome = ""
+        self.family = ""
         self.start = -1
         self.end = -1
         self.strand = "?"
@@ -23,6 +24,10 @@ def main():
     actual_insertions = get_actual_insertions(args.out+"/forward_data")
     predicted_insertions, methods = get_predicted_insertions(args.out+"/forward_results")
     make_out_table(actual_insertions, predicted_insertions, methods, args.out+"/summary/forward_summary.csv")
+
+    actual_insertions = get_actual_insertions(args.out+"/reverse_data")
+    predicted_insertions, methods = get_predicted_insertions(args.out+"/reverse_results")
+    make_out_table(actual_insertions, predicted_insertions, methods, args.out+"/summary/reverse_summary.csv")
 
 
 
@@ -56,6 +61,7 @@ def get_actual_insertions(out):
                     insertion.chromosome = split_line[0]
                     insertion.start = int(split_line[1])
                     insertion.end = int(split_line[2])
+                    insertion.family = split_line[3]
                     insertion.strand = split_line[5]
             
             actual_insertions[name] = insertion
@@ -84,6 +90,11 @@ def get_predicted_insertions(out):
                                     insertion.chromosome = split_line[0]
                                     insertion.start = int(split_line[1])
                                     insertion.end = int(split_line[2])
+                                    info = split_line[3].split("_")
+                                    for x, inf in enumerate(info):
+                                        if "reference" in inf:
+                                            family = "_".join(info[:x])
+                                    insertion.family = family
                                     insertion.strand = split_line[5]
                                     if "non-reference" in line:
                                         insertion.reference = False
@@ -121,23 +132,22 @@ def make_out_table(actual_insertions, predicted_insertions, methods, out_csv):
                     ref_count +=1
                 else:
                     nonref_count +=1
-                    if ((actual_insertions[rep].start <= insert.start and insert.start <= actual_insertions[rep].end) or
-                       (insert.start <= actual_insertions[rep].start and actual_insertions[rep].start <= insert.end)):
+                    if ((insert.family == actual_insertions[rep].family) and (actual_insertions[rep].start == insert.start and insert.start == actual_insertions[rep].end)):
                         exact += 1
                     
                     window = 100
-                    if ((actual_insertions[rep].start-window <= insert.start and insert.start <= actual_insertions[rep].end+window) or
-                       (insert.start <= actual_insertions[rep].start-window and actual_insertions[rep].start-window <= insert.end)):
+                    if ((insert.family == actual_insertions[rep].family) and ((actual_insertions[rep].start-window <= insert.start and insert.start <= actual_insertions[rep].end+window) or
+                       (insert.start <= actual_insertions[rep].start-window and actual_insertions[rep].start-window <= insert.end))):
                         within_100 += 1
 
                     window = 300
-                    if ((actual_insertions[rep].start-window <= insert.start and insert.start <= actual_insertions[rep].end+window) or
-                       (insert.start <= actual_insertions[rep].start-window and actual_insertions[rep].start-window <= insert.end)):
+                    if ((insert.family == actual_insertions[rep].family) and ((actual_insertions[rep].start-window <= insert.start and insert.start <= actual_insertions[rep].end+window) or
+                       (insert.start <= actual_insertions[rep].start-window and actual_insertions[rep].start-window <= insert.end))):
                         within_300 += 1
 
                     window = 500
-                    if ((actual_insertions[rep].start-window <= insert.start and insert.start <= actual_insertions[rep].end+window) or
-                       (insert.start <= actual_insertions[rep].start-window and actual_insertions[rep].start-window <= insert.end)):
+                    if ((insert.family == actual_insertions[rep].family) and ((actual_insertions[rep].start-window <= insert.start and insert.start <= actual_insertions[rep].end+window) or
+                       (insert.start <= actual_insertions[rep].start-window and actual_insertions[rep].start-window <= insert.end))):
                         within_500 += 1
             
             ref_counts.append(ref_count)

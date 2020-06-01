@@ -224,7 +224,7 @@ def make_beds(chroms_with_inserts, out, start=1, end=299):
     for x in range(start-1, end):
         out_bed = out+"/insertion"+str(x+1)+"_genome.bed"
         with open(out_bed,"w") as bed:
-            line = [chroms_with_inserts[x].name, str(chroms_with_inserts[x].insert_start), str(chroms_with_inserts[x].insert_end), chroms_with_inserts[x].insert, "0", chroms_with_inserts[x].strand]
+            line = [chroms_with_inserts[x].name, str(chroms_with_inserts[x].insert_start-1), str(chroms_with_inserts[x].insert_end), chroms_with_inserts[x].insert, "0", chroms_with_inserts[x].strand]
             bed.write("\t".join(line)+"\n")
 
 def calculate_num_pairs(fasta):

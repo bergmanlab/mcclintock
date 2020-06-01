@@ -225,7 +225,7 @@ def make_depth_table(te_fasta, bam, genome_depth, run_id, out, depth_csv, log, t
                 command = ["samtools", "depth", "-aa", "-r", te_name, bam, "-d", "0", "-Q", "0"]
                 mccutils.run_command_stdout(command, allQ, log=log)
 
-                avg_depth = get_avg_depth(allQ, trim_edges)
+                avg_depth = get_avg_depth(allQ, trim_edges=trim_edges)
                 avg_norm_depth = avg_depth/genome_depth
 
                 with open(depth_csv, "a") as table:
