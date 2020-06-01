@@ -33,10 +33,10 @@ def main():
         os.mkdir(args.out+"/forward_data")
     fastas = make_fastas(args.reference, chroms_with_inserts, args.out+"/forward_data", start=args.start, end=args.end)
     make_beds(chroms_with_inserts, args.out+"/forward_data", start=args.start, end=args.end)
-    fastqs = threaded_make_fastqs(fastas, args.out+"/forward_data", threads=args.proc)
-    if not os.path.exists(args.out+"/forward_results"):
-        os.mkdir(args.out+"/forward_results")
-    threaded_mcclintock_run(fastqs, args.reference, args.consensus, args.locations, args.taxonomy, args.out+"/forward_results", threads=args.proc)
+    # fastqs = threaded_make_fastqs(fastas, args.out+"/forward_data", threads=args.proc)
+    # if not os.path.exists(args.out+"/forward_results"):
+    #     os.mkdir(args.out+"/forward_results")
+    # threaded_mcclintock_run(fastqs, args.reference, args.consensus, args.locations, args.taxonomy, args.out+"/forward_results", threads=args.proc)
 
 
 
@@ -45,10 +45,10 @@ def main():
     chroms_with_inserts = make_inserts(args.reference, args.consensus, trnas, strand="-")
     fastas = make_fastas(args.reference, chroms_with_inserts, args.out+"/reverse_data", start=args.start, end=args.end)
     make_beds(chroms_with_inserts, args.out+"/reverse_data", start=args.start, end=args.end)
-    fastqs = threaded_make_fastqs(fastas, args.out+"/reverse_data", threads=args.proc)
-    if not os.path.exists(args.out+"/reverse_results"):
-        os.mkdir(args.out+"/reverse_results")
-    threaded_mcclintock_run(fastqs, args.reference, args.consensus, args.locations, args.taxonomy, args.out+"/reverse_results", threads=args.proc)
+    # fastqs = threaded_make_fastqs(fastas, args.out+"/reverse_data", threads=args.proc)
+    # if not os.path.exists(args.out+"/reverse_results"):
+    #     os.mkdir(args.out+"/reverse_results")
+    # threaded_mcclintock_run(fastqs, args.reference, args.consensus, args.locations, args.taxonomy, args.out+"/reverse_results", threads=args.proc)
 
 
 
@@ -172,13 +172,13 @@ def make_inserts(reference, consensus, trnas, strand="+"):
                 seq_end = seq[trna.start+195:len(seq)]
                 # print(seq_start[-5:], seq_end[0:5], len(seq_start+seq_end) - len(seq))
         
-        
+        tsd_len = len(seq_start+seq_end) - len(seq)
         insertion.strand = strand
         insertion.name = trna.chrom
         insertion.insert = te_types[te_idx]
         insertion.seq = seq_start+consensus_contigs[te_types[te_idx]]+seq_end
-        insertion.insert_start = len(seq_start)
-        insertion.insert_end = len(seq_start+consensus_contigs[te_types[te_idx]])
+        insertion.insert_start = len(seq_start)-tsd_len
+        insertion.insert_end = len(seq_start)
         synthetic_insertions.append(insertion)
         te_idx += 1
 
@@ -224,7 +224,7 @@ def make_beds(chroms_with_inserts, out, start=1, end=299):
     for x in range(start-1, end):
         out_bed = out+"/insertion"+str(x+1)+"_genome.bed"
         with open(out_bed,"w") as bed:
-            line = [chroms_with_inserts[x].name, str(chroms_with_inserts[x].insert_start-1), str(chroms_with_inserts[x].insert_end), chroms_with_inserts[x].insert, "0", chroms_with_inserts[x].strand]
+            line = [chroms_with_inserts[x].name, str(chroms_with_inserts[x].insert_start), str(chroms_with_inserts[x].insert_end), chroms_with_inserts[x].insert, "0", chroms_with_inserts[x].strand]
             bed.write("\t".join(line)+"\n")
 
 def calculate_num_pairs(fasta):

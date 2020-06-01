@@ -132,23 +132,24 @@ def make_out_table(actual_insertions, predicted_insertions, methods, out_csv):
                     ref_count +=1
                 else:
                     nonref_count +=1
-                    if ((insert.family == actual_insertions[rep].family) and (actual_insertions[rep].start == insert.start and insert.start == actual_insertions[rep].end)):
-                        exact += 1
-                    
-                    window = 100
-                    if ((insert.family == actual_insertions[rep].family) and ((actual_insertions[rep].start-window <= insert.start and insert.start <= actual_insertions[rep].end+window) or
-                       (insert.start <= actual_insertions[rep].start-window and actual_insertions[rep].start-window <= insert.end))):
-                        within_100 += 1
+                    if insert.family == actual_insertions[rep].family:
+                        if (actual_insertions[rep].start == insert.start and insert.end == actual_insertions[rep].end):
+                            exact += 1
+                        
+                        window = 100
+                        if ((actual_insertions[rep].start-window <= insert.start and insert.start <= actual_insertions[rep].end+window) or
+                        (insert.start <= actual_insertions[rep].start-window and actual_insertions[rep].start-window <= insert.end)):
+                            within_100 += 1
 
-                    window = 300
-                    if ((insert.family == actual_insertions[rep].family) and ((actual_insertions[rep].start-window <= insert.start and insert.start <= actual_insertions[rep].end+window) or
-                       (insert.start <= actual_insertions[rep].start-window and actual_insertions[rep].start-window <= insert.end))):
-                        within_300 += 1
+                        window = 300
+                        if ((actual_insertions[rep].start-window <= insert.start and insert.start <= actual_insertions[rep].end+window) or
+                        (insert.start <= actual_insertions[rep].start-window and actual_insertions[rep].start-window <= insert.end)):
+                            within_300 += 1
 
-                    window = 500
-                    if ((insert.family == actual_insertions[rep].family) and ((actual_insertions[rep].start-window <= insert.start and insert.start <= actual_insertions[rep].end+window) or
-                       (insert.start <= actual_insertions[rep].start-window and actual_insertions[rep].start-window <= insert.end))):
-                        within_500 += 1
+                        window = 500
+                        if ((actual_insertions[rep].start-window <= insert.start and insert.start <= actual_insertions[rep].end+window) or
+                        (insert.start <= actual_insertions[rep].start-window and actual_insertions[rep].start-window <= insert.end)):
+                            within_500 += 1
             
             ref_counts.append(ref_count)
             nonref_counts.append(nonref_count)
