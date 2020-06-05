@@ -68,6 +68,12 @@ perlPath=$(which perl | sed 's/\//\\\//g')
 sed -i 's/\/usr\/bin\/perl -w/'"$perlPath"'/' RelocaTE/scripts/*.pl
 source deactivate
 
+source activate MCCLINTOCK_temp
+perlPath=$(which perl | sed 's/\//\\\//g')
+sed -i 's/perl /'"$perlPath"' /g' TEMP/scripts/TEMP_Absence.sh
+sed -i 's/perl /'"$perlPath"' /g' TEMP/scripts/TEMP_Insertion.sh
+source deactivate
+
 # Remove deprecated use of defined from RelocaTE to reduce errors
 for f in RelocaTE/scripts/*.pl
 do
