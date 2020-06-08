@@ -188,30 +188,30 @@ def make_run_summary(out_file_map, methods, fq1, fq2, ref, bam, flagstat, median
         out_lines.append(("-"*34)+"\n")
 
 
-        len_longest_name = 0
-        for method in config.ALL_METHODS:
-            if len(method) > len_longest_name:
-                len_longest_name = len(method)
+    len_longest_name = 0
+    for method in config.ALL_METHODS:
+        if len(method) > len_longest_name:
+            len_longest_name = len(method)
 
 
-        width1 = len_longest_name+2
-        width2 = 10
-        width3 = 13
-        width4 = 14
+    width1 = len_longest_name+2
+    width2 = 10
+    width3 = 13
+    width4 = 14
 
-        out_lines.append("\n")
-        out_lines.append("-"*(width1) + "-"*width2 + "-"*width3 + "-"*width4 + "\n")
-        out_lines.append(pad("METHOD", width1) + pad("ALL",width2) + pad("REFERENCE",width3) + pad("NON-REFERENCE", width4) + "\n")
-        out_lines.append("-"*(width1) + "-"*width2 + "-"*width3 + "-"*width4 + "\n")
-        for method in config.ALL_METHODS:
-            if "nonredundant.bed" in out_file_map[method]:
-                if method in methods:
-                    all_te, ref_te, nonref_te = get_te_counts(out_file_map[method])
-                    out_lines.append(pad(method, width1) + pad(str(all_te), width2) + pad(str(ref_te), width3) + pad(str(nonref_te), width4) + "\n")
-                else:
-                    out_lines.append(pad(method, width1) + pad("NA", width2) + pad("NA", width3) + pad("NA", width4) + "\n")
+    out_lines.append("\n")
+    out_lines.append("-"*(width1) + "-"*width2 + "-"*width3 + "-"*width4 + "\n")
+    out_lines.append(pad("METHOD", width1) + pad("ALL",width2) + pad("REFERENCE",width3) + pad("NON-REFERENCE", width4) + "\n")
+    out_lines.append("-"*(width1) + "-"*width2 + "-"*width3 + "-"*width4 + "\n")
+    for method in config.ALL_METHODS:
+        if "nonredundant.bed" in out_file_map[method]:
+            if method in methods:
+                all_te, ref_te, nonref_te = get_te_counts(out_file_map[method])
+                out_lines.append(pad(method, width1) + pad(str(all_te), width2) + pad(str(ref_te), width3) + pad(str(nonref_te), width4) + "\n")
+            else:
+                out_lines.append(pad(method, width1) + pad("NA", width2) + pad("NA", width3) + pad("NA", width4) + "\n")
 
-        out_lines.append("-"*(width1) + "-"*width2 + "-"*width3 + "-"*width4 + "\n")
+    out_lines.append("-"*(width1) + "-"*width2 + "-"*width3 + "-"*width4 + "\n")
 
         
     with open(out_file,"w") as out:

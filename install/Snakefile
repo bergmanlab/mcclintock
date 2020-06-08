@@ -109,6 +109,20 @@ rule popoolationte:
     script:
         config['paths']['install']+"scripts/popoolationte.py"
 
+rule popoolationte2:
+    params:
+        url = config['URLs']['popoolationte2'],
+        md5 = config['MD5s']['popoolationte2'],
+        log = config['paths']['log_dir']+"install.log"
+
+    conda: config['ENVs']['popoolationte2']
+
+    output:
+        config['paths']['install']+"tools/popoolationte2/popte2-v1.10.03.jar"
+
+    script:
+        config['paths']['install']+"scripts/popoolationte2.py"
+
 rule coverage:
     output:
         config['paths']['install']+"tools/coverage/coverage.log"    
@@ -131,6 +145,7 @@ rule install_all:
         config['paths']['install']+"tools/popoolationte/Modules/TEInsert.pm",
         config['paths']['install']+"tools/popoolationte/samro.pl",
         config['paths']['install']+"tools/popoolationte/identify-te-insertsites.pl",
+        config['paths']['install']+"tools/popoolationte2/popte2-v1.10.03.jar",
         config['paths']['install']+"tools/coverage/coverage.log",
         config['paths']['install']+"tools/relocate2/relocaTE2.log"
     

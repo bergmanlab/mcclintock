@@ -33,10 +33,10 @@ def main():
         os.mkdir(args.out+"/forward_data")
     fastas = make_fastas(args.reference, chroms_with_inserts, args.out+"/forward_data", start=args.start, end=args.end)
     make_beds(chroms_with_inserts, args.out+"/forward_data", start=args.start, end=args.end)
-    # fastqs = threaded_make_fastqs(fastas, args.out+"/forward_data", threads=args.proc)
-    # if not os.path.exists(args.out+"/forward_results"):
-    #     os.mkdir(args.out+"/forward_results")
-    # threaded_mcclintock_run(fastqs, args.reference, args.consensus, args.locations, args.taxonomy, args.out+"/forward_results", threads=args.proc)
+    fastqs = threaded_make_fastqs(fastas, args.out+"/forward_data", threads=args.proc)
+    if not os.path.exists(args.out+"/forward_results"):
+        os.mkdir(args.out+"/forward_results")
+    threaded_mcclintock_run(fastqs, args.reference, args.consensus, args.locations, args.taxonomy, args.out+"/forward_results", threads=args.proc)
 
 
 
@@ -45,10 +45,10 @@ def main():
     chroms_with_inserts = make_inserts(args.reference, args.consensus, trnas, strand="-")
     fastas = make_fastas(args.reference, chroms_with_inserts, args.out+"/reverse_data", start=args.start, end=args.end)
     make_beds(chroms_with_inserts, args.out+"/reverse_data", start=args.start, end=args.end)
-    # fastqs = threaded_make_fastqs(fastas, args.out+"/reverse_data", threads=args.proc)
-    # if not os.path.exists(args.out+"/reverse_results"):
-    #     os.mkdir(args.out+"/reverse_results")
-    # threaded_mcclintock_run(fastqs, args.reference, args.consensus, args.locations, args.taxonomy, args.out+"/reverse_results", threads=args.proc)
+    fastqs = threaded_make_fastqs(fastas, args.out+"/reverse_data", threads=args.proc)
+    if not os.path.exists(args.out+"/reverse_results"):
+        os.mkdir(args.out+"/reverse_results")
+    threaded_mcclintock_run(fastqs, args.reference, args.consensus, args.locations, args.taxonomy, args.out+"/reverse_results", threads=args.proc)
 
 
 

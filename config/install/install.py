@@ -5,6 +5,7 @@ URL = {
     "relocate" : "https://github.com/srobb1/RelocaTE/archive/ce3a2066e15f5c14e2887fdf8dce0485e1750e5b.zip",
     "ngs_te_mapper" : "https://github.com/bergmanlab/ngs_te_mapper/archive/fb23590200666fe66f1c417c5d5934385cb77ab9.zip",
     "popoolationte" : "http://downloads.sourceforge.net/project/popoolationte/popoolationte_1.02.zip",
+    "popoolationte2": "http://downloads.sourceforge.net/project/popoolation-te2/popte2-v1.10.03.jar",
     "relocate2" : "https://github.com/stajichlab/RelocaTE2/archive/v2.0.1.zip"
 }
 
@@ -15,6 +16,7 @@ MD5 = {
     "relocate" : "64cc60f65154368518529fb57becc3d6",
     "ngs_te_mapper" : "971dccdb8112e754293f7b8b44799aeb",
     "popoolationte" : "315d266bd6da7487c919576dc46b92b4",
+    "popoolationte2": "0c06186f0b1df215949f57a5cbb2d039",
     "relocate2" : "63eb7dbc09ffeb4063aef4857d198b06"
 }
 
@@ -28,6 +30,7 @@ ENV = {
     "relocate" : ENV_PATH+"mcc_relocate.yml",
     "ngs_te_mapper" : ENV_PATH+"mcc_ngs_te_mapper.yml",
     "popoolationte" : ENV_PATH+"mcc_popoolationte.yml",
+    "popoolationte2" : ENV_PATH+"mcc_popoolationte2.yml",
     "relocate2" : ENV_PATH+"mcc_relocate2.yml",
     "mcc_processing":  ENV_PATH+"mcc_processing.yml"
 }

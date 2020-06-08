@@ -11,10 +11,10 @@ def main():
     download_success = mccutils.download(snakemake.params.url, snakemake.params.zipfile, md5=snakemake.params.md5)
 
     if not download_success:
-        print("temp download failed... retrying...")
+        print("popoolationte download failed... retrying...")
         download_success = mccutils.download(snakemake.params.url, snakemake.params.zipfile, md5=snakemake.params.md5)
         if not download_success:
-            print("temp second download attempt failed... exiting...")
+            print("second popoolationte download attempt failed... exiting...")
             print("try running --install with --clean for clean installation")
             sys.exit(1)
 
