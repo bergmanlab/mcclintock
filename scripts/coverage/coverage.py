@@ -203,12 +203,13 @@ def get_avg_depth(depth_file, trim_edges=0):
 def make_depth_table(te_fasta, bam, genome_depth, run_id, out, depth_csv, log, trim_edges=0):
     print("<COVERAGE> Creating TE depth coverage table...log:"+log)
     with open(depth_csv, "w") as table:
-            table.write("TE-Family,Normalized-Depth"+"\n")
+            table.write("TE-Family,Normalized-Depth,Normalized-Unique-Depth"+"\n")
     
     te_names = []
     uniq_coverage_files = []
     all_coverage_files = []
     avg_norm_depths = []
+    avg_uniq_norm_depths = []
 
     with open(te_fasta,"r") as fa:
         for line in fa:
@@ -228,8 +229,11 @@ def make_depth_table(te_fasta, bam, genome_depth, run_id, out, depth_csv, log, t
                 avg_depth = get_avg_depth(allQ, trim_edges=trim_edges)
                 avg_norm_depth = avg_depth/genome_depth
 
+                avg_uniq_depth = get_avg_depth(highQ, trim_edges=trim_edges)
+                avg_uniq_norm_depth = avg_uniq_depth/genome_depth
+
                 with open(depth_csv, "a") as table:
-                    table.write(te_name+","+str(round(avg_norm_depth,2))+"\n")
+                    table.write(te_name+","+str(round(avg_norm_depth,2))+","+str(round(avg_uniq_norm_depth,2))+"\n")
     
                 te_names.append(te_name)
                 uniq_coverage_files.append(highQ)
