@@ -45,9 +45,13 @@ def main():
 
     edge_trim = 0
     if config.OMIT_EDGES:
-        edge_trim = mccutils.estimate_read_length(snakemake.input.fq1)
+        if config.OMIT_EDGES_READ_LENGTH:
+            edge_trim = mccutils.estimate_read_length(snakemake.input.fq1)
+        else:
+            edge_trim = config.OMIT_EDGES_LENGTH
+            
     te_names, all_coverage_files, uniq_coverage_files, avg_norm_te_depths = make_depth_table(te_seqs, bam, genome_depth, run_id, coverage_out, snakemake.output[0], log, trim_edges=edge_trim)
-    make_plots(te_names, all_coverage_files, uniq_coverage_files, avg_norm_te_depths, genome_depth, snakemake.params.sample, coverage_out)
+    make_plots(te_names, all_coverage_files, uniq_coverage_files, avg_norm_te_depths, genome_depth, snakemake.params.sample, coverage_out, trim_edges=edge_trim)
 
 
 def repeatmask_genome(reference, lib, threads, run_id, out, log):
@@ -243,7 +247,7 @@ def make_depth_table(te_fasta, bam, genome_depth, run_id, out, depth_csv, log, t
     return te_names, all_coverage_files, uniq_coverage_files, avg_norm_depths
 
 
-def make_plots(te_names, all_coverage_files, uniq_coverage_files, avg_norm_te_depths, genome_depth, sample_name, out):
+def make_plots(te_names, all_coverage_files, uniq_coverage_files, avg_norm_te_depths, genome_depth, sample_name, out, trim_edges=0):
     print("<COVERAGE> Creating TE coverage plots...")
     mccutils.mkdir(out+"/plots")
     for x, te_name in enumerate(te_names):
@@ -254,7 +258,7 @@ def make_plots(te_names, all_coverage_files, uniq_coverage_files, avg_norm_te_de
         plot_width = 10
         hline = avg_norm_te_depths[x]
         output = out+"plots/"+te_name+".png"
-        plot = plot_coverage(chrom, all_pos, all_cov, uniq_pos, uniq_cov, sample_name, plot_height, plot_width, genome_depth, hline)
+        plot = plot_coverage(chrom, all_pos, all_cov, uniq_pos, uniq_cov, sample_name, plot_height, plot_width, genome_depth, hline, trim_edges=trim_edges)
         plot.savefig(output, bbox_inches="tight")
         print("<COVERAGE> plot created:", output)
 
@@ -279,7 +283,7 @@ def read_samtools_depth_file(depth_file):
     return chrom, x, y
 
 
-def plot_coverage(chrom, all_pos, all_cov, uniq_pos, uniq_cov, title, height, width, normalize_cov, add_hline ):
+def plot_coverage(chrom, all_pos, all_cov, uniq_pos, uniq_cov, title, height, width, normalize_cov, add_hline, trim_edges=0 ):
 
     if normalize_cov:
         all_cov = np.array(all_cov)
@@ -308,16 +312,22 @@ def plot_coverage(chrom, all_pos, all_cov, uniq_pos, uniq_cov, title, height, wi
     ax.tick_params(axis='x', labelsize=5, length=0, pad=5)
     ax.tick_params(axis='y', labelsize=5, length=0, pad=5)
 
-    ax.set_xlim(min(all_pos),max(all_pos))
-    ax.set_ylim(0,max(all_cov))
-    plot.xticks([min(all_pos), int(np.median(all_pos)), max(all_pos)])
+    x_min = min(all_pos)
+    x_max = max(all_pos)
 
-    y_max_tick = max(all_cov)
+    y_min = min(all_cov)
+    y_max = max(all_cov)
+
+    ax.set_xlim(x_min, x_max)
+    ax.set_ylim(0, y_max)
+    plot.xticks([x_min, int(np.median(all_pos)), x_max])
+
+    y_max_tick = y_max
     y_max_tick = math.ceil(y_max_tick*100)/100
 
 
     if add_hline is None:
-        y_mid_tick = max(all_cov)/2
+        y_mid_tick = y_max/2
         y_mid_tick = math.ceil(y_mid_tick*100)/100
     else:
         y_mid_tick = add_hline
@@ -346,7 +356,7 @@ def plot_coverage(chrom, all_pos, all_cov, uniq_pos, uniq_cov, title, height, wi
 
     if add_hline is not None:
         ax.set_ylabel('Normalized Coverage', fontsize=8)
-        ax.axhline(y=add_hline, color='black',alpha=0.5)
+        ax.axhline(xmin=(x_min+trim_edges)/x_max, xmax=(x_max - trim_edges)/x_max, y=add_hline, color='black', alpha=0.5)
         elements += [matplotlib.pyplot.Line2D([0,0],[0,1],color='black', alpha=0.5)]
         labels.append("Avg. Norm. Cov.")
     else:
