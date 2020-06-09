@@ -39,7 +39,7 @@ def sam_to_bam(sam, bam, threads=1, log=None):
 
 def sort_bam(bam, sorted_bam, threads=1, log=None):
     print("<POPOOLATIONTE2> Sorting BAM...")
-    mccutils.run_command(["samtools","sort","-@", str(threads), "-f", bam, sorted_bam], log=log)
+    mccutils.run_command(["samtools","sort","-@", str(threads), bam, "-o", sorted_bam], log=log)
     return sorted_bam
 
 

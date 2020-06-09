@@ -821,7 +821,7 @@ rule popoolationTE2_preprocessing:
     
     threads: config['args']['max_threads_per_rule']
 
-    conda: config['envs']['popoolationte']
+    conda: config['envs']['popoolationte2']
 
     params:
         out_dir = config['args']['out']+"/results/popoolationTE2/unfiltered/",

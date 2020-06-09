@@ -1,9 +1,8 @@
-#  McClintock
-### Meta-pipeline to identify transposable element insertions using next generation sequencing data
 <p align="center">
     <img src="https://github.com/bergmanlab/mcclintock/blob/master/img/mcclintock.jpg?raw=true" alt="McClintock in action"/>
 </p>
 
+# **McClintock**: <sub><sup>Meta-pipeline to identify transposable element insertions using next generation sequencing data</sup></sub>
 ## <a name="started"></a> Getting Started
 ```bash
 # INSTALL (Requires Conda)
@@ -49,6 +48,7 @@ The complete pipeline requires a fasta reference genome, a fasta consensus set o
  * [TEMP](https://github.com/JialiUMassWengLab/TEMP) - [Zhuang *et al.* (2014)](http://nar.oxfordjournals.org/content/42/11/6826.full)
  * [RetroSeq](https://github.com/tk2/RetroSeq) - [Keane *et al.* (2012)](http://bioinformatics.oxfordjournals.org/content/29/3/389.long)
  * [PoPoolationTE](https://sourceforge.net/projects/popoolationte/) - [Kofler *et al.* (2012)](http://www.plosgenetics.org/article/info%3Adoi%2F10.1371%2Fjournal.pgen.1002487;jsessionid=2CFC9BF7DEF785D90070915204B5F846)
+ * [PoPoolationTE2](https://sourceforge.net/p/popoolation-te2/wiki/Home) - [Kofler *et al.* (2016)](https://academic.oup.com/mbe/article/33/10/2759/2925581)
  * [TE-locate](https://sourceforge.net/projects/te-locate/) - [Platzer *et al.* (2012)](http://www.mdpi.com/2079-7737/1/2/395)
 
 ## <a name="dependency"></a> Software Dependencies
@@ -170,14 +170,12 @@ python3 mcclintock.py \
                         barcode) will be incorporated to SAM output. Warning:
                         do not use this option if the input fastq files do not
                         have comments
-  -C, --include_consensus_te
-                        This option will include the consensus TE sequences as
-                        extra chromosomes in the reference file (useful if the
+  -a AUGMENT, --augment AUGMENT
+                        A fasta file of TE sequences that will be included as 
+                        extra chromosomes in the reference file (useful if the 
                         organism is known to have TEs that are not present in
                         the reference strain)
-  -R, --include_reference_te
-                        This option will include the reference TE sequences as
-                        extra chromosomes in the reference file
+
   --clean               This option will make sure mcclintock runs from
                         scratch and doesn't reuse files already created
   --install             This option will install the dependencies of
@@ -195,6 +193,7 @@ python3 mcclintock.py \
   * `temp` : Runs the [TEMP](https://github.com/JialiUMassWengLab/TEMP) component method (Paired-End Only)
   * `retroseq` : Runs the [RetroSeq](https://github.com/tk2/RetroSeq) component method (Paired-End Only)
   * `popoolationte` : Runs the [PoPoolation TE](https://sourceforge.net/p/popoolationte/wiki/Main) component method (Paired-End Only)
+  * `popoolationte2` : Runs the [PoPoolation TE2](https://sourceforge.net/p/popoolation-te2/wiki/Home) component method (Paired-End Only)
   * `te-locate` : Runs the [TE-locate](https://sourceforge.net/projects/te-locate) component method (Paired-End Only)
 
 ## <a name="output"></a> McClintock Output
@@ -202,17 +201,60 @@ The results of the component methods are output to the directory `<output>/resul
 * Summary files from the run can be located at `<output>/results/summary/`. 
 * Each component method has raw output files which can be found at `<output>/results/<method>/unfiltered/`. 
 * The results are standardized into a bed format and can be found in `<output>/results/<method>/*.bed` where `<output>/results/<method>/*.nonredundant.bed` has any duplicate predictions removed.
-#### Summary files
+* Standardized results are filtered by parameters defined in the `config` files for each method. These config files can be found in `/path/to/mcclintock/config/` and can be modified if you want to adjust the filtering parameters
+#### Summary files : `<output>/results/summary/`
 
-File | Description
--- | --
-`<output>/summary/summary_report.txt` | Summary Report of McClintock run. Contains information on command used, when and where the script was run, and details about the mapped reads
-`<output>/summary/te_summary.txt` | a human readable table that shows the number of TE predictions produced from each method (all, reference, non-reference)
-`<output>/summary/te_summary.csv` | a comma-delimited table showing TE predictions (all, reference, non-reference) from each method for each TE family 
+* `summary_report.txt` : Summary Report of McClintock run. Contains information on command used, when and where the script was run, details about the mapped reads, and table that shows the number of TE predictions produced from each method
+* `te_summary.csv` : a comma-delimited table showing TE predictions (all, reference, non-reference) from each method for each TE family 
+* `te_depth.csv` : (Only produced if coverage module is run) a comma-delimited table showing normalized depth for each consensus TE or TE provided in coverage fasta.
+
+#### TrimGalore : `<output>/results/trimgalore/`
+* `<fastq>_trimming_report.txt` : Information on parameters used and statistics related to adapter trimming with cutadapt. Provides an overview of sequences removed via the adapter trimming process
+* `<fastq>_fastqc.html` : FastQC report of the provided fastq files. Provides information on the results of steps performed by FastQC to assess the quality of the reads provided.
+* `<fastq>_fastqc.zip` : FastQC graph images and plain-text summary statistics compressed into a single `.zip` file
+
+#### Coverage : `<output>/results/coverage/`
+* `plots/*.png` : Coverage plots showing the normalized read coverage across each TE either from the consensus fasta (`-c`) or the coverage fasta (`-s`) if provided. Unique coverage (MAPQ > 0) is in dark gray, while all coverage (MAPQ >= 0) is in light gray.
+* `te-depth-files/*.allQ.cov` : Raw read coverage at each position in a TE sequence. (Output of `samtools depth`)
+* `te-depth-files/*.highQ.cov` : coverage of mapped reads with MAPQ > 0 at each position, omitting multi-mapped reads.
+
+#### ngs_te_mapper : `<output>/results/ngs_te_mapper/`
+* `unfiltered/<reference>_insertions.bed` : Raw 0-based TSDs for non-reference predictions and 0-based intervals. Reference TE intervals are inferred from the data, not from the reference TE annotations. Strand information is present for both non-reference and reference TEs.
+* `<reference>_ngs_te_mapper_nonredundant.bed` : 0-based TSDs for non-reference predictions and 0-based intervals corresponding to the reference TEs. This file contains the same predictions from `unfiltered/<reference>_insertions.bed` with the bed line name adjusted to match the standard McClintock naming convention. By default, no filtering is performed on the raw `ngs_te_mapper` predictions aside from removing redundant predictions, but the config file: (`/path/to/mcclintock/config/ngs_te_mapper/ngs_te_mapper_post.py`) can be modified to increase the minimum read support threshold.
+
+#### RelocaTE : `<output>/results/relocaTE/`
+* `unfiltered/combined.gff` : GFF containing 1-based TSDs for non-reference predictions and 1-based intervals for reference TEs. The reference intervals are based on the reference TE annotations.
+* `<reference>_relocate_nonredundant.bed` : Predictions from `unfiltered/combined.gff` converted into 0-based intervals with bed line names matching the standard McClintock naming convention. By default, no filtering is performed on the raw predictions aside from removing redundant predictions. However, the config file: (`/path/to/mcclintock/config/relocate/relocate_post.py`) can be modified to increase the minimum left and right prediction support thresholds for both reference and non-reference predictions.
+
+#### RelocaTE2 : `<output>/results/relocaTE2/`
+* `unfiltered/repeat/results/ALL.all_ref_insert.gff` : GFF file containing reference TE predictions with 1-based coordinates. The final column also contains read counts supporting the junction (split-read) and read counts supporting the insertion (split pair).
+* `unfiltered/repeat/results/ALL.all_nonref_insert.gff` : GFF file containing non-reference TE predictions with 1-based coordinates. The final column also contains read counts supporting the junction (split-read) and read counts supporting the insertion (split pair).
+* `<reference>_relocate2_nonredundant.bed` : Contains all reference and non-reference predictions `from ALL.all_ref_insert.gff` and `ALL.all_nonref_insert.gff`. Coordinates are adjusted to be 0-based. By default, no filtering is performed on split-read and split-pair evidence, but the config file: (`/path/to/mcclintock/config/ngs_te_mapper/ngs_te_mapper_post.py`) can be modified to increase the threshold for these values.
+
+#### TEMP : `<output>/results/TEMP/`
+* `unfiltered/<reference>.absence.refined.bp.summary` : Tab-delimited table containing reference TEs that are predicted to be absent from the short read data. Position intervals are 1-based.
+* `unfiltered/<reference>.insertion.refined.bp.summary` : Tab-delimited table containing non-reference TE predictions. Position intervals are 1-based.
+* `<reference>_temp_nonredundant.bed` : Contains all reference TEs not reported as absent by TEMP in the `unfiltered/<reference>.absence.refined.bp.summary` file. Also contains non-reference TE predictions `unfiltered/<reference>.insertion.refined.bp.summary` formatted as a bed line using the McClintock naming convention. Positions for both reference and non-reference predictions are 0-based. Non-reference predictions from `unfiltered/<reference>.insertion.refined.bp.summary` are only added to this file if the prediction has read support on both ends ("1p1") and has a sample frequency of > 10%. These restrictions can be modified in the config file: (`/path/to/mcclintock/config/TEMP/temp_post.py`). Non-reference TEs with split-read support at both ends are marked in the bed line name with "_sr_" and the `Junction1` and `Junction2` columns from `unfiltered/<reference>.insertion.refined.bp.summary` are used as the start and end positions of the TSD in this file (converted to 0-based positions). If the non-reference TE prediction does not have split-read support on both ends of the insertions, the designation "_rp_" is added to the bed line name and the `Start` and `End` columns from `unfiltered/<reference>.insertion.refined.bp.summary` are used as the start and end positions of the TSD in this file (converted to 0-based). Reference insertions are labeled `nonab` in the bed line name.
+  
+#### RetroSeq : `<output>/results/retroseq/`
+* `unfiltered/<reference>.call.PE.vcf` : VCF file containing non-reference TE predictions. Non-reference TEs are annotated as 1-based intervals in the POS column and two consecutive coordinates in the INFO field. No predictions are made for reference TEs. Strand information is not provided.
+* `<reference>_retroseq_nonredundant.bed` : Non-reference predictions from `unfiltered/<reference>.call.PE.vcf` with a Breakpoint confidence threshold > 6 are retained in this file. This filtering threshold can be changed by modifying the config file: (`/path/to/mcclintock/config/retroseq/retroseq_post.py`). The position interval reported in the `INFO` column of `unfiltered/<reference>.call.PE.vcf` are converted to 0-based positions and used as the start and end positions in the bed lines in this file.
+
+#### PoPoolationTE : `<output>/results/popoolationTE/`
+* `unfiltered/te-poly-filtered.txt` : Tab-delimited table with non-reference and reference TE predictions and support values. Predictions are annotated as 1-based intervals on either end of the predicted insertion, and also as a midpoint between the inner coordinates of the two terminal spans (which can lead to half-base midpoint coordinates)
+* `<reference>_popoolationte_nonredundant.bed` : Only predictions with read support on both ends ("FR") and with percent read support > 0.1 for both ends were retained in this file. The entire interval between the inner coordinates of the of the two terminal spans (not the midpoint) was converted to 0-based coordinates. Filtering parameters can be modified in the config file: (`/path/to/mcclintock/config/popoolationte/popoolationte_post.py`)
+
+#### PoPoolationTE2 : `<output>/results/popoolationTE2/`
+* `unfiltered/teinsertions.txt` : Tab-delimited table with TE predictions and TE frequency values (ratio of physical coverage supporting a TE insertion to the total physical coverage). PopoolationTE2 does not indicate which predictions are reference and non-reference TEs. Also, only a single position is reported for each prediction, so the TSD is not predicted. Predictions may only have support from one side of the junction ("F" or "R") or both sides ("FR"). Prediction coordinates are 1-based.
+* `<reference>_popoolationte2_nonredundant.bed` : This file contains all of the predictions from `unfiltered/teinsertions.txt` that have support on both ends ("FR") and have a frequency greater than "0.1". The filtering criteria can be modified in the config file: (`/path/to/mcclintock/config/popoolationte2/popoolationte2_post.py`). If predictions intersect a TE in the reference genome, that reference TE is reported in this file using the positions of the reference TE. If the prediction does not intersect a reference TE, it is designated a non-reference insertion `_non-reference_`. The coordinates for all predictions are adjusted to be 0-based. 
+
+#### TE-Locate : `<output>/results/te-locate/`
+* `unfiltered/te-locate-raw.info` : A tab-delimited table containing reference ("old") and non-reference ("new") predictions using 1-based positions. TSDs are not predicted for non-reference TEs, instead a single position is reported.
+* `<reference>_telocate_nonredundant.bed` : Contains all reference and non-reference predictions from `unfiltered/te-locate-raw.info`. Coordinates for both reference and non-reference predictions are converted to a 0-based interval. The Reference TE end position is extended by the `len` column in `unfiltered/te-locate-raw.info`. Non-reference predictions are a single position as te-locate does not predict the TSD size.
 
 License
 ------
-Copyright 2014-2018 Michael G. Nelson, Shunhua Han, and Casey M. Bergman
+Copyright 2014-2020 Preston Basting, Michael G. Nelson, Shunhua Han, and Casey M. Bergman
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
 
