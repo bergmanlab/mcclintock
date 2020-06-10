@@ -77,11 +77,12 @@ def read_insertions(predictions, ref_tes, chroms, sample, both_end_support_neede
             if (insert.support_type == "FR" or not both_end_support_needed) and insert.frequency > support_threshold:     
                 # determine if insert is a ref insert       
                 for x in range(0,len(ref_tes)):
-                    if ref_tes[x].start <= insert.start and insert.start <= ref_tes[x].end and insert.family == ref_tes[x].family:
+                    if ref_tes[x].start <= insert.start and insert.start <= ref_tes[x].end:
+                        insert.family = ref_tes[x].family
                         insert.added = ref_tes[x].added
                         if not ref_tes[x].added:
                             ref_tes[x].added = True
-                        
+                            
                         insert.type = "ref"
                         insert.start = ref_tes[x].start
                         insert.end = ref_tes[x].end
