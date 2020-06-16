@@ -29,7 +29,7 @@ python3 mcclintock.py \
 ## Table of Contents
 * [Getting Started](#started)
 * [Introduction](#intro)
-* [Software Methods](#methods)
+* [Software Components](#methods)
 * [Software Dependencies](#dependency)
 * [Installing McClintock](#install)
 * [Running McClintock](#run)
@@ -52,7 +52,7 @@ The complete pipeline requires a fasta reference genome, a fasta consensus set o
  * [TE-locate](https://sourceforge.net/projects/te-locate/) - [Platzer *et al.* (2012)](http://www.mdpi.com/2079-7737/1/2/395)
 
 ## <a name="dependency"></a> Software Dependencies
-McClintock is written in Python3 leveraging the [SnakeMake](https://snakemake.readthedocs.io/en/stable/) workflow system and is designed to run on linux operating systems. Installation of software dependencies for McClintock is automated by [Conda](https://docs.conda.io/en/latest/), thus a working Conda package is required to install  McClintock. Conda can be installed via the [Miniconda installer](https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh).
+McClintock is written in Python3 leveraging the [SnakeMake](https://snakemake.readthedocs.io/en/stable/) workflow system and is designed to run on linux operating systems. Installation of software dependencies for McClintock is automated by [Conda](https://docs.conda.io/en/latest/), thus a working installation of Conda is required to install  McClintock. Conda can be installed via the [Miniconda installer](https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh).
 
 #### Installing Miniconda (Python 3.X)
 ```bash
