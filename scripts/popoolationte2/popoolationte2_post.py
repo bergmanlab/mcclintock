@@ -30,8 +30,12 @@ def main():
 
     ref_tes = get_ref_tes(te_gff, taxonomy, chromosomes)
     insertions = read_insertions(te_predictions, ref_tes, chromosomes, sample_name, both_end_support_needed=config.REQUIRE_BOTH_END_SUPPORT, support_threshold=config.FREQUENCY_THRESHOLD)
-    insertions = make_redundant_bed(insertions, sample_name, out_dir)
-    make_nonredundant_bed(insertions, sample_name, out_dir)
+    if len(insertions) >= 1:
+        insertions = make_redundant_bed(insertions, sample_name, out_dir)
+        make_nonredundant_bed(insertions, sample_name, out_dir)
+    else:
+        mccutils.run_command(["touch", out_dir+"/"+sample_name+"_popoolationte2_redundant.bed"])
+        mccutils.run_command(["touch", out_dir+"/"+sample_name+"_popoolationte2_nonredundant.bed"])
 
 def get_ref_tes(gff, taxon, chroms):
     ref_inserts = []

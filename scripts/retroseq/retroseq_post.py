@@ -26,7 +26,7 @@ def main():
     chromosomes = snakemake.params.chromosomes.split(",")
 
     insertions = read_insertions(retroseq_out, sample_name, chromosomes, support_threshold=config.READ_SUPPORT_THRESHOLD, breakpoint_threshold=config.BREAKPOINT_CONFIDENCE_THRESHOLD)
-    if len(insertions) > 1:
+    if len(insertions) >= 1:
         insertions = make_redundant_bed(insertions, sample_name, out_dir)
         make_nonredundant_bed(insertions, sample_name, out_dir)
     else:

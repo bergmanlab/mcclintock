@@ -29,8 +29,12 @@ def main():
     chromosomes = snakemake.params.chromosomes.split(",")
 
     insertions = read_insertions(popoolationte_out, sample_name, chromosomes, require_both_end_support=config.REQUIRE_BOTH_END_SUPPORT, percent_read_support_threshold=config.PERCENT_READ_SUPPORT_THRESHOLD)
-    insertions = make_redundant_bed(insertions, sample_name, out_dir)
-    make_nonredundant_bed(insertions, sample_name, out_dir)
+    if len(insertions) >= 1:
+        insertions = make_redundant_bed(insertions, sample_name, out_dir)
+        make_nonredundant_bed(insertions, sample_name, out_dir)
+    else:
+        mccutils.run_command(["touch",out_dir+"/"+sample_name+"_popoolationte_redundant.bed"])
+        mccutils.run_command(["touch",out_dir+"/"+sample_name+"_popoolationte_nonredundant.bed"])
     print("<POPOOLATIONTE POSTPROCESSING> PopoolationTE postprocessing complete")
 
 

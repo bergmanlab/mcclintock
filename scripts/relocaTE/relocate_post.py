@@ -31,9 +31,12 @@ def main():
 
     insertions = set_ref_orientations(insertions, te_gff)
 
-    insertions = make_redundant_bed(insertions, sample_name, out_dir)
-
-    make_nonredundant_bed(insertions, sample_name, out_dir)
+    if len(insertions) >= 1:
+        insertions = make_redundant_bed(insertions, sample_name, out_dir)
+        make_nonredundant_bed(insertions, sample_name, out_dir)
+    else:
+        mccutils.run_command(["touch",out_dir+"/"+sample_name+"_relocate_redundant.bed"])
+        mccutils.run_command(["touch",out_dir+"/"+sample_name+"_relocate_nonredundant.bed"])
 
     print("<RELOCATE POST> RelocaTE postprocessing results...")
 

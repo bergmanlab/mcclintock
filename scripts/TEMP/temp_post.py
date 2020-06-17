@@ -40,9 +40,14 @@ def main():
     insertions += non_absent_ref_insertions
     insertions = filter_insertions(insertions, chromosomes)
     insertions = sort_insertions(insertions)
-    make_raw_bed(insertions, sample_name, out_dir)
-    make_redundant_bed(insertions, sample_name, out_dir, log, acceptable_classes=config.ACCEPTABLE_INSERTION_SUPPORT_CLASSES, frequency_theshold=config.FREQUENCY_THRESHOLD)
-    make_nonredundant_bed(insertions, sample_name, out_dir, log, acceptable_classes=config.ACCEPTABLE_INSERTION_SUPPORT_CLASSES, frequency_theshold=config.FREQUENCY_THRESHOLD)
+    if len(insertions) > 0:
+        make_raw_bed(insertions, sample_name, out_dir)
+        make_redundant_bed(insertions, sample_name, out_dir, log, acceptable_classes=config.ACCEPTABLE_INSERTION_SUPPORT_CLASSES, frequency_theshold=config.FREQUENCY_THRESHOLD)
+        make_nonredundant_bed(insertions, sample_name, out_dir, log, acceptable_classes=config.ACCEPTABLE_INSERTION_SUPPORT_CLASSES, frequency_theshold=config.FREQUENCY_THRESHOLD)
+    else:
+        mccutils.run_command(["touch", out_dir+"/"+sample_name+"_temp_raw.bed"])
+        mccutils.run_command(["touch", out_dir+"/"+sample_name+"_temp_redundant.bed"])
+        mccutils.run_command(["touch", out_dir+"/"+sample_name+"_temp_nonredundant.bed"])
     print("<TEMP POST> TEMP postprocessing complete")
 
 

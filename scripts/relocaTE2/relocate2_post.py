@@ -54,9 +54,12 @@ def main():
 
     all_insertions = ref_insertions + nonref_insertions
 
-    all_insertions = make_redundant_bed(all_insertions, sample_name, out_dir)
-
-    make_nonredundant_bed(all_insertions, sample_name, out_dir)
+    if len(all_insertions) >= 1:
+        all_insertions = make_redundant_bed(all_insertions, sample_name, out_dir)
+        make_nonredundant_bed(all_insertions, sample_name, out_dir)
+    else:
+        mccutils.run_command(["touch", out_dir+"/"+sample_name+"_relocate2_redundant.bed"])
+        mccutils.run_command(["touch", out_dir+"/"+sample_name+"_relocate2_nonredundant.bed"])
 
 
 def get_insertions(gff, sample_name, chromosomes, l_support_threshold=0, r_support_threshold=0, l_junction_threshold=0, r_junction_threshold=0, insert_type="ref"):

@@ -275,7 +275,8 @@ def threaded_mcclintock_run(fastqs, ref, consensus, locations, taxonomy, out, th
     inputs = []
     for fq in fastqs:
         basename = fq.split("/")[-1]
-        os.mkdir(out+"/"+basename)
+        if not os.path.exists(out+"/"+basename):
+            os.mkdir(out+"/"+basename)
         inputs.append([fq+"_1.fastq", fq+"_2.fastq", ref, consensus, locations, taxonomy, out+"/"+basename, False, False])
     
     pool = Pool(processes=threads)
