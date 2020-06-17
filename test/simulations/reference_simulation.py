@@ -3,11 +3,12 @@ import os
 import sys
 import traceback
 import subprocess
-from multiprocessing import Process, Pool
+from multiprocessing import Process, Pool, set_start_method
 
 def main():
     args = parse_args()
-    os.mkdir(args.out+"/data")
+    if not os.path.exists(args.out+"/data"):
+        os.mkdir(args.out+"/data")
     fastqs_100x = threaded_make_fastqs(args.reference, args.out, threads=args.proc, start=args.start, end=args.end)
     fastqs_10x = threaded_subsample(args.out, threads=args.proc, start=args.start, end=args.end)
     threaded_mcclintock_run(fastqs_100x, fastqs_10x, args.reference, args.consensus, args.locations, args.taxonomy, args.out, threads=args.proc, start=args.start)
@@ -67,7 +68,7 @@ def parse_args():
     if args.end is None:
         args.end = 100
 
-    if args.start >= args.end:
+    if args.start > args.end:
         print("-s/--start must be lower than -e/--end")
         sys.exit(1)
     
@@ -133,16 +134,19 @@ def subsample_fastqs(args):
 def threaded_mcclintock_run(fastqs_100x, fastqs_10x, ref, consensus, locations, taxonomy, out, threads=1, start=1):
     print("Starting McClintock runs on simulated reads")
     inputs = []
-    os.mkdir(out+"/100X")
-    os.mkdir(out+"/10X")
+    if not os.path.exists(out+"/100X"):
+        os.mkdir(out+"/100X")
+    if not os.path.exists(out+"/10X"):
+        os.mkdir(out+"/10X")
     for x in range(0, len(fastqs_100x)):
         idx = x+start
-        os.mkdir(out+"/100X/100X"+str(idx))
+        if not os.path.exists(out+"/100X/100X"+str(idx)):
+            os.mkdir(out+"/100X/100X"+str(idx))
         inputs.append([fastqs_100x[x]+"_1.fastq", fastqs_100x[x]+"_2.fastq", ref, consensus, locations, taxonomy, out+"/100X/100X"+str(idx)+"/default", False, False])
         inputs.append([fastqs_100x[x]+"_1.fastq", fastqs_100x[x]+"_2.fastq", ref, consensus, locations, taxonomy, out+"/100X/100X"+str(idx)+"/cons", False, True])
 
-
-        os.mkdir(out+"/10X/10X"+str(idx))
+        if not os.path.exists(out+"/10X/10X"+str(idx)):
+            os.mkdir(out+"/10X/10X"+str(idx))
         inputs.append([fastqs_10x[x]+"_1.fastq", fastqs_10x[x]+"_2.fastq", ref, consensus, locations, taxonomy, out+"/10X/10X"+str(idx)+"/default", False, False])
         inputs.append([fastqs_10x[x]+"_1.fastq", fastqs_10x[x]+"_2.fastq", ref, consensus, locations, taxonomy, out+"/10X/10X"+str(idx)+"/cons", False, True])
     
@@ -163,17 +167,19 @@ def mcclintock_run(args):
     add_ref = args[7]
     add_cons = args[8]
 
-    os.mkdir(out)
+    if not os.path.exists(out):
+        os.mkdir(out)
 
     mcc_path = str(os.path.dirname(os.path.abspath(__file__)))+"/../../"
 
-    command = ["python3",mcc_path+"/mcclintock.py", "-r", ref, "-c", consensus, "-1", fq1, "-2", fq2, "-p", "1", "-o", out, "-g", locations, "-t", taxonomy]
+    command = ["python3",mcc_path+"/mcclintock.py", "-r", ref, "-c", consensus, "-1", fq1, "-2", fq2, "-p", "1", "-o", out, "-g", locations, "-t", taxonomy, "-m","ngs_te_mapper,relocate,relocate2,temp,retroseq,popoolationte,popoolationte2,te-locate"]
 
     if add_ref:
         command.append("-R")
     
     if add_cons:
-        command.append("-a", consensus)
+        command.append("-a")
+        command.append(consensus)
 
     print("running mcclintock... output:", out)
     run_command_stdout(command, out+"/run.stdout", log=out+"/run.stderr")

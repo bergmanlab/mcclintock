@@ -62,7 +62,7 @@ def get_actual_insertions(out):
                     insertion.start = int(split_line[1])
                     insertion.end = int(split_line[2])
                     insertion.family = split_line[3]
-                    insertion.strand = split_line[5]
+                    # insertion.strand = split_line[5]
             
             actual_insertions[name] = insertion
     
@@ -74,38 +74,39 @@ def get_predicted_insertions(out):
     methods = []
     for d in os.listdir(out):
         rep = d
-        for e in os.listdir(out+"/"+d+"/results/"):
-            method = e
-            for f in os.listdir(out+"/"+d+"/results/"+e):
-                if "nonredundant.bed" in f:
-                    if method not in methods:
-                        methods.append(method)
-                    with open(out+"/"+d+"/results/"+e+"/"+f, "r") as bed:
-                        for line in bed:
-                            if "#" not in line:
-                                insertion = Insertion()
-                                line = line.replace("\n","")
-                                split_line = line.split("\t")
-                                if len(split_line) > 5:
-                                    insertion.chromosome = split_line[0]
-                                    insertion.start = int(split_line[1])
-                                    insertion.end = int(split_line[2])
-                                    info = split_line[3].split("_")
-                                    for x, inf in enumerate(info):
-                                        if "reference" in inf:
-                                            family = "_".join(info[:x])
-                                    insertion.family = family
-                                    insertion.strand = split_line[5]
-                                    if "non-reference" in line:
-                                        insertion.reference = False
-                                    else:
-                                        insertion.reference = True
-                                    
-                                    if method not in predicted_insertions.keys():
-                                        predicted_insertions[method] = {rep: [insertion]}
-                                    elif rep not in predicted_insertions[method].keys():
-                                        predicted_insertions[method][rep] = [insertion]
-                                    else:
+        if os.path.exists(out+"/"+d+"/results/"):
+            for e in os.listdir(out+"/"+d+"/results/"):
+                method = e
+                for f in os.listdir(out+"/"+d+"/results/"+e):
+                    if "nonredundant.bed" in f:
+                        if method not in methods:
+                            methods.append(method)
+                        with open(out+"/"+d+"/results/"+e+"/"+f, "r") as bed:
+                            if method not in predicted_insertions.keys():
+                                predicted_insertions[method] = {rep: []}
+                            elif rep not in predicted_insertions[method].keys():
+                                predicted_insertions[method][rep] = []
+
+                            for line in bed:
+                                if "#" not in line:
+                                    insertion = Insertion()
+                                    line = line.replace("\n","")
+                                    split_line = line.split("\t")
+                                    if len(split_line) > 5:
+                                        insertion.chromosome = split_line[0]
+                                        insertion.start = int(split_line[1])
+                                        insertion.end = int(split_line[2])
+                                        info = split_line[3].split("_")
+                                        for x, inf in enumerate(info):
+                                            if "reference" in inf:
+                                                family = "_".join(info[:x])
+                                        insertion.family = family
+                                        insertion.strand = split_line[5]
+                                        if "non-reference" in line:
+                                            insertion.reference = False
+                                        else:
+                                            insertion.reference = True
+                                        
                                         predicted_insertions[method][rep].append(insertion)
     
     return predicted_insertions, methods

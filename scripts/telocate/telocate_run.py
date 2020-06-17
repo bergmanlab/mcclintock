@@ -27,6 +27,8 @@ def main():
     sam_dir = out_dir+"/sam/"
     mccutils.mkdir(sam_dir)
     te_locate_sam = sam_dir+"te-locate.sam"
+    if os.path.exists(te_locate_sam):
+        os.remove(te_locate_sam)
     os.symlink(sam, te_locate_sam)
 
     os.chdir(os.path.dirname(telocate))

@@ -107,7 +107,7 @@ def parse_args():
     if args.end is None:
         args.end = 299
 
-    if args.start >= args.end:
+    if args.start > args.end:
         print("-s/--start must be lower than -e/--end")
         sys.exit(1)
     

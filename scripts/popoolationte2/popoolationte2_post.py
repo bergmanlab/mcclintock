@@ -150,7 +150,7 @@ def make_nonredundant_bed(insertions, sample_name, out_dir):
         if key not in uniq_inserts.keys():
             uniq_inserts[key] = insert
         else:
-            if (uniq_inserts[key].f_read_support + uniq_inserts[key].r_read_support) >  (insert.f_read_support + insert.r_read_support):
+            if (uniq_inserts[key].frequency) >  (insert.frequency):
                 uniq_inserts[key] = insert
     
     tmp_bed = out_dir+"/tmp.bed"
