@@ -25,18 +25,22 @@ def main():
 
 def run_repeatmasker(reference, ref_name, te_seqs, threads, log, outfile, outdir):
     tmp_dir = outdir+"/tmp/repeatmasker"
+    mccutils.remove(tmp_dir)
     mccutils.mkdir(tmp_dir)
     os.chdir(tmp_dir)
 
-    command = ["RepeatMasker","-pa", str(threads), "-lib", te_seqs, "-dir", tmp_dir, "-s", "-gff", "-nolow", "-no_is", reference]
+    command = ["RepeatMasker","-pa", str(threads), "-lib", te_seqs, "-dir", tmp_dir, "-s", "-nolow", "-no_is", reference]
     mccutils.run_command(command, log=log)
 
     os.chdir(outdir)
 
     rm_out = ""
     for f in os.listdir(tmp_dir):
-        if ".out" in f:
+        if "fasta.out" in f and f[-9:] == "fasta.out":
             rm_out = tmp_dir+"/"+f
+
+    if rm_out == "":
+        sys.exit("can't find Repeatmasker output in:"+tmp_dir+"\n")
 
     mccutils.run_command(["mv", rm_out, outfile])
 
