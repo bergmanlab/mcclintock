@@ -133,7 +133,7 @@ def make_out_table(actual_insertions, predicted_insertions, methods, out_csv):
                     ref_count +=1
                 else:
                     nonref_count +=1
-                    if insert.family == actual_insertions[rep].family:
+                    if insert.family == actual_insertions[rep].family and insert.chromosome == actual_insertions[rep].chromosome:
                         if (actual_insertions[rep].start == insert.start and insert.end == actual_insertions[rep].end):
                             exact += 1
                         
@@ -159,6 +159,7 @@ def make_out_table(actual_insertions, predicted_insertions, methods, out_csv):
             within_300s.append(within_300)
             within_500s.append(within_500)
         
+
         ref_mean = statistics.mean(ref_counts)
         nonref_mean = statistics.mean(nonref_counts)
         exact_mean = statistics.mean(exacts)
