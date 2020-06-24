@@ -20,8 +20,8 @@ python3 mcclintock.py \
     -c test/sac_cer_TE_seqs.fasta \
     -g test/reference_TE_locations.gff \
     -t test/sac_cer_te_families.tsv \
-    -1 test/SRR800842_1.fastq \
-    -2 test/SRR800842_2.fastq \
+    -1 test/SRR800842_1.fastq.gz \
+    -2 test/SRR800842_2.fastq.gz \
     -p 4 \
     -o /path/to/output/directory
 ```
@@ -119,8 +119,8 @@ python3 mcclintock.py \
     -c test/sac_cer_TE_seqs.fasta \
     -g test/reference_TE_locations.gff \
     -t test/sac_cer_te_families.tsv \
-    -1 test/SRR800842_1.fastq \
-    -2 test/SRR800842_2.fastq \
+    -1 test/SRR800842_1.fastq.gz \
+    -2 test/SRR800842_2.fastq.gz \
     -p 4 \
     -o /path/to/output/directory
 ```
