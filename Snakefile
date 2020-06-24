@@ -663,7 +663,6 @@ rule telocate_run:
     
     params:
         run_script = config['args']['mcc_path']+"/install/tools/te-locate/TE_locate.pl",
-        max_mem = config['args']['mem'],
         out_dir = config['args']['out']+"/results/te-locate/unfiltered/",
         log = config['args']['log_dir']+"te-locate.log"
     

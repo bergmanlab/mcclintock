@@ -20,9 +20,7 @@ def main():
         
 
     telocate = snakemake.params.run_script
-    max_mem = snakemake.params.max_mem
     out_dir = snakemake.params.out_dir
-    
 
     sam_dir = out_dir+"/sam/"
     mccutils.mkdir(sam_dir)
@@ -37,18 +35,13 @@ def main():
 
     distance = (median_insert_size * config.MIN_DISTANCE)
 
-    command = ["perl", telocate, str(max_mem), sam_dir, te_gff, ref_fasta, out_dir, str(distance), str(config.MIN_SUPPORT_READS), str(config.MIN_SUPPORT_INDIVIDUALS)]
+    command = ["perl", telocate, str(config.MAX_MEM), sam_dir, te_gff, ref_fasta, out_dir, str(distance), str(config.MIN_SUPPORT_READS), str(config.MIN_SUPPORT_INDIVIDUALS)]
 
     mccutils.run_command(command, log=log)
 
 
     mccutils.run_command(["cp", out_dir+"_"+str(distance)+"_reads3_acc1.info", out_dir+"te-locate-raw.info"])
     print("<TELOCATE> TE-Locate complete")
-
-
-
-
-
 
 
 

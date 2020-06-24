@@ -1,3 +1,5 @@
+# Max memory to use (GB)
+MAX_MEM = 4
 
 # Multiplied by median insert size
 MIN_DISTANCE = 5

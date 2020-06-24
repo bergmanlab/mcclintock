@@ -47,7 +47,6 @@ def parse_args():
     ## optional ##
     parser.add_argument("-2", "--second", type=str, help="The path of the second fastq file from a paired end read sequencing", required=False)
     parser.add_argument("-p", "--proc", type=int, help="The number of processors to use for parallel stages of the pipeline [default = 1]", required=False)
-    parser.add_argument("-M", "--mem", type=int, help="The amount of memory available for the pipeline in GB. [default = 4]", required=False)
     parser.add_argument("-o", "--out", type=str, help="An output folder for the run. [default = '.']", required=False)
     parser.add_argument("-m", "--methods", type=str, help="A comma-delimited list containing the software you want the pipeline to use for analysis. e.g. '-m relocate,TEMP,ngs_te_mapper' will launch only those three methods", required=False)
     parser.add_argument("-g", "--locations", type=str, help="The locations of known TEs in the reference genome in GFF 3 format. This must include a unique ID attribute for every entry", required=False)
@@ -88,10 +87,6 @@ def parse_args():
     #check -p
     if args.proc is None:
         args.proc = 1
-    
-    #check -M
-    if args.mem is None:
-        args.mem = 4
 
     #check -o
     if args.out is None:
@@ -344,7 +339,6 @@ def make_run_config(args, sample_name, ref_name, full_command, current_directory
     data = {}
     data['args'] = {
         'proc': str(args.proc),
-        'mem': str(args.mem),
         'out': str(args.out),
         'log_dir': args.out+"/logs/"+now_str+"_"+str(run_id)+"/",
         'augment_fasta': str(args.augment),
