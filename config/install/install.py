@@ -34,3 +34,18 @@ ENV = {
     "relocate2" : ENV_PATH+"mcc_relocate2.yml",
     "mcc_processing":  ENV_PATH+"mcc_processing.yml"
 }
+
+
+INSTALL_PATH = "{{inspath}}"
+OUTPUT = {
+    "coverage" : INSTALL_PATH+"tools/coverage/coverage.log",
+    "te-locate" : INSTALL_PATH+"tools/te-locate/TE_locate.pl",
+    "retroseq" : INSTALL_PATH+"tools/retroseq/bin/retroseq.pl",
+    "temp" : INSTALL_PATH+"tools/temp/scripts/TEMP_Insertion.sh",
+    "relocate" : INSTALL_PATH+"tools/relocate/scripts/relocaTE_insertionFinder.pl",
+    "ngs_te_mapper" : INSTALL_PATH+"tools/ngs_te_mapper/sourceCode/run_ngs_te_mapper.sh",
+    "popoolationte" : INSTALL_PATH+"tools/popoolationte/identify-te-insertsites.pl",
+    "popoolationte2" : INSTALL_PATH+"tools/popoolationte2/popte2-v1.10.03.jar",
+    "relocate2" : INSTALL_PATH+"tools/relocate2/relocaTE2.log",
+    "processing" : INSTALL_PATH+"tools/processing.log"
+}

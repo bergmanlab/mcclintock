@@ -270,9 +270,13 @@ def install(clean=False, debug=False):
     data['URLs'] = config_install.URL
     data['MD5s'] = config_install.MD5
     data['ENVs'] = config_install.ENV
+    data['output'] = config_install.OUTPUT
 
     for method in data['ENVs'].keys():
         data['ENVs'][method] = data['ENVs'][method].replace(config_install.ENV_PATH, install_path+"envs/")
+    
+    for method in data['output'].keys():
+        data['output'][method] = data['output'][method].replace(config_install.INSTALL_PATH, install_path)
 
     with open(install_config,"w") as c:
         json.dump(data, c, indent=4)
@@ -294,18 +298,24 @@ def install(clean=False, debug=False):
 
     for env in config.ALL_METHODS:
         if env not in config.NO_INSTALL_METHODS:
-            env = env.replace("-","")
             mccutils.log("install","Installing conda environment for: "+env)
-            command = ["snakemake","--use-conda", "--conda-prefix", conda_env_dir, "--configfile", install_config, "-R", env, "--cores", "1", "--nolock", "--create-envs-only"]
+            command = ["snakemake","--use-conda", "--conda-prefix", conda_env_dir, "--configfile", install_config, "--cores", "1", "--nolock", "--create-envs-only", data['output'][env]]
             if not debug:
                 command.append("--quiet")
             mccutils.run_command(command)
 
             mccutils.log("install","Installing scripts for:"+env)
-            command = ["snakemake","--use-conda", "--conda-prefix", conda_env_dir, "--configfile", install_config, "-R", env, "--cores", "1", "--nolock"]
+            command = ["snakemake","--use-conda", "--conda-prefix", conda_env_dir, "--configfile", install_config, "--cores", "1", "--nolock", data['output'][env]]
             if not debug:
                 command.append("--quiet")
             mccutils.run_command(command)
+    
+    mccutils.log("install", "Installing conda environment for processing steps")
+    command = ["snakemake","--use-conda", "--conda-prefix", conda_env_dir, "--configfile", install_config, "--cores", "1", "--nolock", "--create-envs-only", data['output']['processing']]
+    if not debug:
+        command.append("--quiet")
+    mccutils.run_command(command)
+
 
 def make_run_config(args, sample_name, ref_name, full_command, current_directory):
     run_id = random.randint(1000000,9999999)

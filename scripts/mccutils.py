@@ -115,7 +115,9 @@ def writelog(log, msg):
             out.write(msg)
 
 
-def download(url, out_file, md5=None, timeout=15):
+def download(url, out_file, md5=None, timeout=15, _attempt=1, max_attempts=1):
+    if _attempt > max_attempts:
+        return False
     socket.setdefaulttimeout(timeout)
     print("downloading ", url, "to", out_file)
     try:
@@ -127,7 +129,7 @@ def download(url, out_file, md5=None, timeout=15):
     except:
         print(sys.exc_info())
         print("download failed...")
-        return False
+        return download(url, out_file, md5=md5, timeout=timeout, _attempt=_attempt+1, max_attempts=max_attempts)
 
     print("download complete")
 
@@ -142,7 +144,7 @@ def download(url, out_file, md5=None, timeout=15):
 
             if this_md5 != md5:
                 print("MD5 of", out_file, " : ", this_md5, "does not match currect MD5 hash: ", md5)
-                return False
+                return download(url, out_file, md5=md5, timeout=timeout, _attempt=_attempt+1, max_attempts=max_attempts)
             else:
                 print("MD5 hash of ", out_file, "matches expected")
                 return True
