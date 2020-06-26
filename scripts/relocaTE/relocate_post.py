@@ -25,7 +25,7 @@ def main():
     sample_name = snakemake.params.sample_name
     chromosomes = snakemake.params.chromosomes.split(",")
 
-    print("<RELOCATE POST> Processing RelocaTE results...")
+    mccutils.log("relocate","processing RelocaTE results")
 
     insertions = get_insertions(relocate_gff, sample_name, chromosomes, ref_l_threshold=config.REF_LEFT_THRESHOLD, ref_r_threshold=config.REF_RIGHT_THRESHOLD, nonref_l_threshold=config.NONREF_LEFT_THRESHOLD, nonref_r_threshold=config.NONREF_RIGHT_THRESHOLD)
 
@@ -38,7 +38,7 @@ def main():
         mccutils.run_command(["touch",out_dir+"/"+sample_name+"_relocate_redundant.bed"])
         mccutils.run_command(["touch",out_dir+"/"+sample_name+"_relocate_nonredundant.bed"])
 
-    print("<RELOCATE POST> RelocaTE postprocessing results...")
+    mccutils.log("relocate","RelocaTE postprocessing complete")
 
 
 def get_insertions(gff, sample_name, chromosomes, ref_l_threshold=0, ref_r_threshold=0, nonref_l_threshold=0, nonref_r_threshold=0):

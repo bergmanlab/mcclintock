@@ -7,7 +7,7 @@ import config.relocate.relocate_run as config
 
 
 def main():
-    print("<RELOCATE> Running RelocaTE...")
+    
 
     sample_name = snakemake.params.sample_name
     log = snakemake.params.log
@@ -16,10 +16,11 @@ def main():
     if raw_fq2 == "None":
         is_paired = False
 
-
     script_dir = snakemake.params.script_dir
     out_dir = snakemake.params.out_dir
     out_gff = snakemake.output[0]
+
+    mccutils.log("relocate","running RelocaTE", log=log)
 
     input_dir = snakemake.params.out_dir+"/input/"
     mccutils.remove(input_dir)
@@ -67,7 +68,7 @@ def main():
     
     mccutils.run_command(command, log=log)
     combine_gffs(out_dir, out_gff)
-    print("<RELOCATE> RelocaTE run complete")
+    mccutils.log("relocate","RelocaTE run complete")
 
 
 

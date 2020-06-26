@@ -26,10 +26,12 @@ def main():
     popoolationte_taxonomy = snakemake.output.taxonomy
     popoolationte_te_gff = snakemake.output.te_gff
 
+    mccutils.log("processing", "making popoolationTE annotation files")
     taxonomy = make_popoolationTE_taxonomy(taxonomy, consensus, run_id, mcc_out)
 
     mccutils.run_command(["cp", te_gff, popoolationte_te_gff])
     mccutils.run_command(["cp", taxonomy, popoolationte_taxonomy])
+    mccutils.log("processing", "popoolationTE annotation files created")
 
 def make_popoolationTE_taxonomy(taxonomy, consensus, run_id, out):
     te_families = []

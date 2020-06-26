@@ -55,7 +55,7 @@ def main():
 
 
 def repeatmask_genome(reference, lib, threads, run_id, out, log):
-    print("<COVERAGE> Running RepeatMasker...log:"+log)
+    mccutils.log("coverage","Running RepeatMasker",log=log)
     outdir = out+"/input/repeatmasker_"+run_id
     mccutils.mkdir(outdir)
     os.chdir(outdir)
@@ -70,7 +70,7 @@ def repeatmask_genome(reference, lib, threads, run_id, out, log):
 
 
 def augment_genome(fasta1, fasta2, run_id, out):
-    print("<COVERAGE> Augmenting reference genome")
+    mccutils.log("coverage","augmenting reference genome")
     augmented_genome = out+"/input/"+run_id+"_augmented_reference.fasta"
     lines = []
     with open(fasta1,"r") as fa1:
@@ -88,13 +88,13 @@ def augment_genome(fasta1, fasta2, run_id, out):
     return augmented_genome
 
 def index_genome(fasta, log):
-    print("<COVERAGE> samtools and bwa indexing", fasta, "Log:"+log)
+    mccutils.log("coverage","samtools and bwa indexing reference", log=log)
     mccutils.run_command(["samtools", "faidx", fasta], log=log)
     mccutils.run_command(["bwa", "index", fasta], log=log)
 
 
 def map_reads(reference, fq1, threads, sample_name, run_id, out, log, fq2=None):
-    print("<COVERAGE> Mapping reads to augmented reference genome...log:"+log)
+    mccutils.log("coverage","mapping reads to augmented reference genome", log=log)
     command = ["bwa", "mem", "-t", str(threads), "-R", "@RG\\tID:"+sample_name+"\\tSM:"+sample_name, reference, fq1]
 
     if fq2 is not None:
@@ -106,7 +106,7 @@ def map_reads(reference, fq1, threads, sample_name, run_id, out, log, fq2=None):
     return sam
 
 def sam_to_bam(sam, reference, sample_name, threads, run_id, out, log):
-    print("<COVERAGE> converting SAM to BAM, and indexing...log:"+log)
+    mccutils.log("coverage","converting SAM to BAM, and indexing", log=log)
     threads = str(threads)
     tmp_bam = out+"/input/"+run_id+"_tmp.bam"
     command = ["samtools", "view", "-Sb", "-@", threads, "-t", reference+".fai", sam]
@@ -123,7 +123,7 @@ def sam_to_bam(sam, reference, sample_name, threads, run_id, out, log):
     return sorted_bam
 
 def make_nonte_bed(reference, masked_gff, run_id, out, log):
-    print("<COVERAGE> creating BED file of non-TE regions...log:"+log)
+    mccutils.log("coverage","creating BED file of non-TE regions", log=log)
     masked_bed = out+"/input/"+run_id+"_ref_tes.bed"
     repeatmasker_gff_to_bed(masked_gff, masked_bed)
 
@@ -156,7 +156,7 @@ def make_nonte_bed(reference, masked_gff, run_id, out, log):
 
 
 def repeatmasker_gff_to_bed(gff, bed):
-    print("<COVERAGE> Converting repeatmasker GFF to BED...")
+    mccutils.log("coverage","converting repeatmasker GFF to BED")
     with open(gff,"r") as ingff:
         with open(bed, "w") as outbed:
             for line in ingff:
@@ -173,7 +173,7 @@ def repeatmasker_gff_to_bed(gff, bed):
 
 
 def get_genome_depth(non_te_bed, bam, run_id, out, log):
-    print("<COVERAGE> determining the coverage depth of the genome...log:"+log)
+    mccutils.log("coverage","determining the coverage depth of the genome", log=log)
     depth_file = out+"/input/"+run_id+"genome.depth"
     command = ["samtools", "depth", "-aa", "-b", non_te_bed, bam, "-d", "0"]
     mccutils.run_command_stdout(command, depth_file, log=log)
@@ -205,7 +205,7 @@ def get_avg_depth(depth_file, trim_edges=0):
     return avg_depth
 
 def make_depth_table(te_fasta, bam, genome_depth, run_id, out, depth_csv, log, trim_edges=0):
-    print("<COVERAGE> Creating TE depth coverage table...log:"+log)
+    mccutils.log("coverage","creating TE depth coverage table", log=log)
     with open(depth_csv, "w") as table:
             table.write("TE-Family,Normalized-Depth,Normalized-Unique-Depth"+"\n")
     
@@ -248,7 +248,7 @@ def make_depth_table(te_fasta, bam, genome_depth, run_id, out, depth_csv, log, t
 
 
 def make_plots(te_names, all_coverage_files, uniq_coverage_files, avg_norm_te_depths, genome_depth, sample_name, out, trim_edges=0):
-    print("<COVERAGE> Creating TE coverage plots...")
+    mccutils.log("coverage","creating TE coverage plots")
     mccutils.mkdir(out+"/plots")
     for x, te_name in enumerate(te_names):
         chrom, all_pos, all_cov = read_samtools_depth_file(all_coverage_files[x])
@@ -260,7 +260,7 @@ def make_plots(te_names, all_coverage_files, uniq_coverage_files, avg_norm_te_de
         output = out+"plots/"+te_name+".png"
         plot = plot_coverage(chrom, all_pos, all_cov, uniq_pos, uniq_cov, sample_name, plot_height, plot_width, genome_depth, hline, trim_edges=trim_edges)
         plot.savefig(output, bbox_inches="tight")
-        print("<COVERAGE> plot created:", output)
+        mccutils.log("coverage","plot created: "+output)
 
 
 

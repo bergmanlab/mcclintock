@@ -145,7 +145,7 @@ def make_te_csv(methods, out_file_map, taxonomy, out_csv):
     
 
 def make_run_summary(out_file_map, methods, fq1, fq2, ref, bam, flagstat, median_insert_size, command, execution_dir, start_time, out_dir, out_file, paired=False):
-    out_lines = []
+    out_lines = ["\n"]
     out_lines.append(("-"*34)+"\n")
     out_lines.append("MCCLINTOCK SUMMARY REPORT\n")
     out_lines.append(("-"*34) + "\n")

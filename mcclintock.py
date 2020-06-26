@@ -69,8 +69,8 @@ def parse_args():
         args.debug = False
 
     if args.install:
-        print("installing dependencies...")
-        print("WARNING...this could take awhile...")
+        mccutils.log("installation","installing dependencies")
+        mccutils.log("installation","WARNING: this could take awhile")
         install(clean=args.clean, debug=args.debug)
         sys.exit(0)
 
@@ -150,7 +150,7 @@ def parse_args():
 
 def check_input_files(ref, consensus, fq1, fq2=None, locations=None, taxonomy=None, coverage_fasta=None, augment_fasta=None):
     # check reference fasta
-    print("checking reference fasta:", ref)
+    mccutils.log("setup","checking reference fasta: "+ref)
     try:
         with open(ref,"r") as fa:
             for record in SeqIO.parse(fa, "fasta"):
@@ -159,20 +159,20 @@ def check_input_files(ref, consensus, fq1, fq2=None, locations=None, taxonomy=No
         print(e)
         sys.exit(ref+" appears to be a malformed FastA file..exiting...\n")
 
-    print("checking fq1:", fq1)
+    mccutils.log("setup","checking fq1: "+fq1)
     #check fq1
     if ".fastq" not in fq1 and ".fq" not in fq1:
         sys.exit(fq1+" is not a (.fastq/.fq) file, exiting...\n")
     
     #check fq2
     if fq2 is not None:
-        print("checking fq2:", fq2)
+        mccutils.log("setup","checking fq2: "+fq2)
         if ".fastq" not in fq2 and ".fq" not in fq2:
             sys.exit(fq2+" is not a (.fastq/.fq) file, exiting...\n")
     
 
     # checking consensus
-    print("checking consensus fasta:", consensus)
+    mccutils.log("setup","checking consensus fasta: "+consensus)
     consensus_seq_names = []
     try:
         with open(consensus,"r") as fa:
@@ -185,7 +185,7 @@ def check_input_files(ref, consensus, fq1, fq2=None, locations=None, taxonomy=No
     #check locations gff
     gff_ids = []
     if locations is not None:
-        print("checking locations gff:", locations)
+        mccutils.log("setup","checking locations gff: "+locations)
         with open(locations,"r") as gff:
             for line in gff:
                 if "#" not in line:
@@ -209,7 +209,7 @@ def check_input_files(ref, consensus, fq1, fq2=None, locations=None, taxonomy=No
     
     # check taxonomy
     if taxonomy is not None:
-        print("checking taxonomy TSV:", taxonomy)
+        mccutils.log("setup","checking taxonomy TSV: "+taxonomy)
         with open(taxonomy, "r") as tsv:
             for line in tsv:
                 split_line = line.split("\t")
@@ -228,7 +228,7 @@ def check_input_files(ref, consensus, fq1, fq2=None, locations=None, taxonomy=No
 
     #check coverage fasta
     if coverage_fasta is not None:
-        print("checking coverage fasta: ", coverage_fasta)
+        mccutils.log("setup","checking coverage fasta: "+coverage_fasta)
         try:
             with open(coverage_fasta,"r") as fa:
                 for record in SeqIO.parse(fa, "fasta"):
@@ -239,7 +239,7 @@ def check_input_files(ref, consensus, fq1, fq2=None, locations=None, taxonomy=No
 
     #check augment fasta
     if augment_fasta is not None:
-        print("checking augment fasta: ", augment_fasta)
+        mccutils.log("setup","checking augment fasta: "+augment_fasta)
         try:
             with open(augment_fasta,"r") as fa:
                 for record in SeqIO.parse(fa, "fasta"):
@@ -283,8 +283,8 @@ def install(clean=False, debug=False):
 
     # removes installed tools and conda environments
     if clean:
-        print("Removing conda envs from: "+conda_env_dir)
-        print("Removing installed tools from: "+install_path+"tools")
+        mccutils.log("install","Removing conda envs from: "+conda_env_dir)
+        mccutils.log("install","Removing installed tools from: "+install_path+"tools")
         mccutils.remove(conda_env_dir)
         mccutils.remove(install_path+"/tools")
 
@@ -295,13 +295,13 @@ def install(clean=False, debug=False):
     for env in config.ALL_METHODS:
         if env not in config.NO_INSTALL_METHODS:
             env = env.replace("-","")
-            print("Installing conda environment for:",env)
+            mccutils.log("install","Installing conda environment for: "+env)
             command = ["snakemake","--use-conda", "--conda-prefix", conda_env_dir, "--configfile", install_config, "-R", env, "--cores", "1", "--nolock", "--create-envs-only"]
             if not debug:
                 command.append("--quiet")
             mccutils.run_command(command)
 
-            print("Installing scripts for:", env)
+            mccutils.log("install","Installing scripts for:"+env)
             command = ["snakemake","--use-conda", "--conda-prefix", conda_env_dir, "--configfile", install_config, "-R", env, "--cores", "1", "--nolock"]
             if not debug:
                 command.append("--quiet")
@@ -326,8 +326,10 @@ def make_run_config(args, sample_name, ref_name, full_command, current_directory
         out_files_to_make.append(out_files[method])
 
     now = datetime.now()
-    now_str = now.strftime("%Y-%m-%d_%H.%M.%S")
-    mccutils.mkdir(args.out+"/logs/"+now_str+"_"+str(run_id))
+    now_str = now.strftime("%Y%m%d.%H%M%S")
+    log_dir = args.out+"/logs/"+now_str+"."+str(run_id)+"/"
+    mccutils.mkdir(log_dir)
+
 
     chromosomes = []
     for record in SeqIO.parse(args.reference, "fasta"):
@@ -340,7 +342,7 @@ def make_run_config(args, sample_name, ref_name, full_command, current_directory
     data['args'] = {
         'proc': str(args.proc),
         'out': str(args.out),
-        'log_dir': args.out+"/logs/"+now_str+"_"+str(run_id)+"/",
+        'log_dir': log_dir,
         'augment_fasta': str(args.augment),
         'mcc_path': os.path.dirname(os.path.abspath(__file__)),
         'sample_name': sample_name,
@@ -425,7 +427,7 @@ def run_workflow(args, sample_name, run_id, debug=False):
     
     command.append(args.out+"/results/summary/summary_report.txt")
 
-    print(" ".join(command))
+    # print(" ".join(command))
     try:
         mccutils.run_command(command)
         mccutils.check_file_exists(args.out+"/results/summary/summary_report.txt")

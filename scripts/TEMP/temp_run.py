@@ -29,7 +29,7 @@ def main():
     scripts_dir = snakemake.params.scripts_dir
     sample_name = snakemake.params.sample_name
 
-    print("<TEMP> Running TEMP Module...")
+    mccutils.log("temp","running TEMP Module")
     median_insert_size = get_median_insert_size(median_insert_size_file)
 
     run_temp_insertion(bam, scripts_dir, consensus, ref_te_bed, taxonomy, median_insert_size, threads, out_dir, log)
@@ -50,7 +50,7 @@ def get_median_insert_size(infile):
 
     
 def run_temp_insertion(bam, scripts, consensus, te_bed, taxonomy, median_insert_size, threads, out, log):
-    print("<TEMP> Running TEMP non-reference insertion prediction...log:"+log)
+    mccutils.log("temp","running TEMP non-reference insertion prediction", log=log)
     command = [
         "bash", scripts+"TEMP_Insertion.sh", 
             "-x", str(config.TEMP_Insertion['x']), 
@@ -69,7 +69,7 @@ def run_temp_insertion(bam, scripts, consensus, te_bed, taxonomy, median_insert_
 
 
 def run_temp_absence(bam, scripts, consensus, te_bed, twobit, taxonomy, median_insert_size, threads, out, log):
-    print("<TEMP> Running TEMP reference insertion absence prediction...log:"+log)
+    mccutils.log("temp","running TEMP reference insertion absence prediction", log=log)
     command = [
         "bash", scripts+"TEMP_Absence.sh",
             "-i", bam,

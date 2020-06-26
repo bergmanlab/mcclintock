@@ -24,10 +24,12 @@ def main():
     chromosomes = snakemake.params.chromosomes.split(",")
     ref_te_fasta = snakemake.output.ref_te_fasta
 
-
+    mccutils.log("processing", "making reference TE fasta", log=log)
     ref_tes = get_ref_te_fasta(ref_fasta, te_gff, run_id, log, mcc_out)
 
     mccutils.run_command(["mv", ref_tes, ref_te_fasta])
+
+    mccutils.log("processing", "reference TE fasta created")
 
 
 def get_ref_te_fasta(reference, ref_tes_gff, run_id, log, out):

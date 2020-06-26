@@ -17,7 +17,7 @@ class Insertion:
 
 
 def main():
-    print("<TELOCATE> Processing TE-Locate results...")
+    mccutils.log("te-locate","processing TE-Locate results")
     telocate_raw = snakemake.input.telocate_raw
     te_gff = snakemake.input.te_gff
 
@@ -33,7 +33,7 @@ def main():
     else:
         mccutils.run_command(["touch", out_dir+"/"+sample_name+"_telocate_redundant.bed"])
         mccutils.run_command(["touch", out_dir+"/"+sample_name+"_telocate_nonredundant.bed"])
-    print("<TELOCATE> TE-Locate post processing complete")
+    mccutils.log("te-locate", "TE-Locate post processing complete")
 
 
 

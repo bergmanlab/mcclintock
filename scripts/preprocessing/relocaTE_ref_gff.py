@@ -6,6 +6,7 @@ import scripts.mccutils as mccutils
 
 
 def main():
+    mccutils.log("processing","creating relocaTE reference TE gff")
     taxonomy = {}
     with open(snakemake.input[1],"r") as tax:
         for line in tax:
@@ -19,7 +20,8 @@ def main():
                 split_line[2] = taxonomy[split_line[2]]
                 line = "\t".join(split_line)
                 outgff.write(line)
-        
+    
+    mccutils.log("processing","relocaTE reference TE gff created")
 
 if __name__ == "__main__":                
     main()

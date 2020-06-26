@@ -19,7 +19,7 @@ class Insertion:
         self.added = False
 
 def main():
-    print("<POPOOLATIONTE2> Processing PopoolationTE2 results...")
+    mccutils.log("popoolationte2","processing PopoolationTE2 results")
     te_predictions = snakemake.input.popoolationte2_out
     te_gff = snakemake.input.te_gff
     taxonomy = snakemake.input.taxonomy
@@ -36,6 +36,8 @@ def main():
     else:
         mccutils.run_command(["touch", out_dir+"/"+sample_name+"_popoolationte2_redundant.bed"])
         mccutils.run_command(["touch", out_dir+"/"+sample_name+"_popoolationte2_nonredundant.bed"])
+    
+    mccutils.log("popoolationte2","PopoolationTE2 postprocessing complete")
 
 def get_ref_tes(gff, taxon, chroms):
     ref_inserts = []

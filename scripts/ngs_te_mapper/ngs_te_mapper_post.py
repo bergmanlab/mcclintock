@@ -19,9 +19,11 @@ def main():
 
     
 
-    print("<NGS_TE_MAPPER POST> Processing ngs_te_mapper results...")
+    mccutils.log("ngs_te_mapper","processing ngs_te_mapper results", log=log)
 
     process_bed(raw_bed, chromosomes, sample_name, log, out_dir, min_read_cutoff=config.MIN_READ_SUPPORT)
+
+    mccutils.log("ngs_te_mapper","ngs_te_mapper postprocessing complete")
 
 def process_bed(bed, chromosomes, sample_name, log, out_dir, min_read_cutoff=0):
     unsorted_bed = out_dir+"/unsorted.bed"

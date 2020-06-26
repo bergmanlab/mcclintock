@@ -20,7 +20,7 @@ class Insertion:
         self.r_read_support_percent = 0
 
 def main():
-    print("<POPOOLATIONTE POSTPROCESSING> processing PopoolationTE results...")
+    mccutils.log("popoolationte","processing PopoolationTE results")
     popoolationte_out = snakemake.input.popoolationte_out
 
     out_dir = snakemake.params.out_dir
@@ -35,7 +35,7 @@ def main():
     else:
         mccutils.run_command(["touch",out_dir+"/"+sample_name+"_popoolationte_redundant.bed"])
         mccutils.run_command(["touch",out_dir+"/"+sample_name+"_popoolationte_nonredundant.bed"])
-    print("<POPOOLATIONTE POSTPROCESSING> PopoolationTE postprocessing complete")
+    mccutils.log("popoolationte","PopoolationTE postprocessing complete")
 
 
 def read_insertions(popoolationte, sample_name, chromosomes, require_both_end_support=True, percent_read_support_threshold=0.1):

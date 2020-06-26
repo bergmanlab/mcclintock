@@ -9,7 +9,6 @@ from Bio import SeqIO
 
 
 def main():
-    print("<RETROSEQ> Running RetroSeq...")
     consensus_fasta = snakemake.input.consensus_fasta
     bam = snakemake.input.bam
     ref_fasta = snakemake.input.ref_fasta
@@ -28,14 +27,15 @@ def main():
     out_dir = snakemake.params.out_dir
     ref_name = snakemake.params.ref_name
     sample_name = snakemake.params.sample_name
-    
+
+    mccutils.log("retroseq","running RetroSeq", log=log)    
 
     elements = split_consensus_fasta(consensus_fasta, ref_name, out_dir)
 
     bed_location_file = make_consensus_beds(elements, ref_name, ref_te_bed, taxonomy, out_dir)
 
     run_retroseq(bam, bed_location_file, ref_fasta, script_dir, sample_name, out_dir, config.PARAMETERS, log=log)
-    print("<RETROSEQ> RetroSeq complete")
+    mccutils.log("retroseq","RetroSeq complete")
 
 
 

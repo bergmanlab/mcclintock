@@ -7,12 +7,13 @@ import config.telocate.telocate_run as config
 
 
 def main():
-    print("<TELOCATE> Running TE-Locate...")
     te_gff = snakemake.input.te_gff
     sam = snakemake.input.sam
     ref_fasta = snakemake.input.ref
     median_insert_size_file = snakemake.input.median_insert_size
     log = snakemake.params.log
+
+    mccutils.log("te-locate","running TE-Locate", log=log)
     with open(log,"a") as l:
         l.write("TE GFF: "+te_gff+"\n")
         l.write("SAM: "+sam+"\n")
@@ -41,7 +42,7 @@ def main():
 
 
     mccutils.run_command(["cp", out_dir+"_"+str(distance)+"_reads3_acc1.info", out_dir+"te-locate-raw.info"])
-    print("<TELOCATE> TE-Locate complete")
+    mccutils.log("te-locate", "TE-Locate complete")
 
 
 

@@ -24,10 +24,12 @@ def main():
     chromosomes = snakemake.params.chromosomes.split(",")
     masked_ref = snakemake.output.masked_ref
 
-
+    mccutils.log("processing","masking reference fasta", log=log)
     ref_fasta = mask_reference(ref_fasta, te_gff, run_id, log, mcc_out)
 
     mccutils.run_command(["mv", ref_fasta, masked_ref])
+
+    mccutils.log("processing","reference fasta masked")
 
 
 # masks reference genome using reference TEs

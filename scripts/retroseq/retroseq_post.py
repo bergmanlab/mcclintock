@@ -17,7 +17,7 @@ class Insertion:
         self.breakpoint_confidence = -1
 
 def main():
-    print("<RETROSEQ POST> Processing RetroSeq results...")
+    mccutils.log("retroseq","processing RetroSeq results")
     retroseq_out = snakemake.input.retroseq_out
 
     out_dir = snakemake.params.out_dir
@@ -32,7 +32,7 @@ def main():
     else:
         mccutils.run_command(["touch",out_dir+"/"+sample_name+"_retroseq_redundant.bed"])
         mccutils.run_command(["touch",out_dir+"/"+sample_name+"_retroseq_nonredundant.bed"])
-    print("<RETROSEQ POST> RetroSeq post processing complete")
+    mccutils.log("retroseq","RetroSeq post processing complete")
 
 def read_insertions(retroseq_vcf, sample_name, chromosomes, support_threshold=0, breakpoint_threshold=6):
     insertions = []

@@ -25,13 +25,13 @@ def main():
     run_id = snakemake.params.run_id
     log = snakemake.params.log
 
-    print("<PROCESSING> prepping reads for McClintock....")
+    mccutils.log("processing", "prepping reads for McClintock")
     try:
         # trims adaptors of input fastq(s)
         trimmedfq = fq1
         trimmedfq2 = fq2
         if "trimgalore" in methods:
-            print("<PROCESSING> running trim_galore...log:"+log)
+            mccutils.log("processing", "running trim_galore", log=log)
             if fq2 == "None":
                 flags = trimgalore.SINGLE_END_FLAGS
                 trimmedfq = run_trim_galore(fq1, run_id, log, mcc_out, cores=processors, flags=flags)
@@ -69,7 +69,7 @@ def main():
         mccutils.remove(snakemake.output[1])
         sys.exit(1)
 
-    print("<PROCESSING> read setup complete")
+    mccutils.log("processing", "read setup complete")
 
 
 def run_trim_galore(fq1, run_id, log, out, fq2=None, cores=1, flags=[]):

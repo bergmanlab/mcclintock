@@ -15,7 +15,7 @@ except Exception as e:
 
 
 def main():
-    print("<PROCESSING> making coverage fasta...")
+    mccutils.log("processing","making coverage fasta")
     fastas = []
     try:
         length = 80
@@ -36,7 +36,7 @@ def main():
         mccutils.remove(snakemake.output[2])
         sys.exit(1)        
 
-    print("<PROCESSING> coverage fasta created")
+    mccutils.log("processing","coverage fasta created")
         
 
 

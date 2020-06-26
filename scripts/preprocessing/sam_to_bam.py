@@ -14,7 +14,7 @@ except Exception as e:
 
 def main():
     log = snakemake.params.log
-    print("<PROCESSING> Converting sam to bam...log:"+log)
+    mccutils.log("processing","Converting sam to bam", log=log)
 
     try:
         command = ["samtools","view", "-@", str(snakemake.threads), "-Sb", "-t", snakemake.input.ref_idx, snakemake.input.sam]
@@ -60,7 +60,8 @@ def main():
         print(track, file=sys.stderr)
         print("ERROR...falied to generate flagstat file using samtools flagstat...bam file:", snakemake.output.bam, file=sys.stderr)
         sys.exit(1)
-        
+    
+    mccutils.log("processing","sam to bam converted")
 
 
 

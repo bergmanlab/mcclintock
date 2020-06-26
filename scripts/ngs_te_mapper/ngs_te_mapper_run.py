@@ -37,8 +37,9 @@ def main():
     else:
         command.append("sample="+fastq1)
     
-    print("<NGS_TE_MAPPER> Running ngs_te_mapper...")
+    mccutils.log("ngs_te_mapper","running ngs_te_mapper", log=log)
     mccutils.run_command(command, log=log)
+    mccutils.log("ngs_te_mapper","ngs_te_mapper run complete", log=log)
 
 
     raw_bed = ""
@@ -48,7 +49,7 @@ def main():
 
     mccutils.run_command(["cp", raw_bed, out_bed])
 
-    print("<NGS_TE_MAPPER> ngs_te_mapper run complete...")
+    mccutils.log("ngs_te_mapper","ngs_te_mapper run complete")
 
     
 

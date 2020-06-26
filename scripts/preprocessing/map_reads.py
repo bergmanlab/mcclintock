@@ -13,7 +13,7 @@ except Exception as e:
 
 
 def main():
-    print("<PROCESSING> mapping reads to reference...log:"+snakemake.log[0])
+    mccutils.log("processing","mapping reads to reference", log=snakemake.log[0])
 
     try:
         command = ["bwa","mem"]
@@ -38,7 +38,7 @@ def main():
             print("ERROR...unable to map reads (bwa mem) using reference fasta:",snakemake.input.ref,"and reads:", snakemake.input.fq1, snakemake.input.fq2, file=sys.stderr)
         sys.exit(1)
         
-    print("<PROCESSING> read mapping complete")
+    mccutils.log("processing","read mapping complete")
 
 
 if __name__ == "__main__":                

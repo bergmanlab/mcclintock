@@ -6,7 +6,7 @@ import scripts.mccutils as mccutils
 
 
 def main():
-    print("<PROCESSING> adding fake chromosomes if chrom # < 5, required by TE-locate")
+    mccutils.log("processing","adding fake chromosomes if chrom # < 5, required by TE-locate")
     chromosomes = []
     with open(snakemake.input[0],"r") as infa:
         with open(snakemake.output[0],"w") as outfa:
@@ -21,7 +21,8 @@ def main():
             for i in range(1,diff+1):
                 out.write(">fixforTElocate"+str(i)+"\n")
                 out.write("ACGT\n")
-        
+    
+    mccutils.log("processing","TE-locate reference created")
 
 if __name__ == "__main__":                
     main()

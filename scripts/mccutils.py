@@ -220,3 +220,34 @@ def estimate_read_length(fq, reads=10000):
     length = sum(lengths)//len(lengths)
 
     return length
+
+
+def log(step, msg, log=None):
+    step = step.upper()
+    max_step = 15
+    if len(step) > max_step:
+        step = step[:max_step]
+    
+    step_buffer = (max_step - len(step)) + 2
+    step += " "*step_buffer
+
+    max_msg = 103
+
+    lines = msg
+    # lines = []
+    # x = 0
+    # while(x + max_msg < len(msg)):
+    #     lines.append(msg[x:x+max_msg])
+    #     x += max_msg
+    
+    # remainder = (len(msg)-x)
+    # lines.append(msg[x:x+remainder])
+
+    # lines = ("\n"+(" "*(max_step+2))).join(lines)
+    lines = step + lines
+
+    if log is not None:
+        lines += " &> " + log
+    
+    print(lines)
+    

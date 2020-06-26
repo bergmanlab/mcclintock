@@ -30,11 +30,13 @@ def main():
     out_taxonomy = snakemake.output.taxonomy
     out_aug_taxonomy = snakemake.output.aug_taxonomy
 
+    mccutils.log("processing","making reference TE annotations")
+
     if not os.path.exists(mcc_out+"/tmp"):
         mccutils.mkdir(mcc_out+"/tmp")
 
     if te_gff == "None" and taxonomy == "None":
-        print("<PROCESSING> no reference TEs provided... finding reference TEs with RepeatMasker...")
+        mccutils.log("processing","no reference TEs provided... finding reference TEs with RepeatMasker",log=log)
         te_gff = repeat_mask(reference, consensus, chromosomes, processors, run_id, log, mcc_out)
         taxonomy, te_gff = make_te_taxonomy_map(te_gff, consensus, run_id, mcc_out)
     
@@ -51,6 +53,8 @@ def main():
     
     mccutils.run_command(["cp", te_gff, out_aug_te_gff])
     mccutils.run_command(["cp", taxonomy, out_aug_taxonomy])
+
+    mccutils.log("processing","reference TE annotations created")
 
 
 

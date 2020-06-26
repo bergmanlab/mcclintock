@@ -26,6 +26,8 @@ def main():
     if not os.path.exists(mcc_out+"/tmp"):
         mccutils.mkdir(mcc_out+"/tmp")
 
+    mccutils.log("processing","making reference fasta")
+
     tmp = mcc_out+"/tmp/"+str(run_id)+"reference.tmp"
     reference = fix_fasta_lines(reference, tmp)
     reference = mccutils.replace_special_chars_fasta(reference, tmp+"1")
@@ -37,6 +39,8 @@ def main():
     
     mccutils.run_command(["cp", reference, out_ref])
     mccutils.run_command(["cp", augmented_reference, out_aug_ref])
+
+    mccutils.log("processing","reference fasta created")
 
 
 

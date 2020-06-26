@@ -25,7 +25,7 @@ class Insertion:
         self.type = "None"
 
 def main():
-    print("<TEMP POST> Running TEMP post processing...")
+    mccutils.log("temp","running TEMP post processing")
     insert_summary = snakemake.input.insert_summary
     absence_summary = snakemake.input.absence_summary
     te_gff = snakemake.input.te_gff
@@ -48,7 +48,7 @@ def main():
         mccutils.run_command(["touch", out_dir+"/"+sample_name+"_temp_raw.bed"])
         mccutils.run_command(["touch", out_dir+"/"+sample_name+"_temp_redundant.bed"])
         mccutils.run_command(["touch", out_dir+"/"+sample_name+"_temp_nonredundant.bed"])
-    print("<TEMP POST> TEMP postprocessing complete")
+    mccutils.log("temp","TEMP postprocessing complete")
 
 
 

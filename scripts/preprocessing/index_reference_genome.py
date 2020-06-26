@@ -15,12 +15,14 @@ except Exception as e:
 def main():
     try:
         log = snakemake.params.log
-        print("<PROCESSING> making samtools and bwa index files for reference fasta")
+        mccutils.log("processing","making samtools and bwa index files for reference fasta", log=log)
         mccutils.run_command(["samtools", "faidx", snakemake.input.ref],log=log)
         mccutils.run_command(["bwa", "index", snakemake.input.ref], log=log)
 
         for out in snakemake.output:
             mccutils.check_file_exists(out)
+        
+        mccutils.log("processing","samtools and bwa index files for reference fasta created")
     
     except Exception as e:
         track = traceback.format_exc()

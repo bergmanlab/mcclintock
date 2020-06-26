@@ -29,6 +29,7 @@ def main():
     sample_name = snakemake.params.sample_name
     chromosomes = snakemake.params.chromosomes.split(",")
     
+    mccutils.log("relocate2", "processing RelocaTE2 results")
 
     ref_insertions = get_insertions(ref_gff, 
                                     sample_name,
@@ -61,6 +62,7 @@ def main():
         mccutils.run_command(["touch", out_dir+"/"+sample_name+"_relocate2_redundant.bed"])
         mccutils.run_command(["touch", out_dir+"/"+sample_name+"_relocate2_nonredundant.bed"])
 
+    mccutils.log("relocate2", "RelocaTE2 postprocessing complete")
 
 def get_insertions(gff, sample_name, chromosomes, l_support_threshold=0, r_support_threshold=0, l_junction_threshold=0, r_junction_threshold=0, insert_type="ref"):
     insertions = []

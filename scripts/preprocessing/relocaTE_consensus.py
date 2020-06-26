@@ -6,7 +6,7 @@ import scripts.mccutils as mccutils
 
 
 def main():
-    print("<PROCESSING> formatting the name of consensus TE fasta headers for compatibility with relocaTE...")
+    mccutils.log("processing","formatting the name of consensus TE fasta headers for compatibility with relocaTE")
     with open(snakemake.input[0],"r") as infa:
         with open(snakemake.output[0], "w") as outfa:
             for line in infa:
@@ -15,6 +15,8 @@ def main():
                     line += " TSD=UNK\n"
 
                 outfa.write(line)
+    
+    mccutils.log("processing","relocaTE consensus fasta created")
         
 
 if __name__ == "__main__":                

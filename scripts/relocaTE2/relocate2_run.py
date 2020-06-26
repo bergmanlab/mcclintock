@@ -51,7 +51,7 @@ def main():
 
 
 
-    print("<RELOCATE> Running RelocaTE2...")
+    mccutils.log("relocate2","running RelocaTE2", log=log)
     command =  [
         "python2", script, 
                         "-t", te_seqs,
@@ -76,9 +76,9 @@ def main():
     else:
         command += ["-u", ".unPaired"]
 
-
-    print(" ".join(command))
     mccutils.run_command(command, log=log)
+
+    mccutils.log("relocate2","RelocaTE2 run complete")
 
 
 def get_median_insert_size(infile):

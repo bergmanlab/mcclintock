@@ -6,7 +6,7 @@ import scripts.mccutils as mccutils
 import config.popoolationte2.popoolationte2_run as config
 
 def main():
-    print("<POPOOLATIONTE2> Running PopoolationTE2...")
+    mccutils.log("popoolationte2","running PopoolationTE2")
     ref_fasta = snakemake.input.ref_fasta
     bam = snakemake.input.bam
     taxonomy = snakemake.input.taxonomy
@@ -36,7 +36,7 @@ def format_taxonomy(taxon, out):
     return out_taxon
 
 def popoolationte2_ppileup(jar, params, bam, taxon, out, log=None):
-    print("<POPOOLATIONTE2> making physical pileup file")
+    mccutils.log("popoolationte2","making physical pileup file", log=log)
     ppileup = out+"/output.ppileup.gz"
     mccutils.run_command(['java', "-jar", jar, "ppileup", 
                                                "--bam", bam, 
@@ -51,7 +51,7 @@ def popoolationte2_ppileup(jar, params, bam, taxon, out, log=None):
 def popoolationte2_subsample(jar, params, ppileup, out, log=None):
     out_ppileup = out+"/subsampled.ppileup.gz"
     if params["run"]:
-        print("<POPOOLATIONTE2> subsampling physical pileup file to uniform coverage")
+        mccutils.log("popoolationte2","subsampling physical pileup file to uniform coverage", log=log)
         command = ["java","-jar", jar, "subsampleppileup",
                                        "--ppileup", ppileup, 
                                        "--target-coverage", str(params['target-coverage']),
@@ -67,7 +67,7 @@ def popoolationte2_subsample(jar, params, ppileup, out, log=None):
 
 
 def popoolationte2_signatures(jar, params, ppileup, out, log=None):
-    print("<POPOOLATIONTE2> identifying signatures of TE insertions")
+    mccutils.log("popoolationte2","identifying signatures of TE insertions", log=log)
     signatures = out+"/output.signatures"
     mccutils.run_command(["java", "-jar", jar, "identifySignatures",
                                                "--ppileup", ppileup,
@@ -81,7 +81,7 @@ def popoolationte2_signatures(jar, params, ppileup, out, log=None):
     return signatures
 
 def popoolationte2_strand(jar, params, signatures, bam, taxon, out, log=None):
-    print("<POPOOLATIONTE2> estimating strand of TEs")
+    mccutils.log("popoolationte2", "estimating strand of TEs", log=log)
     out_sig = out+"/output.stranded.signatures"
     mccutils.run_command(["java","-jar", jar, "updateStrand",
                                               "--signature", signatures,
@@ -96,7 +96,7 @@ def popoolationte2_strand(jar, params, signatures, bam, taxon, out, log=None):
     return out_sig
 
 def popoolationte2_frequency(jar, ppileup, signatures, out, log=None):
-    print("<POPOOLATIONTE2> estimating frequencies for signatures of TE insertions")
+    mccutils.log("popoolationte2","estimating frequencies for signatures of TE insertions", log=log)
     freq_signatures = out+"/output.stranded.signatures.freq"
     mccutils.run_command(["java", "-jar", jar, "frequency",
                                                "--ppileup", ppileup,
@@ -106,7 +106,7 @@ def popoolationte2_frequency(jar, ppileup, signatures, out, log=None):
     return freq_signatures
 
 def popoolationte2_pairup(jar, params, signatures, ref, taxon, out, log=None):
-    print("<POPOOLATIONTE2> generating raw TE insertion predictions")
+    mccutils.log("popoolationte2","generating raw TE insertion predictions", log=log)
     te_insertions = out+"/teinsertions.txt"
     mccutils.run_command(["java","-jar", jar, "pairupSignatures",
                                               "--signature", signatures,

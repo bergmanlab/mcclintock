@@ -10,7 +10,7 @@ def main():
     fq2 = snakemake.params.fq2
 
     if fq2 != "None":
-        print("<PROCESSING> calculating median insert size of reads...")
+        mccutils.log("processing","calculating median insert size of reads")
         insert_sizes = []
         with open(snakemake.input[0],"r") as sam:
             for line in sam:
@@ -24,6 +24,8 @@ def main():
         median = statistics.median(insert_sizes)
         with open(snakemake.output[0],"w") as out:
             out.write("median_insert_size="+str(median)+"\n")
+        
+        mccutils.log("processing","median insert size of reads calculated")
     
     else:
         with open(snakemake.output[0],"w") as out:
