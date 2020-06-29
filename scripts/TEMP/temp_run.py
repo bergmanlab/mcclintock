@@ -36,6 +36,10 @@ def main():
 
     run_temp_absence(bam, scripts_dir, consensus, ref_te_bed, twobit, taxonomy, median_insert_size, threads, out_dir, log)
 
+    for f in os.listdir(out_dir):
+        if ".sorted.bam" in f or ".fastq" in f:
+            mccutils.remove(f)
+
 
 
 def get_median_insert_size(infile):

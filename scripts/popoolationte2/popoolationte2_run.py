@@ -23,6 +23,8 @@ def main():
     signatures = popoolationte2_frequency(jar, ppileup, signatures, out_dir, log=log)
     te_insertions = popoolationte2_pairup(jar, config.pairupSignatures, signatures, ref_fasta, taxonomy, out_dir, log=log)
 
+    mccutils.remove(bam)
+
 def format_taxonomy(taxon, out):
     out_taxon = out+"/input.taxonomy.txt"
     with open(out_taxon,"w") as out:

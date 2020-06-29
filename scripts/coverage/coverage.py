@@ -53,6 +53,9 @@ def main():
     te_names, all_coverage_files, uniq_coverage_files, avg_norm_te_depths = make_depth_table(te_seqs, bam, genome_depth, run_id, coverage_out, snakemake.output[0], log, trim_edges=edge_trim)
     make_plots(te_names, all_coverage_files, uniq_coverage_files, avg_norm_te_depths, genome_depth, snakemake.params.sample, coverage_out, trim_edges=edge_trim)
 
+    mccutils.remove(sam)
+    mccutils.remove(bam)
+
 
 def repeatmask_genome(reference, lib, threads, run_id, out, log):
     mccutils.log("coverage","Running RepeatMasker",log=log)

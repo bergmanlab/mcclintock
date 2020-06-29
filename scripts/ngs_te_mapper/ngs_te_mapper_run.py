@@ -49,6 +49,8 @@ def main():
 
     mccutils.run_command(["cp", raw_bed, out_bed])
 
+    mccutils.remove(out_dir+"/aligned_te/")
+
     mccutils.log("ngs_te_mapper","ngs_te_mapper run complete")
 
     

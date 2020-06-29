@@ -56,6 +56,10 @@ def main():
 
     mccutils.run_command(["touch", snakemake.output[0]])
 
+    mccutils.remove(sam)
+    mccutils.remove(fq1)
+    mccutils.remove(fq2)
+
 
 def get_read_length(fq1, fq2):
     read1_length = 0

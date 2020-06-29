@@ -20,6 +20,9 @@ def main():
     bam = sam_to_bam(sam, out_dir+"/tmp.bam", threads=threads, log=log)
     sorted_bam = sort_bam(bam, snakemake.output.bam, threads=threads, log=log)
 
+    mccutils.remove(sam)
+    mccutils.remove(bam)
+
 
 def index_fasta(fasta, log=None):
     mccutils.log("popoolationte2","indexing reference fasta", log=log)
