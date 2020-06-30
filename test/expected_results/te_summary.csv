@@ -1,0 +1,7 @@
+TE-Family,ngs_te_mapper_all,ngs_te_mapper_ref,ngs_te_mapper_nonref,relocate_all,relocate_ref,relocate_nonref,relocate2_all,relocate2_ref,relocate2_nonref,temp_all,temp_ref,temp_nonref,retroseq_all,retroseq_ref,retroseq_nonref,popoolationte_all,popoolationte_ref,popoolationte_nonref,te-locate_all,te-locate_ref,te-locate_nonref
+TY1,6,2,4,24,24,0,61,28,33,248,220,28,34,0,34,98,59,39,527,90,437
+TY3,12,8,4,0,0,0,18,1,17,27,18,9,11,0,11,18,7,11,49,16,33
+TY2,3,2,1,0,0,0,20,9,11,23,13,10,12,0,12,2,0,2,35,12,23
+TY4,9,4,5,15,9,6,14,3,11,42,34,8,12,0,12,13,6,7,80,33,47
+TY5,3,3,0,4,4,0,0,0,0,13,13,0,0,0,0,4,2,2,14,7,7
+TY3_1p,0,0,0,1,0,1,0,0,0,13,13,0,2,0,2,7,4,3,8,6,2

@@ -1,0 +1,28 @@
+----------------------------------
+MCCLINTOCK SUMMARY REPORT
+----------------------------------
+Command:
+python3 /home/pjb68507/git/mcclintock/mcclintock.py  \
+	-r /home/pjb68507/git/mcclintock/test//sacCer2.fasta  \
+	-c /home/pjb68507/git/mcclintock/test//sac_cer_TE_seqs.fasta  \
+	-1 /home/pjb68507/git/mcclintock/test//SRR800842_1.fastq.gz  \
+	-2 /home/pjb68507/git/mcclintock/test//SRR800842_2.fastq.gz  \
+	-p 20  \
+	-o /scratch/pjb68507/test/mcc/  \
+	-g /home/pjb68507/git/mcclintock/test//reference_TE_locations.gff  \
+	-t /home/pjb68507/git/mcclintock/test//sac_cer_te_families.tsv
+
+run from directory: /home/pjb68507
+Started:    2020-05-12 22:24:16
+Completed:  2020-05-12 23:43:59
+
+----------------------------------
+MAPPED READ INFORMATION
+----------------------------------
+read1 sequence length:  95
+read2 sequence length:  95
+read1 reads:            18547823
+read2 reads:            18558411
+median insert size:     302
+avg genome coverage:    273.465
+----------------------------------

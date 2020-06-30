@@ -1,0 +1,154 @@
+rule telocate:
+    params:
+        url = config['URLs']['te-locate'],
+        md5 = config['MD5s']['te-locate'],
+        tar = config['paths']['install']+"tools/te-locate/te-locate.tar",
+        log = config['paths']['log_dir']+"install.log"
+
+    output:
+        config['output']['te-locate']
+    
+    conda: config['ENVs']['te-locate']
+
+    script:
+        config['paths']['install']+"scripts/te-locate.py"
+
+
+rule retroseq:
+    params:
+        url = config['URLs']['retroseq'],
+        md5 = config['MD5s']['retroseq'],
+        zipfile = config['paths']['install']+"tools/retroseq/retroseq.zip",
+        log = config['paths']['log_dir']+"install.log"
+
+    output:
+        config['output']['retroseq']
+    
+    conda: config['ENVs']['retroseq']
+
+    script:
+        config['paths']['install']+"scripts/retroseq.py"
+
+rule temp:
+    params:
+        url = config['URLs']['temp'],
+        md5 = config['MD5s']['temp'],
+        zipfile = config['paths']['install']+"tools/temp/temp.zip",
+        log = config['paths']['log_dir']+"install.log",
+        patch = config['paths']['install']+"patches/temp/TEMP_Absence.patch"
+
+    output:
+        config['output']['temp']
+    
+    conda: config['ENVs']['temp']
+
+    script:
+        config['paths']['install']+"scripts/temp.py"
+
+rule relocate:
+    params:
+        url = config['URLs']['relocate'],
+        md5 = config['MD5s']['relocate'],
+        zipfile = config['paths']['install']+"tools/relocate/relocate.zip",
+        log = config['paths']['log_dir']+"install.log",
+        patch = config['paths']['install']+"patches/relocate/relocaTE_insertionFinder.patch"
+    
+    output:
+        config['output']['relocate']
+
+    conda: config['ENVs']['relocate']
+
+    script:
+       config['paths']['install']+"scripts/relocate.py" 
+
+rule relocate2:
+    conda: config['ENVs']['relocate2']
+
+    output:
+        config['output']['relocate2']
+    
+    shell:
+        "echo 'RelocaTE2 env installed' > {output}"
+
+rule ngs_te_mapper:
+    params:
+        url = config['URLs']['ngs_te_mapper'],
+        md5 = config['MD5s']['ngs_te_mapper'],
+        zipfile = config['paths']['install']+"tools/ngs_te_mapper/ngs_te_mapper.zip",
+        log = config['paths']['log_dir']+"install.log"
+    
+    output:
+        config['output']['ngs_te_mapper']
+    
+    conda: config['ENVs']['ngs_te_mapper']
+
+    script:
+        config['paths']['install']+"scripts/ngs_te_mapper.py"
+    
+rule popoolationte:
+    params:
+        url = config['URLs']['popoolationte'],
+        md5 = config['MD5s']['popoolationte'],
+        zipfile = config['paths']['install']+"tools/popoolationte.zip",
+        log = config['paths']['log_dir']+"install.log",
+        patch1 = config['paths']['install']+"patches/popoolationte/TEInsertUtility.patch",
+        patch2 = config['paths']['install']+"patches/popoolationte/TEInsert.patch",
+        patch3 = config['paths']['install']+"patches/popoolationte/samro.patch",
+        patch4 = config['paths']['install']+"patches/popoolationte/identify-te-insertsites.patch"
+    
+    output:
+        config['output']['popoolationte']
+    
+    conda: config['ENVs']['popoolationte']
+
+    script:
+        config['paths']['install']+"scripts/popoolationte.py"
+
+rule popoolationte2:
+    params:
+        url = config['URLs']['popoolationte2'],
+        md5 = config['MD5s']['popoolationte2'],
+        log = config['paths']['log_dir']+"install.log"
+
+    conda: config['ENVs']['popoolationte2']
+
+    output:
+        config['output']['popoolationte2']
+
+    script:
+        config['paths']['install']+"scripts/popoolationte2.py"
+
+rule coverage:
+    output:
+        config['output']['coverage']  
+
+    conda: config['ENVs']['coverage']
+
+    shell:
+        "echo 'coverage env installed' > {output}"
+
+rule processing:
+    output:
+        config['output']['processing'] 
+    
+    conda: config['ENVs']['mcc_processing']
+
+    shell:
+        "echo 'processing env installed' > {output}"
+
+rule install_all:
+    input:
+        config['output']['te-locate'],
+        config['output']['retroseq'],
+        config['output']['temp'],
+        config['output']['relocate'],
+        config['output']['ngs_te_mapper'],
+        config['output']['popoolationte'],
+        config['output']['popoolationte2'],
+        config['output']['coverage'],
+        config['output']['relocate2']
+    
+    conda: config['ENVs']['mcc_processing']
+
+    shell:
+        "echo 'install done!'"

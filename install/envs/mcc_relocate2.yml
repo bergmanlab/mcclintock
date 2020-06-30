@@ -1,0 +1,8 @@
+name: mcc_relocate2
+channels:
+  - anaconda
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+    - relocate2=2.0.1=pypl526_4

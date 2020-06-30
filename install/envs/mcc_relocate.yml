@@ -1,0 +1,11 @@
+name: mcc_relocate
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - perl-bioperl-run=1.006900
+  - bedtools=2.17.0
+  - bowtie=1.0.0
+  - ucsc-blat=366
+  - samtools=0.1.19
