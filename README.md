@@ -8,7 +8,6 @@
 # INSTALL (Requires Conda)
 git clone git@github.com:bergmanlab/mcclintock.git
 cd mcclintock
-git checkout refactor ## OMIT WHEN REFACTOR BRANCH IS MERGED WITH MASTER
 conda env create -f install/envs/mcclintock.yml --name mcclintock
 conda activate mcclintock
 python3 mcclintock.py --install
@@ -76,7 +75,6 @@ After installing and updating Conda, McClintock can be installed by: **1.** clon
 ```bash
 git clone git@github.com:bergmanlab/mcclintock.git
 cd mcclintock
-git checkout refactor ## OMIT WHEN REFACTOR BRANCH IS MERGED WITH MASTER
 ```
 
 #### Create McClintock Conda Environment
