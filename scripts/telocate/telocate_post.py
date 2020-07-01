@@ -5,16 +5,6 @@ sys.path.append(snakemake.config['args']['mcc_path'])
 import scripts.mccutils as mccutils
 import config.telocate.telocate_post as config
 
-class Insertion:
-    def __init__(self):
-        self.chromosome = "None"
-        self.start = -1
-        self.end = -1
-        self.name = "None"
-        self.type = "None"
-        self.strand = "."
-        self.read_pair_support = -1
-
 
 def main():
     mccutils.log("te-locate","processing TE-Locate results")
@@ -42,7 +32,7 @@ def read_insertions(telocate_out, sample_name, chromosomes, rp_threshold=0):
     with open(telocate_out,"r") as raw:
         for x, line in enumerate(raw):
             if x > 1:
-                insert = Insertion()
+                insert = mccutils.Insertion()
                 split_line = line.split("\t")
                 insert.chromosome = split_line[0]
                 insert.start = int(split_line[1])
