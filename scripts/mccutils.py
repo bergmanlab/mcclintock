@@ -7,6 +7,76 @@ import socket
 import shutil
 import errno
 
+class Ngs_te_mapper:
+    def __init__(self):
+        self.support = -1
+
+class Temp:
+    def __init__(self):
+        self.classification = "None"
+        self.support = -1
+        self.frequency = -1
+        self.junction1 = -1
+        self.junction1Support = -1
+        self.junction2 = -1
+        self.junction2Support = -1
+        self.fivePrimeSupport = -1
+        self.threePrimeSupport = -1
+
+class Telocate:
+    def __init__(self):
+        self.read_pair_support = -1
+
+class Retroseq:
+    def __init__(self):
+        self.read_support = -1
+        self.breakpoint_confidence = -1
+
+class Relocate2:
+    def __init__(self):
+        self.left_support = -1
+        self.right_support = -1
+        self.left_junction = -1
+        self.right_junction = -1
+
+class Relocate:
+    def __init__(self):
+        self.left_support = -1
+        self.right_support = -1
+
+class Popoolationte2:
+    def __init__(self):
+        self.support_type = ""
+        self.frequency = -1
+        self.added = False
+
+class Popoolationte:
+    def __init__(self):
+        self.support_type = ""
+        self.f_read_support = 0
+        self.r_read_support = 0
+        self.f_read_support_percent = 0
+        self.r_read_support_percent = 0
+
+class Insertion:
+    def __init__(self):
+        self.chromosome = "None"
+        self.start = -1
+        self.end = -1
+        self.name = "None"
+        self.type = "None"
+        self.strand = "."
+        self.family = ""
+        self.popoolationte = Popoolationte()
+        self.popoolationte2 = Popoolationte2()
+        self.relocate = Relocate()
+        self.relocate2 = Relocate2()
+        self.retroseq = Retroseq()
+        self.telocate = Telocate()
+        self.temp = Temp()
+        self.ngs_te_mapper = Ngs_te_mapper()
+
+
 def mkdir(indir, log=None):
     if os.path.isdir(indir) == False:
         os.mkdir(indir)
@@ -236,16 +306,6 @@ def log(step, msg, log=None):
     max_msg = 103
 
     lines = msg
-    # lines = []
-    # x = 0
-    # while(x + max_msg < len(msg)):
-    #     lines.append(msg[x:x+max_msg])
-    #     x += max_msg
-    
-    # remainder = (len(msg)-x)
-    # lines.append(msg[x:x+remainder])
-
-    # lines = ("\n"+(" "*(max_step+2))).join(lines)
     lines = step + lines
 
     if log is not None:
@@ -253,3 +313,109 @@ def log(step, msg, log=None):
     
     print(lines)
     
+
+def make_redundant_bed(insertions, sample_name, out_dir, method="popoolationte"):
+    tmp_bed = out_dir+"/tmp.bed"
+
+    insertion_dict = {}
+    out_inserts = []
+    for insert in insertions:
+        insertion_dict[ "_".join([insert.chromosome, str(insert.start-1), str(insert.end), insert.name, "0", insert.strand])] = insert
+
+
+    with open(tmp_bed, "w") as out:
+        for insert in insertions:
+            out_line = "\t".join([insert.chromosome, str(insert.start-1), str(insert.end), insert.name, "0", insert.strand])
+            out.write(out_line+"\n")
+    
+    sorted_bed = out_dir+"/sorted.bed"
+    command = ["bedtools", "sort", "-i", tmp_bed]
+    run_command_stdout(command, sorted_bed)
+
+    redundant_bed = out_dir+"/"+sample_name+"_"+method+"_redundant.bed"
+    with open(redundant_bed, "w") as outbed:
+        header = 'track name="'+sample_name+'_'+method+'" description="'+sample_name+'_'+method+'"\n'
+        outbed.write(header)
+        with open(sorted_bed, "r") as inbed:
+            for x, line in enumerate(inbed):
+
+                # outputs inserts in sorted order with unique number added to name
+                key = line.replace("\t","_")
+                key = key.replace("\n","")
+                insert = insertion_dict[key]
+                insert.name += str(x+1)
+                out_inserts.append(insert)
+
+                # write to bed with unique number added to name
+                split_line = line.split("\t")
+                split_line[3] += str(x+1)
+                line = "\t".join(split_line)
+                outbed.write(line)
+    
+    remove(tmp_bed)
+    remove(sorted_bed)
+
+    return out_inserts
+
+def make_nonredundant_bed(insertions, sample_name, out_dir, method="popoolationte"):
+    uniq_inserts = {}
+
+    for insert in insertions:
+        key = "_".join([insert.chromosome, str(insert.end)])
+        if key not in uniq_inserts.keys():
+            uniq_inserts[key] = insert
+        else:
+            ## method specific way to determine which duplicate to keep
+            if method == "popoolationte":
+                if (uniq_inserts[key].popoolationte.f_read_support + uniq_inserts[key].popoolationte.r_read_support) >  (insert.popoolationte.f_read_support + insert.popoolationte.r_read_support):
+                    uniq_inserts[key] = insert
+            
+            elif method == "popoolationte2":
+                if (uniq_inserts[key].popoolationte2.frequency) >  (insert.popoolationte2.frequency):
+                    uniq_inserts[key] = insert
+            
+            elif method == "relocate":
+                if (uniq_inserts[key].relocate.left_support + uniq_inserts[key].relocate.right_support) < (insert.relocate.left_support + insert.relocate.right_support):
+                    uniq_inserts[key] = insert
+            
+            elif method == "relocate2":
+                if (uniq_inserts[key].left_support + uniq_inserts[key].right_support) < (insert.left_support + insert.right_support):
+                    uniq_inserts[key] = insert
+            
+            elif method == "retroseq":
+                if uniq_inserts[key].retroseq.read_support >  insert.retroseq.read_support:
+                    uniq_inserts[key] = insert
+            
+            elif method == "te-locate":
+                if uniq_inserts[key].telocate.read_pair_support >  insert.telocate.read_pair_support:
+                    uniq_inserts[key] = insert
+            
+            elif method == "temp":
+                if uniq_inserts[key].temp.support != "!" and insert.temp.support > uniq_inserts[key].temp.support:
+                    uniq_inserts[key] = insert
+            
+            elif method == "ngs_te_mapper":
+                if insert.ngs_te_mapper.support > uniq_inserts[key].ngs_te_mapper.support:
+                    uniq_inserts[key] = insert
+    
+    tmp_bed = out_dir+"/tmp.bed"
+    with open(tmp_bed, "w") as outbed:
+        for key in uniq_inserts.keys():
+            insert = uniq_inserts[key]
+            out_line = "\t".join([insert.chromosome, str(insert.start-1), str(insert.end), insert.name, "0", insert.strand])
+            outbed.write(out_line+"\n")
+    
+    sorted_bed = out_dir+"/sorted.bed"
+    command = ["bedtools", "sort", "-i", tmp_bed]
+    run_command_stdout(command, sorted_bed)
+
+    nonredundant_bed = out_dir+"/"+sample_name+"_"+method+"_nonredundant.bed"
+    with open(sorted_bed, "r") as inbed:
+        with open(nonredundant_bed, "w") as outbed:
+            header = 'track name="'+sample_name+'_'+method+'" description="'+sample_name+'_'+method+'"\n'
+            outbed.write(header)
+            for line in inbed:
+                outbed.write(line)
+
+    remove(tmp_bed)
+    remove(sorted_bed)

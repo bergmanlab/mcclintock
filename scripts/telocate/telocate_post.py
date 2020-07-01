@@ -28,8 +28,8 @@ def main():
     insertions = read_insertions(telocate_raw, sample_name, chromosomes, rp_threshold=config.READ_PAIR_SUPPORT_THRESHOLD)
     insertions = filter_by_reference(insertions, te_gff)
     if len(insertions) > 0:
-        insertions = make_redundant_bed(insertions, sample_name, out_dir)
-        make_nonredundant_bed(insertions, sample_name, out_dir)
+        insertions = mccutils.make_redundant_bed(insertions, sample_name, out_dir, method="te-locate")
+        mccutils.make_nonredundant_bed(insertions, sample_name, out_dir,method="te-locate")
     else:
         mccutils.run_command(["touch", out_dir+"/"+sample_name+"_telocate_redundant.bed"])
         mccutils.run_command(["touch", out_dir+"/"+sample_name+"_telocate_nonredundant.bed"])
@@ -49,11 +49,11 @@ def read_insertions(telocate_out, sample_name, chromosomes, rp_threshold=0):
                 
                 te_name = split_line[3].split("/")[1]
                 if "old" in split_line[15]:
-                    insert.type = "ref"
+                    insert.type = "reference"
                     insert.end = insert.start+int(split_line[2])
                     insert.name = te_name+"_reference_"+sample_name+"_telocate_rp_"
                 else:
-                    insert.type = "nonref"
+                    insert.type = "non-reference"
                     insert.end = insert.start
                     insert.name = te_name+"_non-reference_"+sample_name+"_telocate_rp_"
 
@@ -64,9 +64,9 @@ def read_insertions(telocate_out, sample_name, chromosomes, rp_threshold=0):
                 else:
                     insert.strand = "-"
 
-                insert.read_pair_support = int(split_line[7])
+                insert.telocate.read_pair_support = int(split_line[7])
 
-                if insert.read_pair_support >= rp_threshold and insert.chromosome in chromosomes:
+                if insert.telocate.read_pair_support >= rp_threshold and insert.chromosome in chromosomes:
                     insertions.append(insert)
     
     return insertions
@@ -86,7 +86,7 @@ def filter_by_reference(insertions, te_gff):
 
     
     for insert in insertions:
-        if insert.type == "nonref":
+        if insert.type == "non-reference":
             passed_insertions.append(insert)
         else:
             if insert.chromosome+"_"+str(insert.start) in gff_insertions.keys():

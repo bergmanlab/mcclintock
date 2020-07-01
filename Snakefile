@@ -491,7 +491,6 @@ rule process_temp:
     threads: 1
 
     output:
-        config['args']['out']+"/results/TEMP/"+config['args']['sample_name']+"_temp_raw.bed",
         config['args']['out']+"/results/TEMP/"+config['args']['sample_name']+"_temp_redundant.bed",
         config['args']['out']+"/results/TEMP/"+config['args']['sample_name']+"_temp_nonredundant.bed"
     
