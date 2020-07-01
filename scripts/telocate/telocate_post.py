@@ -18,8 +18,8 @@ def main():
     insertions = read_insertions(telocate_raw, sample_name, chromosomes, rp_threshold=config.READ_PAIR_SUPPORT_THRESHOLD)
     insertions = filter_by_reference(insertions, te_gff)
     if len(insertions) > 0:
-        insertions = mccutils.make_redundant_bed(insertions, sample_name, out_dir, method="te-locate")
-        mccutils.make_nonredundant_bed(insertions, sample_name, out_dir,method="te-locate")
+        insertions = mccutils.make_redundant_bed(insertions, sample_name, out_dir, method="telocate")
+        mccutils.make_nonredundant_bed(insertions, sample_name, out_dir,method="telocate")
     else:
         mccutils.run_command(["touch", out_dir+"/"+sample_name+"_telocate_redundant.bed"])
         mccutils.run_command(["touch", out_dir+"/"+sample_name+"_telocate_nonredundant.bed"])
