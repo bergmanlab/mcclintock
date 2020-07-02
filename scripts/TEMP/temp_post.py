@@ -5,25 +5,6 @@ sys.path.append(snakemake.config['args']['mcc_path'])
 import scripts.mccutils as mccutils
 import config.TEMP.temp_post as config
 
-
-class Insertion:
-    def __init__(self):
-        self.chromosome = "None"
-        self.start = -1
-        self.end = -1
-        self.name = "None"
-        self.direction = "None"
-        self.classification = "None"
-        self.support = -1
-        self.frequency = -1
-        self.junction1 = -1
-        self.junction1Support = -1
-        self.junction2 = -1
-        self.junction2Support = -1
-        self.fivePrimeSupport = -1
-        self.threePrimeSupport = -1
-        self.type = "None"
-
 def main():
     mccutils.log("temp","running TEMP post processing")
     insert_summary = snakemake.input.insert_summary
@@ -38,14 +19,11 @@ def main():
     absence_bed = make_absence_bed(absence_summary, sample_name, out_dir)
     non_absent_ref_insertions = get_non_absent_ref_tes(te_gff, absence_bed, sample_name, out_dir, log)
     insertions += non_absent_ref_insertions
-    insertions = filter_insertions(insertions, chromosomes)
-    insertions = sort_insertions(insertions)
+    insertions = filter_insertions(insertions, chromosomes, acceptable_classes=config.ACCEPTABLE_INSERTION_SUPPORT_CLASSES, frequency_theshold=config.FREQUENCY_THRESHOLD)
     if len(insertions) > 0:
-        make_raw_bed(insertions, sample_name, out_dir)
-        make_redundant_bed(insertions, sample_name, out_dir, log, acceptable_classes=config.ACCEPTABLE_INSERTION_SUPPORT_CLASSES, frequency_theshold=config.FREQUENCY_THRESHOLD)
-        make_nonredundant_bed(insertions, sample_name, out_dir, log, acceptable_classes=config.ACCEPTABLE_INSERTION_SUPPORT_CLASSES, frequency_theshold=config.FREQUENCY_THRESHOLD)
+        insertions = mccutils.make_redundant_bed(insertions, sample_name, out_dir, method="temp")
+        mccutils.make_nonredundant_bed(insertions, sample_name, out_dir, method="temp")
     else:
-        mccutils.run_command(["touch", out_dir+"/"+sample_name+"_temp_raw.bed"])
         mccutils.run_command(["touch", out_dir+"/"+sample_name+"_temp_redundant.bed"])
         mccutils.run_command(["touch", out_dir+"/"+sample_name+"_temp_nonredundant.bed"])
     mccutils.log("temp","TEMP postprocessing complete")
@@ -60,7 +38,7 @@ def read_insertion_summary(infile, sample):
     with open(infile,"r") as inf:
         for x,line in enumerate(inf):
             if x > 0:
-                insert = Insertion()
+                insert = mccutils.Insertion()
                 split_line = line.split("\t")
                 if len(split_line) == 14:
                     insert.chromosome = split_line[0]
@@ -69,27 +47,27 @@ def read_insertion_summary(infile, sample):
                     insert.name = split_line[3]+"_non-reference_"+split_line[7]+"_"+sample+"_temp_"
 
                     if  "antisense" in split_line[4]:
-                        insert.direction = "-"
+                        insert.strand = "-"
                     else:
-                        insert.direction = "+"
+                        insert.strand = "+"
                         
-                    insert.classification = split_line[5]
-                    insert.support = float(split_line[6])
-                    insert.frequency = float(split_line[7])
-                    insert.junction1 = int(split_line[8])
-                    insert.junction1Support = int(split_line[9])
-                    insert.junction2 = int(split_line[10])
-                    insert.junction2Support = int(split_line[11])
-                    insert.fivePrimeSupport = float(split_line[12])
-                    insert.threePrimeSupport = float(split_line[13].replace("\n",""))
+                    insert.temp.classification = split_line[5]
+                    insert.temp.support = float(split_line[6])
+                    insert.temp.frequency = float(split_line[7])
+                    insert.temp.junction1 = int(split_line[8])
+                    insert.temp.junction1Support = int(split_line[9])
+                    insert.temp.junction2 = int(split_line[10])
+                    insert.temp.junction2Support = int(split_line[11])
+                    insert.temp.fivePrimeSupport = float(split_line[12])
+                    insert.temp.threePrimeSupport = float(split_line[13].replace("\n",""))
                     insert.type = "non-reference"
 
                     if insert.end >= insert.start and insert.end > 0 and insert.start > -1:
 
                         # if split read, use junction positions as start and end
-                        if insert.junction1Support > 0 and insert.junction2Support > 0:
-                            insert.start = insert.junction1 - 1
-                            insert.end = insert.junction2
+                        if insert.temp.junction1Support > 0 and insert.temp.junction2Support > 0:
+                            insert.start = insert.temp.junction1
+                            insert.end = insert.temp.junction2
                             insert.name = insert.name+"sr_"
 
                         # read pair
@@ -137,19 +115,19 @@ def get_non_absent_ref_tes(te_gff, absence_bed, sample, out, log):
             if "#" not in line:
                 line = line.replace(";","\t")
                 split_line = line.split("\t")
-                insert = Insertion()
+                insert = mccutils.Insertion()
                 insert.chromosome = split_line[0]
-                insert.start = int(split_line[3])-1
+                insert.start = int(split_line[3])
                 insert.end = int(split_line[4])
-                insert.support = "!"
+                insert.temp.support = "!"
                 insert.name = split_line[9].split("=")[1]+"_reference_"+sample+"_temp_nonab_"
-                insert.direction = split_line[6]
-                insert.classification = "!"
-                insert.junction1Support = "!"
-                insert.junction2Support = "!"
-                insert.junction1 = '!'
-                insert.junction2 = "!"
-                insert.frequency = "!"
+                insert.strand = split_line[6]
+                insert.temp.classification = "!"
+                insert.temp.junction1Support = "!"
+                insert.temp.junction2Support = "!"
+                insert.temp.junction1 = '!'
+                insert.temp.junction2 = "!"
+                insert.temp.frequency = "!"
                 insert.type = "reference"
                 
                 insertions.append(insert)
@@ -159,140 +137,13 @@ def get_non_absent_ref_tes(te_gff, absence_bed, sample, out, log):
     return insertions
     
 
-def filter_insertions(insertions, chromosomes):
+def filter_insertions(insertions, chromosomes, acceptable_classes=["1p1"], frequency_theshold=0.1):
     out = []
     for insert in insertions:
-        if insert.chromosome in chromosomes:
+        if insert.chromosome in chromosomes and (insert.type == "reference" or (insert.temp.classification in acceptable_classes and insert.temp.frequency > frequency_theshold)):
             out.append(insert)
     
     return out
-
-def sort_insertions(insertions):
-    # sorts insertions by chromosome and start position
-
-    chromosomes = []
-    insert_dict = {}
-    sorted_insertions = []
-    for insert in insertions:
-        # adds chromosome to non-redundant list of chromosomes
-        if insert.chromosome not in chromosomes:
-            chromosomes.append(insert.chromosome)
-
-        # separates insertions by chromosome, adds inserts to list based on start position
-        if insert.chromosome not in insert_dict.keys():
-            insert_dict[insert.chromosome] = []
-            insert_dict[insert.chromosome].append(insert)
-        else:
-            inserted = False
-            if insert.start <= insert_dict[insert.chromosome][0].start:
-                insert_dict[insert.chromosome] = [insert] + insert_dict[insert.chromosome]
-                inserted = True
-            
-            elif insert.start >= insert_dict[insert.chromosome][-1].start:
-                insert_dict[insert.chromosome].append(insert)
-                inserted = True
-
-            else:
-                for i in range(0,len(insert_dict[insert.chromosome])-1):
-                    if insert_dict[insert.chromosome][i].start <= insert.start and insert.start <= insert_dict[insert.chromosome][i+1].start:
-                        insert_dict[insert.chromosome].insert(i+1,insert)
-                        inserted = True
-                        break
-            
-            if inserted == False:
-                sys.exit("<ERROR> <TEMP POST> An error occured in sorting of the insertions... exiting...\n")
-
-    insert_num = 0
-    chromosomes.sort()
-    for chrom in chromosomes:
-        for insert in insert_dict[chrom]:
-            insert.name += str(insert_num)
-            insert_num += 1
-            sorted_insertions.append(insert)
-
-    return sorted_insertions
-    
-
-
-def make_raw_bed(insertions, sample, out):
-    raw_bed = out+"/"+sample+"_temp_raw.bed"
-    
-    with open(raw_bed,"w") as bed:
-        header = 'track name="%s_TEMP" description="%s_TEMP"' % (sample, sample)
-        bed.write(header+"\n")
-
-        for insert in insertions:
-            line = "\t".join([insert.chromosome, str(insert.start), str(insert.end), insert.name, "0", insert.direction])
-            line += "\n"
-            bed.write(line)
-
-
-
-def make_redundant_bed(insertions, sample, out, log, acceptable_classes=["1p1"], frequency_theshold=0.1):
-    redundant_bed = out+"/"+sample+"_temp_redundant.bed"
-
-    with open(redundant_bed,"w") as bed:
-        header = 'track name="%s_TEMP" description="%s_TEMP"' % (sample, sample)
-        bed.write(header+"\n")
-        for insert in insertions:
-            if insert.type == "reference" or (insert.classification in acceptable_classes and insert.frequency > frequency_theshold):
-                line = "\t".join([insert.chromosome, str(insert.start), str(insert.end), insert.name, "0", insert.direction])
-                line += "\n"
-                bed.write(line)
-
-
-        
-def make_nonredundant_bed(insertions, sample, out, log, acceptable_classes=["1p1"], frequency_theshold=0.1):
-    unsorted_nonredundant_bed = out+"/"+sample+"_temp_unsorted_nonredundant.bed"
-
-    collaped_insertions = {}
-
-    # collapsing all insterts that share the same chromosome and end position (and pass thresholds)
-    for insert in insertions:
-        if insert.type == "reference" or (insert.classification in acceptable_classes and insert.frequency > frequency_theshold):
-            if insert.type == "reference":
-                # reference TEs are only considered 'redundant' if they share the same start and end
-                key = insert.chromosome+"_"+str(insert.start)+"_"+str(insert.end)
-            else:
-                key = insert.chromosome+"_"+str(insert.end)
-
-            if key not in collaped_insertions.keys():
-                collaped_insertions[key] = []
-
-            collaped_insertions[key].append(insert)
-    
-    with open(unsorted_nonredundant_bed, "w") as bed:
-        for key in collaped_insertions.keys():
-            highest_supported_insert = None
-            for x, insert in enumerate(collaped_insertions[key]):
-                if x < 1:
-                    highest_supported_insert = insert
-                else:
-                    if highest_supported_insert.support != "!" and insert.support > highest_supported_insert.support:
-                        highest_supported_insert = insert
-            
-            line = "\t".join([highest_supported_insert.chromosome, str(highest_supported_insert.start), str(highest_supported_insert.end), highest_supported_insert.name, "0", highest_supported_insert.direction])
-            bed.write(line+"\n")
-
-    tmp_bed = out+"/"+sample+"_temp_nonredundant.bed.tmp"
-
-    command = ["bedtools", "sort", "-i", unsorted_nonredundant_bed]
-    mccutils.run_command_stdout(command, tmp_bed, log=log)
-
-    nonredundant_bed = out+"/"+sample+"_temp_nonredundant.bed"
-    with open(nonredundant_bed,"w") as outbed:
-        with open(tmp_bed, "r") as inbed:
-            header = 'track name="%s_TEMP" description="%s_TEMP"' % (sample, sample)
-            outbed.write(header+"\n")
-            for line in inbed:
-                outbed.write(line)
-
-    mccutils.remove(tmp_bed)
-    mccutils.remove(unsorted_nonredundant_bed)
-
-
-
-
 
 
 if __name__ == "__main__":                

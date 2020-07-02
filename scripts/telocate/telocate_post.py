@@ -5,16 +5,6 @@ sys.path.append(snakemake.config['args']['mcc_path'])
 import scripts.mccutils as mccutils
 import config.telocate.telocate_post as config
 
-class Insertion:
-    def __init__(self):
-        self.chromosome = "None"
-        self.start = -1
-        self.end = -1
-        self.name = "None"
-        self.type = "None"
-        self.strand = "."
-        self.read_pair_support = -1
-
 
 def main():
     mccutils.log("te-locate","processing TE-Locate results")
@@ -28,8 +18,8 @@ def main():
     insertions = read_insertions(telocate_raw, sample_name, chromosomes, rp_threshold=config.READ_PAIR_SUPPORT_THRESHOLD)
     insertions = filter_by_reference(insertions, te_gff)
     if len(insertions) > 0:
-        insertions = make_redundant_bed(insertions, sample_name, out_dir)
-        make_nonredundant_bed(insertions, sample_name, out_dir)
+        insertions = mccutils.make_redundant_bed(insertions, sample_name, out_dir, method="telocate")
+        mccutils.make_nonredundant_bed(insertions, sample_name, out_dir,method="telocate")
     else:
         mccutils.run_command(["touch", out_dir+"/"+sample_name+"_telocate_redundant.bed"])
         mccutils.run_command(["touch", out_dir+"/"+sample_name+"_telocate_nonredundant.bed"])
@@ -42,18 +32,18 @@ def read_insertions(telocate_out, sample_name, chromosomes, rp_threshold=0):
     with open(telocate_out,"r") as raw:
         for x, line in enumerate(raw):
             if x > 1:
-                insert = Insertion()
+                insert = mccutils.Insertion()
                 split_line = line.split("\t")
                 insert.chromosome = split_line[0]
                 insert.start = int(split_line[1])
                 
                 te_name = split_line[3].split("/")[1]
                 if "old" in split_line[15]:
-                    insert.type = "ref"
+                    insert.type = "reference"
                     insert.end = insert.start+int(split_line[2])
                     insert.name = te_name+"_reference_"+sample_name+"_telocate_rp_"
                 else:
-                    insert.type = "nonref"
+                    insert.type = "non-reference"
                     insert.end = insert.start
                     insert.name = te_name+"_non-reference_"+sample_name+"_telocate_rp_"
 
@@ -64,9 +54,9 @@ def read_insertions(telocate_out, sample_name, chromosomes, rp_threshold=0):
                 else:
                     insert.strand = "-"
 
-                insert.read_pair_support = int(split_line[7])
+                insert.telocate.read_pair_support = int(split_line[7])
 
-                if insert.read_pair_support >= rp_threshold and insert.chromosome in chromosomes:
+                if insert.telocate.read_pair_support >= rp_threshold and insert.chromosome in chromosomes:
                     insertions.append(insert)
     
     return insertions
@@ -86,7 +76,7 @@ def filter_by_reference(insertions, te_gff):
 
     
     for insert in insertions:
-        if insert.type == "nonref":
+        if insert.type == "non-reference":
             passed_insertions.append(insert)
         else:
             if insert.chromosome+"_"+str(insert.start) in gff_insertions.keys():
