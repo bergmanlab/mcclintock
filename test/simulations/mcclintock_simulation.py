@@ -106,6 +106,26 @@ def get_seqs(fasta):
     
     return seq_dir
 
+def fix_fasta_lines(fasta, length):
+    lines = []
+    fasta_records = SeqIO.parse(fasta,"fasta")
+    for record in fasta_records:
+        # print(">"+record.id)
+        header = ">"+str(record.id)
+        lines.append(header)
+        seq = str(record.seq)
+        x = 0
+        while(x+length < len(seq)):
+            # print(seq[x:x+length])
+            lines.append(seq[x:x+length])
+            x += length
+
+        remainder = (len(seq)) - x
+        # print(seq[x:x+remainder])
+        lines.append(seq[x:x+remainder])
+    
+    return lines
+
 def add_synthetic_insertion(reference_seqs, consensus_seqs, config, rep, out, run_id="", seed=None):
     if not os.path.exists(out+"/data"):
         os.mkdir(out+"/data")
@@ -115,11 +135,6 @@ def add_synthetic_insertion(reference_seqs, consensus_seqs, config, rep, out, ru
     else:
         random.seed(str(datetime.now())+"add_synthetic_insertion"+str(rep))
 
-    # get reference contig to modify
-    chrom_idx_to_change = random.randint(0,len(reference_seqs)-1)
-    chrom_to_change = reference_seqs[chrom_idx_to_change][0]
-    seq_to_change = reference_seqs[chrom_idx_to_change][1]
-
     # get TE family to add
     te_families = list(config["families"].keys())
     family_to_add = te_families[random.randint(0, len(te_families)-1)]
@@ -127,9 +142,27 @@ def add_synthetic_insertion(reference_seqs, consensus_seqs, config, rep, out, ru
     for seq in consensus_seqs:
         if seq[0] == family_to_add:
             family_seq = seq[1]
+    target_file = config['families'][family_to_add]["targets"]
+    valid_chroms = []
+    with open(target_file,"r") as t:
+        for line in t:
+            chrom = line.split("\t")[0]
+            valid_chroms.append(chrom)
+    
+    # removed chroms that are not in target file
+    tmp = []
+    for ref in reference_seqs:
+        if ref[0] in valid_chroms:
+            tmp.append(ref)
+    reference_seqs = tmp
+
+    # get reference contig to modify
+    chrom_idx_to_change = random.randint(0,len(reference_seqs)-1)
+    chrom_to_change = reference_seqs[chrom_idx_to_change][0]
+    seq_to_change = reference_seqs[chrom_idx_to_change][1]
+
 
     # get target site to add TE
-    target_file = config['families'][family_to_add]["targets"]
     targets = []
     with open(target_file,"r") as t:
         for line in t:
@@ -151,10 +184,18 @@ def add_synthetic_insertion(reference_seqs, consensus_seqs, config, rep, out, ru
 
     reference_seqs[chrom_idx_to_change][1] = modified_seq
 
-    with open(out+"/data/"+run_id+str(rep)+".modref.fasta","w") as outfa:
+    with open(out+"/data/"+run_id+str(rep)+".modref.fasta.tmp","w") as outfa:
         for seq in reference_seqs:
-            outfa.write(seq[0]+"\n")
+            outfa.write(">"+seq[0]+"\n")
             outfa.write(seq[1]+"\n")
+    
+    fasta_lines = fix_fasta_lines(out+"/data/"+run_id+str(rep)+".modref.fasta.tmp", 80)
+    print(len(fasta_lines))
+    with open(out+"/data/"+run_id+str(rep)+".modref.fasta","w") as outfa:
+        for line in fasta_lines:
+            outfa.write(line+"\n")
+
+    os.remove(out+"/data/"+run_id+str(rep)+".modref.fasta.tmp")
     
     with open(out+"/data/"+run_id+str(rep)+".modref.bed","w") as outbed:
         outbed.write(chrom_to_change+"\t"+str(target_site)+"\t"+str(target_site+duplication_size)+"\t"+family_to_add+"\n")
