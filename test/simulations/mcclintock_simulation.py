@@ -4,6 +4,7 @@ import sys
 import traceback
 import json
 import random
+import subprocess
 from datetime import datetime
 from Bio import SeqIO
 from Bio.Seq import Seq
@@ -15,6 +16,14 @@ def main():
     reference_seqs = get_seqs(args.reference)
     for x in range(0,args.reps):
         modified_reference = add_synthetic_insertion(reference_seqs, consensus_seqs, args.config, x, args.out, run_id=args.runid, seed=args.seed)
+        num_pairs = calculate_num_pairs(modified_reference)
+        fastq1, fastq2 = create_synthetic_reads(modified_reference, num_pairs, x, args.out, run_id=args.runid, seed=args.seed)
+        run_mcclintock(fastq1, fastq2, modified_reference, args.consensus, args.locations, args.taxonomy, x, args.proc, args.out, args.config, run_id=args.runid)
+
+        modified_reference = add_synthetic_insertion(reference_seqs, consensus_seqs, args.config, x, args.out, run_id=args.runid, seed=args.seed, reverse=True)
+        num_pairs = calculate_num_pairs(modified_reference)
+        fastq1, fastq2 = create_synthetic_reads(modified_reference, num_pairs, x, args.out, run_id=args.runid, seed=args.seed)
+        run_mcclintock(fastq1, fastq2, modified_reference, args.consensus, args.locations, args.taxonomy, x, args.proc, args.out, args.config, run_id=args.runid, reverse=True)
 
 def parse_args():
     parser = argparse.ArgumentParser(prog='McClintock Simulation', description="Script to run synthetic insertion simulations to evaluate mcclintock component methods")
@@ -82,6 +91,77 @@ def parse_args():
 
     return args
 
+def run_command(cmd_list, log=None):
+    msg = ""
+    if log is None:
+        try:
+            # print(" ".join(cmd_list))
+            subprocess.check_call(cmd_list)
+        except subprocess.CalledProcessError as e:
+            if e.output is not None:
+                msg = str(e.output)+"\n"
+            if e.stderr is not None:
+                msg += str(e.stderr)+"\n"
+            cmd_string = " ".join(cmd_list)
+            msg += msg + cmd_string + "\n"
+            sys.stderr.write(msg)
+            sys.exit(1)
+    
+    else:
+        try:
+            out = open(log,"a")
+            out.write(" ".join(cmd_list)+"\n")
+            subprocess.check_call(cmd_list, stdout=out, stderr=out)
+            out.close()
+
+        except subprocess.CalledProcessError as e:
+            if e.output is not None:
+                msg = str(e.output)+"\n"
+            if e.stderr is not None:
+                msg += str(e.stderr)+"\n"
+            cmd_string = " ".join(cmd_list)
+            msg += msg + cmd_string + "\n"
+            writelog(log, msg)
+            sys.stderr.write(msg)
+            sys.exit(1)
+
+def run_command_stdout(cmd_list, out_file, log=None):
+    msg = ""
+    if log is None:
+        try:
+            # print(" ".join(cmd_list)+" > "+out_file)
+            out = open(out_file,"w")
+            subprocess.check_call(cmd_list, stdout=out)
+            out.close()
+        except subprocess.CalledProcessError as e:
+            if e.output is not None:
+                msg = str(e.output)+"\n"
+            if e.stderr is not None:
+                msg += str(e.stderr)+"\n"
+            cmd_string = " ".join(cmd_list)
+            msg += msg + cmd_string + "\n"
+            sys.stderr.write(msg)
+            sys.exit(1)
+    
+    else:
+        try:
+            out_log = open(log,"a")
+            out_log.write(" ".join(cmd_list)+" > "+out_file+"\n")
+            out = open(out_file,"w")
+            subprocess.check_call(cmd_list, stdout=out, stderr=out_log)
+            out.close()
+            out_log.close()
+
+        except subprocess.CalledProcessError as e:
+            if e.output is not None:
+                msg = str(e.output)+"\n"
+            if e.stderr is not None:
+                msg += str(e.stderr)+"\n"
+            cmd_string = " ".join(cmd_list)
+            msg += msg + cmd_string + "\n"
+            writelog(log, msg)
+            sys.stderr.write(msg)
+            sys.exit(1)
 
 def writelog(log, msg):
     if log is not None:
@@ -126,7 +206,7 @@ def fix_fasta_lines(fasta, length):
     
     return lines
 
-def add_synthetic_insertion(reference_seqs, consensus_seqs, config, rep, out, run_id="", seed=None):
+def add_synthetic_insertion(reference_seqs, consensus_seqs, config, rep, out, run_id="", seed=None, reverse=False):
     if not os.path.exists(out+"/data"):
         os.mkdir(out+"/data")
     
@@ -135,13 +215,19 @@ def add_synthetic_insertion(reference_seqs, consensus_seqs, config, rep, out, ru
     else:
         random.seed(str(datetime.now())+"add_synthetic_insertion"+str(rep))
 
+
     # get TE family to add
     te_families = list(config["families"].keys())
     family_to_add = te_families[random.randint(0, len(te_families)-1)]
     family_seq = ""
     for seq in consensus_seqs:
         if seq[0] == family_to_add:
-            family_seq = seq[1]
+            if not reverse:
+                family_seq = seq[1]
+            else:
+                tmp = Seq(seq[1])
+                tmp = tmp.reverse_complement()
+                family_seq = str(tmp)
     target_file = config['families'][family_to_add]["targets"]
     valid_chroms = []
     with open(target_file,"r") as t:
@@ -175,13 +261,12 @@ def add_synthetic_insertion(reference_seqs, consensus_seqs, config, rep, out, ru
         sys.exit("missing chromosome in target files")
     target = targets[random.randint(0, len(targets)-1)]
     target_site = random.randint(int(target[1]), int(target[2])-1)
-
     duplication_size = config['families'][family_to_add]["TSD"]
 
+    # add TE in reference contig
     seq_start = seq_to_change[0:target_site+duplication_size]
     seq_end = seq_to_change[target_site:]
     modified_seq = seq_start + family_seq + seq_end
-
     reference_seqs[chrom_idx_to_change][1] = modified_seq
 
     with open(out+"/data/"+run_id+str(rep)+".modref.fasta.tmp","w") as outfa:
@@ -189,6 +274,7 @@ def add_synthetic_insertion(reference_seqs, consensus_seqs, config, rep, out, ru
             outfa.write(">"+seq[0]+"\n")
             outfa.write(seq[1]+"\n")
     
+    # create fasta with fixed line lengths
     fasta_lines = fix_fasta_lines(out+"/data/"+run_id+str(rep)+".modref.fasta.tmp", 80)
     print(len(fasta_lines))
     with open(out+"/data/"+run_id+str(rep)+".modref.fasta","w") as outfa:
@@ -197,6 +283,7 @@ def add_synthetic_insertion(reference_seqs, consensus_seqs, config, rep, out, ru
 
     os.remove(out+"/data/"+run_id+str(rep)+".modref.fasta.tmp")
     
+    # create bed that marks TSD
     with open(out+"/data/"+run_id+str(rep)+".modref.bed","w") as outbed:
         outbed.write(chrom_to_change+"\t"+str(target_site)+"\t"+str(target_site+duplication_size)+"\t"+family_to_add+"\n")
 
@@ -204,6 +291,61 @@ def add_synthetic_insertion(reference_seqs, consensus_seqs, config, rep, out, ru
 
     return out+"/data/"+run_id+str(rep)+".modref.fasta"
 
+
+def calculate_num_pairs(fasta):
+    command = ["samtools","faidx", fasta]
+    run_command(command)
+
+    total_length = 0
+    with open(fasta+".fai", "r") as faidx:
+        for line in faidx:
+            split_line = line.split("\t")
+            contig_length = int(split_line[1])
+            total_length += contig_length
+    
+    num_pairs = (total_length * 100)/202
+    return num_pairs
+
+def create_synthetic_reads(reference, num_pairs, rep, out, run_id="", seed=None):
+    if seed is not None:
+        random.seed(seed+"create_synthetic_reads"+str(rep))
+    else:
+        random.seed(str(datetime.now())+"create_synthetic_reads"+str(rep))
+    
+    seed_for_wgsim = random.randint(0,1000)
+
+    fastq1 = reference.replace(".fasta", "_1.fastq")
+    fastq2 = reference.replace(".fasta", "_2.fastq")
+    report = reference.replace(".fasta", "_wgsim_report.txt")
+
+    command = ["wgsim", "-1", "101", "-2", "101", "-d", "300", "-N", str(num_pairs), "-S", str(seed_for_wgsim), "-e", "0.01", "-h", reference, fastq1, fastq2]
+    run_command_stdout(command, report)
+
+    return fastq1, fastq2
+
+def run_mcclintock(fastq1, fastq2, reference, consensus, locations, taxonomy, rep, threads, out, config, run_id="", reverse=False):
+    if not os.path.exists(out+"/results"):
+        os.mkdir(out+"/results")
+    
+    if not reverse:
+        if not os.path.exists(out+"/results/forward"):
+            os.mkdir(out+"/results/forward")
+        mcc_out = out+"/results/forward/run"+run_id+"_"+str(rep)
+    else:
+        if not os.path.exists(out+"/results/reverse"):
+            os.mkdir(out+"/results/reverse")
+        mcc_out = out+"/results/reverse/run"+run_id+"_"+str(rep)
+
+    if not os.path.exists(mcc_out):
+        os.mkdir(mcc_out)
+    
+    mcc_path = config['mcclintock']['path']
+    command = ["python3",mcc_path+"/mcclintock.py", "-r", reference, "-c", consensus, "-1", fastq1, "-2", fastq2, "-p", str(threads), "-o", mcc_out, "-g", locations, "-t", taxonomy, "-m", config['mcclintock']['methods']]
+    print("running mcclintock... output:", mcc_out)
+    run_command_stdout(command, mcc_out+"/run.stdout", log=mcc_out+"/run.stderr")
+    if not os.path.exists(mcc_out+"/results/summary/summary_report.txt"):
+        sys.stderr.write("run at: "+mcc_out+" failed...")
+    
 
 if __name__ == "__main__":                
     main()
