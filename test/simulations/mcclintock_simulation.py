@@ -14,12 +14,14 @@ def main():
     args = parse_args()
     consensus_seqs = get_seqs(args.consensus)
     reference_seqs = get_seqs(args.reference)
-    for x in range(0,args.reps):
+    for x in range(1,args.reps+1):
+        # forward
         modified_reference = add_synthetic_insertion(reference_seqs, consensus_seqs, args.config, x, args.out, run_id=args.runid, seed=args.seed)
         num_pairs = calculate_num_pairs(modified_reference)
         fastq1, fastq2 = create_synthetic_reads(modified_reference, num_pairs, x, args.out, run_id=args.runid, seed=args.seed)
         run_mcclintock(fastq1, fastq2, modified_reference, args.consensus, args.locations, args.taxonomy, x, args.proc, args.out, args.config, run_id=args.runid)
 
+        # reverse
         modified_reference = add_synthetic_insertion(reference_seqs, consensus_seqs, args.config, x, args.out, run_id=args.runid, seed=args.seed, reverse=True)
         num_pairs = calculate_num_pairs(modified_reference)
         fastq1, fastq2 = create_synthetic_reads(modified_reference, num_pairs, x, args.out, run_id=args.runid, seed=args.seed)
@@ -210,10 +212,18 @@ def add_synthetic_insertion(reference_seqs, consensus_seqs, config, rep, out, ru
     if not os.path.exists(out+"/data"):
         os.mkdir(out+"/data")
     
-    if seed is not None:
-        random.seed(seed+"add_synthetic_insertion"+str(rep))
+    if not reverse:
+        outdir = out+"/data/forward"
     else:
-        random.seed(str(datetime.now())+"add_synthetic_insertion"+str(rep))
+        outdir = out+"/data/reverse"
+    
+    if not os.path.exists(outdir):
+        os.mkdir(outdir)
+
+    if seed is not None:
+        random.seed(seed+"add_synthetic_"+str(reverse)+"_insertion"+str(rep))
+    else:
+        random.seed(str(datetime.now())+"add_synthetic_"+str(reverse)+"_insertion"+str(rep)+str(reverse))
 
 
     # get TE family to add
@@ -269,27 +279,31 @@ def add_synthetic_insertion(reference_seqs, consensus_seqs, config, rep, out, ru
     modified_seq = seq_start + family_seq + seq_end
     reference_seqs[chrom_idx_to_change][1] = modified_seq
 
-    with open(out+"/data/"+run_id+str(rep)+".modref.fasta.tmp","w") as outfa:
+
+    outfasta = outdir+"/"+run_id+str(rep)+".modref.fasta"
+    outbed = outdir+"/"+run_id+str(rep)+".modref.bed"
+
+    
+    with open(outfasta+".tmp","w") as outfa:
         for seq in reference_seqs:
             outfa.write(">"+seq[0]+"\n")
             outfa.write(seq[1]+"\n")
     
     # create fasta with fixed line lengths
-    fasta_lines = fix_fasta_lines(out+"/data/"+run_id+str(rep)+".modref.fasta.tmp", 80)
-    print(len(fasta_lines))
-    with open(out+"/data/"+run_id+str(rep)+".modref.fasta","w") as outfa:
+    fasta_lines = fix_fasta_lines(outfasta+".tmp", 80)
+    with open(outfasta,"w") as outfa:
         for line in fasta_lines:
             outfa.write(line+"\n")
 
-    os.remove(out+"/data/"+run_id+str(rep)+".modref.fasta.tmp")
+    os.remove(outfasta+".tmp")
     
     # create bed that marks TSD
-    with open(out+"/data/"+run_id+str(rep)+".modref.bed","w") as outbed:
-        outbed.write(chrom_to_change+"\t"+str(target_site)+"\t"+str(target_site+duplication_size)+"\t"+family_to_add+"\n")
+    with open(outbed,"w") as bed:
+        bed.write(chrom_to_change+"\t"+str(target_site)+"\t"+str(target_site+duplication_size)+"\t"+family_to_add+"\n")
 
     print(chrom_to_change+"\t"+str(target_site)+"\t"+str(target_site+duplication_size)+"\t"+family_to_add+"\n")
 
-    return out+"/data/"+run_id+str(rep)+".modref.fasta"
+    return outfasta
 
 
 def calculate_num_pairs(fasta):
