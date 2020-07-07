@@ -14,7 +14,7 @@ def main():
     args = parse_args()
     consensus_seqs = get_seqs(args.consensus)
     reference_seqs = get_seqs(args.reference)
-    for x in range(1,args.reps+1):
+    for x in range(args.start,args.end+1):
         # forward
         modified_reference = add_synthetic_insertion(reference_seqs, consensus_seqs, args.config, x, args.out, run_id=args.runid, seed=args.seed)
         num_pairs = calculate_num_pairs(modified_reference)
@@ -40,7 +40,8 @@ def parse_args():
     ## optional ##
     parser.add_argument("-p", "--proc", type=int, help="The number of processors to use for parallel stages of the pipeline [default = 1]", required=False)
     parser.add_argument("-o", "--out", type=str, help="An output folder for the run. [default = '.']", required='run' not in sys.argv)
-    parser.add_argument("--reps", type=int, help="The number of replicates to run. [default = 1]", required=False)
+    parser.add_argument("--start", type=int, help="The number of replicates to run. [default = 1]", required=False)
+    parser.add_argument("--end", type=int, help="The number of replicates to run. [default = 300]", required=False)
     parser.add_argument("--seed", type=str, help="a seed to the random number generator so runs can be replicated", required=False)
     parser.add_argument("--runid", type=str, help="a string to prepend to output files so that multiple runs can be run at the same time without file name clashes", required=False)
 
@@ -84,9 +85,13 @@ def parse_args():
                 print("cannot create output directory: ",args.out,"exiting...", file=sys.stderr)
                 sys.exit(1)
 
-    # check --reps
-    if args.reps is None:
-        args.reps = 1
+    # check --start
+    if args.start is None:
+        args.start = 1
+
+    # check --end
+    if args.end is None:
+        args.end = 1
     
     if args.runid is None:
         args.runid = ""
