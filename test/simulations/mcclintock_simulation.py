@@ -5,27 +5,53 @@ import traceback
 import json
 import random
 import subprocess
+import statistics
 from datetime import datetime
 from Bio import SeqIO
 from Bio.Seq import Seq
 from collections import OrderedDict
 
+class Insertion:
+    def __init__(self):
+        self.chromosome = ""
+        self.family = ""
+        self.start = -1
+        self.end = -1
+        self.strand = "?"
+        self.reference = False
+
 def main():
     args = parse_args()
-    consensus_seqs = get_seqs(args.consensus)
-    reference_seqs = get_seqs(args.reference)
-    for x in range(args.start,args.end+1):
-        # forward
-        modified_reference = add_synthetic_insertion(reference_seqs, consensus_seqs, args.config, x, args.out, run_id=args.runid, seed=args.seed)
-        num_pairs = calculate_num_pairs(modified_reference)
-        fastq1, fastq2 = create_synthetic_reads(modified_reference, num_pairs, x, args.out, run_id=args.runid, seed=args.seed)
-        run_mcclintock(fastq1, fastq2, args.reference, args.consensus, args.locations, args.taxonomy, x, args.proc, args.out, args.config, run_id=args.runid)
+    if args.mode == "run":
+        for x in range(args.start,args.end+1):
+            # forward
+            consensus_seqs = get_seqs(args.consensus)
+            reference_seqs = get_seqs(args.reference)
+            modified_reference = add_synthetic_insertion(reference_seqs, consensus_seqs, args.config, x, args.out, run_id=args.runid, seed=args.seed)
+            num_pairs = calculate_num_pairs(modified_reference)
+            fastq1, fastq2 = create_synthetic_reads(modified_reference, num_pairs, x, args.out, run_id=args.runid, seed=args.seed)
+            run_mcclintock(fastq1, fastq2, args.reference, args.consensus, args.locations, args.taxonomy, x, args.proc, args.out, args.config, run_id=args.runid)
 
-        # reverse
-        modified_reference = add_synthetic_insertion(reference_seqs, consensus_seqs, args.config, x, args.out, run_id=args.runid, seed=args.seed, reverse=True)
-        num_pairs = calculate_num_pairs(modified_reference)
-        fastq1, fastq2 = create_synthetic_reads(modified_reference, num_pairs, x, args.out, run_id=args.runid, seed=args.seed)
-        run_mcclintock(fastq1, fastq2, args.reference, args.consensus, args.locations, args.taxonomy, x, args.proc, args.out, args.config, run_id=args.runid, reverse=True)
+            # reverse
+            consensus_seqs = get_seqs(args.consensus)
+            reference_seqs = get_seqs(args.reference)
+            modified_reference = add_synthetic_insertion(reference_seqs, consensus_seqs, args.config, x, args.out, run_id=args.runid, seed=args.seed, reverse=True)
+            num_pairs = calculate_num_pairs(modified_reference)
+            fastq1, fastq2 = create_synthetic_reads(modified_reference, num_pairs, x, args.out, run_id=args.runid, seed=args.seed)
+            run_mcclintock(fastq1, fastq2, args.reference, args.consensus, args.locations, args.taxonomy, x, args.proc, args.out, args.config, run_id=args.runid, reverse=True)
+
+    elif args.mode == "analysis":
+        if not os.path.exists(args.out+"/summary/"):
+            os.mkdir(args.out+"/summary/")
+
+        actual_insertions = get_actual_insertions(args.out+"/data/forward/")
+        predicted_insertions, methods = get_predicted_insertions(args.out+"/results/forward/")
+        make_out_table(actual_insertions, predicted_insertions, methods, args.out+"/summary/forward_summary.csv")
+
+        actual_insertions = get_actual_insertions(args.out+"/data/reverse/")
+        predicted_insertions, methods = get_predicted_insertions(args.out+"/results/reverse/")
+        make_out_table(actual_insertions, predicted_insertions, methods, args.out+"/summary/reverse_summary.csv")
+
 
 def parse_args():
     parser = argparse.ArgumentParser(prog='McClintock Simulation', description="Script to run synthetic insertion simulations to evaluate mcclintock component methods")
@@ -48,53 +74,54 @@ def parse_args():
     args = parser.parse_args()
 
     # check --mode
-    valid_modes = ["run"]
+    valid_modes = ["run", "analysis"]
     if args.mode not in valid_modes:
         print(args.mode, "not a valid mode ( valid modes:",",".join(valid_modes),")", file=sys.stderr)
 
-    #check -r
-    args.reference = get_abs_path(args.reference)
-    #check -c
-    args.consensus = get_abs_path(args.consensus)
-    # check -g
-    args.locations = get_abs_path(args.locations)
-    # check -t
-    args.taxonomy = get_abs_path(args.taxonomy)
-    # check -j
-    args.config = get_abs_path(args.config)
-    with open(args.config, "r") as j:
-        config = json.load(j, object_pairs_hook = OrderedDict)
-    args.config = config
+    if args.mode == "run":
+        #check -r
+        args.reference = get_abs_path(args.reference)
+        #check -c
+        args.consensus = get_abs_path(args.consensus)
+        # check -g
+        args.locations = get_abs_path(args.locations)
+        # check -t
+        args.taxonomy = get_abs_path(args.taxonomy)
+        # check -j
+        args.config = get_abs_path(args.config)
+        with open(args.config, "r") as j:
+            config = json.load(j, object_pairs_hook = OrderedDict)
+        args.config = config
 
-    #check -p
-    if args.proc is None:
-        args.proc = 1
+        #check -p
+        if args.proc is None:
+            args.proc = 1
 
-    #check -o
-    if args.out is None:
-        args.out = os.path.abspath(".")
-    else:
-        args.out = os.path.abspath(args.out)
+        #check -o
+        if args.out is None:
+            args.out = os.path.abspath(".")
+        else:
+            args.out = os.path.abspath(args.out)
 
-        if not os.path.exists(args.out):
-            try:
-                os.mkdir(args.out)
-            except Exception as e:
-                track = traceback.format_exc()
-                print(track, file=sys.stderr)
-                print("cannot create output directory: ",args.out,"exiting...", file=sys.stderr)
-                sys.exit(1)
+            if not os.path.exists(args.out):
+                try:
+                    os.mkdir(args.out)
+                except Exception as e:
+                    track = traceback.format_exc()
+                    print(track, file=sys.stderr)
+                    print("cannot create output directory: ",args.out,"exiting...", file=sys.stderr)
+                    sys.exit(1)
 
-    # check --start
-    if args.start is None:
-        args.start = 1
+        # check --start
+        if args.start is None:
+            args.start = 1
 
-    # check --end
-    if args.end is None:
-        args.end = 1
-    
-    if args.runid is None:
-        args.runid = ""
+        # check --end
+        if args.end is None:
+            args.end = 1
+        
+        if args.runid is None:
+            args.runid = ""
 
     return args
 
@@ -184,7 +211,6 @@ def get_abs_path(in_file, log=None):
         writelog(log, msg)
         sys.exit(1)
 
-
 def get_seqs(fasta):
     seq_dir = []
     records = SeqIO.parse(fasta, "fasta")
@@ -251,16 +277,15 @@ def add_synthetic_insertion(reference_seqs, consensus_seqs, config, rep, out, ru
             valid_chroms.append(chrom)
     
     # removed chroms that are not in target file
-    tmp = []
+    filtered_reference = []
     for ref in reference_seqs:
         if ref[0] in valid_chroms:
-            tmp.append(ref)
-    reference_seqs = tmp
+            filtered_reference.append(ref)
 
     # get reference contig to modify
-    chrom_idx_to_change = random.randint(0,len(reference_seqs)-1)
-    chrom_to_change = reference_seqs[chrom_idx_to_change][0]
-    seq_to_change = reference_seqs[chrom_idx_to_change][1]
+    chrom_idx_to_change = random.randint(0,len(filtered_reference)-1)
+    chrom_to_change = filtered_reference[chrom_idx_to_change][0]
+    seq_to_change = filtered_reference[chrom_idx_to_change][1]
 
 
     # get target site to add TE
@@ -282,7 +307,7 @@ def add_synthetic_insertion(reference_seqs, consensus_seqs, config, rep, out, ru
     seq_start = seq_to_change[0:target_site+duplication_size]
     seq_end = seq_to_change[target_site:]
     modified_seq = seq_start + family_seq + seq_end
-    reference_seqs[chrom_idx_to_change][1] = modified_seq
+    filtered_reference[chrom_idx_to_change][1] = modified_seq
 
 
     outfasta = outdir+"/"+run_id+str(rep)+".modref.fasta"
@@ -290,7 +315,7 @@ def add_synthetic_insertion(reference_seqs, consensus_seqs, config, rep, out, ru
 
     
     with open(outfasta+".tmp","w") as outfa:
-        for seq in reference_seqs:
+        for seq in filtered_reference:
             outfa.write(">"+seq[0]+"\n")
             outfa.write(seq[1]+"\n")
     
@@ -365,6 +390,136 @@ def run_mcclintock(fastq1, fastq2, reference, consensus, locations, taxonomy, re
     if not os.path.exists(mcc_out+"/results/summary/summary_report.txt"):
         sys.stderr.write("run at: "+mcc_out+" failed...")
     
+
+def get_actual_insertions(out):
+    actual_insertions = {}
+    for f in os.listdir(out):
+        if ".bed" in f:
+            bed = out+"/"+f
+            rep = bed.split("/")[-1]
+            rep = rep.split(".")[0]
+            rep = "run_"+rep
+            with open(bed,"r") as b:
+                for line in b:
+                    insertion = Insertion()
+                    line = line.replace("\n","")
+                    split_line = line.split("\t")
+                    insertion.chromosome = split_line[0]
+                    insertion.start = int(split_line[1])
+                    insertion.end = int(split_line[2])
+                    insertion.family = split_line[3]
+                    # insertion.strand = split_line[5]
+            
+            actual_insertions[rep] = insertion
+    
+    return actual_insertions
+
+def get_predicted_insertions(out):
+    predicted_insertions = {}
+    methods = []
+    for d in os.listdir(out):
+        rep = d
+        if os.path.exists(out+"/"+d+"/results/"):
+            for e in os.listdir(out+"/"+d+"/results/"):
+                method = e
+                for f in os.listdir(out+"/"+d+"/results/"+e):
+                    if "nonredundant.bed" in f:
+                        if method not in methods:
+                            methods.append(method)
+                        with open(out+"/"+d+"/results/"+e+"/"+f, "r") as bed:
+                            if method not in predicted_insertions.keys():
+                                predicted_insertions[method] = {rep: []}
+                            elif rep not in predicted_insertions[method].keys():
+                                predicted_insertions[method][rep] = []
+
+                            for line in bed:
+                                if "#" not in line:
+                                    insertion = Insertion()
+                                    line = line.replace("\n","")
+                                    split_line = line.split("\t")
+                                    if len(split_line) > 5:
+                                        insertion.chromosome = split_line[0]
+                                        insertion.start = int(split_line[1])
+                                        insertion.end = int(split_line[2])
+                                        info = split_line[3].split("_")
+                                        for x, inf in enumerate(info):
+                                            if "reference" in inf:
+                                                family = "_".join(info[:x])
+                                        insertion.family = family
+                                        insertion.strand = split_line[5]
+                                        if "non-reference" in line:
+                                            insertion.reference = False
+                                        else:
+                                            insertion.reference = True
+                                        
+                                        predicted_insertions[method][rep].append(insertion)
+    
+    return predicted_insertions, methods
+
+def make_out_table(actual_insertions, predicted_insertions, methods, out_csv):
+    columns = [["Method","Reference","Nonreference", "Exact", "Within-100", "Within-300", "Within-500"]]
+    for method in methods:
+        ref_counts = []
+        nonref_counts = []
+        exacts = []
+        within_100s = []
+        within_300s = []
+        within_500s = []
+        for rep in predicted_insertions[method].keys():
+            ref_count = 0
+            nonref_count = 0
+            exact = 0
+            within_100 = 0
+            within_300 = 0
+            within_500 = 0
+            for insert in predicted_insertions[method][rep]:
+                if insert.reference:
+                    ref_count +=1
+                else:
+                    nonref_count +=1
+                    if insert.family == actual_insertions[rep].family and insert.chromosome == actual_insertions[rep].chromosome:
+                        if (actual_insertions[rep].start == insert.start and insert.end == actual_insertions[rep].end):
+                            exact += 1
+                        
+                        window = 100
+                        if ((actual_insertions[rep].start-window <= insert.start and insert.start <= actual_insertions[rep].end+window) or
+                        (insert.start <= actual_insertions[rep].start-window and actual_insertions[rep].start-window <= insert.end)):
+                            within_100 += 1
+
+                        window = 300
+                        if ((actual_insertions[rep].start-window <= insert.start and insert.start <= actual_insertions[rep].end+window) or
+                        (insert.start <= actual_insertions[rep].start-window and actual_insertions[rep].start-window <= insert.end)):
+                            within_300 += 1
+
+                        window = 500
+                        if ((actual_insertions[rep].start-window <= insert.start and insert.start <= actual_insertions[rep].end+window) or
+                        (insert.start <= actual_insertions[rep].start-window and actual_insertions[rep].start-window <= insert.end)):
+                            within_500 += 1
+            
+            ref_counts.append(ref_count)
+            nonref_counts.append(nonref_count)
+            exacts.append(exact)
+            within_100s.append(within_100)
+            within_300s.append(within_300)
+            within_500s.append(within_500)
+        
+
+        ref_mean = statistics.mean(ref_counts)
+        nonref_mean = statistics.mean(nonref_counts)
+        exact_mean = statistics.mean(exacts)
+        mean_100 = statistics.mean(within_100s)
+        mean_300 = statistics.mean(within_300s)
+        mean_500 = statistics.mean(within_500s)
+        columns.append([method, str(ref_mean), str(nonref_mean), str(exact_mean), str(mean_100), str(mean_300), str(mean_500)])
+    
+    with open(out_csv, "w") as csv:
+        for y in range(0, len(columns[0])):
+            line = []
+            for x in range(0, len(columns)):
+                line.append(columns[x][y])
+            line = ",".join(line)
+            csv.write(line+"\n")
+
 
 if __name__ == "__main__":                
     main()
