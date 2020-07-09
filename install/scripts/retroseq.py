@@ -13,21 +13,23 @@ def main():
         print("try running --install with --clean for clean installation")
         sys.exit(1)
 
-    mccutils.remove(snakemake.config['paths']['install']+"RetroSeq-700d4f76a3b996686652866f2b81fefc6f0241e0")
+    extracted_file_name = "RetroSeq-9d4f3b5270af2383f40e6e7ea1204ea718365db2"
+
+    mccutils.remove(snakemake.config['paths']['install']+extracted_file_name)
     command = ["unzip", snakemake.params.zipfile]
     mccutils.run_command(command, log=snakemake.params.log)
 
-    mccutils.remove(install_path+"RetroSeq-700d4f76a3b996686652866f2b81fefc6f0241e0")
-    command = ["mv", snakemake.config['paths']['install']+"RetroSeq-700d4f76a3b996686652866f2b81fefc6f0241e0", install_path]
+    mccutils.remove(install_path+extracted_file_name)
+    command = ["mv", snakemake.config['paths']['install']+extracted_file_name, install_path]
     mccutils.run_command(command, log=snakemake.params.log)
 
     mccutils.remove(install_path+"retroseq")
     mccutils.mkdir(install_path+"retroseq")
-    for f in os.listdir(install_path+"RetroSeq-700d4f76a3b996686652866f2b81fefc6f0241e0"):
-        command = ["mv", install_path+"RetroSeq-700d4f76a3b996686652866f2b81fefc6f0241e0/"+f, install_path+"retroseq"]
+    for f in os.listdir(install_path+extracted_file_name):
+        command = ["mv", install_path+extracted_file_name+"/"+f, install_path+"retroseq"]
         mccutils.run_command(command, log=snakemake.params.log)
     
-    mccutils.remove(install_path+"RetroSeq-700d4f76a3b996686652866f2b81fefc6f0241e0")
+    mccutils.remove(install_path+extracted_file_name)
     mccutils.remove(snakemake.params.zipfile)
 
 if __name__ == "__main__":                
