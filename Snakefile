@@ -716,14 +716,14 @@ rule retroseq_run:
         log = config['args']['log_dir']+"retroseq.log"
     
     output:
-        config['args']['out']+"/results/retroseq/unfiltered/"+config['args']['sample_name']+".call.PE.vcf"
+        config['args']['out']+"/results/retroseq/unfiltered/"+config['args']['sample_name']+".call"
     
     script:
         config['args']['mcc_path']+"/scripts/retroseq/retroseq_run.py"
 
 rule retroseq_post:
     input:
-        retroseq_out = config['args']['out']+"/results/retroseq/unfiltered/"+config['args']['sample_name']+".call.PE.vcf"
+        retroseq_out = config['args']['out']+"/results/retroseq/unfiltered/"+config['args']['sample_name']+".call"
 
     threads: 1
 
