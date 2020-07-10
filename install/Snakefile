@@ -127,6 +127,19 @@ rule coverage:
     shell:
         "echo 'coverage env installed' > {output}"
 
+rule tepid:
+    params:
+        map_patch = config['paths']['install']+"patches/tepid/tepid-map.patch",
+        map_se_patch = config['paths']['install']+"patches/tepid/tepid-map-se.patch",
+        log = config['paths']['log_dir']+"install.log"
+    output:
+        config['output']['tepid']
+    
+    conda: config['ENVs']['tepid']
+
+    script:
+        config['paths']['install']+"scripts/tepid.py"
+
 rule processing:
     output:
         config['output']['processing'] 

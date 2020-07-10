@@ -32,6 +32,7 @@ ENV = {
     "popoolationte" : ENV_PATH+"mcc_popoolationte.yml",
     "popoolationte2" : ENV_PATH+"mcc_popoolationte2.yml",
     "relocate2" : ENV_PATH+"mcc_relocate2.yml",
+    "tepid" : ENV_PATH+"mcc_tepid.yml",
     "mcc_processing":  ENV_PATH+"mcc_processing.yml"
 }
 
@@ -47,5 +48,6 @@ OUTPUT = {
     "popoolationte" : INSTALL_PATH+"tools/popoolationte/identify-te-insertsites.pl",
     "popoolationte2" : INSTALL_PATH+"tools/popoolationte2/popte2-v1.10.03.jar",
     "relocate2" : INSTALL_PATH+"tools/relocate2/relocaTE2.log",
+    "tepid" : INSTALL_PATH+"tools/tepid/tepid-map",
     "processing" : INSTALL_PATH+"tools/processing.log"
 }

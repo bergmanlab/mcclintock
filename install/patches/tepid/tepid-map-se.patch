@@ -1,0 +1,11 @@
+--- tepid-map-se        2020-07-10 17:15:46.000000000 -0400
++++ tepid-map-se-fixed       2019-10-26 11:10:29.000000000 -0400
+@@ -76,7 +76,7 @@
+   rm "${fname}.split.sam"
+
+   echo "Sorting alignment"
+-  samtools sort -@ $proc "${fname}_unsort.bam" "${fname}"
++  samtools sort -@ $proc "${fname}_unsort.bam" -o "${fname}.bam"
+   rm "${fname}_unsort.bam"
+
+   echo "Indexing alignment"

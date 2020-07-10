@@ -1,0 +1,7 @@
+name: mcc_tepid
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - tepid=0.8
