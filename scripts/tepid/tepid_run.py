@@ -31,18 +31,18 @@ def main():
     if raw_fq2 == "False":
         is_paired = False
     
-    mccutils.log("tepid","indexing reference")
+    mccutils.log("tepid","indexing reference", log=log)
     index_ref(ref_fasta, ref_name, out_dir, log=log)
     mccutils.log("tepid","making TEPID reference TE bed")
     te_bed = make_te_bed(te_gff, te_taxonomy, out_dir)
 
-    mccutils.log("tepid","mapping reads")
+    mccutils.log("tepid","mapping reads", log=log)
     if is_paired:
         bam, split_bam = map_reads(fq1, fq2, script_dir, ref_name, median_insert_size, out_dir, threads=threads, paired=True, log=log)
     else:
         bam, split_bam = map_reads(fq1, fq2, script_dir, ref_name, median_insert_size, out_dir, threads=threads, paired=False, log=log)
 
-    mccutils.log("tepid","discovering variants")
+    mccutils.log("tepid","discovering variants", log=log)
     discover_variants(ref_name, bam, split_bam, te_bed, out_dir, threads=threads, log=log)
     mccutils.log("tepid","TEPID run complete")
 
