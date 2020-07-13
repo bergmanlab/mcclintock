@@ -51,5 +51,6 @@ OUT_PATHS = {
         'popoolationte2': RESULTS_DIR+"popoolationTE2/"+SAMPLE_NAME+"_popoolationte2_nonredundant.bed",
         'te-locate': RESULTS_DIR+"te-locate/"+SAMPLE_NAME+"_telocate_nonredundant.bed",
         'trimgalore': INPUT_DIR+"fastq/"+SAMPLE_NAME+"_1.fq",
-        'relocate2': RESULTS_DIR+"relocaTE2/"+SAMPLE_NAME+"_relocate2_nonredundant.bed"
+        'relocate2': RESULTS_DIR+"relocaTE2/"+SAMPLE_NAME+"_relocate2_nonredundant.bed",
+        'tepid': RESULTS_DIR+"tepid/"+SAMPLE_NAME+"_tepid_nonredundant.bed"
 }

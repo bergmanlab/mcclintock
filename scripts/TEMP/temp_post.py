@@ -119,15 +119,8 @@ def get_non_absent_ref_tes(te_gff, absence_bed, sample, out, log):
                 insert.chromosome = split_line[0]
                 insert.start = int(split_line[3])
                 insert.end = int(split_line[4])
-                insert.temp.support = "!"
                 insert.name = split_line[9].split("=")[1]+"_reference_"+sample+"_temp_nonab_"
                 insert.strand = split_line[6]
-                insert.temp.classification = "!"
-                insert.temp.junction1Support = "!"
-                insert.temp.junction2Support = "!"
-                insert.temp.junction1 = '!'
-                insert.temp.junction2 = "!"
-                insert.temp.frequency = "!"
                 insert.type = "reference"
                 
                 insertions.append(insert)

@@ -58,6 +58,11 @@ class Popoolationte:
         self.f_read_support_percent = 0
         self.r_read_support_percent = 0
 
+class Tepid:
+    def __init__(self):
+        self.id = -1
+        self.support = 0
+
 class Insertion:
     def __init__(self):
         self.chromosome = "None"
@@ -75,6 +80,7 @@ class Insertion:
         self.telocate = Telocate()
         self.temp = Temp()
         self.ngs_te_mapper = Ngs_te_mapper()
+        self.tepid = Tepid()
 
 
 def mkdir(indir, log=None):
@@ -391,11 +397,15 @@ def make_nonredundant_bed(insertions, sample_name, out_dir, method="popoolationt
                     uniq_inserts[key] = insert
             
             elif method == "temp":
-                if uniq_inserts[key].temp.support != "!" and insert.temp.support > uniq_inserts[key].temp.support:
+                if uniq_inserts[key].type == "non-reference" and (insert.type == "reference" or insert.temp.support > uniq_inserts[key].temp.support):
                     uniq_inserts[key] = insert
             
             elif method == "ngs_te_mapper":
                 if insert.ngs_te_mapper.support > uniq_inserts[key].ngs_te_mapper.support:
+                    uniq_inserts[key] = insert
+            
+            elif method == "tepid":
+                if uniq_inserts[key].type == "non-reference" and (insert.type == "reference" or insert.tepid.support > uniq_inserts[key].tepid.support):
                     uniq_inserts[key] = insert
     
     tmp_bed = out_dir+"/tmp.bed"
