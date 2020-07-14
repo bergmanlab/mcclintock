@@ -88,7 +88,7 @@ def map_reads(fq1, fq2, script_dir, ref_name, median_insert_size, out, threads=1
     try:
         os.chdir(out)
         if paired:
-            command = [script_dir+"tepid-map", 
+            command = ["bash", script_dir+"tepid-map", 
                             "-x", out+"/"+ref_name, 
                             "-y", out+"/"+ref_name+".X15_01_65525S", 
                             "-p", str(threads), 
@@ -97,7 +97,7 @@ def map_reads(fq1, fq2, script_dir, ref_name, median_insert_size, out, threads=1
                             "-1", fq1,
                             "-2", fq2 ]
         else:
-            command = [script_dir+"tepid-map-se", 
+            command = ["bash", script_dir+"tepid-map-se", 
                             "-x", out+"/"+ref_name, 
                             "-y", out+"/"+ref_name+".X15_01_65525S", 
                             "-p", str(threads), 
