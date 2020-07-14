@@ -47,13 +47,22 @@ def main():
     mccutils.log("tepid","TEPID run complete")
 
 def index_ref(fasta, ref_name, out, log=None):
-    os.chdir(out)
-    fasta_no_path = fasta.split("/")[-1]
-    fasta_copy = out+"/"+fasta_no_path
-    mccutils.run_command(["cp", fasta, fasta_copy])
+    try:
+        os.chdir(out)
+        fasta_no_path = fasta.split("/")[-1]
+        fasta_copy = out+"/"+fasta_no_path
+        mccutils.run_command(["cp", fasta, fasta_copy])
 
-    mccutils.run_command(["bowtie2-build", fasta_copy, ref_name], log=log)
-    mccutils.run_command(["yaha", "-g", fasta_copy], log=log)
+        mccutils.run_command(["bowtie2-build", fasta_copy, ref_name], log=log)
+        mccutils.run_command(["yaha", "-g", fasta_copy], log=log)
+
+        mccutils.check_file_exists(out+"/"+ref_name+".X15_01_65525S")
+    
+    except Exception as e:
+        track = traceback.format_exc()
+        print(track, file=sys.stderr)
+        print("ERROR...Failed to index reference fasta:"+fasta_copy+" ...exiting...", file=sys.stderr)
+        sys.exit(1)
 
 def make_te_bed(gff, taxonomy, out):
     te_to_family = {}
@@ -121,15 +130,25 @@ def map_reads(fq1, fq2, script_dir, ref_name, median_insert_size, out, threads=1
 
 
 def discover_variants(ref_name, bam, split_bam, te_bed, out, threads=1, log=None):
-    os.chdir(out)
-    command = ["tepid-discover",
-                    "-p", str(threads),
-                    "-n", ref_name,
-                    "-c", bam,
-                    "-s", split_bam,
-                    "-t", te_bed]
+    try:
+        os.chdir(out)
+        command = ["tepid-discover",
+                        "-p", str(threads),
+                        "-n", ref_name,
+                        "-c", bam,
+                        "-s", split_bam,
+                        "-t", te_bed]
 
-    mccutils.run_command(command, log=log)
+        mccutils.run_command(command, log=log)
+
+        mccutils.check_file_exists(snakemake.output[0])
+        mccutils.check_file_exists(snakemake.output[1])
+
+    except Exception as e:
+        track = traceback.format_exc()
+        print(track, file=sys.stderr)
+        print("ERROR...Failed to run TEPID discover step...exiting...", file=sys.stderr)
+        sys.exit(1)
 
 if __name__ == "__main__":                
     main()
