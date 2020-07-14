@@ -43,7 +43,7 @@ def main():
         bam, split_bam = map_reads(fq1, fq2, script_dir, ref_name, median_insert_size, out_dir, threads=threads, paired=False, log=log)
 
     mccutils.log("tepid","discovering variants", log=log)
-    discover_variants(ref_name, bam, split_bam, te_bed, out_dir, threads=threads, log=log)
+    discover_variants(ref_name, script_dir, bam, split_bam, te_bed, out_dir, threads=threads, log=log)
     mccutils.log("tepid","TEPID run complete")
 
 def index_ref(fasta, ref_name, out, log=None):
@@ -129,10 +129,10 @@ def map_reads(fq1, fq2, script_dir, ref_name, median_insert_size, out, threads=1
     return bam, split_bam 
 
 
-def discover_variants(ref_name, bam, split_bam, te_bed, out, threads=1, log=None):
+def discover_variants(ref_name, script_dir, bam, split_bam, te_bed, out, threads=1, log=None):
     try:
         os.chdir(out)
-        command = ["tepid-discover",
+        command = [script_dir+"tepid-discover",
                         "-p", str(threads),
                         "-n", ref_name,
                         "-c", bam,
@@ -141,7 +141,10 @@ def discover_variants(ref_name, bam, split_bam, te_bed, out, threads=1, log=None
 
         mccutils.run_command(command, log=log)
 
-        mccutils.check_file_exists(snakemake.output[0])
+        if not os.path.exists(snakemake.output[0]):
+            mccutils.run_command(["touch", snakemake.output[0]])
+        if not os.path.exists(snakemake.output[2]):
+            mccutils.run_command(["touch", snakemake.output[2]])
         mccutils.check_file_exists(snakemake.output[1])
 
     except Exception as e:

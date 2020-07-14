@@ -129,8 +129,10 @@ rule coverage:
 
 rule tepid:
     params:
-        map_patch = config['paths']['install']+"patches/tepid/tepid-map.patch",
-        map_se_patch = config['paths']['install']+"patches/tepid/tepid-map-se.patch",
+        discover_patch = config['paths']['install']+"patches/tepid/tepid-discover.patch",
+        url = config['URLs']['tepid'],
+        md5 = config['MD5s']['tepid'],
+        zipfile = config['paths']['install']+"tools/tepid/tepid.zip",
         log = config['paths']['log_dir']+"install.log"
     output:
         config['output']['tepid']

@@ -1,0 +1,11 @@
+--- Scripts/tepid-discover	2020-02-04 11:26:05.000000000 -0500
++++ tepid-discover	2020-07-14 17:32:34.778652700 -0400
+@@ -8,7 +8,7 @@
+     import random
+     import string
+ 
+-    version = pkg_resources.require("TEPID")[0].version
++    version = "ad46d65b5c41bf8a9171215d49b3ffaecdceaab0"
+ 
+     parser = ArgumentParser(description='TEPID -- transposable element polymorphism identification')
+     group = parser.add_mutually_exclusive_group()

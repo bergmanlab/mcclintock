@@ -28,9 +28,13 @@ def main():
     non_abs_ref_insertions = get_non_absent_ref_tes(deletions, te_gff, te_to_family, sample_name)
 
     insertions += non_abs_ref_insertions
-
-    mccutils.make_redundant_bed(insertions, sample_name, out_dir, method="tepid")
-    mccutils.make_nonredundant_bed(insertions, sample_name, out_dir, method="tepid")
+    if len(insertions) > 0:
+        mccutils.make_redundant_bed(insertions, sample_name, out_dir, method="tepid")
+        mccutils.make_nonredundant_bed(insertions, sample_name, out_dir, method="tepid")
+    else:
+        mccutils.run_command(["touch",out_dir+"/"+sample_name+"_tepid_redundant.bed"])
+        mccutils.run_command(["touch",out_dir+"/"+sample_name+"_tepid_nonredundant.bed"])
+        
     mccutils.log("tepid","TEPID post processing complete")
 
 def get_te_family_map(taxonomy):
@@ -53,13 +57,13 @@ def read_insertions(bed, te_to_family, sample_name, reference=False):
             insert.end = int(split_line[2])
 
             if reference:
-                te_name = split_line[4]
+                te_name = split_line[4].split(",")[0]
                 insert.family = te_to_family[te_name]
                 insert.strand = split_line[3]
                 insert.type = "reference"
                 insert.name = insert.family+"_reference_"+sample_name+"_tepid_nonab_"
             else:
-                te_name = split_line[6]
+                te_name = split_line[6].split(",")[0]
                 insert.family = te_to_family[te_name]
                 insert.type = "non-reference"
                 insert.name = insert.family+"_non-reference_"+sample_name+"_tepid_"
