@@ -132,7 +132,7 @@ def map_reads(fq1, fq2, script_dir, ref_name, median_insert_size, out, threads=1
 def discover_variants(ref_name, script_dir, bam, split_bam, te_bed, out, threads=1, log=None):
     try:
         os.chdir(out)
-        command = [script_dir+"tepid-discover",
+        command = ["python2", script_dir+"tepid-discover",
                         "-p", str(threads),
                         "-n", ref_name,
                         "-c", bam,
