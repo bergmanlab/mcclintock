@@ -15,7 +15,6 @@ def main():
     threads = snakemake.threads
 
     median_insert_size_file = snakemake.input.median_insert_size
-    script_dir = snakemake.params.script_dir
     raw_fq2 = snakemake.params.raw_fq2
     ref_name = snakemake.params.ref_name
     out_dir = snakemake.params.out_dir
@@ -38,12 +37,12 @@ def main():
 
     mccutils.log("tepid","mapping reads", log=log)
     if is_paired:
-        bam, split_bam = map_reads(fq1, fq2, script_dir, ref_name, median_insert_size, out_dir, threads=threads, paired=True, log=log)
+        bam, split_bam = map_reads(fq1, fq2, ref_name, median_insert_size, out_dir, threads=threads, paired=True, log=log)
     else:
-        bam, split_bam = map_reads(fq1, fq2, script_dir, ref_name, median_insert_size, out_dir, threads=threads, paired=False, log=log)
+        bam, split_bam = map_reads(fq1, fq2, ref_name, median_insert_size, out_dir, threads=threads, paired=False, log=log)
 
     mccutils.log("tepid","discovering variants", log=log)
-    discover_variants(ref_name, script_dir, bam, split_bam, te_bed, out_dir, threads=threads, log=log)
+    discover_variants(ref_name, bam, split_bam, te_bed, out_dir, threads=threads, log=log)
     mccutils.log("tepid","TEPID run complete")
 
 def index_ref(fasta, ref_name, out, log=None):
@@ -93,11 +92,11 @@ def make_te_bed(gff, taxonomy, out):
     
     return te_bed
 
-def map_reads(fq1, fq2, script_dir, ref_name, median_insert_size, out, threads=1, paired=True, log=None):
+def map_reads(fq1, fq2, ref_name, median_insert_size, out, threads=1, paired=True, log=None):
     try:
         os.chdir(out)
         if paired:
-            command = ["bash", script_dir+"tepid-map", 
+            command = ["tepid-map", 
                             "-x", out+"/"+ref_name, 
                             "-y", out+"/"+ref_name+".X15_01_65525S", 
                             "-p", str(threads), 
@@ -106,7 +105,7 @@ def map_reads(fq1, fq2, script_dir, ref_name, median_insert_size, out, threads=1
                             "-1", fq1,
                             "-2", fq2 ]
         else:
-            command = ["bash", script_dir+"tepid-map-se", 
+            command = ["tepid-map-se", 
                             "-x", out+"/"+ref_name, 
                             "-y", out+"/"+ref_name+".X15_01_65525S", 
                             "-p", str(threads), 
@@ -129,10 +128,10 @@ def map_reads(fq1, fq2, script_dir, ref_name, median_insert_size, out, threads=1
     return bam, split_bam 
 
 
-def discover_variants(ref_name, script_dir, bam, split_bam, te_bed, out, threads=1, log=None):
+def discover_variants(ref_name, bam, split_bam, te_bed, out, threads=1, log=None):
     try:
         os.chdir(out)
-        command = ["python2", script_dir+"tepid-discover",
+        command = ["tepid-discover",
                         "-p", str(threads),
                         "-n", ref_name,
                         "-c", bam,

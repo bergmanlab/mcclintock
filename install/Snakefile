@@ -128,19 +128,13 @@ rule coverage:
         "echo 'coverage env installed' > {output}"
 
 rule tepid:
-    params:
-        discover_patch = config['paths']['install']+"patches/tepid/tepid-discover.patch",
-        url = config['URLs']['tepid'],
-        md5 = config['MD5s']['tepid'],
-        zipfile = config['paths']['install']+"tools/tepid/tepid.zip",
-        log = config['paths']['log_dir']+"install.log"
     output:
         config['output']['tepid']
     
     conda: config['ENVs']['tepid']
 
-    script:
-        config['paths']['install']+"scripts/tepid.py"
+    shell:
+        "echo 'TEPID env installed' > {output}"
 
 rule processing:
     output:

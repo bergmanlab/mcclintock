@@ -892,7 +892,6 @@ rule tepid_run:
     conda: config['envs']['tepid']
 
     params:
-        script_dir = config['args']['mcc_path']+"/install/tools/tepid/",
         raw_fq2 = config['in']['fq2'],
         ref_name = config['args']['ref_name'],
         out_dir = config['args']['out']+"/results/tepid/unfiltered/",
