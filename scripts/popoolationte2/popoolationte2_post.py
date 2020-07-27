@@ -41,7 +41,7 @@ def get_ref_tes(gff, taxon, chroms):
             if "#" not in line:
                 split_line = line.split("\t")
                 insert = mccutils.Insertion()
-                insert.type = "ref"
+                insert.type = "reference"
                 insert.chromosome = split_line[0]
                 insert.start = int(split_line[3])
                 insert.end = int(split_line[4])
@@ -76,14 +76,15 @@ def read_insertions(predictions, ref_tes, chroms, sample, both_end_support_neede
                         if not ref_tes[x].popoolationte2.added:
                             ref_tes[x].popoolationte2.added = True
                             
-                        insert.type = "ref"
+                        insert.type = "reference"
                         insert.start = ref_tes[x].start
                         insert.end = ref_tes[x].end
                         insert.strand = ref_tes[x].strand
                 
-                if insert.type == "ref":
+                if insert.type == "reference":
                     insert.name = insert.family+"_reference_"+str(insert.popoolationte2.frequency)+"_"+sample+"_popoolationte2_rp_"
                 else:
+                    insert.type = "non-reference"
                     insert.name = insert.family+"_non-reference_"+str(insert.popoolationte2.frequency)+"_"+sample+"_popoolationte2_rp_"
                 
                 if not insert.popoolationte2.added:

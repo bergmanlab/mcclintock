@@ -367,7 +367,7 @@ def make_nonredundant_bed(insertions, sample_name, out_dir, method="popoolationt
     uniq_inserts = {}
 
     for insert in insertions:
-        key = "_".join([insert.chromosome, str(insert.end)])
+        key = "_".join([insert.chromosome, str(insert.start), str(insert.end), insert.type])
         if key not in uniq_inserts.keys():
             uniq_inserts[key] = insert
         else:
@@ -385,7 +385,7 @@ def make_nonredundant_bed(insertions, sample_name, out_dir, method="popoolationt
                     uniq_inserts[key] = insert
             
             elif method == "relocate2":
-                if (uniq_inserts[key].left_support + uniq_inserts[key].right_support) < (insert.left_support + insert.right_support):
+                if (uniq_inserts[key].relocate2.left_support + uniq_inserts[key].relocate2.right_support) < (insert.relocate2.left_support + insert.relocate2.right_support):
                     uniq_inserts[key] = insert
             
             elif method == "retroseq":
@@ -397,7 +397,7 @@ def make_nonredundant_bed(insertions, sample_name, out_dir, method="popoolationt
                     uniq_inserts[key] = insert
             
             elif method == "temp":
-                if uniq_inserts[key].type == "non-reference" and (insert.type == "reference" or insert.temp.support > uniq_inserts[key].temp.support):
+                if insert.temp.support > uniq_inserts[key].temp.support:
                     uniq_inserts[key] = insert
             
             elif method == "ngs_te_mapper":
@@ -405,7 +405,7 @@ def make_nonredundant_bed(insertions, sample_name, out_dir, method="popoolationt
                     uniq_inserts[key] = insert
             
             elif method == "tepid":
-                if uniq_inserts[key].type == "non-reference" and (insert.type == "reference" or insert.tepid.support > uniq_inserts[key].tepid.support):
+                if insert.tepid.support > uniq_inserts[key].tepid.support:
                     uniq_inserts[key] = insert
     
     tmp_bed = out_dir+"/tmp.bed"
