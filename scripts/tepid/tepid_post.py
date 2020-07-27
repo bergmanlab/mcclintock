@@ -20,10 +20,11 @@ def main():
 
     mccutils.log("tepid","running TEPID post processing")
     te_to_family = get_te_family_map(te_taxonomy)
-    insertions = read_insertions(insertions_bed, te_to_family, sample_name, reference=False)
+    te_pos_to_family = get_te_pos_family_map(te_gff, te_to_family)
+    insertions = read_insertions(insertions_bed, te_to_family, sample_name, te_pos_to_family, reference=False)
     insertions = add_support(insertions, insertions_support, threshold=config.READ_SUPPORT_THRESHOLD)
 
-    deletions = read_insertions(deletions_bed, te_to_family, sample_name, reference=True)
+    deletions = read_insertions(deletions_bed, te_to_family, sample_name, te_pos_to_family, reference=True)
     deletions = add_support(deletions, deletions_support, threshold=config.READ_SUPPORT_THRESHOLD)
     non_abs_ref_insertions = get_non_absent_ref_tes(deletions, te_gff, te_to_family, sample_name)
 
@@ -46,7 +47,26 @@ def get_te_family_map(taxonomy):
     
     return te_to_family
 
-def read_insertions(bed, te_to_family, sample_name, reference=False):
+def get_te_pos_family_map(gff, te_to_family):
+    pos_to_te = {}
+    with open(gff, "r") as g:
+        for line in g:
+            if "#" not in line:
+                split_line = line.split("\t")
+                chrom = split_line[0]
+                start = split_line[3]
+                end = split_line[4]
+                feats = split_line[8].split(";")
+                te_name = ""
+                for feat in feats:
+                    if "ID=" in feat:
+                        te_name = feat.split("=")[1].replace("\n","")
+                pos_to_te[chrom+"_"+start+"_"+end] = te_to_family[te_name]
+    
+    return pos_to_te
+
+
+def read_insertions(bed, te_to_family, sample_name, te_pos_to_family, reference=False):
     inserts = []
     with open(bed,"r") as b:
         for line in b:
@@ -63,8 +83,10 @@ def read_insertions(bed, te_to_family, sample_name, reference=False):
                 insert.type = "reference"
                 insert.name = insert.family+"_reference_"+sample_name+"_tepid_nonab_"
             else:
-                te_name = split_line[6].split(",")[0]
-                insert.family = te_to_family[te_name]
+                te_chrom = split_line[3]
+                te_start = split_line[4]
+                te_end = split_line[5]
+                insert.family = te_pos_to_family[te_chrom+"_"+te_start+"_"+te_end]
                 insert.type = "non-reference"
                 insert.name = insert.family+"_non-reference_"+sample_name+"_tepid_"
             
