@@ -4,7 +4,7 @@ import subprocess
 sys.path.append(snakemake.config['args']['mcc_path'])
 import scripts.mccutils as mccutils
 import config.relocate.relocate_run as config
-
+import random
 
 def main():
     
@@ -32,14 +32,23 @@ def main():
     te_gff = input_dir+"te.gff"
     reference_fasta = input_dir+"reference.fasta"
 
+    uniq_id = str(random.randint(10000,99999))
+    while uniq_id in fq_dir:
+        mccutils.log("relocate","unique id: "+uniq_id+" occurs in file path... selecting a new one...", log=log)
+        uniq_id = str(random.randint(10000,99999))
+
+    fq1_uniq_id = uniq_id+"_mcc_relocate_1"
+    fq2_uniq_id = uniq_id+"_mcc_relocate_2"
+    unpaired_id = uniq_id+"_unPaired"
+
     os.symlink(snakemake.input.consensus_fasta, consensus_fasta)
     os.symlink(snakemake.input.te_gff, te_gff)
     os.symlink(snakemake.input.reference_fasta, reference_fasta)
     if is_paired:
-        os.symlink(snakemake.input.fq1, fq_dir+sample_name+"_1.fq")
-        os.symlink(snakemake.input.fq2, fq_dir+sample_name+"_2.fq")
+        os.symlink(snakemake.input.fq1, fq_dir+sample_name+"."+fq1_uniq_id+".fq")
+        os.symlink(snakemake.input.fq2, fq_dir+sample_name+"."+fq2_uniq_id+".fq")
     else:
-        os.symlink(snakemake.input.fq1, fq_dir+sample_name+".unPaired.fq")
+        os.symlink(snakemake.input.fq1, fq_dir+sample_name+"."+unpaired_id+".fq")
 
 
 
@@ -61,9 +70,9 @@ def main():
 
 
     if is_paired:
-        command += ["-1", "_1", "-2", "_2"]
+        command += ["-1", fq1_uniq_id, "-2", fq2_uniq_id]
     else:
-        command += ["-u", "unPaired"]
+        command += ["-u", unpaired_id]
     
     
     mccutils.run_command(command, log=log)
