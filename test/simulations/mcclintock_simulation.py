@@ -27,18 +27,36 @@ def main():
             # forward
             consensus_seqs = get_seqs(args.consensus)
             reference_seqs = get_seqs(args.reference)
-            modified_reference = add_synthetic_insertion(reference_seqs, consensus_seqs, args.config, x, args.out, run_id=args.runid, seed=args.seed)
-            num_pairs = calculate_num_pairs(modified_reference)
-            fastq1, fastq2 = create_synthetic_reads(modified_reference, num_pairs, x, args.out, run_id=args.runid, seed=args.seed)
-            run_mcclintock(fastq1, fastq2, args.reference, args.consensus, args.locations, args.taxonomy, x, args.proc, args.out, args.config, run_id=args.runid)
+            
+            modified_reference = args.out+"/data/forward/"+str(args.runid)+str(x)+".modref.fasta"
+            if not os.path.exists(modified_reference):
+                modified_reference = add_synthetic_insertion(reference_seqs, consensus_seqs, args.config, x, args.out, run_id=args.runid, seed=args.seed)
+            
+            fastq1 = modified_reference.replace(".fasta", "_1.fastq")
+            fastq2 = modified_reference.replace(".fasta", "_2.fastq")
+            if not os.path.exists(fastq1) or not os.path.exists(fastq2):
+                num_pairs = calculate_num_pairs(modified_reference)
+                fastq1, fastq2 = create_synthetic_reads(modified_reference, num_pairs, x, args.out, run_id=args.runid, seed=args.seed)
+
+            if not os.path.exists(args.out+"/results/forward/run"+args.runid+"_"+str(x)+"/results/summary/summary_report.txt"):
+                run_mcclintock(fastq1, fastq2, args.reference, args.consensus, args.locations, args.taxonomy, x, args.proc, args.out, args.config, run_id=args.runid)
 
             # reverse
             consensus_seqs = get_seqs(args.consensus)
             reference_seqs = get_seqs(args.reference)
-            modified_reference = add_synthetic_insertion(reference_seqs, consensus_seqs, args.config, x, args.out, run_id=args.runid, seed=args.seed, reverse=True)
-            num_pairs = calculate_num_pairs(modified_reference)
-            fastq1, fastq2 = create_synthetic_reads(modified_reference, num_pairs, x, args.out, run_id=args.runid, seed=args.seed)
-            run_mcclintock(fastq1, fastq2, args.reference, args.consensus, args.locations, args.taxonomy, x, args.proc, args.out, args.config, run_id=args.runid, reverse=True)
+
+            modified_reference = args.out+"/data/reverse/"+str(args.runid)+str(x)+".modref.fasta"
+            if not os.path.exists(modified_reference):
+                modified_reference = add_synthetic_insertion(reference_seqs, consensus_seqs, args.config, x, args.out, run_id=args.runid, seed=args.seed, reverse=True)
+            
+            fastq1 = modified_reference.replace(".fasta", "_1.fastq")
+            fastq2 = modified_reference.replace(".fasta", "_2.fastq")
+            if not os.path.exists(fastq1) or not os.path.exists(fastq2):
+                num_pairs = calculate_num_pairs(modified_reference)
+                fastq1, fastq2 = create_synthetic_reads(modified_reference, num_pairs, x, args.out, run_id=args.runid, seed=args.seed)
+
+            if not os.path.exists(args.out+"/results/reverse/run"+args.runid+"_"+str(x)+"/results/summary/summary_report.txt"):
+                run_mcclintock(fastq1, fastq2, args.reference, args.consensus, args.locations, args.taxonomy, x, args.proc, args.out, args.config, run_id=args.runid, reverse=True)
 
     elif args.mode == "analysis":
         if not os.path.exists(args.out+"/summary/"):
