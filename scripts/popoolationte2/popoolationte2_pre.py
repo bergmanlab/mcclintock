@@ -15,6 +15,10 @@ def main():
     out_dir = snakemake.params.out_dir
     threads = snakemake.threads
 
+    # ensures intermediate files from previous runs are removed
+    for f in os.listdir(out_dir):
+        mccutils.remove(out_dir+"/"+f)
+
     index_fasta(ref_fasta, log=log)
     sam = map_reads(ref_fasta, fq1, fq2, out_dir, threads=threads, log=log)
     bam = sam_to_bam(sam, out_dir+"/tmp.bam", threads=threads, log=log)

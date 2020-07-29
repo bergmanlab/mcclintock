@@ -18,6 +18,11 @@ def main():
     mccutils.mkdir(mcc_out+"/results/")
     coverage_out = mcc_out+"/results/coverage/"
     mccutils.mkdir(coverage_out)
+
+    # ensures intermediate files from previous runs are removed
+    for f in os.listdir(coverage_out):
+        mccutils.remove(coverage_out+"/"+f)
+
     run_id = snakemake.config['args']['run_id']
     te_seqs = snakemake.input.consensus
     log = snakemake.params.log
