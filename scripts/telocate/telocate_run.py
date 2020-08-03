@@ -23,6 +23,10 @@ def main():
     telocate = snakemake.params.run_script
     out_dir = snakemake.params.out_dir
 
+    # ensures intermediate files from previous runs are removed
+    for f in os.listdir(out_dir):
+        mccutils.remove(out_dir+"/"+f)
+
     sam_dir = out_dir+"/sam/"
     mccutils.mkdir(sam_dir)
     te_locate_sam = sam_dir+"te-locate.sam"

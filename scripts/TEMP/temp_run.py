@@ -29,6 +29,10 @@ def main():
     scripts_dir = snakemake.params.scripts_dir
     sample_name = snakemake.params.sample_name
 
+    # ensures intermediate files from previous runs are removed
+    for f in os.listdir(out_dir):
+        mccutils.remove(out_dir+"/"+f)
+
     mccutils.log("temp","running TEMP Module")
     median_insert_size = get_median_insert_size(median_insert_size_file)
 

@@ -19,6 +19,10 @@ def main():
 
     threads = snakemake.threads
 
+    # ensures intermediate files from previous runs are removed
+    for f in os.listdir(out_dir):
+        mccutils.remove(out_dir+"/"+f)
+
     mccutils.log("popoolationte","formatting read names")
     fq1,fq2 = format_read_names(fq1, fq2, sample_name, out_dir)
     mccutils.log("popoolationte","indexing popoolationTE reference fasta", log=log)
