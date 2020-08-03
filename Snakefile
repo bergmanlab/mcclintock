@@ -921,7 +921,8 @@ rule tepid_post:
 
     params:
         sample_name = config['args']['sample_name'],
-        out_dir = config['args']['out']+"/results/tepid/"
+        out_dir = config['args']['out']+"/results/tepid/",
+        chromosomes = config['args']['chromosomes']
 
     output:
         config['args']['out']+"/results/tepid/"+config['args']['sample_name']+"_tepid_nonredundant.bed"

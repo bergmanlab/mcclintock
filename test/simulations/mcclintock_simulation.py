@@ -404,6 +404,8 @@ def run_mcclintock(fastq1, fastq2, reference, consensus, locations, taxonomy, re
     
     mcc_path = config['mcclintock']['path']
     command = ["python3",mcc_path+"/mcclintock.py", "-r", reference, "-c", consensus, "-1", fastq1, "-2", fastq2, "-p", str(threads), "-o", mcc_out, "-g", locations, "-t", taxonomy, "-m", config['mcclintock']['methods']]
+    if 'augment' in config['mcclintock'].keys() and config['mcclintock']['augment'] is not None:
+        command += ["-a", config['mcclintock']['augment']]
     print("running mcclintock... output:", mcc_out)
     run_command_stdout(command, mcc_out+"/run.stdout", log=mcc_out+"/run.stderr")
     if not os.path.exists(mcc_out+"/results/summary/summary_report.txt"):
