@@ -46,8 +46,10 @@ def read_insertions(popoolationte, sample_name, chromosomes, require_both_end_su
                 insert.end = int(float(split_line[15]))               
 
             if "-" in split_line[6]:
+                insert.type = "non-reference"
                 insert.name = split_line[3]+"_non-reference_"+split_line[4]+"_"+sample_name+"_popoolationte_rp_"
             else:
+                insert.type = "reference"
                 insert.name = split_line[3]+"_reference_"+split_line[4]+"_"+sample_name+"_popoolationte_rp_"
 
             insert.popoolationte.support_type = split_line[2]

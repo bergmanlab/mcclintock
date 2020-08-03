@@ -58,6 +58,11 @@ class Popoolationte:
         self.f_read_support_percent = 0
         self.r_read_support_percent = 0
 
+class Tepid:
+    def __init__(self):
+        self.id = -1
+        self.support = 0
+
 class Insertion:
     def __init__(self):
         self.chromosome = "None"
@@ -75,6 +80,7 @@ class Insertion:
         self.telocate = Telocate()
         self.temp = Temp()
         self.ngs_te_mapper = Ngs_te_mapper()
+        self.tepid = Tepid()
 
 
 def mkdir(indir, log=None):
@@ -361,7 +367,7 @@ def make_nonredundant_bed(insertions, sample_name, out_dir, method="popoolationt
     uniq_inserts = {}
 
     for insert in insertions:
-        key = "_".join([insert.chromosome, str(insert.end)])
+        key = "_".join([insert.chromosome, str(insert.start), str(insert.end), insert.type])
         if key not in uniq_inserts.keys():
             uniq_inserts[key] = insert
         else:
@@ -379,7 +385,7 @@ def make_nonredundant_bed(insertions, sample_name, out_dir, method="popoolationt
                     uniq_inserts[key] = insert
             
             elif method == "relocate2":
-                if (uniq_inserts[key].left_support + uniq_inserts[key].right_support) < (insert.left_support + insert.right_support):
+                if (uniq_inserts[key].relocate2.left_support + uniq_inserts[key].relocate2.right_support) < (insert.relocate2.left_support + insert.relocate2.right_support):
                     uniq_inserts[key] = insert
             
             elif method == "retroseq":
@@ -391,11 +397,15 @@ def make_nonredundant_bed(insertions, sample_name, out_dir, method="popoolationt
                     uniq_inserts[key] = insert
             
             elif method == "temp":
-                if uniq_inserts[key].temp.support != "!" and insert.temp.support > uniq_inserts[key].temp.support:
+                if insert.temp.support > uniq_inserts[key].temp.support:
                     uniq_inserts[key] = insert
             
             elif method == "ngs_te_mapper":
                 if insert.ngs_te_mapper.support > uniq_inserts[key].ngs_te_mapper.support:
+                    uniq_inserts[key] = insert
+            
+            elif method == "tepid":
+                if insert.tepid.support > uniq_inserts[key].tepid.support:
                     uniq_inserts[key] = insert
     
     tmp_bed = out_dir+"/tmp.bed"

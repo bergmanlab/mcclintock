@@ -39,6 +39,7 @@ def read_insertions(retroseq_vcf, sample_name, chromosomes, support_threshold=0,
                 insert.start = int(split_line[10])
                 insert.end = int(split_line[11])
                 insert.retroseq.read_support = int(split_line[6])
+                insert.type = "non-reference"
                 insert.name = split_line[9]+"_non-reference_"+sample_name+"_retroseq_rp_"
                 insert.retroseq.breakpoint_confidence = int(split_line[22])
 

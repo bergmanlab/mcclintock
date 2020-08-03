@@ -53,9 +53,9 @@ def get_insertions(gff, sample_name, chromosomes, ref_l_threshold=0, ref_r_thres
                         feat_te_name = feat.split("=")[1]
                     elif "Note=" in feat:
                         if "Shared" in feat:
-                            insert.type = "ref"
+                            insert.type = "reference"
                         elif "Non-reference" in feat:
-                            insert.type = "nonref"
+                            insert.type = "non-reference"
                         else:
                             insert.type = "missing"
                     
@@ -65,15 +65,15 @@ def get_insertions(gff, sample_name, chromosomes, ref_l_threshold=0, ref_r_thres
                     elif "right_flanking_read_count=" in feat:
                         insert.relocate.right_support = int(feat.split("=")[1])
                 
-                if insert.type == "ref":
+                if insert.type == "reference":
                     insert.name = feat_te_name+"_reference_"+sample_name+"_relocate_sr_"
-                elif insert.type == "nonref":
+                elif insert.type == "non-reference":
                     feat_te_name = feat_id.split(".")[0]
                     insert.name = feat_te_name+"_non-reference_"+sample_name+"_relocate_sr_"
             
-            if insert.type == "ref" and insert.relocate.left_support >= ref_l_threshold and insert.relocate.right_support >= ref_r_threshold and insert.chromosome in chromosomes:
+            if insert.type == "reference" and insert.relocate.left_support >= ref_l_threshold and insert.relocate.right_support >= ref_r_threshold and insert.chromosome in chromosomes:
                 insertions.append(insert)
-            elif insert.type == "nonref" and insert.relocate.left_support >= nonref_l_threshold and insert.relocate.right_support >= nonref_r_threshold and insert.chromosome in chromosomes:
+            elif insert.type == "non-reference" and insert.relocate.left_support >= nonref_l_threshold and insert.relocate.right_support >= nonref_r_threshold and insert.chromosome in chromosomes:
                 insertions.append(insert)
     
     return insertions
@@ -92,7 +92,7 @@ def set_ref_orientations(insertions, te_gff):
                 ref_strands["_".join([chrom, start, end])] = strand
     
     for insert in insertions:
-        if insert.type == "ref":
+        if insert.type == "reference":
             insert.strand = ref_strands["_".join([insert.chromosome, str(insert.start), str(insert.end)])]
         
         out_inserts.append(insert)

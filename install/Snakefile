@@ -127,6 +127,15 @@ rule coverage:
     shell:
         "echo 'coverage env installed' > {output}"
 
+rule tepid:
+    output:
+        config['output']['tepid']
+    
+    conda: config['ENVs']['tepid']
+
+    shell:
+        "echo 'TEPID env installed' > {output}"
+
 rule processing:
     output:
         config['output']['processing'] 

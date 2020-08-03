@@ -13,6 +13,10 @@ def main():
     median_insert_size_file = snakemake.input.median_insert_size
     log = snakemake.params.log
 
+    # ensures intermediate files from previous runs are removed
+    for f in os.listdir(out_dir):
+        mccutils.remove(out_dir+"/"+f)
+
     is_paired = True
     if snakemake.params.raw_fq2 == "None":
         is_paired = False

@@ -25,8 +25,7 @@ def main():
                                     l_support_threshold=config.REF_LEFT_SUPPORT_THRESHOLD, 
                                     r_support_threshold=config.REF_RIGHT_SUPPORT_THRESHOLD,
                                     l_junction_threshold=config.REF_LEFT_JUNCTION_THRESHOLD,
-                                    r_junction_threshold=config.REF_RIGHT_JUNCTION_THRESHOLD
-                                    )
+                                    r_junction_threshold=config.REF_RIGHT_JUNCTION_THRESHOLD)
 
     nonref_insertions = get_insertions(nonref_gff, 
                                     sample_name,
@@ -35,8 +34,7 @@ def main():
                                     l_support_threshold=config.NONREF_LEFT_SUPPORT_THRESHOLD, 
                                     r_support_threshold=config.NONREF_RIGHT_SUPPORT_THRESHOLD,
                                     l_junction_threshold=config.NONREF_LEFT_JUNCTION_THRESHOLD,
-                                    r_junction_threshold=config.NONREF_RIGHT_JUNCTION_THRESHOLD
-                                    )
+                                    r_junction_threshold=config.NONREF_RIGHT_JUNCTION_THRESHOLD)
 
     ref_insertions = fix_ref_te_names(ref_insertions, rm_out, sample_name)
 
@@ -67,12 +65,15 @@ def get_insertions(gff, sample_name, chromosomes, l_support_threshold=0, r_suppo
 
                 insert.name = split_line[8].split("=")[1]
 
+                te_name = ""
                 if insert_type == "ref":
+                    insert.type = "reference"
                     insert.relocate2.right_junction = int(split_line[11].split(":")[1])
                     insert.relocate2.left_junction = int(split_line[12].split(":")[1])
                     insert.relocate2.right_support = int(split_line[13].split(":")[1])
                     insert.relocate2.left_support = int(split_line[14].split(":")[1])
                 else:
+                    insert.type = "non-reference"
                     te_name = split_line[9].split("=")[1]
                     insert.name = te_name+"_non-reference_"+sample_name+"_relocate2_sr_"
                     insert.relocate2.right_junction = int(split_line[12].split("=")[1])
@@ -80,7 +81,12 @@ def get_insertions(gff, sample_name, chromosomes, l_support_threshold=0, r_suppo
                     insert.relocate2.right_support = int(split_line[14].split("=")[1])
                     insert.relocate2.left_support = int(split_line[15].split("=")[1])
 
-                if insert.relocate2.right_junction >= r_junction_threshold and insert.relocate2.left_junction >= l_junction_threshold and insert.relocate2.right_support >= r_support_threshold and insert.relocate2.left_support >= l_support_threshold and insert.chromosome in chromosomes:
+                if ( insert.relocate2.right_junction >= r_junction_threshold and 
+                        insert.relocate2.left_junction >= l_junction_threshold and 
+                        insert.relocate2.right_support >= r_support_threshold and 
+                        insert.relocate2.left_support >= l_support_threshold and 
+                        insert.chromosome in chromosomes and
+                        te_name != "repeat_name"):
                     insertions.append(insert)
     
     return insertions

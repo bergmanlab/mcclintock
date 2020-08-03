@@ -6,7 +6,8 @@ URL = {
     "ngs_te_mapper" : "https://github.com/bergmanlab/ngs_te_mapper/archive/fb23590200666fe66f1c417c5d5934385cb77ab9.zip",
     "popoolationte" : "http://downloads.sourceforge.net/project/popoolationte/popoolationte_1.02.zip",
     "popoolationte2": "http://downloads.sourceforge.net/project/popoolation-te2/popte2-v1.10.03.jar",
-    "relocate2" : "https://github.com/stajichlab/RelocaTE2/archive/v2.0.1.zip"
+    "relocate2" : "https://github.com/stajichlab/RelocaTE2/archive/v2.0.1.zip",
+    "tepid" : "https://github.com/ListerLab/TEPID/archive/ad46d65b5c41bf8a9171215d49b3ffaecdceaab0.zip"
 }
 
 MD5 = {
@@ -17,7 +18,8 @@ MD5 = {
     "ngs_te_mapper" : "971dccdb8112e754293f7b8b44799aeb",
     "popoolationte" : "315d266bd6da7487c919576dc46b92b4",
     "popoolationte2": "0c06186f0b1df215949f57a5cbb2d039",
-    "relocate2" : "63eb7dbc09ffeb4063aef4857d198b06"
+    "relocate2" : "63eb7dbc09ffeb4063aef4857d198b06",
+    "tepid" : "51f61acf138b07842074f054aba780d5"
 }
 
 
@@ -32,6 +34,7 @@ ENV = {
     "popoolationte" : ENV_PATH+"mcc_popoolationte.yml",
     "popoolationte2" : ENV_PATH+"mcc_popoolationte2.yml",
     "relocate2" : ENV_PATH+"mcc_relocate2.yml",
+    "tepid" : ENV_PATH+"mcc_tepid.yml",
     "mcc_processing":  ENV_PATH+"mcc_processing.yml"
 }
 
@@ -47,5 +50,6 @@ OUTPUT = {
     "popoolationte" : INSTALL_PATH+"tools/popoolationte/identify-te-insertsites.pl",
     "popoolationte2" : INSTALL_PATH+"tools/popoolationte2/popte2-v1.10.03.jar",
     "relocate2" : INSTALL_PATH+"tools/relocate2/relocaTE2.log",
+    "tepid" : INSTALL_PATH+"tools/tepid/tepid-map",
     "processing" : INSTALL_PATH+"tools/processing.log"
 }

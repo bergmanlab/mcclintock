@@ -27,18 +27,36 @@ def main():
             # forward
             consensus_seqs = get_seqs(args.consensus)
             reference_seqs = get_seqs(args.reference)
-            modified_reference = add_synthetic_insertion(reference_seqs, consensus_seqs, args.config, x, args.out, run_id=args.runid, seed=args.seed)
-            num_pairs = calculate_num_pairs(modified_reference)
-            fastq1, fastq2 = create_synthetic_reads(modified_reference, num_pairs, x, args.out, run_id=args.runid, seed=args.seed)
-            run_mcclintock(fastq1, fastq2, args.reference, args.consensus, args.locations, args.taxonomy, x, args.proc, args.out, args.config, run_id=args.runid)
+            
+            modified_reference = args.out+"/data/forward/"+str(args.runid)+str(x)+".modref.fasta"
+            if not os.path.exists(modified_reference):
+                modified_reference = add_synthetic_insertion(reference_seqs, consensus_seqs, args.config, x, args.out, run_id=args.runid, seed=args.seed)
+            
+            fastq1 = modified_reference.replace(".fasta", "_1.fastq")
+            fastq2 = modified_reference.replace(".fasta", "_2.fastq")
+            if not os.path.exists(fastq1) or not os.path.exists(fastq2):
+                num_pairs = calculate_num_pairs(modified_reference)
+                fastq1, fastq2 = create_synthetic_reads(modified_reference, num_pairs, x, args.out, run_id=args.runid, seed=args.seed)
+
+            if not os.path.exists(args.out+"/results/forward/run"+args.runid+"_"+str(x)+"/results/summary/summary_report.txt"):
+                run_mcclintock(fastq1, fastq2, args.reference, args.consensus, args.locations, args.taxonomy, x, args.proc, args.out, args.config, run_id=args.runid)
 
             # reverse
             consensus_seqs = get_seqs(args.consensus)
             reference_seqs = get_seqs(args.reference)
-            modified_reference = add_synthetic_insertion(reference_seqs, consensus_seqs, args.config, x, args.out, run_id=args.runid, seed=args.seed, reverse=True)
-            num_pairs = calculate_num_pairs(modified_reference)
-            fastq1, fastq2 = create_synthetic_reads(modified_reference, num_pairs, x, args.out, run_id=args.runid, seed=args.seed)
-            run_mcclintock(fastq1, fastq2, args.reference, args.consensus, args.locations, args.taxonomy, x, args.proc, args.out, args.config, run_id=args.runid, reverse=True)
+
+            modified_reference = args.out+"/data/reverse/"+str(args.runid)+str(x)+".modref.fasta"
+            if not os.path.exists(modified_reference):
+                modified_reference = add_synthetic_insertion(reference_seqs, consensus_seqs, args.config, x, args.out, run_id=args.runid, seed=args.seed, reverse=True)
+            
+            fastq1 = modified_reference.replace(".fasta", "_1.fastq")
+            fastq2 = modified_reference.replace(".fasta", "_2.fastq")
+            if not os.path.exists(fastq1) or not os.path.exists(fastq2):
+                num_pairs = calculate_num_pairs(modified_reference)
+                fastq1, fastq2 = create_synthetic_reads(modified_reference, num_pairs, x, args.out, run_id=args.runid, seed=args.seed)
+
+            if not os.path.exists(args.out+"/results/reverse/run"+args.runid+"_"+str(x)+"/results/summary/summary_report.txt"):
+                run_mcclintock(fastq1, fastq2, args.reference, args.consensus, args.locations, args.taxonomy, x, args.proc, args.out, args.config, run_id=args.runid, reverse=True)
 
     elif args.mode == "analysis":
         if not os.path.exists(args.out+"/summary/"):
@@ -276,38 +294,39 @@ def add_synthetic_insertion(reference_seqs, consensus_seqs, config, rep, out, ru
             chrom = line.split("\t")[0]
             valid_chroms.append(chrom)
     
-    # removed chroms that are not in target file
-    filtered_reference = []
-    for ref in reference_seqs:
-        if ref[0] in valid_chroms:
-            filtered_reference.append(ref)
-
-    # get reference contig to modify
-    chrom_idx_to_change = random.randint(0,len(filtered_reference)-1)
-    chrom_to_change = filtered_reference[chrom_idx_to_change][0]
-    seq_to_change = filtered_reference[chrom_idx_to_change][1]
-
-
     # get target site to add TE
     targets = []
     with open(target_file,"r") as t:
         for line in t:
             split_line = line.split("\t")
-            if split_line[0] == chrom_to_change:
-                targets.append(split_line)
+            targets.append(split_line)
 
     if len(targets) == 0:
-        print(chrom_to_change)
-        sys.exit("missing chromosome in target files")
+        sys.exit("no targets in target bed file...exiting...")
+    
     target = targets[random.randint(0, len(targets)-1)]
     target_site = random.randint(int(target[1]), int(target[2])-1)
+    target_chrom = target[0]
     duplication_size = config['families'][family_to_add]["TSD"]
+
+
+    chrom_idx_to_change = None
+    seq_to_change = None
+
+    # get reference contig to modify
+    for x in range(0,len(reference_seqs)):
+        if reference_seqs[x][0] == target_chrom:
+            chrom_idx_to_change = x
+            seq_to_change = reference_seqs[x][1]
+
+    if chrom_idx_to_change is None:
+        sys.exit("chrom: "+target_chrom+" not in reference")
 
     # add TE in reference contig
     seq_start = seq_to_change[0:target_site+duplication_size]
     seq_end = seq_to_change[target_site:]
     modified_seq = seq_start + family_seq + seq_end
-    filtered_reference[chrom_idx_to_change][1] = modified_seq
+    reference_seqs[chrom_idx_to_change][1] = modified_seq
 
 
     outfasta = outdir+"/"+run_id+str(rep)+".modref.fasta"
@@ -315,7 +334,7 @@ def add_synthetic_insertion(reference_seqs, consensus_seqs, config, rep, out, ru
 
     
     with open(outfasta+".tmp","w") as outfa:
-        for seq in filtered_reference:
+        for seq in reference_seqs:
             outfa.write(">"+seq[0]+"\n")
             outfa.write(seq[1]+"\n")
     
@@ -329,9 +348,9 @@ def add_synthetic_insertion(reference_seqs, consensus_seqs, config, rep, out, ru
     
     # create bed that marks TSD
     with open(outbed,"w") as bed:
-        bed.write(chrom_to_change+"\t"+str(target_site)+"\t"+str(target_site+duplication_size)+"\t"+family_to_add+"\n")
+        bed.write(target_chrom+"\t"+str(target_site)+"\t"+str(target_site+duplication_size)+"\t"+family_to_add+"\n")
 
-    print(chrom_to_change+"\t"+str(target_site)+"\t"+str(target_site+duplication_size)+"\t"+family_to_add+"\n")
+    print(target_chrom+"\t"+str(target_site)+"\t"+str(target_site+duplication_size)+"\t"+family_to_add+"\n")
 
     return outfasta
 
@@ -385,6 +404,8 @@ def run_mcclintock(fastq1, fastq2, reference, consensus, locations, taxonomy, re
     
     mcc_path = config['mcclintock']['path']
     command = ["python3",mcc_path+"/mcclintock.py", "-r", reference, "-c", consensus, "-1", fastq1, "-2", fastq2, "-p", str(threads), "-o", mcc_out, "-g", locations, "-t", taxonomy, "-m", config['mcclintock']['methods']]
+    if 'augment' in config['mcclintock'].keys() and config['mcclintock']['augment'] is not None:
+        command += ["-a", config['mcclintock']['augment']]
     print("running mcclintock... output:", mcc_out)
     run_command_stdout(command, mcc_out+"/run.stdout", log=mcc_out+"/run.stderr")
     if not os.path.exists(mcc_out+"/results/summary/summary_report.txt"):

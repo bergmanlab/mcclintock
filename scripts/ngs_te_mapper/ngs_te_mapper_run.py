@@ -26,6 +26,10 @@ def main():
     out_dir = snakemake.params.out_dir
     out_bed = snakemake.output[0]
 
+    # ensures intermediate files from previous runs are removed
+    for f in os.listdir(out_dir):
+        mccutils.remove(out_dir+"/"+f)
+
     is_paired = True
     if snakemake.params.raw_fq2 == "None":
         is_paired = False
