@@ -32,6 +32,7 @@ python3 mcclintock.py \
 * [Software Dependencies](#dependency)
 * [Installing McClintock](#install)
 * [Running McClintock](#run)
+* [McClintock Input](#input)
 * [McClintock Output](#output)
 
 
@@ -127,7 +128,9 @@ python3 mcclintock.py \
 
 #### McClintock Parameters
 ```
-  -h, --help            show this help message and exit
+##########################
+##       Required       ##
+##########################
   -r REFERENCE, --reference REFERENCE
                         A reference genome sequence in fasta format
   -c CONSENSUS, --consensus CONSENSUS
@@ -137,6 +140,12 @@ python3 mcclintock.py \
                         The path of the first fastq file from paired end read
                         sequencing or the fastq file from single read
                         sequencing
+
+
+##########################
+##       Optional       ##
+##########################
+  -h, --help            show this help message and exit
   -2 SECOND, --second SECOND
                         The path of the second fastq file from a paired end
                         read sequencing
@@ -193,6 +202,35 @@ python3 mcclintock.py \
   * `popoolationte` : Runs the [PoPoolation TE](https://sourceforge.net/p/popoolationte/wiki/Main) component method (Paired-End Only)
   * `popoolationte2` : Runs the [PoPoolation TE2](https://sourceforge.net/p/popoolation-te2/wiki/Home) component method (Paired-End Only)
   * `te-locate` : Runs the [TE-locate](https://sourceforge.net/projects/te-locate) component method (Paired-End Only)
+
+## <a name="input"></a> Mcclintock Input Files
+#### Required
+* Reference FASTA (`-r/--reference`)
+  * The genome sequence of the reference genome in FASTA format. The reads from the FASTQ file(s) will be mapped to this reference genome to predict TE insertions
+  * [example](https://github.com/bergmanlab/mcclintock/blob/master/test/sacCer2.fasta)
+* Consensus FASTA (`-c/--consensus`)
+  * A FASTA file containing a consensus sequence for each family
+  * [example](https://github.com/bergmanlab/mcclintock/blob/master/test/sac_cer_TE_seqs.fasta)
+* FASTQ File 1 (`-1/--first`)
+  * Either the Read1 FASTQ file from a paired-end sequencing run or the FASTQ file from an unpaired sequencing run
+#### Optional
+* FASTQ File 2 (`-2/--second`)
+  * The Read2 FASTQ file from a paired-end sequencing run. Not required if using unpaired data.
+* Locations (`-g/--locations`)
+  * A GFF file contianing the locations of the reference TEs.
+  * Each annotation should contain an `ID=` attribute that contains a unique identifier that does not match any other annotation.
+  * If both the locations GFF and taxonomy TSV are not provided, McClintock will produce them using RepeatMasker with the consensus sequences
+  * [example](https://github.com/bergmanlab/mcclintock/blob/master/test/reference_TE_locations.gff)
+* Taxonomy (`-t/--taxonomy`)
+  * A Tab deliminted file that maps the unique reference TE to the family it belongs to.
+  * This file should contain two columns, the first corresponding to the refence TE idendifier which should match the `ID=` attribute from the locations GFF(`-g`). The second column contains the reference TE's family which should match the name of a sequence in the consensus fasta (`-c`)
+  * [example](https://github.com/bergmanlab/mcclintock/blob/master/test/sac_cer_te_families.tsv)
+* Coverage FASTA (`-s/--coverage_fasta`)
+  * A fasta file of TE sequences to be used for the coverage analysis.
+  * By default, McClintock estimates the coverage and creates coverage plots of the consensus TE sequences (`-c`). This option allows you to use a custom set of TEs for the coverage estimations and plots.
+* Augment FASTA (`-a/--augment`)
+  * A FASTA file of TE sequences that will be included as extra chromosomes in the reference genome file (`-r`)
+  * Some methods leverage the reference TE sequences to find non-reference TEs insertions. The augment FASTA can be used to augment the reference genome with additional TEs that can be used to locate non-reference TE insertions that do not have a representative in the reference genome.
 
 ## <a name="output"></a> McClintock Output
 The results of McClintock component methods are output to the directory `<output>/results`.
