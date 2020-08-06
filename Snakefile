@@ -937,6 +937,7 @@ rule summary_report:
         fq2 = config['mcc']['fq2']
 
     params:
+        commit = config['args']['commit'],
         ref = config['mcc']['reference'],
         taxonomy = config['mcc']['taxonomy'],
         bam = config['mcc']['bam'],

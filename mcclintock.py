@@ -323,6 +323,20 @@ def make_run_config(args, sample_name, ref_name, full_command, current_directory
     input_dir = args.out+"/method_input/"
     results_dir = args.out+"/results/"
 
+    mcc_path = os.path.dirname(os.path.abspath(__file__))
+
+    os.chdir(mcc_path)
+    git_commit_file = args.out+"/git-commit.txt"
+    mccutils.run_command_stdout(["git","rev-parse","HEAD"], git_commit_file)
+    git_commit = ""
+    with open(git_commit_file,"r") as inf:
+        for line in inf:
+            git_commit = line.replace("\n","")
+    
+    mccutils.remove(git_commit_file)
+
+    mccutils.log("SETUP","McClintock Version: "+git_commit)
+
     out_files_to_make = []
     out_files = config.OUT_PATHS
     for key in out_files.keys():
@@ -352,7 +366,8 @@ def make_run_config(args, sample_name, ref_name, full_command, current_directory
         'out': str(args.out),
         'log_dir': log_dir,
         'augment_fasta': str(args.augment),
-        'mcc_path': os.path.dirname(os.path.abspath(__file__)),
+        'mcc_path': mcc_path,
+        'commit': git_commit,
         'sample_name': sample_name,
         'ref_name': ref_name,
         'run_id' : str(run_id),
