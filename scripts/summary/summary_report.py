@@ -13,6 +13,7 @@ def main():
     fq1 = snakemake.input.fq1
     fq2 = snakemake.input.fq2
 
+    commit = snakemake.params.commit
     ref = snakemake.params.ref
     taxonomy = snakemake.params.taxonomy
     bam = snakemake.params.bam
@@ -40,7 +41,7 @@ def main():
     if os.path.exists(taxonomy):
         make_te_csv(methods, out_file_map, taxonomy, out_dir+"te_summary.csv")
 
-    make_run_summary(out_file_map, methods, fq1, fq2, ref, bam, flagstat, median_insert_size, command, execution_dir, start_time, out_dir, snakemake.output.summary_report, paired=paired)
+    make_run_summary(out_file_map, commit, methods, fq1, fq2, ref, bam, flagstat, median_insert_size, command, execution_dir, start_time, out_dir, snakemake.output.summary_report, paired=paired)
     
 
 
@@ -144,7 +145,7 @@ def make_te_csv(methods, out_file_map, taxonomy, out_csv):
             out.write(",".join(line)+"\n")
     
 
-def make_run_summary(out_file_map, methods, fq1, fq2, ref, bam, flagstat, median_insert_size, command, execution_dir, start_time, out_dir, out_file, paired=False):
+def make_run_summary(out_file_map, commit, methods, fq1, fq2, ref, bam, flagstat, median_insert_size, command, execution_dir, start_time, out_dir, out_file, paired=False):
     out_lines = ["\n"]
     out_lines.append(("-"*34)+"\n")
     out_lines.append("MCCLINTOCK SUMMARY REPORT\n")
@@ -154,6 +155,7 @@ def make_run_summary(out_file_map, methods, fq1, fq2, ref, bam, flagstat, median
         if split[0] == "-":
             split_command[x] = split_command[x].replace("-", " \\\n\t-",1)
     command = " ".join(split_command)
+    out_lines.append("McClintock Version: "+commit+"\n\n")
     out_lines.append("Command:\n"+command+"\n")
     out_lines.append("\nrun from directory: "+execution_dir+"\n")
     out_lines.append(pad("Started:",12)+start_time+"\n")
