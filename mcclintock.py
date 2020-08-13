@@ -325,15 +325,23 @@ def make_run_config(args, sample_name, ref_name, full_command, current_directory
 
     mcc_path = os.path.dirname(os.path.abspath(__file__))
 
-    os.chdir(mcc_path)
-    git_commit_file = args.out+"/git-commit.txt"
-    mccutils.run_command_stdout(["git","rev-parse","HEAD"], git_commit_file)
-    git_commit = ""
-    with open(git_commit_file,"r") as inf:
-        for line in inf:
-            git_commit = line.replace("\n","")
-    
-    mccutils.remove(git_commit_file)
+    # get git commit hash to provide in summary report
+    git_commit = "?"
+    try:
+        os.chdir(mcc_path)
+        git_commit_file = args.out+"/git-commit.txt"
+        mccutils.run_command_stdout(["git","rev-parse","HEAD"], git_commit_file)
+        with open(git_commit_file,"r") as inf:
+            for line in inf:
+                git_commit = line.replace("\n","")
+        
+        mccutils.remove(git_commit_file)
+
+    except Exception as e:
+        track = traceback.format_exc()
+        print(track, file=sys.stderr)
+        print("Could not locate git commit hash...using '?' ", file=sys.stderr)
+        git_commit = "?"
 
     mccutils.log("SETUP","McClintock Version: "+git_commit)
 
