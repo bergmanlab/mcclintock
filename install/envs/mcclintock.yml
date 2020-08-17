@@ -7,3 +7,4 @@ dependencies:
   - python=3.8.2
   - snakemake=5.10.0
   - biopython=1.76
+  - git=2.23.0
