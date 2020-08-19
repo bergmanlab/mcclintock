@@ -257,7 +257,7 @@ def check_file_exists(infile):
 
 
 def replace_special_chars(string, encode="_"):
-    special_chars = [";","&","(",")","|","*","?","[","]","~","{","}","<","!","^",'"',"'","\\","$","/","+","-"]
+    special_chars = [";","&","(",")","|","*","?","[","]","~","{","}","<","!","^",'"',"'","\\","$","/","+","-","#"]
     for char in special_chars:
         string = string.replace(char,encode)
     
@@ -325,9 +325,23 @@ def make_redundant_bed(insertions, sample_name, out_dir, method="popoolationte")
 
     insertion_dict = {}
     out_inserts = []
+    malformed_inserts = []
+    properly_formed_inserts = []
     for insert in insertions:
-        insertion_dict[ "_".join([insert.chromosome, str(insert.start-1), str(insert.end), insert.name, "0", insert.strand])] = insert
+        if insert.start <= insert.end:
+            insertion_dict[ "_".join([insert.chromosome, str(insert.start-1), str(insert.end), insert.name, "0", insert.strand])] = insert
+            properly_formed_inserts.append(insert)
+        else:
+            malformed_inserts.append(insert)
 
+    insertions = properly_formed_inserts
+    # write malformed predictions to separate bed file
+    if len(malformed_inserts) > 0:
+        malformed_bed = out_dir+"/"+sample_name+"_"+method+"_malformed.bed"
+        with open(malformed_bed,"w") as out:
+            for insert in malformed_inserts:
+                out_line = "\t".join([insert.chromosome, str(insert.start-1), str(insert.end), insert.name, "0", insert.strand])
+                out.write(out_line+"\n")
 
     with open(tmp_bed, "w") as out:
         for insert in insertions:
