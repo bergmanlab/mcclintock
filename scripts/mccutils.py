@@ -326,12 +326,15 @@ def make_redundant_bed(insertions, sample_name, out_dir, method="popoolationte")
     insertion_dict = {}
     out_inserts = []
     malformed_inserts = []
+    properly_formed_inserts = []
     for insert in insertions:
         if insert.start <= insert.end:
             insertion_dict[ "_".join([insert.chromosome, str(insert.start-1), str(insert.end), insert.name, "0", insert.strand])] = insert
+            properly_formed_inserts.append(insert)
         else:
             malformed_inserts.append(insert)
 
+    insertions = properly_formed_inserts
     # write malformed predictions to separate bed file
     if len(malformed_inserts) > 0:
         malformed_bed = out_dir+"/"+sample_name+"_"+method+"_malformed.bed"
