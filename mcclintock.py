@@ -456,12 +456,12 @@ def run_workflow(args, sample_name, run_id, debug=False):
     for method in args.methods:
         command.append(out_files[method])
     
-    command.append(args.out+"/results/summary/summary_report.txt")
+    command.append(args.out+"/results/summary/data/run/summary_report.txt")
 
     # print(" ".join(command))
     try:
         mccutils.run_command(command)
-        mccutils.check_file_exists(args.out+"/results/summary/summary_report.txt")
+        mccutils.check_file_exists(args.out+"/results/summary/data/run/summary_report.txt")
     except Exception as e:
         track = traceback.format_exc()
         print(track, file=sys.stderr)
