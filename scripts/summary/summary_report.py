@@ -19,6 +19,7 @@ def main():
 
     commit = snakemake.params.commit
     ref = snakemake.params.ref
+    consensus = snakemake.params.consensus
     taxonomy = snakemake.params.taxonomy
     bam = snakemake.params.bam
     flagstat = snakemake.params.flagstat
@@ -49,8 +50,7 @@ def main():
     make_local_css_js_copies(snakemake.config['args']['mcc_path']+"/templates/css/", snakemake.config['args']['mcc_path']+"/templates/js/", snakemake.params.out_dir)
     make_data_copies(methods, snakemake.params.results_dir, snakemake.params.out_dir)
     make_summary_page(env, methods, sample_name, commit, start_time, end_time, out_dir, execution_dir, command, snakemake.input.fq1, snakemake.input.fq2, mapping_info, out_file_map, paired, snakemake.output.html_summary_report)
-    
-
+    make_families_page(env, consensus, methods, out_file_map, out_dir)
 
 def get_te_counts(bed):
     all_te = 0
@@ -269,6 +269,7 @@ def get_avg_coverage(ref, bam, out):
     return round(cov_total/pos, 3)
 
 def make_local_css_js_copies(css_dir, js_dir, out_dir):
+    mccutils.mkdir(out_dir+"/html/")
     mccutils.mkdir(out_dir+"/css/")
     for css in os.listdir(css_dir):
         mccutils.run_command(["cp", css_dir+"/"+css, out_dir+"/css/"])
@@ -432,6 +433,93 @@ def make_summary_page(jinja_env, methods, sample_name, commit, start_time, end_t
         nonreference_counts=nonreference_counts
     )
 
+    with open(out_file,"w") as out:
+        for line in rendered_lines:
+            out.write(line)
+
+
+def make_families_page(jinja_env, consensus, methods, out_file_map, out_dir):
+    template = jinja_env.get_template('families.html')
+
+    families = []
+    with open(consensus,"r") as fa:
+        for line in fa:
+            if line[0] == ">":
+                family = line.replace(">","")
+                family = family.replace("\n","")
+                families.append(family)
+    
+    prediction_methods = []
+    for method in methods:
+        if method != "coverage" and method != "trimgalore":
+            prediction_methods.append(method)
+
+    class Prediction:
+        def __init__(self):
+            self.family = ""
+            self.all = []
+            self.reference = []
+            self.nonreference = []
+
+    prediction_list = []
+    for family in families:
+        prediction = Prediction()
+        prediction.family = family
+
+        for method in prediction_methods:
+            all_count = 0
+            reference_count = 0
+            nonreference_count = 0
+            prediction_file = out_file_map[method]
+            with open(prediction_file,"r") as predictions:
+                for line in predictions:
+                    split_line = line.split("\t")
+                    if len(split_line) > 3:
+                        info = split_line[3]
+                        split_info = info.split("_")
+                        if split_info[0] == family:
+                            all_count += 1
+                            if split_info[1] == "non-reference":
+                                nonreference_count += 1
+                            else:
+                                reference_count += 1
+            
+            prediction.all.append(all_count)
+            prediction.reference.append(reference_count)
+            prediction.nonreference.append(nonreference_count)
+        prediction_list.append(prediction)
+
+    mccutils.mkdir(out_dir+"/data/families/")
+    with open(out_dir+"/data/families/family_prediction_summary.txt","w") as out:
+        header = ["TE_Family","Type"] + prediction_methods
+        header = ",".join(header)
+        out.write(header+"\n")
+        for prediction in prediction_list:
+            line = [prediction.family,"all"]
+            for val in prediction.all:
+                line.append(str(val))
+            line = ",".join(line)
+            out.write(line+"\n")
+
+            line = [prediction.family,"reference"]
+            for val in prediction.reference:
+                line.append(str(val))
+            line = ",".join(line)
+            out.write(line+"\n")
+
+            line = [prediction.family,"non-reference"]
+            for val in prediction.nonreference:
+                line.append(str(val))
+            line = ",".join(line)
+            out.write(line+"\n")
+
+    rendered_lines = template.render(
+        methods=prediction_methods,
+        families=families,
+        predictions=prediction_list
+    )
+
+    out_file = out_dir+"/html/families.html"
     with open(out_file,"w") as out:
         for line in rendered_lines:
             out.write(line)

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link href="../css/families.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Fauna+One">
+        <script type="text/javascript" src="../js/families.js"></script>
+        <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    </head>
+    
+    <body>
+        <div class="navbar">
+            <ul class="navbar">
+                <li class="navbar" id="logo"><a href="https://github.com/bergmanlab/mcclintock" target="_blank" class="logo">McClintock</a></li>
+                <li class="navbar"><a href="../summary.html" class="navbar">Summary</a></li>
+                <li class="navbar"><a href="families.html" class="navbar">TE Families</a></li>
+                <li class="navbar dropdown">
+                    <a href="#" class="navbar dropdown">TE Detection Methods</a>
+                    <div class="dropdown-content">
+                        {% for method in methods %}
+                            <a href="{{method}}.html" class="dropdown-content">{{method}}</a>
+                        {% endfor %}
+                    </div>
+                </li>
+            </ul> 
+        </div>
+
+        <div class="row">
+            <div class="sidebar">
+                <ul class="sidebar">
+                    <li class="sidebar"><a href="#familyinfoHeader" class="sidebar">Family Prediction Summary</a></li>
+                </ul>
+            </div>
+            <div class="main">
+                <div class="pageHeader">
+                    <p class="pageHeader">TE Families</p>
+                </div>
+                <div class="sectionHeader">
+                    <a href="../data/families/family_prediction_summary.txt"  target="_blank"><div class="sectionHeaderRaw">Raw</div></a>
+                    <div class="sectionHeaderName">Family Prediction Summary</div>
+                    <div class="sectionHeaderHide" id="familyinfoHeader" onclick="hide('familyinfoDiv','familyinfoHeader')">Hide</div>
+                </div>
+                <div id="familyinfoDiv">
+                    <div class="filter">
+                        <input type="text" class="filterTable" id="filterTable2" autocomplete="off" onkeyup="filterTableType('filterTable2','familyInfoTable', 'exactBox2','allBox','refBox','nonrefBox')" placeholder="Filter">
+                        <input type="checkbox" class="checkbox" id="exactBox2" name="exactBox2" autocomplete="off" onclick="filterTableType('filterTable2','familyInfoTable', 'exactBox2','allBox','refBox','nonrefBox')">
+                        <label for="exactBox2">Exact Match</label>
+                        <input type="checkbox" class="checkbox" id="refBox" name="refBox" checked="checked" autocomplete="off" onclick="filterTableType('filterTable2','familyInfoTable', 'exactBox2','allBox','refBox','nonrefBox')">
+                        <label for="exactBox2">Reference</label>
+                        <input type="checkbox" class="checkbox" id="nonrefBox" name="nonrefBox" checked="checked" autocomplete="off" onclick="filterTableType('filterTable2','familyInfoTable', 'exactBox2','allBox','refBox','nonrefBox')">
+                        <label for="exactBox2">Non-Reference</label>
+                        <input type="checkbox" class="checkbox" id="allBox" name="allBox" checked="checked" autocomplete="off" onclick="filterTableType('filterTable2','familyInfoTable', 'exactBox2','allBox','refBox','nonrefBox')">
+                        <label for="exactBox2">All</label>
+                    </div>
+                    <div class="runinfo" id="familyinfo">
+                        {% if methods|length > 6 %}
+                            <table class="run-information" id="familyInfoTable" style="width:1100px;">
+                        {% else %}
+                            <table class="run-information" id="familyInfoTable" style="width:900px;">
+                        {% endif %}
+                            <tr>
+                                <th class="header" onclick="sortTable('familyInfoTable', 0)">TE Family</th>
+                                <th class="header" onclick="sortTable('familyInfoTable', 1)">Type</th>
+                                <th class="header" onclick="sortTable('familyInfoTable', 2, numeric=true)"></th>
+                                {% set count = namespace(value=3) %}
+                                {% for method in methods %}
+                                    <th class="header" onclick="sortTable('familyInfoTable', {{ count.value }}, numeric=true)">{{method}}</th>
+                                    {% set count.value = count.value + 1 %}
+                                {% endfor %}
+                                
+                            </tr>
+                            {% set count = namespace(value=1) %}
+                            {% for prediction in predictions %}
+                                {% if count.value % 2 != 0 %}
+                                    <tr>
+                                        <td class="values">{{ prediction.family }}</td>
+                                        <td class="values">All</td>
+                                        <td class="values link"><a href="{{ prediction.family }}.html" class="tableLink">Report</a></td>
+                                        {% for val in prediction.all %}
+                                            <td class="values">{{ val }}</td>
+                                        {% endfor %}
+                                        
+                                    </tr>
+                                    <tr>
+                                        <td class="values even">{{ prediction.family }}</td>
+                                        <td class="values even">Reference</td>
+                                        <td class="values even">-</td>
+                                        {% for val in prediction.reference %}
+                                            <td class="values even">{{ val }}</td>
+                                        {% endfor %}
+                                        
+                                    </tr>
+                                    <tr>
+                                        <td class="values">{{ prediction.family }}</td>
+                                        <td class="values">Non-Reference</td>
+                                        <td class="values">-</td>
+                                        {% for val in prediction.nonreference %}
+                                            <td class="values">{{ val }}</td>
+                                        {% endfor %}
+                                        
+                                    </tr>
+                                {% else %}
+                                    <tr>
+                                        <td class="values even">{{ prediction.family }}</td>
+                                        <td class="values even">All</td>
+                                        <td class="values link even"><a href="{{ prediction.family }}.html" class="tableLink">Report</a></td>
+                                        {% for val in prediction.all %}
+                                            <td class="values even">{{ val }}</td>
+                                        {% endfor %}
+                                        
+                                    </tr>
+                                    <tr>
+                                        <td class="values">{{ prediction.family }}</td>
+                                        <td class="values">Reference</td>
+                                        <td class="values">-</td>
+                                        {% for val in prediction.reference %}
+                                            <td class="values">{{ val }}</td>
+                                        {% endfor %}
+                                    </tr>
+                                    <tr>
+                                        <td class="values even">{{ prediction.family }}</td>
+                                        <td class="values even">Non-Reference</td>
+                                        <td class="values even">-</td>
+                                        {% for val in prediction.nonreference %}
+                                            <td class="values even">{{ val }}</td>
+                                        {% endfor %}
+                                    </tr>
+                                {% endif %}
+                                {% set count.value = count.value + 1 %}
+                            {% endfor %}
+                        </table>
+                    </div>
+                </div>
+                <div class="spacer2"></div>
+            </div>
+        </div>
+        <!-- plot 1: Tool Plots -->
+        <script>
+            var trace1 = {
+            x: [19, 37, 41, 331, 0, 78, 164],
+            y: ['ngs_te_mapper', 'RelocaTE', 'RelocaTE2','TEMP','RetroSeq','PopoolationTE',"TE-Locate"],
+            name: 'Reference',
+            orientation: 'h',
+            marker: {
+                color: 'rgba(25,25,25,0.6)',
+                width: 1
+            },
+            type: 'bar'
+            };
+
+            var trace2 = {
+            x: [14, 7, 98, 55, 71, 64, 549],
+            y: ['ngs_te_mapper', 'RelocaTE', 'RelocaTE2','TEMP','RetroSeq','PopoolationTE',"TE-Locate"],
+            name: 'Non-Reference',
+            orientation: 'h',
+            type: 'bar',
+            marker: {
+                color: 'rgba(95,95,95,0.6)',
+                width: 1
+            }
+            };
+
+            var data = [trace1, trace2];
+
+            var layout = {
+            barmode: 'stack',
+            font: {size: 12},
+            margin: {'t':50, 'b':50},
+            xaxis: {automargin: true},
+            yaxis: {automargin: true},
+            legend: {"orientation": "h", x: 0.3, y: 1.1}
+            };
+
+            var div = document.getElementsByClassName('toolplot')[0];
+            Plotly.newPlot(div, data, layout);
+        </script>
+    </body>
+
+</html>

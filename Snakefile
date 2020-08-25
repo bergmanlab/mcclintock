@@ -326,6 +326,7 @@ rule summary_report:
     params:
         commit = config['args']['commit'],
         ref = config['mcc']['reference'],
+        consensus = config['mcc']['consensus'],
         taxonomy = config['mcc']['taxonomy'],
         bam = config['mcc']['bam'],
         flagstat = config['mcc']['flagstat'],
