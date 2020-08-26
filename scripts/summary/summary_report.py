@@ -11,6 +11,31 @@ from jinja2 import Environment, FileSystemLoader
 templateLoader = FileSystemLoader(searchpath=snakemake.config['args']['mcc_path']+"/templates/html/")
 env = Environment(loader=templateLoader)
 
+class Prediction:
+    def __init__(self):
+        self.family = ""
+        self.all = []
+        self.reference = []
+        self.nonreference = []
+
+class MethodPrediction:
+    def __init__(self):
+        self.method = ""
+        self.family = ""
+        self.all = []
+        self.reference = []
+        self.nonreference = []
+        self.insertions = []
+
+class Insertion:
+    def __init__(self):
+        self.chrom = ""
+        self.family = ""
+        self.type = ""
+        self.start = -1
+        self.end = -1
+        self.strand = "."
+
 
 def main():
     out_files = snakemake.input.out_files
@@ -31,6 +56,7 @@ def main():
     execution_dir = snakemake.params.execution_dir
     start_time = snakemake.params.time
     raw_fq2 = snakemake.params.raw_fq2
+    chromosomes = snakemake.params.chromosomes.split(",")
     out_dir = snakemake.params.out_dir
 
     paired = True
@@ -51,6 +77,7 @@ def main():
     make_data_copies(methods, snakemake.params.results_dir, snakemake.params.out_dir)
     make_summary_page(env, methods, sample_name, commit, start_time, end_time, out_dir, execution_dir, command, snakemake.input.fq1, snakemake.input.fq2, mapping_info, out_file_map, paired, snakemake.output.html_summary_report)
     make_families_page(env, consensus, methods, out_file_map, out_dir)
+    make_family_pages(env, consensus, methods, out_file_map, chromosomes, out_dir)
 
 def get_te_counts(bed):
     all_te = 0
@@ -279,12 +306,24 @@ def make_local_css_js_copies(css_dir, js_dir, out_dir):
         mccutils.run_command(["cp", js_dir+"/"+js, out_dir+"/js/"])
 
 def make_data_copies(methods, results_dir, out_dir):
+    mccutils.mkdir(out_dir+"/data/")
     if "trimgalore" in methods:
-        mccutils.mkdir(out_dir+"/data/")
         mccutils.mkdir(out_dir+"/data/trimgalore/")
         for f in os.listdir(results_dir+"/trimgalore"):
             if ".zip" not in f:
                 mccutils.run_command(["cp", "-r", results_dir+"/trimgalore/"+f, out_dir+"/data/trimgalore/"])
+    
+    if "coverage" in methods:
+        mccutils.mkdir(out_dir+"/data/coverage/")
+        for f in os.listdir(results_dir+"/coverage/"):
+            if not os.path.isdir(results_dir+"/coverage/"+f):
+                mccutils.run_command(["cp", results_dir+"/coverage/"+f, out_dir+"/data/coverage/"])
+        for f in os.listdir(results_dir+"/coverage/te-depth-files/"):
+            mccutils.run_command(["cp", results_dir+"/coverage/te-depth-files/"+f, out_dir+"/data/coverage/"])
+        for f in os.listdir(out_dir+"/data/coverage/"):
+            o = f.replace(".csv",".txt")
+            o = o.replace(".cov",".txt")
+            mccutils.run_command(["mv", out_dir+"/data/coverage/"+f, out_dir+"/data/coverage/"+o])
 
 def read_trimgalore_results(fastq, trimgalore_dir):
     results = ["","","","","",""]
@@ -454,19 +493,117 @@ def make_families_page(jinja_env, consensus, methods, out_file_map, out_dir):
         if method != "coverage" and method != "trimgalore":
             prediction_methods.append(method)
 
-    class Prediction:
-        def __init__(self):
-            self.family = ""
-            self.all = []
-            self.reference = []
-            self.nonreference = []
-
     prediction_list = []
     for family in families:
+        prediction = count_predictions(prediction_methods,out_file_map, family)
+        prediction_list.append(prediction)
+
+    mccutils.mkdir(out_dir+"/data/families/")
+    prediction_summary_file = out_dir+"/data/families/family_prediction_summary.txt"
+    write_prediction_file(prediction_list, prediction_methods, prediction_summary_file)
+
+    rendered_lines = template.render(
+        methods=prediction_methods,
+        families=families,
+        predictions=prediction_list
+    )
+
+    out_file = out_dir+"/html/families.html"
+    with open(out_file,"w") as out:
+        for line in rendered_lines:
+            out.write(line)
+
+
+def make_family_pages(jinja_env, consensus, methods, out_file_map, chromosomes, out_dir):
+    families = []
+    with open(consensus,"r") as fa:
+        for line in fa:
+            if line[0] == ">":
+                family = line.replace(">","")
+                family = family.replace("\n","")
+                families.append(family)
+
+    prediction_methods = []
+    for method in methods:
+        if method != "coverage" and method != "trimgalore":
+            prediction_methods.append(method)
+
+
+    depth = {}
+    with open(out_dir+"/data/coverage/te_depth.txt","r") as depth_file:
+        for i,line in enumerate(depth_file):
+            if i > 0:
+                split_line = line.split(",")
+                family = split_line[0]
+                depth[family] = [split_line[1], split_line[2]]
+
+    for family in families:
+        all_cov = None
+        all_pos = None
+        uniq_cov = None
+        uniq_pos = None
+
+        template = jinja_env.get_template('family.html')
+
+        if "coverage" in methods:
+            all_pos = []
+            all_cov = []
+            with open(out_dir+"data/coverage/"+family+".allQ.normalized.txt","r") as data:
+                for line in data:
+                    line = line.replace("\n","")
+                    split_line = line.split("\t")
+                    all_pos.append(split_line[1])
+                    all_cov.append(split_line[2])
+            
+            uniq_pos = []
+            uniq_cov = []
+            with open(out_dir+"data/coverage/"+family+".highQ.normalized.txt","r") as data:
+                for line in data:
+                    line = line.replace("\n","")
+                    split_line = line.split("\t")
+                    uniq_pos.append(split_line[1])
+                    uniq_cov.append(split_line[2])
+
+        prediction = count_predictions(prediction_methods, out_file_map, family)
+        family_prediction_summary_file = out_dir+"/data/families/"+family+"_prediction_summary.txt"
+        write_prediction_file([prediction], prediction_methods, family_prediction_summary_file)
+
+        method_predictions = []
+        for method in prediction_methods:
+            method_prediction = count_predictions_chrom(method, out_file_map, family, chromosomes)
+            method_prediction.insertions = get_family_predictions(out_file_map[method], family)
+            family_predictions_file = out_dir+"/data/families/"+family+"_"+method+"_predictions.txt"
+            with open(family_predictions_file,"w") as predictions_file:
+                for insertion in method_prediction.insertions:
+                    line = ",".join([insertion.chrom, insertion.family, insertion.type, str(insertion.start), str(insertion.end), insertion.strand])
+                    predictions_file.write(line+"\n")
+            method_predictions.append(method_prediction)
+
+        rendered_lines = template.render(
+            methods=prediction_methods,
+            family=family,
+            all_coverage=all_cov,
+            all_positions=all_pos,
+            uniq_coverage=uniq_cov,
+            uniq_positions=uniq_pos,
+            norm_depth=depth[family][0],
+            uniq_depth=depth[family][1],
+            prediction_summary=prediction,
+            chromosomes=chromosomes,
+            method_results=method_predictions
+        )
+        
+        out_file = out_dir+"/html/"+family+".html"
+        with open(out_file,"w") as out:
+            for line in rendered_lines:
+                out.write(line)
+
+
+def count_predictions(methods, out_file_map, family):
         prediction = Prediction()
         prediction.family = family
 
-        for method in prediction_methods:
+        for method in methods:
             all_count = 0
             reference_count = 0
             nonreference_count = 0
@@ -476,10 +613,13 @@ def make_families_page(jinja_env, consensus, methods, out_file_map, out_dir):
                     split_line = line.split("\t")
                     if len(split_line) > 3:
                         info = split_line[3]
-                        split_info = info.split("_")
+                        if "_reference_" in info:
+                            split_info = info.split("_reference_")
+                        else:
+                            split_info = info.split("_non-reference_")
                         if split_info[0] == family:
                             all_count += 1
-                            if split_info[1] == "non-reference":
+                            if "non-reference" in info:
                                 nonreference_count += 1
                             else:
                                 reference_count += 1
@@ -487,11 +627,73 @@ def make_families_page(jinja_env, consensus, methods, out_file_map, out_dir):
             prediction.all.append(all_count)
             prediction.reference.append(reference_count)
             prediction.nonreference.append(nonreference_count)
-        prediction_list.append(prediction)
+        
+        return prediction
 
-    mccutils.mkdir(out_dir+"/data/families/")
-    with open(out_dir+"/data/families/family_prediction_summary.txt","w") as out:
-        header = ["TE_Family","Type"] + prediction_methods
+def count_predictions_chrom(method, out_file_map, family, chromosomes):
+        prediction = MethodPrediction()
+        prediction.method = method
+        prediction.family = family
+
+        for chromosome in chromosomes:
+            all_count = 0
+            reference_count = 0
+            nonreference_count = 0
+            prediction_file = out_file_map[method]
+            with open(prediction_file,"r") as predictions:
+                for line in predictions:
+                    split_line = line.split("\t")
+                    if len(split_line) > 3:
+                        info = split_line[3]
+                        if "_reference_" in info:
+                            split_info = info.split("_reference_")
+                        else:
+                            split_info = info.split("_non-reference_")
+                        if split_info[0] == family and split_line[0] == chromosome:
+                            all_count += 1
+                            if "non-reference" in info:
+                                nonreference_count += 1
+                            else:
+                                reference_count += 1
+            
+            prediction.all.append(all_count)
+            prediction.reference.append(reference_count)
+            prediction.nonreference.append(nonreference_count)
+        
+        return prediction
+
+def get_family_predictions(bed, family):
+    predictions = []
+    with open(bed,"r") as infile:
+        for line in infile:
+            line = line.replace("\n","")
+            split_line = line.split("\t")
+            if len(split_line) > 3:
+                info = split_line[3]
+                insert_type = ""
+                if "_reference_" in info:
+                    split_info = info.split("_reference_")
+                    insert_type = "Reference"
+                else:
+                    split_info = info.split("_non-reference_")
+                    insert_type = "Non-Reference"
+                if split_info[0] == family:
+                    insertion = Insertion()
+                    insertion.chrom = split_line[0]
+                    insertion.family = family
+                    insertion.start = int(split_line[1])
+                    insertion.end = int(split_line[2])
+                    insertion.strand = split_line[5]
+                    insertion.type = insert_type
+                    predictions.append(insertion)
+    
+    return predictions
+
+
+
+def write_prediction_file(prediction_list, methods, out_file):
+    with open(out_file,"w") as out:
+        header = ["TE_Family","Type"] + methods
         header = ",".join(header)
         out.write(header+"\n")
         for prediction in prediction_list:
@@ -512,17 +714,6 @@ def make_families_page(jinja_env, consensus, methods, out_file_map, out_dir):
                 line.append(str(val))
             line = ",".join(line)
             out.write(line+"\n")
-
-    rendered_lines = template.render(
-        methods=prediction_methods,
-        families=families,
-        predictions=prediction_list
-    )
-
-    out_file = out_dir+"/html/families.html"
-    with open(out_file,"w") as out:
-        for line in rendered_lines:
-            out.write(line)
 
 if __name__ == "__main__":                
     main()

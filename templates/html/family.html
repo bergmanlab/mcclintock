@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link href="../css/family.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Fauna+One">
+        <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+        <script type="text/javascript" src="../js/families.js"></script>
+    </head>
+    
+    <body>
+        <div class="navbar">
+            <ul class="navbar">
+                <li class="navbar" id="logo"><a href="https://github.com/bergmanlab/mcclintock" target="_blank" class="logo">McClintock</a></li>
+                <li class="navbar"><a href="../summary.html" class="navbar">Summary</a></li>
+                <li class="navbar"><a href="families.html" class="navbar">TE Families</a></li>
+                <li class="navbar dropdown">
+                    <a href="#" class="navbar dropdown">TE Detection Methods</a>
+                    <div class="dropdown-content">
+                        {% for method in methods%}
+                            <a href="{{method}}.html" class="dropdown-content">{{method}}</a>
+                        {% endfor %}
+                    </div>
+                </li>
+            </ul> 
+        </div>
+
+        <div class="row">
+            <div class="sidebar">
+                <ul class="sidebar">
+                    <li class="sidebar"><a href="#plot1Header" class="sidebar">{{family}} Coverage</a></li>
+                    <li class="sidebar"><a href="#predictionHeader" class="sidebar">{{family}} Prediction Summary</a></li>
+                    {% for method in methods %}
+                        <li class="sidebar"><a href="#{{method}}Header" class="sidebar">{{method}}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="main">
+                <div class="pageHeader">
+                    <p class="pageHeader">TE Family: {{family}}</p>
+                </div>
+                <div class="spacer2"></div>
+                <div class="sectionHeader">
+                    <a href="../data/coverage/{{family}}.allQ.normalized.txt"  target="_blank"><div class="sectionHeaderRaw"style="width:25px;">All</div></a>
+                    <a href="../data/coverage/{{family}}.highQ.normalized.txt"  target="_blank" ><div class="sectionHeaderRaw" style="width:25px;">Unique</div></a>
+                    <div class="sectionHeaderName" style="width: 700px;">{{family}} Normalized Coverage</div>
+                    <div class="sectionHeaderHide" id="plot1Header" onclick="hide('plot1Div','plot1Header')">Hide</div>
+                </div>
+                <div id="plot1Div">
+                    <div class="runinfo" id="teinfo">
+                        <div id="tester" class="plot1" style="width:100%;height:500px;"></div>
+                    </div>
+                    <div class="runinfo" id="mapinfo">
+                        <table class="run-information">
+                            <tr>
+                                <td class="header2" colspan="2">Mean Normalized Coverage</td>
+                            </tr>
+                            <tr>
+                                <td class="header">All</td>
+                                <td class="values">{{norm_depth}}</td>
+                            </tr>
+                            <tr>
+                                <td class="header">Unique</td>
+                                <td class="values odd">{{uniq_depth}}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <div class="spacer2"></div>
+                <div class="sectionHeader">
+                    <a href="../data/families/{{family}}_prediction_summary.txt"  target="_blank"><div class="sectionHeaderRaw">Raw</div></a>
+                    <div class="sectionHeaderName">{{family}} Prediction Summary</div>
+                    <div class="sectionHeaderHide" id="predictionHeader" onclick="hide('familyinfoDiv','predictionHeader')">Hide</div>
+                </div>
+                <div id="familyinfoDiv">
+                    <div class="runinfo" id="familyinfo">
+                        <table class="run-information" id="familyInfoTable">
+                            <tr>
+                                <th class="header" onclick="sortTable('familyInfoTable', 0)">TE Family</th>
+                                <th class="header" onclick="sortTable('familyInfoTable', 1)">Type</th>
+                                {% set count = namespace(value=2) %}
+                                {% for method in methods %}
+                                    <th class="header" onclick="sortTable('familyInfoTable', {{ count.value }}, numeric=true)">{{method}}</th>
+                                    {% set count.value = count.value + 1 %}
+                                {% endfor %}
+                            </tr>
+                            <tr>
+                                <td class="values">{{family}}</td>
+                                <td class="values">All</td>
+                                {% for value in prediction_summary.all %}
+                                    <td class="values">{{ value }}</td>
+                                {% endfor %}
+                            </tr>
+                            <tr>
+                                <td class="values even">{{family}}</td>
+                                <td class="values even">Reference</td>
+                                {% for value in prediction_summary.reference %}
+                                    <td class="values even">{{ value }}</td>
+                                {% endfor %}
+                            </tr>
+                            <tr>
+                                <td class="values">{{family}}</td>
+                                <td class="values">Non-Reference</td>
+                                {% for value in prediction_summary.nonreference %}
+                                    <td class="values">{{ value }}</td>
+                                {% endfor %}
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                {% for results in method_results %}
+                    <div class="spacer2"></div>
+                    <div class="sectionHeader">
+                        <a href="../data/families/{{family}}_{{results.method}}_predictions.txt"  target="_blank"><div class="sectionHeaderRaw">Raw</div></a>
+                        <div class="sectionHeaderName">{{results.method}}</div>
+                        <div class="sectionHeaderHide" id="{{results.method}}Header" onclick="hide('{{results.method}}','{{results.method}}Header')">Hide</div>
+                    </div>
+                    <div id="{{results.method}}">
+                        <div class="runinfo" id="teinfo">
+                            <div id="tester" class="{{results.method}}Plot" style="width:100%;height:500px;"></div>
+                        </div>
+                        <div id="familyinfoDiv">
+                            <div class="filter">
+                                <input type="text" class="filterTable" id="{{results.method}}Table1" autocomplete="off" onkeyup="filterTableExtended('{{results.method}}Table1','{{results.method}}Table2','{{results.method}}_table', '{{results.method}}exactBox','{{results.method}}refBox','{{results.method}}nonrefBox','{{results.method}}filterOption')" placeholder="Filter">
+                                <input type="button" id="{{results.method}}filterOption" class="filterOption" name="{{results.method}}filterOption" value="and" onclick="flipFilterOption('{{results.method}}filterOption');filterTableExtended('{{results.method}}Table1','{{results.method}}Table2','{{results.method}}_table', '{{results.method}}exactBox','{{results.method}}refBox','{{results.method}}nonrefBox','{{results.method}}filterOption');">
+                                <input type="text" class="filterTable" id="{{results.method}}Table2" autocomplete="off" onkeyup="filterTableExtended('{{results.method}}Table1','{{results.method}}Table2','{{results.method}}_table', '{{results.method}}exactBox','{{results.method}}refBox','{{results.method}}nonrefBox','{{results.method}}filterOption')" placeholder="Filter">
+                                <input type="checkbox" class="checkbox" id="{{results.method}}exactBox" name="{{results.method}}exactBox" autocomplete="off" onclick="filterTableExtended('{{results.method}}Table1','{{results.method}}Table2','{{results.method}}_table', '{{results.method}}exactBox','{{results.method}}refBox','{{results.method}}nonrefBox','{{results.method}}filterOption')">
+                                <label for="{{results.method}}exactBox">Exact Match</label>
+                                <input type="checkbox" class="checkbox" id="{{results.method}}refBox" name="{{results.method}}refBox" checked="checked" autocomplete="off" onclick="filterTableExtended('{{results.method}}Table1','{{results.method}}Table2','{{results.method}}_table', '{{results.method}}exactBox','{{results.method}}refBox','{{results.method}}nonrefBox','{{results.method}}filterOption')">
+                                <label for="{{results.method}}exactBox">Reference</label>
+                                <input type="checkbox" class="checkbox" id="{{results.method}}nonrefBox" name="{{results.method}}nonrefBox" checked="checked" autocomplete="off" onclick="filterTableExtended('{{results.method}}Table1','{{results.method}}Table2','{{results.method}}_table', '{{results.method}}exactBox','{{results.method}}refBox','{{results.method}}nonrefBox','{{results.method}}filterOption')">
+                                <label for="{{results.method}}exactBox">Non-Reference</label>
+                                
+                            </div>
+                            <div class="runinfo" id="predictions">
+                                <table class="run-information" id="{{results.method}}_table">
+                                    <tr>
+                                        <th class="header" onclick="sortTable('{{results.method}}_table', 0)">Contig</th>
+                                        <th class="header" onclick="sortTable('{{results.method}}_table', 1)">Family</th>
+                                        <th class="header" onclick="sortTable('{{results.method}}_table', 2)">Type</th>
+                                        <th class="header" onclick="sortTable('{{results.method}}_table', 3, numeric=true)">Start</th>
+                                        <th class="header" onclick="sortTable('{{results.method}}_table', 4, numeric=true)">End</th>
+                                        <th class="header" onclick="sortTable('{{results.method}}_table', 5, numeric=true)">Strand</th>
+                                    </tr>
+                                    {% for insertion in results.insertions %}
+                                    <tr>
+                                        <td class="values">{{insertion.chrom}}</td>
+                                        <td class="values">{{insertion.family}}</td>
+                                        <td class="values">{{insertion.type}}</td>
+                                        <td class="values">{{insertion.start}}</td>
+                                        <td class="values">{{insertion.end}}</td>
+                                        <td class="values">{{insertion.strand}}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+                <div class="spacer2"></div>
+            </div>
+        </div>
+        <!-- plot 1: Family Summary -->
+        <script>
+            var trace1 = {
+            x: [
+            {% for pos in uniq_positions %}
+                {{pos}},
+            {% endfor %}
+            ],
+            y: [
+            {% for cov in uniq_coverage %}
+                {{cov}},
+            {% endfor %}
+            ],
+            name: "Unique Coverage",
+            fill: 'tozeroy',
+            type: 'scatter',
+            fillcolor: 'rgba(25,25,25,0.6)',
+            line: {
+                color: 'rgba(95,95,95,1)'
+            }
+            };
+
+            var trace2 = {
+            x: [
+            {% for pos in all_positions %}
+                {{pos}},
+            {% endfor %}
+            ],
+            y: [
+            {% for cov in all_coverage %}
+                {{cov}},
+            {% endfor %}
+            ],
+            name: "All Coverage",
+            fill: 'tonexty',
+            type: 'scatter',
+            fillcolor: 'rgba(95,95,95,0.6)',
+            line: {
+                color: 'rgba(130,130,130,1)'
+            }
+            };
+
+            var layout = {
+                showlegend: true,
+                legend: {"orientation": "h"}
+            };
+
+            var data = [trace1, trace2];
+            var div = document.getElementsByClassName('plot1')[0];
+            Plotly.newPlot(div, data, layout);
+        </script>
+
+        <!-- plot 2: Chromosome Summary -->
+        {% for method_result in method_results %}
+            <script>
+                var trace1 = {
+                x: [
+                    {% for val in method_result.reference %}
+                        {{val}},
+                    {% endfor %}
+                ],
+                y: [
+                    {% for chromosome in chromosomes %}
+                        "{{chromosome}}",
+                    {% endfor %}
+                ],
+                name: 'Reference',
+                orientation: 'h',
+                marker: {
+                    color: 'rgba(25,25,25,0.6)',
+                    width: 1
+                },
+                type: 'bar'
+                };
+
+                var trace2 = {
+                x: [
+                    {% for val in method_result.nonreference %}
+                        {{val}},
+                    {% endfor %}
+                ],
+                y: [
+                    {% for chromosome in chromosomes %}
+                        "{{chromosome}}",
+                    {% endfor %}
+                ],
+                name: 'Non-Reference',
+                orientation: 'h',
+                type: 'bar',
+                marker: {
+                    color: 'rgba(95,95,95,0.6)',
+                    width: 1
+                }
+                };
+
+                var data = [trace1, trace2];
+
+                var layout = {
+                barmode: 'stack',
+                showlegend: true,
+                legend: {"orientation": "h"}
+                };
+
+                var div = document.getElementsByClassName('{{method_result.method}}Plot')[0];
+                Plotly.newPlot(div, data, layout);
+            </script>
+        {% endfor %}
+    </body>
+
+</html>
