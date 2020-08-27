@@ -203,7 +203,11 @@
 
             var layout = {
                 showlegend: true,
-                legend: {"orientation": "h"}
+                font: {size: 12},
+                margin: {'t':50, 'b':50},
+                xaxis: {automargin: true},
+                yaxis: {automargin: true},
+                legend: {"orientation": "h", x: 0.3, y: 1.1}
             };
 
             var data = [trace1, trace2];
@@ -258,8 +262,11 @@
 
                 var layout = {
                 barmode: 'stack',
-                showlegend: true,
-                legend: {"orientation": "h"}
+                font: {size: 12},
+                margin: {'t':50, 'b':50},
+                xaxis: {automargin: true},
+                yaxis: {automargin: true},
+                legend: {"orientation": "h", x: 0.3, y: 1.1}
                 };
 
                 var div = document.getElementsByClassName('{{method_result.method}}Plot')[0];

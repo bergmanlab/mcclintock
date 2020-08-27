@@ -75,6 +75,7 @@ def get_insertions(gff, sample_name, chromosomes, l_support_threshold=0, r_suppo
                 else:
                     insert.type = "non-reference"
                     te_name = split_line[9].split("=")[1]
+                    te_name = te_name.split("/")[0]
                     insert.name = te_name+"_non-reference_"+sample_name+"_relocate2_sr_"
                     insert.relocate2.right_junction = int(split_line[12].split("=")[1])
                     insert.relocate2.left_junction = int(split_line[13].split("=")[1])

@@ -75,9 +75,10 @@ def main():
     mapping_info,end_time = make_run_summary(out_file_map, commit, methods, fq1, fq2, ref, bam, flagstat, median_insert_size, command, execution_dir, start_time, out_dir, snakemake.output.summary_report, paired=paired)
     make_local_css_js_copies(snakemake.config['args']['mcc_path']+"/templates/css/", snakemake.config['args']['mcc_path']+"/templates/js/", snakemake.params.out_dir)
     make_data_copies(methods, snakemake.params.results_dir, snakemake.params.out_dir)
-    make_summary_page(env, methods, sample_name, commit, start_time, end_time, out_dir, execution_dir, command, snakemake.input.fq1, snakemake.input.fq2, mapping_info, out_file_map, paired, snakemake.output.html_summary_report)
+    make_summary_page(env, methods, sample_name, commit, start_time, end_time, out_dir, execution_dir, command, snakemake.params.raw_fq1, snakemake.params.raw_fq2, mapping_info, out_file_map, paired, snakemake.output.html_summary_report)
     make_families_page(env, consensus, methods, out_file_map, out_dir)
     make_family_pages(env, consensus, methods, out_file_map, chromosomes, out_dir)
+    make_method_pages(env, methods, consensus, out_file_map, chromosomes, out_dir)
 
 def get_te_counts(bed):
     all_te = 0
@@ -321,9 +322,10 @@ def make_data_copies(methods, results_dir, out_dir):
         for f in os.listdir(results_dir+"/coverage/te-depth-files/"):
             mccutils.run_command(["cp", results_dir+"/coverage/te-depth-files/"+f, out_dir+"/data/coverage/"])
         for f in os.listdir(out_dir+"/data/coverage/"):
+            tmp = out_dir+"/data/coverage/"+f
             o = f.replace(".csv",".txt")
             o = o.replace(".cov",".txt")
-            mccutils.run_command(["mv", out_dir+"/data/coverage/"+f, out_dir+"/data/coverage/"+o])
+            mccutils.run_command(["mv", tmp, out_dir+"/data/coverage/"+o])
 
 def read_trimgalore_results(fastq, trimgalore_dir):
     results = ["","","","","",""]
@@ -571,7 +573,7 @@ def make_family_pages(jinja_env, consensus, methods, out_file_map, chromosomes, 
         method_predictions = []
         for method in prediction_methods:
             method_prediction = count_predictions_chrom(method, out_file_map, family, chromosomes)
-            method_prediction.insertions = get_family_predictions(out_file_map[method], family)
+            method_prediction.insertions = get_predictions(out_file_map[method], family=family)
             family_predictions_file = out_dir+"/data/families/"+family+"_"+method+"_predictions.txt"
             with open(family_predictions_file,"w") as predictions_file:
                 for insertion in method_prediction.insertions:
@@ -594,6 +596,97 @@ def make_family_pages(jinja_env, consensus, methods, out_file_map, chromosomes, 
         )
         
         out_file = out_dir+"/html/"+family+".html"
+        with open(out_file,"w") as out:
+            for line in rendered_lines:
+                out.write(line)
+
+
+def make_method_pages(jinja_env, methods, consensus, out_file_map, chromosomes, out_dir):
+    families = []
+    with open(consensus,"r") as fa:
+        for line in fa:
+            if line[0] == ">":
+                family = line.replace(">","")
+                family = family.replace("\n","")
+                families.append(family)
+
+    prediction_methods = []
+    for method in methods:
+        if method != "coverage" and method != "trimgalore":
+            prediction_methods.append(method)
+
+    mccutils.mkdir(out_dir+"/data/methods/")
+    for method in prediction_methods:
+        template = jinja_env.get_template('method.html')
+        mccutils.mkdir(out_dir+"/data/methods/"+method)
+
+        predictions_file = out_file_map[method]
+        reference_family_counts = []
+        nonreference_family_counts = []
+        for family in families:
+            reference_count = 0
+            nonreference_count = 0
+            predictions = get_predictions(predictions_file, family=family)
+            for prediction in predictions:
+                if prediction.type == "Reference":
+                    reference_count += 1
+                else:
+                    nonreference_count += 1
+            
+            reference_family_counts.append(reference_count)
+            nonreference_family_counts.append(nonreference_count)
+        
+        with open(out_dir+"/data/methods/"+method+"/family_predictions.txt", "w") as raw_file:
+            header = ",".join(["Family","Reference","Non-Reference"])
+            raw_file.write(header+"\n")
+            for i, fam in enumerate(families):
+                line = ",".join([fam, str(reference_family_counts[i]), str(nonreference_family_counts[i])])
+                raw_file.write(line+"\n")
+
+        reference_chromosome_counts = []
+        nonreference_chromosome_counts = []
+        for chromosome in chromosomes:
+            reference_count = 0
+            nonreference_count = 0
+            predictions = get_predictions(predictions_file, chromosome=chromosome)
+            for prediction in predictions:
+                if prediction.type == "Reference":
+                    reference_count += 1
+                else:
+                    nonreference_count += 1
+            
+            reference_chromosome_counts.append(reference_count)
+            nonreference_chromosome_counts.append(nonreference_count)
+
+        with open(out_dir+"/data/methods/"+method+"/contig_predictions.txt", "w") as raw_file:
+            header = ",".join(["Contig","Reference","Non-Reference"])
+            raw_file.write(header+"\n")
+            for i, chrom in enumerate(chromosomes):
+                line = ",".join([chrom, str(reference_chromosome_counts[i]), str(nonreference_chromosome_counts[i])])
+                raw_file.write(line+"\n")
+
+        predictions = get_predictions(predictions_file)
+
+        with open(out_dir+"/data/methods/"+method+"/all_predictions.txt", "w") as raw_file:
+            header = ",".join(["Contig","Family","Type","Start","End","Strand"])
+            raw_file.write(header+"\n")
+            for prediction in predictions:
+                line = ",".join([prediction.chrom, prediction.family, prediction.type, str(prediction.start), str(prediction.end), prediction.strand])
+                raw_file.write(line+"\n")
+
+        rendered_lines = template.render(
+            methods=prediction_methods,
+            method=method,
+            families=families,
+            reference_family_counts=reference_family_counts,
+            nonreference_family_counts=nonreference_family_counts,
+            chromosomes=chromosomes,
+            reference_chromosome_counts=reference_chromosome_counts,
+            nonreference_chromosome_counts=nonreference_chromosome_counts,
+            predictions=predictions
+        )
+        
+        out_file = out_dir+"/html/"+method+".html"
         with open(out_file,"w") as out:
             for line in rendered_lines:
                 out.write(line)
@@ -662,7 +755,7 @@ def count_predictions_chrom(method, out_file_map, family, chromosomes):
         
         return prediction
 
-def get_family_predictions(bed, family):
+def get_predictions(bed, family=None, chromosome=None):
     predictions = []
     with open(bed,"r") as infile:
         for line in infile:
@@ -677,10 +770,10 @@ def get_family_predictions(bed, family):
                 else:
                     split_info = info.split("_non-reference_")
                     insert_type = "Non-Reference"
-                if split_info[0] == family:
+                if (split_info[0] == family or family is None) and (split_line[0] == chromosome or chromosome is None):
                     insertion = Insertion()
                     insertion.chrom = split_line[0]
-                    insertion.family = family
+                    insertion.family = split_info[0]
                     insertion.start = int(split_line[1])
                     insertion.end = int(split_line[2])
                     insertion.strand = split_line[5]

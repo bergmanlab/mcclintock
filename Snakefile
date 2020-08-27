@@ -337,6 +337,7 @@ rule summary_report:
         command = config['args']['full_command'],
         execution_dir = config['args']['call_directory'],
         time = config['args']['time'],
+        raw_fq1 = config['in']['fq1'],
         raw_fq2 = config['in']['fq2'],
         chromosomes = config['args']['chromosomes'],
         out_dir = config['args']['out']+"/results/summary/"
