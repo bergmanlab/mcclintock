@@ -247,8 +247,9 @@ td.header2 {
     background-color: #36424e;
     color: #fff;
     width:200px;
-    text-align: center;
-    padding: 4px 0px 4px 0px;
+    text-align: right;
+    padding: 4px 10px 4px 0px;
+    font-size: 12px;
 }
 
 th.header {
@@ -257,6 +258,24 @@ th.header {
     color: #fff;
     font-weight: normal;
     text-align: left;
+}
+
+a.header2:hover {
+    color: #fff;
+}
+
+a.header2 {
+    color: #95aeca;
+    text-decoration: none;
+}
+
+td.header3 {
+    border-color: #495868;
+    background-color: #36424e;
+    color: #fff;
+    /* width:200px; */
+    text-align: center;
+    padding: 4px 10px 4px 10px;
 }
 
 th.header:hover {
@@ -275,13 +294,43 @@ div.runinfo {
     display: table;
     margin: 0px 0px 0px 40px;
     border-radius: 0px 0px 4px 4px;
+    overflow: auto;
+    display: block;
+    border-width: 1px;
+    border-style: solid;
+    border-color: #EBEBEB;
+    border-top-style: none;
+    width: 900px;
+    max-height: 900px;
+}
+
+div.card {
+    display: table;
+    margin: 0px 0px 0px 40px;
+    border-radius: 0px 0px 4px 4px;
     overflow: hidden;
     display: block;
     border-width: 1px;
     border-style: solid;
     border-color: #EBEBEB;
     border-top-style: none;
-    width: 900px
+    width: 900px;
+    overflow: auto;
+}
+
+div.plot {
+    display: table;
+    margin: 0px 0px 0px 40px;
+    border-radius: 0px 0px 4px 4px;
+    overflow: hidden;
+    display: block;
+    border-width: 1px;
+    border-style: solid;
+    border-color: #EBEBEB;
+    border-top-style: none;
+    width: 900px;
+    height: 500px;
+    overflow: auto;
 }
 
 div.filter {

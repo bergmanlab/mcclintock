@@ -75,7 +75,6 @@ function sortTable(id, n, numeric=false){
     }
 }
 
-
 function filterTable(inputId, tableId, checkbox){
     var input = document.getElementById(inputId);
     var filter = input.value.toUpperCase();
