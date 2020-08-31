@@ -13,4 +13,4 @@ dependencies:
   - perl-bioperl-run=1.006900
   - bwa=0.7.4
   - jinja2=2.10.1
-  - multiqc=1.6
+  - multiqc=1.9
