@@ -1,9 +1,7 @@
 function sortTable(id, n, numeric=false){
     console.log(id)
     var table = document.getElementById(id);
-    var swapped = true;
-    var sortDirection = "lowToHigh";
-    var rows,i,j, shouldSwap,x,y,tmp, switchCount = 0;
+    var rows, i, j;
     rows = table.rows;
 
     console.log("read table");
@@ -21,60 +19,16 @@ function sortTable(id, n, numeric=false){
     }
 
     console.log("sort table");
-    // sort array
-    while(swapped){
-        swapped = false;
-        for (i = 1; i < rowArray.length-1; i++){
-            x = rowArray[i][n]
-            y = rowArray[i+1][n]
-            if (sortDirection == "lowToHigh"){
-                if (numeric){
-                    if (parseInt(x) > parseInt(y)){
-                        swapped = true;
-                        tmp = rowArray[i];
-                        rowArray[i] = rowArray[i+1];
-                        rowArray[i+1] = tmp;
-                        switchCount += 1;
-                        break;
-                    }
-                } else {
-                    if (x.toLowerCase() > y.toLowerCase()){
-                        swapped = true;
-                        tmp = rowArray[i];
-                        rowArray[i] = rowArray[i+1];
-                        rowArray[i+1] = tmp;
-                        switchCount += 1;
-                        break;
-                    }
-                }
+    invert = isSorted(rowArray, n, numeric=numeric);
+    if (!invert){
+        invert = isSorted(rowArray, n, numeric=numeric, inverted=true);
+    }
 
-            } else if (sortDirection == "highToLow"){
-                if (numeric){
-                    if (parseInt(x) < parseInt(y)){
-                        swapped = true;
-                        tmp = rowArray[i];
-                        rowArray[i] = rowArray[i+1];
-                        rowArray[i+1] = tmp;
-                        switchCount += 1;
-                        break;
-                    }
-                } else {
-                    if (x.toLowerCase() < y.toLowerCase()){
-                        swapped = true;
-                        tmp = rowArray[i];
-                        rowArray[i] = rowArray[i+1];
-                        rowArray[i+1] = tmp;
-                        switchCount += 1;
-                        break;
-                    }
-                }
-            }
-        }
-
-        if (switchCount == 0 && sortDirection == "lowToHigh"){
-            sortDirection = "highToLow";
-            swapped = true;
-        }
+    if(invert){
+        console.log("invert");
+        rowArray = invertArray(rowArray);
+    } else{
+        rowArray = quickSort(rowArray, 1, rowArray.length-1, n, numeric=numeric);
     }
 
     //clear table
@@ -116,6 +70,94 @@ function sortTable(id, n, numeric=false){
         }
     }
 
+}
+
+function isSorted(arr, col, numeric=false, inverted=false){
+    for (var i =1; i < arr.length-1; i++){
+        if (numeric){
+            if (inverted){
+                if (parseInt(arr[i][col]) < parseInt(arr[i+1][col])){
+                    return false;
+                }
+            } else {
+                if (parseInt(arr[i][col]) > parseInt(arr[i+1][col])){
+                    return false;
+                }
+            }
+
+        } else {
+            if (inverted){
+                if (arr[i][col].toLowerCase() < arr[i+1][col].toLowerCase()){
+                    return false;
+                }
+            } else {
+                if (arr[i][col].toLowerCase() > arr[i+1][col].toLowerCase()){
+                    return false;
+                }
+            }
+
+        }
+    }
+    return true;
+}
+
+function invertArray(arr){
+    var invertedArray = [...arr];
+    for (var i = 1; i < arr.length; i++){
+        invertedArray[i] = arr[(arr.length)-i]
+    }
+
+    return invertedArray;
+}
+
+function quickSort(arr, l, h, col, numeric=false){
+    if (arr.length == 1){
+        return arr;
+    }
+
+    var p;
+    if (l < h){
+        p = partition(arr, l, h, col, numeric=numeric);
+        quickSort(arr, l, p - 1, col, numeric=numeric);
+        quickSort(arr, p + 1, h, col, numeric=numeric);
+    }
+
+    return arr;
+}
+
+function partition(arr, l, h, col, numeric=false){
+    var i = l -1;
+    if (numeric){
+        pivot = parseInt(arr[h][col]);
+    } else{
+        pivot = arr[h][col].toLowerCase();
+    }
+
+    var tmp;
+    for (var j = l; j < h; j++){
+        if (numeric){
+            if (parseInt(arr[j][col]) <= pivot){
+                i += 1;
+                tmp = arr[i];
+                arr[i] = arr[j];
+                arr[j] = tmp;
+            }
+        } else {
+            if (arr[j][col].toLowerCase() <= pivot){
+                i += 1;
+                tmp = arr[i];
+                arr[i] = arr[j];
+                arr[j] = tmp;
+            }
+        }
+
+    }
+
+    tmp = arr[i+1];
+    arr[i+1] = arr[h];
+    arr[h] = tmp;
+
+    return(i+1)
 }
 
 function filterTableType(inputId, tableId, exactbox, allbox, refbox, nonrefbox){
