@@ -1,10 +1,10 @@
 function sortTable(id, n, numeric=false){
+    var t0 = performance.now();
     console.log(id)
     var table = document.getElementById(id);
     var rows, i, j;
     rows = table.rows;
 
-    console.log("read table");
     // read in table into an array
     var rowArray = new Array(rows.length-1);
     var valuesArray;
@@ -18,29 +18,40 @@ function sortTable(id, n, numeric=false){
         rowArray[i] = valuesArray;
     }
 
-    console.log("sort table");
+    var t1 = performance.now();
+    console.log("read table: " + (t1-t0) + "ms");
+
     invert = isSorted(rowArray, n, numeric=numeric);
     if (!invert){
         invert = isSorted(rowArray, n, numeric=numeric, inverted=true);
     }
+    var t2 = performance.now();
+    console.log("check if already sorted: "+ (t2-t1) + "ms");
 
     if(invert){
-        console.log("invert");
         rowArray = invertArray(rowArray);
+        var t3 = performance.now();
+        console.log("invert: " + (t3-t2) + "ms");
     } else{
-        rowArray = quickSort(rowArray, 1, rowArray.length-1, n, numeric=numeric);
+
+        sortByColumn(rowArray, n, numeric=numeric);
+        var t3 = performance.now();
+        console.log("sort: " + (t3-t2) + "ms");
     }
 
+
     //clear table
-    console.log("clear table");
+    table.style.display = "none";
     for (i = rows.length-1; i > 0; i--){
         table.deleteRow(i);
     }
 
-    console.log("write table");
+    var t4 = performance.now();
+    console.log("clear table: " + (t4-t3) + "ms");
+
     // repolulate table with sorted values
     for (i = 1; i < rowArray.length; i++){
-        var newRow = table.insertRow(-1);
+        var newRow = document.createElement("tr");
         var newCell;
 
         for (j = 0; j < rowArray[1].length-1; j++){
@@ -48,9 +59,13 @@ function sortTable(id, n, numeric=false){
             newCell.innerHTML = rowArray[i][j];
         }
         newRow.style.display = rowArray[i][rowArray[1].length-1];
+
+        table.tBodies[0].appendChild(newRow);
     }
 
-    console.log("fix even-odd column coloring");
+    var t5 = performance.now();
+    console.log("write table: " + (t5-t4) + "ms");
+
     // fix odd even shading
     var rows = table.getElementsByTagName("tr");
     var odd=false;
@@ -70,6 +85,12 @@ function sortTable(id, n, numeric=false){
         }
     }
 
+    var t6 = performance.now();
+    console.log("fix even-odd column coloring: "+ (t6-t5) + "ms");
+
+    table.style.display = "";
+    var t7 = performance.now();
+    console.log("total duration: "+ (t7-t0) + "ms");
 }
 
 function isSorted(arr, col, numeric=false, inverted=false){
@@ -110,54 +131,30 @@ function invertArray(arr){
     return invertedArray;
 }
 
-function quickSort(arr, l, h, col, numeric=false){
-    if (arr.length == 1){
-        return arr;
-    }
-
-    var p;
-    if (l < h){
-        p = partition(arr, l, h, col, numeric=numeric);
-        quickSort(arr, l, p - 1, col, numeric=numeric);
-        quickSort(arr, p + 1, h, col, numeric=numeric);
-    }
-
-    return arr;
-}
-
-function partition(arr, l, h, col, numeric=false){
-    var i = l -1;
+function sortByColumn(arr, colIdx, numeric=false){
     if (numeric){
-        pivot = parseInt(arr[h][col]);
-    } else{
-        pivot = arr[h][col].toLowerCase();
-    }
-
-    var tmp;
-    for (var j = l; j < h; j++){
-        if (numeric){
-            if (parseInt(arr[j][col]) <= pivot){
-                i += 1;
-                tmp = arr[i];
-                arr[i] = arr[j];
-                arr[j] = tmp;
-            }
-        } else {
-            if (arr[j][col].toLowerCase() <= pivot){
-                i += 1;
-                tmp = arr[i];
-                arr[i] = arr[j];
-                arr[j] = tmp;
+        function sortFunction(a,b){
+            if (parseInt(a[colIdx]) > parseInt(b[colIdx])){
+                return 1;
+            } else {
+                return -1;
             }
         }
-
+    } else {
+        function sortFunction(a,b){
+            if (a[colIdx].toLowerCase() > b[colIdx].toLowerCase()){
+                return 1;
+            } else {
+                return -1;
+            }
+        }
     }
 
-    tmp = arr[i+1];
-    arr[i+1] = arr[h];
-    arr[h] = tmp;
-
-    return(i+1)
+    arr.sort(sortFunction);
+    tmp = arr[-1];
+    arr.unshift(tmp);
+    arr.pop();
+    return arr;
 }
 
 function filterTableType(inputId, tableId, exactbox, allbox, refbox, nonrefbox){

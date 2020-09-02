@@ -85,7 +85,7 @@
                                 <th class="header" onclick="sortTable('predictionsTable', 2)">Type</th>
                                 <th class="header" onclick="sortTable('predictionsTable', 3, numeric=true)">Start</th>
                                 <th class="header" onclick="sortTable('predictionsTable', 4, numeric=true)">End</th>
-                                <th class="header" onclick="sortTable('predictionsTable', 5, numeric=true)">Strand</th>
+                                <th class="header" onclick="sortTable('predictionsTable', 5)">Strand</th>
                             </tr>
                             {% for prediction in predictions %}
                                 {% if loop.index%2 != 0 %}

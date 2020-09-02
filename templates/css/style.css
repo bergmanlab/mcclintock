@@ -286,6 +286,10 @@ td.even {
     background-color: #f8f8f8;
 }
 
+table.code {
+    width: 1800px;
+}
+
 td.code {
     font-family: "Consolas";
 }
