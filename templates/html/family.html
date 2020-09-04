@@ -39,7 +39,7 @@
                     <p class="pageHeader">TE Family: {{family}}</p>
                 </div>
 
-                {% if norm_depth is defined %}
+                {% if coverage %}
                     <div class="spacer2"></div>
                     <div class="sectionHeader">
                         <a href="../data/coverage/{{family}}.allQ.normalized.txt"  target="_blank"><div class="sectionHeaderRaw"style="width:25px;">All</div></a>
@@ -165,7 +165,7 @@
             </div>
         </div>
         <!-- plot 1: Family Summary -->
-        {% if uniq_positions is defined %}
+        {% if coverage %}
             <script>            
                 var trace1 = {
                 x: [
