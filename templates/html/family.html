@@ -39,7 +39,7 @@
                     <p class="pageHeader">TE Family: {{family}}</p>
                 </div>
 
-                {% if norm_depth is not defined %}
+                {% if norm_depth is defined %}
                     <div class="spacer2"></div>
                     <div class="sectionHeader">
                         <a href="../data/coverage/{{family}}.allQ.normalized.txt"  target="_blank"><div class="sectionHeaderRaw"style="width:25px;">All</div></a>
@@ -124,9 +124,10 @@
                         </div>
                         <div id="familyinfoDiv">
                             <div class="filter">
-                                <input type="text" class="filterTable" id="{{results.method}}Table1" autocomplete="off" onkeyup="filterTableExtended('{{results.method}}Table1','{{results.method}}Table2','{{results.method}}_table', '{{results.method}}exactBox','{{results.method}}refBox','{{results.method}}nonrefBox','{{results.method}}filterOption')" placeholder="Filter">
+                                <input type="button" id="{{results.method}}FilterButton" class="filterButton" name="{{results.method}}FilterButton" value="Filter" onclick="filterTableExtended('{{results.method}}Table1','{{results.method}}Table2','{{results.method}}_table', '{{results.method}}exactBox','{{results.method}}refBox','{{results.method}}nonrefBox','{{results.method}}filterOption')">
+                                <input type="text" class="filterTable" id="{{results.method}}Table1" autocomplete="off" placeholder="">
                                 <input type="button" id="{{results.method}}filterOption" class="filterOption" name="{{results.method}}filterOption" value="and" onclick="flipFilterOption('{{results.method}}filterOption');filterTableExtended('{{results.method}}Table1','{{results.method}}Table2','{{results.method}}_table', '{{results.method}}exactBox','{{results.method}}refBox','{{results.method}}nonrefBox','{{results.method}}filterOption');">
-                                <input type="text" class="filterTable" id="{{results.method}}Table2" autocomplete="off" onkeyup="filterTableExtended('{{results.method}}Table1','{{results.method}}Table2','{{results.method}}_table', '{{results.method}}exactBox','{{results.method}}refBox','{{results.method}}nonrefBox','{{results.method}}filterOption')" placeholder="Filter">
+                                <input type="text" class="filterTable" id="{{results.method}}Table2" autocomplete="off" placeholder="">
                                 <input type="checkbox" class="checkbox" id="{{results.method}}exactBox" name="{{results.method}}exactBox" autocomplete="off" onclick="filterTableExtended('{{results.method}}Table1','{{results.method}}Table2','{{results.method}}_table', '{{results.method}}exactBox','{{results.method}}refBox','{{results.method}}nonrefBox','{{results.method}}filterOption')">
                                 <label for="{{results.method}}exactBox">Exact Match</label>
                                 <input type="checkbox" class="checkbox" id="{{results.method}}refBox" name="{{results.method}}refBox" checked="checked" autocomplete="off" onclick="filterTableExtended('{{results.method}}Table1','{{results.method}}Table2','{{results.method}}_table', '{{results.method}}exactBox','{{results.method}}refBox','{{results.method}}nonrefBox','{{results.method}}filterOption')">
@@ -164,7 +165,7 @@
             </div>
         </div>
         <!-- plot 1: Family Summary -->
-        {% if uniq_positions is not defined %}
+        {% if uniq_positions is defined %}
             <script>            
                 var trace1 = {
                 x: [

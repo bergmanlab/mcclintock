@@ -179,13 +179,13 @@ function filterTableType(inputId, tableId, exactbox, allbox, refbox, nonrefbox){
             typeValue = typeValue.toUpperCase();
 
             if (exactMatch){
-                if (txtValue.toUpperCase() == filter){
+                if ((txtValue.toUpperCase() == filter) || (filter === "")){
                     if ((typeValue == "ALL" && keepAll) || (typeValue == "REFERENCE" && keepRef) || (typeValue == "NON-REFERENCE" && keepNonref)){
                         display = true;
                     }
                 }
             } else {
-                if (txtValue.toUpperCase().indexOf(filter) > -1){
+                if ((txtValue.toUpperCase().indexOf(filter) > -1)  || (filter === "")){
                     if ((typeValue == "ALL" && keepAll) || (typeValue == "REFERENCE" && keepRef) || (typeValue == "NON-REFERENCE" && keepNonref)){
                         display = true;
                     }
@@ -228,23 +228,23 @@ function filterTableExtended(input1Id, input2Id, tableId, exactbox, refbox, nonr
                 typeValue = typeValue.toUpperCase();
                 if (exactMatch){
                     if (txtValue.toUpperCase() == filter1){
-                        if ((typeValue == "REFERENCE" && keepRef) || (typeValue == "NON-REFERENCE" && keepNonref)){
+                        if ((typeValue == "REFERENCE" && keepRef) || (typeValue == "NON-REFERENCE" && keepNonref) || (filter1 == "")){
                             match1 = true;
                         }
                     }
                     if (txtValue.toUpperCase() == filter2){
-                        if ((typeValue == "REFERENCE" && keepRef) || (typeValue == "NON-REFERENCE" && keepNonref)){
+                        if ((typeValue == "REFERENCE" && keepRef) || (typeValue == "NON-REFERENCE" && keepNonref) || (filter2 == "")){
                             match2 = true;
                         }
                     }
                 } else {
                     if (txtValue.toUpperCase().indexOf(filter1) > -1){
-                        if ((typeValue == "REFERENCE" && keepRef) || (typeValue == "NON-REFERENCE" && keepNonref)){
+                        if ((typeValue == "REFERENCE" && keepRef) || (typeValue == "NON-REFERENCE" && keepNonref) || (filter1 == "")){
                             match1 = true;
                         }
                     }
                     if (txtValue.toUpperCase().indexOf(filter2) > -1){
-                        if ((typeValue == "REFERENCE" && keepRef) || (typeValue == "NON-REFERENCE" && keepNonref)){
+                        if ((typeValue == "REFERENCE" && keepRef) || (typeValue == "NON-REFERENCE" && keepNonref) || (filter2 == "")){
                             match2 = true;
                         }
                     }

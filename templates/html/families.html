@@ -41,7 +41,8 @@
                 </div>
                 <div id="familyinfoDiv">
                     <div class="filter">
-                        <input type="text" class="filterTable" id="filterTable2" autocomplete="off" onkeyup="filterTableType('filterTable2','familyInfoTable', 'exactBox2','allBox','refBox','nonrefBox')" placeholder="Filter">
+                        <input type="button" id="filterButton" class="filterButton" name="filterButton" value="Filter" onclick="filterTableType('filterTable2','familyInfoTable', 'exactBox2','allBox','refBox','nonrefBox')">
+                        <input type="text" class="filterTable" id="filterTable2" autocomplete="off" placeholder="">
                         <input type="checkbox" class="checkbox" id="exactBox2" name="exactBox2" autocomplete="off" onclick="filterTableType('filterTable2','familyInfoTable', 'exactBox2','allBox','refBox','nonrefBox')">
                         <label for="exactBox2">Exact Match</label>
                         <input type="checkbox" class="checkbox" id="refBox" name="refBox" checked="checked" autocomplete="off" onclick="filterTableType('filterTable2','familyInfoTable', 'exactBox2','allBox','refBox','nonrefBox')">

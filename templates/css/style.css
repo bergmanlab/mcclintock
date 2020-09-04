@@ -395,3 +395,17 @@ input.rawData:hover {
 .filterOption:hover {
     background-color: #ddd;
 }
+
+.filterButton {
+    margin: 5px 0px 5px 0px;
+    border-radius: 4px;
+    background-color: #EBEBEB;
+    border-color: #ddd;
+    color: #616161;
+    font-family: "Helvetica";
+    padding: 4px 10px 4px 10px;
+}
+
+.filterButton:hover {
+    background-color: #ddd;
+}

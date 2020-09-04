@@ -66,9 +66,10 @@
                 </div>
                 <div id="familyinfoDiv">
                     <div class="filter">
-                        <input type="text" class="filterTable" id="filterTable1" autocomplete="off" onkeyup="filterTableExtended('filterTable1','filterTable2','predictionsTable', 'exactBox2','refBox','nonrefBox','filterOption')" placeholder="Filter">
-                        <input type="button" id="filterOption" class="filterOption" name="filterOption" value="and" onclick="flipFilterOption('filterOption');filterTableExtended('filterTable1','filterTable2','predictionsTable', 'exactBox2','refBox','nonrefBox','filterOption');">
-                        <input type="text" class="filterTable" id="filterTable2" autocomplete="off" onkeyup="filterTableExtended('filterTable1','filterTable2','predictionsTable', 'exactBox2','refBox','nonrefBox','filterOption')" placeholder="Filter">
+                        <input type="button" id="filterButton" class="filterButton" name="filterButton" value="Filter" onclick="filterTableExtended('filterTable1','filterTable2','predictionsTable', 'exactBox2','refBox','nonrefBox','filterOption')">
+                        <input type="text" class="filterTable" id="filterTable1" autocomplete="off" placeholder="">
+                        <input type="button" id="filterOption" class="filterOption" name="filterOption" value="and" onclick="flipFilterOption('filterOption')">
+                        <input type="text" class="filterTable" id="filterTable2" autocomplete="off" placeholder="">
                         <input type="checkbox" class="checkbox" id="exactBox2" name="exactBox2" autocomplete="off" onclick="filterTableExtended('filterTable1','filterTable2','predictionsTable', 'exactBox2','refBox','nonrefBox','filterOption')">
                         <label for="exactBox2">Exact Match</label>
                         <input type="checkbox" class="checkbox" id="refBox" name="refBox" checked="checked" autocomplete="off" onclick="filterTableExtended('filterTable1','filterTable2','predictionsTable', 'exactBox2','refBox','nonrefBox','filterOption')">
