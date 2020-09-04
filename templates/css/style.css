@@ -282,12 +282,16 @@ th.header:hover {
     background-color: #29323D;
 }
 
-td.even {
+/* td.even {
     background-color: #f8f8f8;
-}
+} */
 
 table.code {
     width: 1800px;
+}
+
+td.values {
+    border-bottom: 1px solid #EBEBEB;
 }
 
 td.code {
@@ -386,10 +390,10 @@ input.rawData:hover {
     margin: 5px 0px 5px 0px;
     border-radius: 4px;
     background-color: #EBEBEB;
-    border-color: #ddd;
     color: #616161;
     font-family: "Helvetica";
-    padding: 4px 10px 4px 10px;
+    padding: 6px 10px 6px 10px;
+    border: 1px solid #ddd;
 }
 
 .filterOption:hover {
@@ -400,10 +404,10 @@ input.rawData:hover {
     margin: 5px 0px 5px 0px;
     border-radius: 4px;
     background-color: #EBEBEB;
-    border-color: #ddd;
     color: #616161;
     font-family: "Helvetica";
-    padding: 4px 10px 4px 10px;
+    padding: 6px 20px 6px 20px;
+    border: 1px solid #ddd;
 }
 
 .filterButton:hover {

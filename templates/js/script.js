@@ -57,6 +57,7 @@ function sortTable(id, n, numeric=false){
         for (j = 0; j < rowArray[1].length-1; j++){
             newCell = newRow.insertCell(j);
             newCell.innerHTML = rowArray[i][j];
+            newCell.classList.add("values");
         }
         newRow.style.display = rowArray[i][rowArray[1].length-1];
 
@@ -65,28 +66,6 @@ function sortTable(id, n, numeric=false){
 
     var t5 = performance.now();
     console.log("write table: " + (t5-t4) + "ms");
-
-    // fix odd even shading
-    var rows = table.getElementsByTagName("tr");
-    var odd=false;
-    for (var i = 1; i < rows.length; i++){
-        if (rows[i].style.display == ""){
-            if (odd){
-                odd = false;
-                for (var j = 0; j < rows[i].getElementsByTagName("td").length; j++){
-                    rows[i].getElementsByTagName("td")[j].classList.add('even');
-                }
-            } else {
-                odd = true;
-                for (var j = 0; j < rows[i].getElementsByTagName("td").length; j++){
-                    rows[i].getElementsByTagName("td")[j].classList.remove('even');
-                }
-            }
-        }
-    }
-
-    var t6 = performance.now();
-    console.log("fix even-odd column coloring: "+ (t6-t5) + "ms");
 
     table.style.display = "";
     var t7 = performance.now();
@@ -216,9 +195,22 @@ function filterTableExtended(input1Id, input2Id, tableId, exactbox, refbox, nonr
     var match1 = false;
     var match2 = false;
     var data;
+
+    table.style.display = "none";
+    var t0 = performance.now();
+
+    var rowArray = new Array(rows.length);
+    var valuesArray;
     for (var i = 1; i < rows.length; i++){
         match1 = false;
         match2 = false;
+
+        valuesArray = new Array(rows[1].getElementsByTagName("td").length+1);
+
+        for (var j = 0; j < rows[1].getElementsByTagName("td").length; j++){
+            valuesArray[j] = rows[i].getElementsByTagName("td")[j].innerHTML;
+        }
+
         for (var j = 0; j < 2; j++){
             data = rows[i].getElementsByTagName("td")[j];
             type = rows[i].getElementsByTagName("td")[2];
@@ -227,24 +219,24 @@ function filterTableExtended(input1Id, input2Id, tableId, exactbox, refbox, nonr
                 var typeValue = type.textContent || type.innerText;
                 typeValue = typeValue.toUpperCase();
                 if (exactMatch){
-                    if (txtValue.toUpperCase() == filter1){
-                        if ((typeValue == "REFERENCE" && keepRef) || (typeValue == "NON-REFERENCE" && keepNonref) || (filter1 == "")){
+                    if (txtValue.toUpperCase() == filter1 || filter1 == ""){
+                        if ((typeValue == "REFERENCE" && keepRef) || (typeValue == "NON-REFERENCE" && keepNonref)){
                             match1 = true;
                         }
                     }
-                    if (txtValue.toUpperCase() == filter2){
-                        if ((typeValue == "REFERENCE" && keepRef) || (typeValue == "NON-REFERENCE" && keepNonref) || (filter2 == "")){
+                    if (txtValue.toUpperCase() == filter2 || filter2 == ""){
+                        if ((typeValue == "REFERENCE" && keepRef) || (typeValue == "NON-REFERENCE" && keepNonref)){
                             match2 = true;
                         }
                     }
                 } else {
-                    if (txtValue.toUpperCase().indexOf(filter1) > -1){
-                        if ((typeValue == "REFERENCE" && keepRef) || (typeValue == "NON-REFERENCE" && keepNonref) || (filter1 == "")){
+                    if (txtValue.toUpperCase().indexOf(filter1) > -1 || filter1 == ""){
+                        if ((typeValue == "REFERENCE" && keepRef) || (typeValue == "NON-REFERENCE" && keepNonref)){
                             match1 = true;
                         }
                     }
-                    if (txtValue.toUpperCase().indexOf(filter2) > -1){
-                        if ((typeValue == "REFERENCE" && keepRef) || (typeValue == "NON-REFERENCE" && keepNonref) || (filter2 == "")){
+                    if (txtValue.toUpperCase().indexOf(filter2) > -1 || filter2 == ""){
+                        if ((typeValue == "REFERENCE" && keepRef) || (typeValue == "NON-REFERENCE" && keepNonref)){
                             match2 = true;
                         }
                     }
@@ -252,13 +244,48 @@ function filterTableExtended(input1Id, input2Id, tableId, exactbox, refbox, nonr
             }
         }
         // console.log(match1);
-        // console.log(match2);
+        // console.log("filtered");
         if ((filterOption == "or" && (match1 || match2)) || (filterOption == "and" && (match1 && match2))){
-            rows[i].style.display = "";
+            valuesArray[rows[1].getElementsByTagName("td").length] = "";
+            rowArray[i] = valuesArray;
+
         } else {
-            rows[i].style.display = "none";
+            valuesArray[rows[1].getElementsByTagName("td").length] = "none";
+            rowArray[i] = valuesArray;
         }
     }
+
+    var t1 = performance.now();
+    console.log("change display: " + (t1-t0) + "ms");
+
+    // clear table
+    for (i = rows.length-1; i > 0; i--){
+        table.deleteRow(i);
+    }
+
+    var t2 = performance.now();
+    console.log("clear table: " + (t2-t1) + "ms");
+
+    // repolulate table with sorted values
+    for (i = 1; i < rowArray.length; i++){
+        var newRow = document.createElement("tr");
+        var newCell;
+
+        for (j = 0; j < rowArray[1].length-1; j++){
+            newCell = newRow.insertCell(j);
+            newCell.innerHTML = rowArray[i][j];
+            newCell.classList.add("values");
+        }
+        newRow.style.display = rowArray[i][rowArray[1].length-1];
+        table.tBodies[0].appendChild(newRow);
+    }
+
+    var t3 = performance.now();
+    console.log("repopulate display: " + (t3-t2) + "ms");
+    
+    table.style.display = "";
+
+    console.log("total duration: " + (t3-t0) + "ms");
 }
 
 function flipFilterOption(buttonId){
