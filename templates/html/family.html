@@ -38,33 +38,37 @@
                 <div class="pageHeader">
                     <p class="pageHeader">TE Family: {{family}}</p>
                 </div>
-                <div class="spacer2"></div>
-                <div class="sectionHeader">
-                    <a href="../data/coverage/{{family}}.allQ.normalized.txt"  target="_blank"><div class="sectionHeaderRaw"style="width:25px;">All</div></a>
-                    <a href="../data/coverage/{{family}}.highQ.normalized.txt"  target="_blank" ><div class="sectionHeaderRaw" style="width:25px;">Unique</div></a>
-                    <div class="sectionHeaderName" style="width: 700px;">{{family}} Normalized Coverage</div>
-                    <div class="sectionHeaderHide" id="plot1Header" onclick="hide('plot1Div','plot1Header')">Hide</div>
-                </div>
-                <div id="plot1Div">
-                    <div class="runinfo" id="teinfo">
-                        <div id="tester" class="plot1" style="width:100%;height:500px;"></div>
+
+                {% if norm_depth is not defined %}
+                    <div class="spacer2"></div>
+                    <div class="sectionHeader">
+                        <a href="../data/coverage/{{family}}.allQ.normalized.txt"  target="_blank"><div class="sectionHeaderRaw"style="width:25px;">All</div></a>
+                        <a href="../data/coverage/{{family}}.highQ.normalized.txt"  target="_blank" ><div class="sectionHeaderRaw" style="width:25px;">Unique</div></a>
+                        <div class="sectionHeaderName" style="width: 700px;">{{family}} Normalized Coverage</div>
+                        <div class="sectionHeaderHide" id="plot1Header" onclick="hide('plot1Div','plot1Header')">Hide</div>
                     </div>
-                    <div class="runinfo" id="mapinfo">
-                        <table class="run-information">
-                            <tr>
-                                <td class="header3" colspan="2">Mean Normalized Coverage</td>
-                            </tr>
-                            <tr>
-                                <td class="header">All</td>
-                                <td class="values">{{norm_depth}}</td>
-                            </tr>
-                            <tr>
-                                <td class="header">Unique</td>
-                                <td class="values odd">{{uniq_depth}}</td>
-                            </tr>
-                        </table>
+                    <div id="plot1Div">
+                        <div class="runinfo" id="teinfo">
+                            <div id="tester" class="plot1" style="width:100%;height:500px;"></div>
+                        </div>
+                        <div class="runinfo" id="mapinfo">
+                            <table class="run-information">
+                                <tr>
+                                    <td class="header3" colspan="2">Mean Normalized Coverage</td>
+                                </tr>
+                                <tr>
+                                    <td class="header">All</td>
+                                    <td class="values">{{norm_depth}}</td>
+                                </tr>
+                                <tr>
+                                    <td class="header">Unique</td>
+                                    <td class="values odd">{{uniq_depth}}</td>
+                                </tr>
+                            </table>
+                        </div>
                     </div>
-                </div>
+                {% endif %}
+
                 <div class="spacer2"></div>
                 <div class="sectionHeader">
                     <a href="../data/families/{{family}}_prediction_summary.txt"  target="_blank"><div class="sectionHeaderRaw">Raw</div></a>
@@ -160,60 +164,62 @@
             </div>
         </div>
         <!-- plot 1: Family Summary -->
-        <script>
-            var trace1 = {
-            x: [
-            {% for pos in uniq_positions %}
-                {{pos}},
-            {% endfor %}
-            ],
-            y: [
-            {% for cov in uniq_coverage %}
-                {{cov}},
-            {% endfor %}
-            ],
-            name: "Unique Coverage",
-            fill: 'tozeroy',
-            type: 'scatter',
-            fillcolor: 'rgba(25,25,25,0.6)',
-            line: {
-                color: 'rgba(95,95,95,1)'
-            }
-            };
+        {% if uniq_positions is not defined %}
+            <script>            
+                var trace1 = {
+                x: [
+                {% for pos in uniq_positions %}
+                    {{pos}},
+                {% endfor %}
+                ],
+                y: [
+                {% for cov in uniq_coverage %}
+                    {{cov}},
+                {% endfor %}
+                ],
+                name: "Unique Coverage",
+                fill: 'tozeroy',
+                type: 'scatter',
+                fillcolor: 'rgba(25,25,25,0.6)',
+                line: {
+                    color: 'rgba(95,95,95,1)'
+                }
+                };
 
-            var trace2 = {
-            x: [
-            {% for pos in all_positions %}
-                {{pos}},
-            {% endfor %}
-            ],
-            y: [
-            {% for cov in all_coverage %}
-                {{cov}},
-            {% endfor %}
-            ],
-            name: "All Coverage",
-            fill: 'tonexty',
-            type: 'scatter',
-            fillcolor: 'rgba(95,95,95,0.6)',
-            line: {
-                color: 'rgba(130,130,130,1)'
-            }
-            };
+                var trace2 = {
+                x: [
+                {% for pos in all_positions %}
+                    {{pos}},
+                {% endfor %}
+                ],
+                y: [
+                {% for cov in all_coverage %}
+                    {{cov}},
+                {% endfor %}
+                ],
+                name: "All Coverage",
+                fill: 'tonexty',
+                type: 'scatter',
+                fillcolor: 'rgba(95,95,95,0.6)',
+                line: {
+                    color: 'rgba(130,130,130,1)'
+                }
+                };
 
-            var layout = {
-                showlegend: true,
-                font: {size: 12},
-                margin: {'t':50, 'b':50},
-                xaxis: {automargin: true},
-                yaxis: {automargin: true},
-                legend: {"orientation": "h", x: 0.3, y: 1.1}
-            };
+                var layout = {
+                    showlegend: true,
+                    font: {size: 12},
+                    margin: {'t':50, 'b':50},
+                    xaxis: {automargin: true},
+                    yaxis: {automargin: true},
+                    legend: {"orientation": "h", x: 0.3, y: 1.1}
+                };
 
-            var data = [trace1, trace2];
-            var div = document.getElementsByClassName('plot1')[0];
-            Plotly.newPlot(div, data, layout);
-        </script>
+                var data = [trace1, trace2];
+                var div = document.getElementsByClassName('plot1')[0];
+                Plotly.newPlot(div, data, layout);
+            </script>
+        {% endif %}
 
         <!-- plot 2: Chromosome Summary -->
         {% for method_result in method_results %}

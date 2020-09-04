@@ -196,6 +196,7 @@ def make_run_summary(out_file_map, commit, methods, fq1, fq2, ref, bam, flagstat
     out_lines.append(pad("Started:",12)+start_time+"\n")
     out_lines.append(pad("Completed:",12)+"{{END_TIME}}"+"\n\n")
 
+    mapping_info = None
     if os.path.exists(bam) and os.path.exists(flagstat) and os.path.exists(median_insert_size) and os.path.exists(ref):
         mapping_info = {}
         out_lines.append(("-"*34)+"\n")
@@ -309,12 +310,18 @@ def make_local_css_js_copies(css_dir, js_dir, out_dir):
 def make_data_copies(methods, results_dir, out_dir):
     mccutils.mkdir(out_dir+"/data/")
     if "trimgalore" in methods:
+        if os.path.exists(out_dir+"/data/trimgalore/"):
+            mccutils.remove(out_dir+"/data/trimgalore/")
+
         mccutils.mkdir(out_dir+"/data/trimgalore/")
         for f in os.listdir(results_dir+"/trimgalore"):
             if ".zip" not in f:
                 mccutils.run_command(["cp", "-r", results_dir+"/trimgalore/"+f, out_dir+"/data/trimgalore/"])
     
     if "coverage" in methods:
+        if os.path.exists(out_dir+"/data/coverage/"):
+            mccutils.remove(out_dir+"/data/coverage/")
+            
         mccutils.mkdir(out_dir+"/data/coverage/")
         for f in os.listdir(results_dir+"/coverage/"):
             if not os.path.isdir(results_dir+"/coverage/"+f):
@@ -405,20 +412,29 @@ def make_summary_page(jinja_env, methods, sample_name, commit, start_time, end_t
         else:
             fq2_trimgalore_results = None
     else:
+        fq1_trimgalore_file = None
+        fq2_trimgalore_file = None
         fq1_trimgalore_results = None
         fq2_trimgalore_results = None
 
-
-    # get mapping info
-    read1_seq_len = mapping_info['read1_length']
-    read2_seq_len = None
-    read1_reads = mapping_info['read1_reads']
-    read2_reads = None
-    median_insert_size = mapping_info['median_insert_size']
-    avg_genome_cov = mapping_info['avg_genome_cov']
-    if paired:
-        read2_seq_len = mapping_info['read2_length']
-        read2_reads = mapping_info['read2_reads']
+    if mapping_info is not None:
+        # get mapping info
+        read1_seq_len = mapping_info['read1_length']
+        read2_seq_len = None
+        read1_reads = mapping_info['read1_reads']
+        read2_reads = None
+        median_insert_size = mapping_info['median_insert_size']
+        avg_genome_cov = mapping_info['avg_genome_cov']
+        if paired:
+            read2_seq_len = mapping_info['read2_length']
+            read2_reads = mapping_info['read2_reads']
+    else:
+        read1_seq_len = None
+        read2_seq_len = None
+        read1_reads = None
+        read2_reads = None
+        median_insert_size = None
+        avg_genome_cov = None
         
 
     # get prediction information
@@ -463,6 +479,7 @@ def make_summary_page(jinja_env, methods, sample_name, commit, start_time, end_t
         trimgalore2=fq2_trimgalore_results,
         trimgalore1_file=fq1_trimgalore_file,
         trimgalore2_file=fq2_trimgalore_file,
+        mapping_info = mapping_info,
         r1_seq_len = read1_seq_len,
         r2_seq_len = read2_seq_len,
         r1_reads = read1_reads,
@@ -532,12 +549,13 @@ def make_family_pages(jinja_env, consensus, methods, out_file_map, chromosomes, 
 
 
     depth = {}
-    with open(out_dir+"/data/coverage/te_depth.txt","r") as depth_file:
-        for i,line in enumerate(depth_file):
-            if i > 0:
-                split_line = line.split(",")
-                family = split_line[0]
-                depth[family] = [split_line[1], split_line[2]]
+    if "coverage" in methods:
+        with open(out_dir+"/data/coverage/te_depth.txt","r") as depth_file:
+            for i,line in enumerate(depth_file):
+                if i > 0:
+                    split_line = line.split(",")
+                    family = split_line[0]
+                    depth[family] = [split_line[1], split_line[2]]
 
     for family in families:
         all_cov = None
@@ -581,19 +599,34 @@ def make_family_pages(jinja_env, consensus, methods, out_file_map, chromosomes, 
                     predictions_file.write(line+"\n")
             method_predictions.append(method_prediction)
 
-        rendered_lines = template.render(
-            methods=prediction_methods,
-            family=family,
-            all_coverage=all_cov,
-            all_positions=all_pos,
-            uniq_coverage=uniq_cov,
-            uniq_positions=uniq_pos,
-            norm_depth=depth[family][0],
-            uniq_depth=depth[family][1],
-            prediction_summary=prediction,
-            chromosomes=chromosomes,
-            method_results=method_predictions
-        )
+        if "coverage" in methods:
+            rendered_lines = template.render(
+                methods=prediction_methods,
+                family=family,
+                all_coverage=all_cov,
+                all_positions=all_pos,
+                uniq_coverage=uniq_cov,
+                uniq_positions=uniq_pos,
+                norm_depth=depth[family][0],
+                uniq_depth=depth[family][1],
+                prediction_summary=prediction,
+                chromosomes=chromosomes,
+                method_results=method_predictions
+            )
+        else:
+            rendered_lines = template.render(
+                methods=prediction_methods,
+                family=family,
+                all_coverage=None,
+                all_positions=None,
+                uniq_coverage=None,
+                uniq_positions=None,
+                norm_depth=None,
+                uniq_depth=None,
+                prediction_summary=prediction,
+                chromosomes=chromosomes,
+                method_results=method_predictions
+            )
         
         out_file = out_dir+"/html/"+family+".html"
         with open(out_file,"w") as out:

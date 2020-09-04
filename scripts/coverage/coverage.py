@@ -283,6 +283,7 @@ def make_plots(te_names, all_coverage_files, uniq_coverage_files, avg_norm_te_de
         output = out+"plots/"+te_name+".png"
         plot = plot_coverage(chrom, all_pos, all_cov, uniq_pos, uniq_cov, sample_name, plot_height, plot_width, genome_depth, hline, trim_edges=trim_edges)
         plot.savefig(output, bbox_inches="tight")
+        plot.close()
         mccutils.log("coverage","plot created: "+output)
 
 

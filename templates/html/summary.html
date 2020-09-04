@@ -165,44 +165,48 @@
                         </div>
                     </div>
                 {% endif %}
-                <div class="spacer2"></div>
-                <div class="sectionHeader">
-                    <a href="data/run/summary_report.txt"  target="_blank"><div class="sectionHeaderRaw">Raw</div></a>
-                    <div class="sectionHeaderName">Read Mapping Information</div>
-                    <div class="sectionHeaderHide" id="mapinfoHeader" onclick="hide('mapinfo','mapinfoHeader')">Hide</div>
-                </div>
-                <div class="card" id="mapinfo">
-                    <table class="run-information">
-                        <tr>
-                            <td class="header">Read1 Sequence Length</td>
-                            <td class="values">{{ r1_seq_len }}</td>
-                        </tr>
-                        {% if paired %}
+
+                {% if mapping_info is defined %}
+                    <div class="spacer2"></div>
+                    <div class="sectionHeader">
+                        <a href="data/run/summary_report.txt"  target="_blank"><div class="sectionHeaderRaw">Raw</div></a>
+                        <div class="sectionHeaderName">Read Mapping Information</div>
+                        <div class="sectionHeaderHide" id="mapinfoHeader" onclick="hide('mapinfo','mapinfoHeader')">Hide</div>
+                    </div>
+                    <div class="card" id="mapinfo">
+                        <table class="run-information">
                             <tr>
-                                <td class="header">Read2 Sequence Length</td>
-                                <td class="values even">{{ r2_seq_len }}</td>
+                                <td class="header">Read1 Sequence Length</td>
+                                <td class="values">{{ r1_seq_len }}</td>
                             </tr>
-                        {% endif %}
-                        <tr>
-                            <td class="header">Read1 Reads</td>
-                            <td class="values">{{ r1_reads }}</td>
-                        </tr>
-                        {% if paired %}
+                            {% if paired %}
+                                <tr>
+                                    <td class="header">Read2 Sequence Length</td>
+                                    <td class="values even">{{ r2_seq_len }}</td>
+                                </tr>
+                            {% endif %}
                             <tr>
-                                <td class="header">Read2 Reads</td>
-                                <td class="values even">{{ r2_reads }}</td>
+                                <td class="header">Read1 Reads</td>
+                                <td class="values">{{ r1_reads }}</td>
                             </tr>
-                        {% endif %}
-                        <tr>
-                            <td class="header">Median Insert Size</td>
-                            <td class="values">{{ median_insert_size }}</td>
-                        </tr>
-                        <tr>
-                            <td class="header">Avg Genome Coverage</td>
-                            <td class="values even">{{ avg_genome_cov }}</td>
-                        </tr>
-                    </table>
-                </div>       
+                            {% if paired %}
+                                <tr>
+                                    <td class="header">Read2 Reads</td>
+                                    <td class="values even">{{ r2_reads }}</td>
+                                </tr>
+                            {% endif %}
+                            <tr>
+                                <td class="header">Median Insert Size</td>
+                                <td class="values">{{ median_insert_size }}</td>
+                            </tr>
+                            <tr>
+                                <td class="header">Avg Genome Coverage</td>
+                                <td class="values even">{{ avg_genome_cov }}</td>
+                            </tr>
+                        </table>
+                    </div>       
+                {% endif %}
+
                 {% if prediction_methods|length > 0 %}    
                     <div class="spacer2"></div>
                     <div class="sectionHeader">
