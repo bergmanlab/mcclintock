@@ -49,7 +49,7 @@
                     </div>
                     <div id="plot1Div">
                         <div class="runinfo" id="teinfo">
-                            <div id="tester" class="plot1" style="width:100%;height:500px;"></div>
+                            <div id="tester" class="plot1" style="width:100%;height:{{chrom_plot_height}}px;"></div>
                         </div>
                         <div class="runinfo" id="mapinfo">
                             <table class="run-information">
@@ -120,7 +120,7 @@
                     </div>
                     <div id="{{results.method}}">
                         <div class="runinfo" id="teinfo">
-                            <div id="tester" class="{{results.method}}Plot" style="width:100%;height:500px;"></div>
+                            <div id="tester" class="{{results.method}}Plot" style="width:100%;height:{{chrom_plot_height}}px;"></div>
                         </div>
                         <div id="familyinfoDiv">
                             <div class="filter">
@@ -211,9 +211,8 @@
                     showlegend: true,
                     font: {size: 12},
                     margin: {'t':50, 'b':50},
-                    xaxis: {automargin: true},
-                    yaxis: {automargin: true},
-                    legend: {"orientation": "h", x: 0.3, y: 1.1}
+                    xaxis: {automargin: true, side: 'top'},
+                    yaxis: {automargin: true}
                 };
 
                 var data = [trace1, trace2];
@@ -271,9 +270,8 @@
                 barmode: 'stack',
                 font: {size: 12},
                 margin: {'t':50, 'b':50},
-                xaxis: {automargin: true},
-                yaxis: {automargin: true},
-                legend: {"orientation": "h", x: 0.3, y: 1.1}
+                xaxis: {automargin: true, side: 'top'},
+                yaxis: {automargin: true}
                 };
 
                 var div = document.getElementsByClassName('{{method_result.method}}Plot')[0];

@@ -599,6 +599,13 @@ def make_family_pages(jinja_env, consensus, methods, out_file_map, chromosomes, 
                     predictions_file.write(line+"\n")
             method_predictions.append(method_prediction)
 
+        height_per_entry = 20
+        min_height = 500
+        # determine height of plot of predictions per contig
+        chrom_plot_height = len(chromosomes) * height_per_entry
+        if chrom_plot_height < min_height:
+            chrom_plot_height = min_height
+
         if "coverage" in methods:
             rendered_lines = template.render(
                 methods=prediction_methods,
@@ -612,6 +619,7 @@ def make_family_pages(jinja_env, consensus, methods, out_file_map, chromosomes, 
                 uniq_depth=depth[family][1],
                 prediction_summary=prediction,
                 chromosomes=chromosomes,
+                chrom_plot_height=chrom_plot_height,
                 method_results=method_predictions
             )
         else:
@@ -627,6 +635,7 @@ def make_family_pages(jinja_env, consensus, methods, out_file_map, chromosomes, 
                 uniq_depth=None,
                 prediction_summary=prediction,
                 chromosomes=chromosomes,
+                chrom_plot_height=chrom_plot_height,
                 method_results=method_predictions
             )
         
@@ -678,6 +687,13 @@ def make_method_pages(jinja_env, methods, consensus, out_file_map, chromosomes, 
                 line = ",".join([fam, str(reference_family_counts[i]), str(nonreference_family_counts[i])])
                 raw_file.write(line+"\n")
 
+        # determine height of family counts plot, makes sure there is enough room for each bar
+        height_per_entry = 20
+        min_height = 500
+        family_plot_height = len(families) * height_per_entry
+        if family_plot_height < min_height:
+            family_plot_height = min_height
+
         reference_chromosome_counts = []
         nonreference_chromosome_counts = []
         for chromosome in chromosomes:
@@ -700,6 +716,11 @@ def make_method_pages(jinja_env, methods, consensus, out_file_map, chromosomes, 
                 line = ",".join([chrom, str(reference_chromosome_counts[i]), str(nonreference_chromosome_counts[i])])
                 raw_file.write(line+"\n")
 
+        # determine height of plot of predictions per contig
+        chrom_plot_height = len(chromosomes) * height_per_entry
+        if chrom_plot_height < min_height:
+            chrom_plot_height = min_height
+
         predictions = get_predictions(predictions_file)
 
         with open(out_dir+"/data/methods/"+method+"/all_predictions.txt", "w") as raw_file:
@@ -713,9 +734,11 @@ def make_method_pages(jinja_env, methods, consensus, out_file_map, chromosomes, 
             methods=prediction_methods,
             method=method,
             families=families,
+            family_plot_height=family_plot_height,
             reference_family_counts=reference_family_counts,
             nonreference_family_counts=nonreference_family_counts,
             chromosomes=chromosomes,
+            chrom_plot_height=chrom_plot_height,
             reference_chromosome_counts=reference_chromosome_counts,
             nonreference_chromosome_counts=nonreference_chromosome_counts,
             predictions=predictions
