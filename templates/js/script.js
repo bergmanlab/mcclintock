@@ -1,4 +1,208 @@
+function fillTable(rawData, tableId, maxTableSize){
+    console.log(rawData.length)
+    var table = document.getElementById(tableId);
+    maxRows = maxTableSize;
+    if (maxTableSize > rawData.length){
+        maxRows = rawData.length;
+    }
+    for (var i = 1; i < maxRows; i++){
+        var newRow = document.createElement("tr");
+        for (let j = 0; j < rawData[1].length; j++){
+            var text = document.createTextNode(rawData[i][j]);
+            var newCol = document.createElement('td');
+            newCol.classList.add("values");
+            newCol.appendChild(text);
+            newRow.appendChild(newCol);
+        }
+        table.appendChild(newRow);
+    }
+}
+
+function sortTableLarge(rawData, tableId, colToSort, maxTableSize, numeric=false){
+    console.log(tableId,colToSort)
+    var t0 = performance.now();
+    var table = document.getElementById(tableId);
+    var rows = table.getElementsByTagName("tr");
+
+    // remove sorted label from non-sorted column headers
+    for (var c = 0; c < rows[0].length; c++){
+        if (c != colToSort){
+            rows[0].getElementsByTagName("th")[c].classList.remove("sorted");
+            rows[0].getElementsByTagName("th")[c].classList.remove("invSorted");
+        }
+    }
+
+    //clear table
+    for (i = rows.length-1; i > 0; i--){
+        table.deleteRow(i);
+    }
+
+    // remove header row from sorting
+    var rowArray = [...rawData];
+    rowArray.shift();
+
+    // sort data
+    if (rows[0].getElementsByTagName("th")[colToSort].classList.contains("sorted")){
+        console.log("is already sorted");
+        sortByColumn(rowArray, colToSort, numeric=numeric, invert=true);
+        rows[0].getElementsByTagName("th")[colToSort].classList.remove("sorted");
+        rows[0].getElementsByTagName("th")[colToSort].classList.add("invSorted");
+    } else {
+        sortByColumn(rowArray, colToSort, numeric=numeric, invert=false);
+        rows[0].getElementsByTagName("th")[colToSort].classList.add("sorted");
+    }
+
+    // fill table
+    rowArray.unshift(rawData[0]);
+    fillTable(rowArray, tableId, maxTableSize);
+    return rowArray;
+}
+
+function filterData(rawData, tableId, maxTableSize, filterId1, filterId2, exactId, refId, nonrefId, containsBothId){
+    var filteredData = [];
+    var filter1 = document.getElementById(filterId1).value.toUpperCase();
+    var filter2 = document.getElementById(filterId2).value.toUpperCase();
+    var exactMatch = document.getElementById(exactId).checked;
+    var keepRef = document.getElementById(refId).checked;
+    var keepNonref = document.getElementById(nonrefId).checked;
+    var containsBothValue = document.getElementById(containsBothId).value;
+    var containsBoth = false;
+    if (containsBothValue == "and"){
+        containsBoth = true;
+    }
+
+    for (var i = 1; i < rawData.length; i++){
+        var match1 = false;
+        var match2 = false;
+        for (var j = 0; j < 2; j++){
+            var valToCheck = rawData[i][j].toUpperCase();
+            var predType = rawData[i][2].toUpperCase();
+            console.log(valToCheck, filter1, filter2);
+            if (exactMatch){
+                if ((valToCheck == filter1) || (filter1 == "")){
+                    if (((predType == "REFERENCE") && keepRef) || ((predType == "NON-REFERENCE") && keepNonref)){
+                        match1 = true;
+                    }
+                }
+                if ((valToCheck == filter2) || (filter2 == "")){
+                    if (((predType == "REFERENCE") && keepRef) || ((predType == "NON-REFERENCE") && keepNonref)){
+                        match2 = true;
+                    }
+                }
+            } else {
+                if ((valToCheck.indexOf(filter1) > -1) || (filter1 == "")){
+                    if (((predType == "REFERENCE") && keepRef) || ((predType == "NON-REFERENCE") && keepNonref)){
+                        match1 = true;
+                    }
+                }
+                if ((valToCheck.indexOf(filter2) > -1) || (filter2 == "")){
+                    if (((predType == "REFERENCE") && keepRef) || ((predType == "NON-REFERENCE") && keepNonref)){
+                        match2 = true;
+                    }
+                }
+            }
+        }
+        console.log(match1, match2);
+        if (containsBoth){
+            if (match1 && match2){
+                filteredData.push(rawData[i]);
+            }
+        } else {
+            if (match1 || match2){
+                filteredData.push(rawData[i]);
+            }
+        }
+    }
+
+    filteredData.unshift(rawData[0]);
+    console.log(filteredData.length);
+
+    var table = document.getElementById(tableId);
+    var rows = table.getElementsByTagName("tr");
+    //clear table
+    for (i = rows.length-1; i > 0; i--){
+        table.deleteRow(i);
+    }
+    fillTable(filteredData, tableId, maxTableSize);
+    console.log(filteredData.length)
+    return filteredData;
+}
+
+
+function showSection(data, tableId, maxTableSize, section){
+    var dataToShow = [];
+    var binNum = data.length / maxTableSize;
+    if ((data.length % maxTableSize) > 0){
+        binNum += 1;
+    }
+
+    var start = 1;
+    var end = maxTableSize;
+    if (maxTableSize > data.length){
+        end = data.length;
+    }
+
+    for (var b = 1; b <= binNum; b++){
+        if (b == section){
+            for (x = start; x < end; x++){
+                dataToShow.push(data[x]);
+            }
+        }
+        start += maxTableSize;
+        end += maxTableSize;
+    }
+
+    dataToShow.unshift(data[0]);
+
+    var table = document.getElementById(tableId);
+    var rows = table.getElementsByTagName("tr");
+    //clear table
+    for (i = rows.length-1; i > 0; i--){
+        table.deleteRow(i);
+    }
+
+    fillTable(dataToShow, tableId, maxTableSize);
+
+    // add button coloring to shade current section
+}
+
+
+function isSorted(arr, col, numeric=false, inverted=false){
+    for (var i = 0; i < arr.length -1; i++){
+        if (numeric){
+            if (inverted){
+                if (parseInt(arr[i][col]) < parseInt(arr[i+1][col])){
+                    console.log(arr[i][col], arr[i+1][col])
+                    return false;
+                }
+            } else {
+                if (parseInt(arr[i][col]) > parseInt(arr[i+1][col])){
+                    console.log(arr[i][col], arr[i+1][col])
+                    return false;
+                }
+            }
+
+        } else {
+            if (inverted){
+                if (arr[i][col].toLowerCase() < arr[i+1][col].toLowerCase()){
+                    console.log(arr[i][col], arr[i+1][col])
+                    return false;
+                }
+            } else {
+                if (arr[i][col].toLowerCase() > arr[i+1][col].toLowerCase()){
+                    console.log(arr[i][col], arr[i+1][col])
+                    return false;
+                }
+            }
+
+        }
+    }
+    return true;
+}
+
+
 function sortTable(id, n, numeric=false){
+    console.log(id,n)
     var t0 = performance.now();
     console.log(id)
     var table = document.getElementById(id);
@@ -61,7 +265,7 @@ function sortTable(id, n, numeric=false){
         }
         newRow.style.display = rowArray[i][rowArray[1].length-1];
 
-        table.tBodies[0].appendChild(newRow);
+        table.appendChild(newRow);
     }
 
     var t5 = performance.now();
@@ -72,67 +276,59 @@ function sortTable(id, n, numeric=false){
     console.log("total duration: "+ (t7-t0) + "ms");
 }
 
-function isSorted(arr, col, numeric=false, inverted=false){
-    for (var i =1; i < arr.length-1; i++){
-        if (numeric){
-            if (inverted){
-                if (parseInt(arr[i][col]) < parseInt(arr[i+1][col])){
-                    return false;
-                }
-            } else {
-                if (parseInt(arr[i][col]) > parseInt(arr[i+1][col])){
-                    return false;
-                }
-            }
-
-        } else {
-            if (inverted){
-                if (arr[i][col].toLowerCase() < arr[i+1][col].toLowerCase()){
-                    return false;
-                }
-            } else {
-                if (arr[i][col].toLowerCase() > arr[i+1][col].toLowerCase()){
-                    return false;
-                }
-            }
-
-        }
-    }
-    return true;
-}
 
 function invertArray(arr){
     var invertedArray = [...arr];
-    for (var i = 1; i < arr.length; i++){
+    for (var i = 0; i < arr.length; i++){
         invertedArray[i] = arr[(arr.length)-i]
     }
 
     return invertedArray;
 }
 
-function sortByColumn(arr, colIdx, numeric=false){
-    if (numeric){
-        function sortFunction(a,b){
-            if (parseInt(a[colIdx]) > parseInt(b[colIdx])){
-                return 1;
-            } else {
-                return -1;
+function sortByColumn(arr, colIdx, numeric=false, invert=false){
+    if (invert){
+        if (numeric){
+            function sortFunction(a,b){
+                if (parseInt(a[colIdx]) < parseInt(b[colIdx])){
+                    return 1;
+                } else {
+                    return -1;
+                }
+            }
+        } else {
+            function sortFunction(a,b){
+                if (a[colIdx].toLowerCase() < b[colIdx].toLowerCase()){
+                    return 1;
+                } else {
+                    return -1;
+                }
             }
         }
     } else {
-        function sortFunction(a,b){
-            if (a[colIdx].toLowerCase() > b[colIdx].toLowerCase()){
-                return 1;
-            } else {
-                return -1;
+        if (numeric){
+            function sortFunction(a,b){
+                if (parseInt(a[colIdx]) > parseInt(b[colIdx])){
+                    return 1;
+                } else {
+                    return -1;
+                }
+            }
+        } else {
+            function sortFunction(a,b){
+                if (a[colIdx].toLowerCase() > b[colIdx].toLowerCase()){
+                    return 1;
+                } else {
+                    return -1;
+                }
             }
         }
     }
 
     arr.sort(sortFunction);
-    tmp = arr[-1];
-    arr.unshift(tmp);
-    arr.pop();
+    // tmp = arr[-1];
+    // arr.unshift(tmp);
+    // arr.pop();
     return arr;
 }
 
@@ -277,7 +473,7 @@ function filterTableExtended(input1Id, input2Id, tableId, exactbox, refbox, nonr
             newCell.classList.add("values");
         }
         newRow.style.display = rowArray[i][rowArray[1].length-1];
-        table.tBodies[0].appendChild(newRow);
+        table.appendChild(newRow);
     }
 
     var t3 = performance.now();

@@ -11,7 +11,6 @@ p {
 /* NAV BAR */
 
 div.navbar {
-    box-shadow: 0px 2px 5px 0px #616161;
     z-index: 100;
     position: fixed;
     width: 100%;
@@ -94,14 +93,13 @@ div.sidebar {
     float: left;
     width: 225px;
     height: 100%;
-    border-color: #EBEBEB;
-    border-style: solid;
-    border-width: 0.01px;
+    border-right-color: #EBEBEB;
+    border-right-style: solid;
+    border-right-width: 1px;
     background-color: #f8f8f8;
     z-index: 100;
     position: fixed;
     margin: 38px 0px 0px 0px;
-    box-shadow: 0px 2px 5px 0px #616161;
 }
 
 ul.sidebar {
@@ -116,6 +114,7 @@ a.sidebar {
     font-size: 14px;
     text-decoration: none;
     padding: 10px 20px;
+    text-align: right;
 }
 
 a.sidebar:hover {
@@ -135,6 +134,7 @@ div.main {
 div.pageHeader {
     border-bottom-style: solid;
     border-width: 1px;
+    border-color: #EBEBEB;
     margin: 0px 0px 0px 40px;
     padding: 60px 0px 0px 0px;
     width: 900px;
@@ -142,8 +142,8 @@ div.pageHeader {
 
 p.pageHeader {
     font-family: "Helvetica";
-    font-size: 30px;
-    font-weight: bold;
+    font-size: 25px;
+    /* font-weight: bold; */
     margin: 0px;
     padding: 20px 0px 20px 0px;
 }
@@ -309,7 +309,7 @@ div.runinfo {
     border-color: #EBEBEB;
     border-top-style: none;
     width: 900px;
-    max-height: 900px;
+    /* max-height: 900px; */
 }
 
 div.card {
@@ -412,4 +412,44 @@ input.rawData:hover {
 
 .filterButton:hover {
     background-color: #ddd;
+}
+
+div.pageChanger {
+    margin: 10px 0px 0px 40px;
+    width: 901px;
+    height: 30px;
+}
+
+button.pageChanger {
+    margin: 0px, 0px, 0px, 0px;
+    background-color: #EBEBEB;
+    color: #616161;
+    border: 1px solid #ddd;
+    font-family: "Helvetica";
+    font-size: 14px;
+    height: 30px;
+    border-radius: 4px;
+}
+
+button.pageChanger:hover {
+    background-color: #ddd;
+}
+
+button.currentPage {
+    background-color: #ddd;
+}
+
+button.currentPage:hover {
+    background-color: #EBEBEB;
+}
+
+button.hiddenRange {
+    margin: 0px, 0px, 0px, 0px;
+    background-color: #FFF;
+    color: #616161;
+    border: 1px solid #FFF;
+    font-family: "Helvetica";
+    font-size: 14px;
+    height: 30px;
+    border-radius: 4px;
 }

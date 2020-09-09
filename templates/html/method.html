@@ -7,7 +7,7 @@
         <script type="text/javascript" src="../js/script.js"></script>
     </head>
     
-    <body>
+    <body onload="fillTable(predictionData, 'predictionsTable', maxTableSize);">
         <div class="navbar">
             <ul class="navbar">
                 <li class="navbar" id="logo"><a href="https://github.com/bergmanlab/mcclintock" target="_blank" class="logo">McClintock</a></li>
@@ -66,55 +66,58 @@
                 </div>
                 <div id="familyinfoDiv">
                     <div class="filter">
-                        <input type="button" id="filterButton" class="filterButton" name="filterButton" value="Filter" onclick="filterTableExtended('filterTable1','filterTable2','predictionsTable', 'exactBox2','refBox','nonrefBox','filterOption')">
+                        <input type="button" id="filterButton" class="filterButton" name="filterButton" value="Filter" onclick="predictionData = filterData(unmodifiedData,'predictionsTable',maxTableSize,'filterTable1','filterTable2','exactBox2','refBox','nonrefBox','filterOption')">
                         <input type="text" class="filterTable" id="filterTable1" autocomplete="off" placeholder="">
                         <input type="button" id="filterOption" class="filterOption" name="filterOption" value="and" onclick="flipFilterOption('filterOption')">
                         <input type="text" class="filterTable" id="filterTable2" autocomplete="off" placeholder="">
-                        <input type="checkbox" class="checkbox" id="exactBox2" name="exactBox2" autocomplete="off" onclick="filterTableExtended('filterTable1','filterTable2','predictionsTable', 'exactBox2','refBox','nonrefBox','filterOption')">
+                        <input type="checkbox" class="checkbox" id="exactBox2" name="exactBox2" autocomplete="off" onclick="predictionData = filterData(unmodifiedData,'predictionsTable',maxTableSize,'filterTable1','filterTable2','exactBox2','refBox','nonrefBox','filterOption')">
                         <label for="exactBox2">Exact Match</label>
-                        <input type="checkbox" class="checkbox" id="refBox" name="refBox" checked="checked" autocomplete="off" onclick="filterTableExtended('filterTable1','filterTable2','predictionsTable', 'exactBox2','refBox','nonrefBox','filterOption')">
+                        <input type="checkbox" class="checkbox" id="refBox" name="refBox" checked="checked" autocomplete="off" onclick="predictionData = filterData(unmodifiedData,'predictionsTable',maxTableSize,'filterTable1','filterTable2','exactBox2','refBox','nonrefBox','filterOption')">
                         <label for="exactBox2">Reference</label>
-                        <input type="checkbox" class="checkbox" id="nonrefBox" name="nonrefBox" checked="checked" autocomplete="off" onclick="filterTableExtended('filterTable1','filterTable2','predictionsTable', 'exactBox2','refBox','nonrefBox','filterOption')">
+                        <input type="checkbox" class="checkbox" id="nonrefBox" name="nonrefBox" checked="checked" autocomplete="off" onclick="predictionData = filterData(unmodifiedData,'predictionsTable',maxTableSize,'filterTable1','filterTable2','exactBox2','refBox','nonrefBox','filterOption')">
                         <label for="exactBox2">Non-Reference</label>
                         
                     </div>
                     <div class="runinfo" id="predictions">
                         <table class="run-information" id="predictionsTable">
                             <tr>
-                                <th class="header" onclick="sortTable('predictionsTable', 0)">Contig</th>
-                                <th class="header" onclick="sortTable('predictionsTable', 1)">Family</th>
-                                <th class="header" onclick="sortTable('predictionsTable', 2)">Type</th>
-                                <th class="header" onclick="sortTable('predictionsTable', 3, numeric=true)">Start</th>
-                                <th class="header" onclick="sortTable('predictionsTable', 4, numeric=true)">End</th>
-                                <th class="header" onclick="sortTable('predictionsTable', 5)">Strand</th>
+                                <th class="header" onclick="predictionData = sortTableLarge(predictionData,'predictionsTable', 0, maxTableSize)">Contig</th>
+                                <th class="header" onclick="predictionData = sortTableLarge(predictionData,'predictionsTable', 1, maxTableSize)">Family</th>
+                                <th class="header" onclick="predictionData = sortTableLarge(predictionData,'predictionsTable', 2, maxTableSize)">Type</th>
+                                <th class="header" onclick="predictionData = sortTableLarge(predictionData,'predictionsTable', 3, maxTableSize, numeric=true)">Start</th>
+                                <th class="header" onclick="predictionData = sortTableLarge(predictionData,'predictionsTable', 4, maxTableSize, numeric=true)">End</th>
+                                <th class="header" onclick="predictionData = sortTableLarge(predictionData,'predictionsTable', 5, maxTableSize)">Strand</th>
                             </tr>
-                            {% for prediction in predictions %}
-                                {% if loop.index%2 != 0 %}
-                                    <tr>
-                                        <td class="values">{{ prediction.chrom }}</td>
-                                        <td class="values">{{ prediction.family }}</td>
-                                        <td class="values">{{ prediction.type }}</td>
-                                        <td class="values">{{ prediction.start }}</td>
-                                        <td class="values">{{ prediction.end }}</td>
-                                        <td class="values">{{ prediction.strand }}</td>
-                                    </tr>
-                                {% else %}
-                                    <tr>
-                                        <td class="values even">{{ prediction.chrom }}</td>
-                                        <td class="values even">{{ prediction.family }}</td>
-                                        <td class="values even">{{ prediction.type }}</td>
-                                        <td class="values even">{{ prediction.start }}</td>
-                                        <td class="values even">{{ prediction.end }}</td>
-                                        <td class="values even">{{ prediction.strand }}</td>
-                                    </tr>
-                                {% endif %}
-                            {% endfor %}
                         </table>
                     </div>
+                </div>
+                <div class="pageChanger">
+                    <button class="pageChanger currentPage" onclick="showSection(predictionData, 'predictionsTable', maxTableSize, 1)">1</button>
+                    <button class="pageChanger" onclick="showSection(predictionData, 'predictionsTable', maxTableSize, 2)">2</button>
+                    <button class="pageChanger" onclick="showSection(predictionData, 'predictionsTable', maxTableSize, 3)">3</button>
+                    <button class="pageChanger" onclick="showSection(predictionData, 'predictionsTable', maxTableSize, 4)">4</button>
+                    <button class="pageChanger" onclick="showSection(predictionData, 'predictionsTable', maxTableSize, 5)">5</button>
+                    <button class="hiddenRange">...</button>
+                    <button class="pageChanger" onclick="showSection(predictionData, 'predictionsTable', maxTableSize, 19)">19</button>
                 </div>
                 <div class="spacer2"></div>
             </div>
         </div>
+
+        <!-- data for prediction table -->
+        <script>
+            var maxTableSize = 20;
+            var predictionData = [
+                ['Contig','Family','Type','Start','End','Strand'],
+                {% for p in predictions %}
+                    [ '{{ p.chrom }}', '{{ p.family }}', '{{ p.type }}', '{{ p.start }}', '{{ p.end }}', '{{ p.strand }}' ],
+                {% endfor %}
+            ];
+
+            const unmodifiedData = [...predictionData];
+        </script>
+
+
         <!-- plot 1: Family Summary -->
         <script>
             var trace1 = {
