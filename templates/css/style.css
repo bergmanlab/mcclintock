@@ -309,7 +309,7 @@ div.runinfo {
     border-color: #EBEBEB;
     border-top-style: none;
     width: 900px;
-    /* max-height: 900px; */
+    max-height: 900px;
 }
 
 div.card {
@@ -452,4 +452,8 @@ button.hiddenRange {
     font-size: 14px;
     height: 30px;
     border-radius: 4px;
+}
+
+div.largeTable {
+    max-height: none;
 }

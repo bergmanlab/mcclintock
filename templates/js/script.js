@@ -1,13 +1,19 @@
-function fillTable(rawData, tableId, maxTableSize){
-    console.log(rawData.length)
+function fillTable(data, tableId, maxTableSize){
+    //  removes undefined rows
+    var rawData = data.filter(function(x){ return x !== undefined;})
+
+    console.log("filltable length:",rawData.length)
+    console.log(rawData)
+
+
     var table = document.getElementById(tableId);
     maxRows = maxTableSize;
-    if (maxTableSize > rawData.length){
-        maxRows = rawData.length;
+    if (maxTableSize > rawData.length-1){
+        maxRows = rawData.length-1;
     }
-    for (var i = 1; i < maxRows; i++){
+    for (var i = 1; i <= maxRows; i++){
         var newRow = document.createElement("tr");
-        for (let j = 0; j < rawData[1].length; j++){
+        for (let j = 0; j < rawData[0].length; j++){
             var text = document.createTextNode(rawData[i][j]);
             var newCol = document.createElement('td');
             newCol.classList.add("values");
@@ -55,6 +61,10 @@ function sortTableLarge(rawData, tableId, colToSort, maxTableSize, numeric=false
     // fill table
     rowArray.unshift(rawData[0]);
     fillTable(rowArray, tableId, maxTableSize);
+
+    // add button coloring to shade current section
+    setupSectionButtons(rowArray, maxTableSize, section=1);
+
     return rowArray;
 }
 
@@ -125,22 +135,26 @@ function filterData(rawData, tableId, maxTableSize, filterId1, filterId2, exactI
     }
     fillTable(filteredData, tableId, maxTableSize);
     console.log(filteredData.length)
+
+    // add button coloring to shade current section
+    setupSectionButtons(filteredData, maxTableSize, section=1);
+
     return filteredData;
 }
 
 
-function showSection(data, tableId, maxTableSize, section){
+function showSection(inData, tableId, maxTableSize, btnId){
     var dataToShow = [];
-    var binNum = data.length / maxTableSize;
-    if ((data.length % maxTableSize) > 0){
-        binNum += 1;
-    }
+    var button = document.getElementById(btnId);
+    var section = parseInt(button.value);
 
-    var start = 1;
-    var end = maxTableSize;
-    if (maxTableSize > data.length){
-        end = data.length;
-    }
+    var data = [...inData];
+    data.shift();
+
+    var metrics = calcSectionMetrics(data, maxTableSize);
+    var start = metrics[0];
+    var end = metrics[1];
+    var binNum = metrics[2];
 
     for (var b = 1; b <= binNum; b++){
         if (b == section){
@@ -164,6 +178,99 @@ function showSection(data, tableId, maxTableSize, section){
     fillTable(dataToShow, tableId, maxTableSize);
 
     // add button coloring to shade current section
+    setupSectionButtons(inData, maxTableSize, section=section);
+}
+
+function calcSectionMetrics(data, maxTableSize){
+    var binNum = parseInt(data.length / maxTableSize);
+    if ((data.length / maxTableSize) - binNum > 0){
+        binNum += 1;
+    }
+
+    var start = 0;
+    var end = maxTableSize;
+    if (maxTableSize > data.length){
+        end = data.length;
+    }
+    console.log(start, end, binNum);
+    return [start, end, binNum];
+}
+
+function setupSectionButtons(inData, maxTableSize, section=1){
+    
+    var data = [...inData];
+    data.shift();
+    var metrics = calcSectionMetrics(data, maxTableSize);
+    var binNum = metrics[2];
+    var buttonDiv = document.getElementById("pageChanger");
+    var hide1 = document.getElementById("hide1");
+    var hide2 = document.getElementById("hide2");
+
+    console.log("section:", section, "bins:", binNum);
+
+    // remove current page styling
+    for (var x = 1; x < 8; x++){
+        var button = document.getElementById("btn"+x.toString());
+        button.classList.remove('currentPage');
+    }
+
+    // no hidden sections
+    if (binNum < 7){
+        hide1.style.display = "none";
+        hide2.style.display = "none";
+        for (var x = 1; x < 8; x++){
+            var button = document.getElementById("btn"+x.toString());
+            if (x == section){
+                button.classList.add('currentPage');
+            }
+            if (x > binNum){
+                button.style.display = "none";
+            }
+        }
+    } else {
+        hide1.style.display = "";
+        hide2.style.display = "";
+
+        // hide downstream sections
+        if (section < 4){
+            hide1.style.display = "none";
+            for (var x = 1; x < 7; x++){
+                setButton("btn"+x.toString(), x);
+                if (x == section){
+                    document.getElementById("btn"+x.toString()).classList.add("currentPage");
+                }
+            }
+            setButton("btn7", binNum);
+
+        // hide upstream sections
+        } else if (section > (binNum-4)) {
+            hide2.style.display = "none";
+            setButton("btn1", 1);
+
+            for (var x = 2; x < 8; x++){
+                setButton("btn"+x.toString(), (binNum-(7-x)));
+                if ((binNum-(7-x)) == section){
+                    document.getElementById("btn"+x.toString()).classList.add("currentPage");
+                }
+            }
+        
+        // hide up and downstream sections
+        } else {
+            document.getElementById("btn4").classList.add("currentPage");
+            setButton("btn1", 1);
+            setButton("btn2", section-2);
+            setButton("btn3", section-1);
+            setButton("btn4", section);
+            setButton("btn5", section+1);
+            setButton("btn6", section+2);
+            setButton("btn7", binNum);
+        }
+    }
+}
+
+function setButton(buttonId, value){
+    document.getElementById(buttonId).innerHTML = value;
+    document.getElementById(buttonId).value = value;
 }
 
 
