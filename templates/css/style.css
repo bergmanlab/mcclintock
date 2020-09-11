@@ -429,6 +429,7 @@ button.pageChanger {
     font-size: 14px;
     height: 30px;
     border-radius: 4px;
+    outline:none;
 }
 
 button.pageChanger:hover {

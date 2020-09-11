@@ -14,17 +14,18 @@ function fillTable(data, tableId, maxTableSize){
     for (var i = 1; i <= maxRows; i++){
         var newRow = document.createElement("tr");
         for (let j = 0; j < rawData[0].length; j++){
-            var text = document.createTextNode(rawData[i][j]);
+            // var text = document.createTextNode(rawData[i][j]);
             var newCol = document.createElement('td');
+            newCol.innerHTML = rawData[i][j];
             newCol.classList.add("values");
-            newCol.appendChild(text);
+            // newCol.appendChild(text);
             newRow.appendChild(newCol);
         }
         table.appendChild(newRow);
     }
 }
 
-function sortTableLarge(rawData, tableId, colToSort, maxTableSize, numeric=false){
+function sortTableLarge(rawData, tableId, colToSort, maxTableSize, btnPrefix, numeric=false){
     console.log(tableId,colToSort)
     var t0 = performance.now();
     var table = document.getElementById(tableId);
@@ -63,63 +64,104 @@ function sortTableLarge(rawData, tableId, colToSort, maxTableSize, numeric=false
     fillTable(rowArray, tableId, maxTableSize);
 
     // add button coloring to shade current section
-    setupSectionButtons(rowArray, maxTableSize, section=1);
+    setupSectionButtons(rowArray, maxTableSize, btnPrefix, section=1);
 
     return rowArray;
 }
 
-function filterData(rawData, tableId, maxTableSize, filterId1, filterId2, exactId, refId, nonrefId, containsBothId){
+function filterData(rawData, tableId, maxTableSize, btnPrefix, filterId1, filterId2, exactId, refId, nonrefId, singleField, containsBothId, predTypeRow, keepAllId){
     var filteredData = [];
+    console.log(filterId1);
     var filter1 = document.getElementById(filterId1).value.toUpperCase();
+    console.log(document.getElementById(filterId1).classList)
     var filter2 = document.getElementById(filterId2).value.toUpperCase();
     var exactMatch = document.getElementById(exactId).checked;
     var keepRef = document.getElementById(refId).checked;
     var keepNonref = document.getElementById(nonrefId).checked;
-    var containsBothValue = document.getElementById(containsBothId).value;
-    var containsBoth = false;
-    if (containsBothValue == "and"){
-        containsBoth = true;
+
+    if (containsBothId == false){
+        containsBoth = false;
+    } else {
+        var containsBothValue = document.getElementById(containsBothId).value;
+        var containsBoth = false;
+        if (containsBothValue == "and"){
+            containsBoth = true;
+        }
     }
 
-    for (var i = 1; i < rawData.length; i++){
-        var match1 = false;
-        var match2 = false;
-        for (var j = 0; j < 2; j++){
-            var valToCheck = rawData[i][j].toUpperCase();
-            var predType = rawData[i][2].toUpperCase();
-            console.log(valToCheck, filter1, filter2);
-            if (exactMatch){
-                if ((valToCheck == filter1) || (filter1 == "")){
-                    if (((predType == "REFERENCE") && keepRef) || ((predType == "NON-REFERENCE") && keepNonref)){
-                        match1 = true;
+    if (keepAllId == ""){
+       var keepAll = false;
+    } else {
+        var keepAll = document.getElementById(keepAllId).checked;
+    }
+
+    if (singleField){
+        for (var i = 1; i < rawData.length; i++){
+            var match =false;
+            for (var j = 0; j < 2; j++){
+                var valToCheck = rawData[i][j].toUpperCase();
+                var predType = rawData[i][predTypeRow].toUpperCase();
+                if (exactMatch){
+                    if ((valToCheck == filter1) || (filter1 == "")){
+                        if (((predType == "REFERENCE") && keepRef) || ((predType == "NON-REFERENCE") && keepNonref) || ((predType == "ALL") && keepAll)){
+                            match = true;
+                        }
+                    }
+
+                } else {
+                    if ((valToCheck.indexOf(filter1) > -1) || (filter1 == "")){
+                        if (((predType == "REFERENCE") && keepRef) || ((predType == "NON-REFERENCE") && keepNonref) || ((predType == "ALL") && keepAll)){
+                            console.log("here:", filter1, valToCheck);
+                            match = true;
+                        }
                     }
                 }
-                if ((valToCheck == filter2) || (filter2 == "")){
-                    if (((predType == "REFERENCE") && keepRef) || ((predType == "NON-REFERENCE") && keepNonref)){
-                        match2 = true;
-                    }
-                }
-            } else {
-                if ((valToCheck.indexOf(filter1) > -1) || (filter1 == "")){
-                    if (((predType == "REFERENCE") && keepRef) || ((predType == "NON-REFERENCE") && keepNonref)){
-                        match1 = true;
-                    }
-                }
-                if ((valToCheck.indexOf(filter2) > -1) || (filter2 == "")){
-                    if (((predType == "REFERENCE") && keepRef) || ((predType == "NON-REFERENCE") && keepNonref)){
-                        match2 = true;
-                    }
-                }
+            }
+            if (match){
+                filteredData.push(rawData[i]);
             }
         }
-        console.log(match1, match2);
-        if (containsBoth){
-            if (match1 && match2){
-                filteredData.push(rawData[i]);
+    } else {
+        for (var i = 1; i < rawData.length; i++){
+            var match1 = false;
+            var match2 = false;
+            for (var j = 0; j < 2; j++){
+                var valToCheck = rawData[i][j].toUpperCase();
+                var predType = rawData[i][predTypeRow].toUpperCase();
+                console.log(valToCheck, filter1, filter2);
+                if (exactMatch){
+                    if ((valToCheck == filter1) || (filter1 == "")){
+                        if (((predType == "REFERENCE") && keepRef) || ((predType == "NON-REFERENCE") && keepNonref) || ((predType == "ALL") && keepAll)){
+                            match1 = true;
+                        }
+                    }
+                    if ((valToCheck == filter2) || (filter2 == "")){
+                        if (((predType == "REFERENCE") && keepRef) || ((predType == "NON-REFERENCE") && keepNonref) || ((predType == "ALL") && keepAll)){
+                            match2 = true;
+                        }
+                    }
+                } else {
+                    if ((valToCheck.indexOf(filter1) > -1) || (filter1 == "")){
+                        if (((predType == "REFERENCE") && keepRef) || ((predType == "NON-REFERENCE") && keepNonref) || ((predType == "ALL") && keepAll)){
+                            match1 = true;
+                        }
+                    }
+                    if ((valToCheck.indexOf(filter2) > -1) || (filter2 == "")){
+                        if (((predType == "REFERENCE") && keepRef) || ((predType == "NON-REFERENCE") && keepNonref) || ((predType == "ALL") && keepAll)){
+                            match2 = true;
+                        }
+                    }
+                }
             }
-        } else {
-            if (match1 || match2){
-                filteredData.push(rawData[i]);
+            console.log(match1, match2);
+            if (containsBoth){
+                if (match1 && match2){
+                    filteredData.push(rawData[i]);
+                }
+            } else {
+                if (match1 || match2){
+                    filteredData.push(rawData[i]);
+                }
             }
         }
     }
@@ -137,13 +179,13 @@ function filterData(rawData, tableId, maxTableSize, filterId1, filterId2, exactI
     console.log(filteredData.length)
 
     // add button coloring to shade current section
-    setupSectionButtons(filteredData, maxTableSize, section=1);
+    setupSectionButtons(filteredData, maxTableSize, btnPrefix, section=1);
 
     return filteredData;
 }
 
 
-function showSection(inData, tableId, maxTableSize, btnId){
+function showSection(inData, tableId, maxTableSize, btnId, btnPrefix){
     var dataToShow = [];
     var button = document.getElementById(btnId);
     var section = parseInt(button.value);
@@ -178,7 +220,7 @@ function showSection(inData, tableId, maxTableSize, btnId){
     fillTable(dataToShow, tableId, maxTableSize);
 
     // add button coloring to shade current section
-    setupSectionButtons(inData, maxTableSize, section=section);
+    setupSectionButtons(inData, maxTableSize, btnPrefix, section=section);
 }
 
 function calcSectionMetrics(data, maxTableSize){
@@ -196,30 +238,29 @@ function calcSectionMetrics(data, maxTableSize){
     return [start, end, binNum];
 }
 
-function setupSectionButtons(inData, maxTableSize, section=1){
+function setupSectionButtons(inData, maxTableSize, btnPrefix, section=1){
     
     var data = [...inData];
     data.shift();
     var metrics = calcSectionMetrics(data, maxTableSize);
     var binNum = metrics[2];
-    var buttonDiv = document.getElementById("pageChanger");
-    var hide1 = document.getElementById("hide1");
-    var hide2 = document.getElementById("hide2");
+    var hide1 = document.getElementById(btnPrefix+"h1");
+    var hide2 = document.getElementById(btnPrefix+"h2");
 
     console.log("section:", section, "bins:", binNum);
 
     // remove current page styling
     for (var x = 1; x < 8; x++){
-        var button = document.getElementById("btn"+x.toString());
+        var button = document.getElementById(btnPrefix+x.toString());
         button.classList.remove('currentPage');
     }
 
     // no hidden sections
-    if (binNum < 7){
+    if (binNum < 8){
         hide1.style.display = "none";
         hide2.style.display = "none";
         for (var x = 1; x < 8; x++){
-            var button = document.getElementById("btn"+x.toString());
+            var button = document.getElementById(btnPrefix+x.toString());
             if (x == section){
                 button.classList.add('currentPage');
             }
@@ -232,38 +273,38 @@ function setupSectionButtons(inData, maxTableSize, section=1){
         hide2.style.display = "";
 
         // hide downstream sections
-        if (section < 4){
+        if (section < 5){
             hide1.style.display = "none";
             for (var x = 1; x < 7; x++){
-                setButton("btn"+x.toString(), x);
+                setButton(btnPrefix+x.toString(), x);
                 if (x == section){
-                    document.getElementById("btn"+x.toString()).classList.add("currentPage");
+                    document.getElementById(btnPrefix+x.toString()).classList.add("currentPage");
                 }
             }
-            setButton("btn7", binNum);
+            setButton(btnPrefix+"7", binNum);
 
         // hide upstream sections
         } else if (section > (binNum-4)) {
             hide2.style.display = "none";
-            setButton("btn1", 1);
+            setButton(btnPrefix+"1", 1);
 
             for (var x = 2; x < 8; x++){
-                setButton("btn"+x.toString(), (binNum-(7-x)));
+                setButton(btnPrefix+x.toString(), (binNum-(7-x)));
                 if ((binNum-(7-x)) == section){
-                    document.getElementById("btn"+x.toString()).classList.add("currentPage");
+                    document.getElementById(btnPrefix+x.toString()).classList.add("currentPage");
                 }
             }
         
         // hide up and downstream sections
         } else {
-            document.getElementById("btn4").classList.add("currentPage");
-            setButton("btn1", 1);
-            setButton("btn2", section-2);
-            setButton("btn3", section-1);
-            setButton("btn4", section);
-            setButton("btn5", section+1);
-            setButton("btn6", section+2);
-            setButton("btn7", binNum);
+            document.getElementById(btnPrefix+"4").classList.add("currentPage");
+            setButton(btnPrefix+"1", 1);
+            setButton(btnPrefix+"2", section-2);
+            setButton(btnPrefix+"3", section-1);
+            setButton(btnPrefix+"4", section);
+            setButton(btnPrefix+"5", section+1);
+            setButton(btnPrefix+"6", section+2);
+            setButton(btnPrefix+"7", binNum);
         }
     }
 }

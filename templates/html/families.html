@@ -7,7 +7,7 @@
         <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     </head>
     
-    <body>
+    <body onload="fillTable(predictionData, 'familyInfoTable', maxTableSize);setupSectionButtons(predictionData, maxTableSize, 'btn')">
         <div class="navbar">
             <ul class="navbar">
                 <li class="navbar" id="logo"><a href="https://github.com/bergmanlab/mcclintock" target="_blank" class="logo">McClintock</a></li>
@@ -41,138 +41,93 @@
                 </div>
                 <div id="familyinfoDiv">
                     <div class="filter">
-                        <input type="button" id="filterButton" class="filterButton" name="filterButton" value="Filter" onclick="filterTableType('filterTable2','familyInfoTable', 'exactBox2','allBox','refBox','nonrefBox')">
+                        <input type="button" id="filterButton" class="filterButton" name="filterButton" value="Filter" onclick="filterData(unmodifiedData,'familyInfoTable', maxTableSize, 'btn', 'filterTable2','filterTable2', 'exactBox2', 'refBox','nonrefBox', true, false, 1, 'allBox')">
                         <input type="text" class="filterTable" id="filterTable2" autocomplete="off" placeholder="">
-                        <input type="checkbox" class="checkbox" id="exactBox2" name="exactBox2" autocomplete="off" onclick="filterTableType('filterTable2','familyInfoTable', 'exactBox2','allBox','refBox','nonrefBox')">
+                        <input type="checkbox" class="checkbox" id="exactBox2" name="exactBox2" autocomplete="off" onclick="filterData(unmodifiedData,'familyInfoTable', maxTableSize, 'btn', 'filterTable2','filterTable2', 'exactBox2', 'refBox','nonrefBox', true, false, 1, 'allBox')">
                         <label for="exactBox2">Exact Match</label>
-                        <input type="checkbox" class="checkbox" id="refBox" name="refBox" checked="checked" autocomplete="off" onclick="filterTableType('filterTable2','familyInfoTable', 'exactBox2','allBox','refBox','nonrefBox')">
+                        <input type="checkbox" class="checkbox" id="refBox" name="refBox" checked="checked" autocomplete="off" onclick="filterData(unmodifiedData,'familyInfoTable', maxTableSize, 'btn', 'filterTable2','filterTable2', 'exactBox2', 'refBox','nonrefBox', true, false, 1, 'allBox')">
                         <label for="exactBox2">Reference</label>
-                        <input type="checkbox" class="checkbox" id="nonrefBox" name="nonrefBox" checked="checked" autocomplete="off" onclick="filterTableType('filterTable2','familyInfoTable', 'exactBox2','allBox','refBox','nonrefBox')">
+                        <input type="checkbox" class="checkbox" id="nonrefBox" name="nonrefBox" checked="checked" autocomplete="off" onclick="filterData(unmodifiedData,'familyInfoTable', maxTableSize, 'btn', 'filterTable2','filterTable2', 'exactBox2', 'refBox','nonrefBox', true, false, 1, 'allBox')">
                         <label for="exactBox2">Non-Reference</label>
-                        <input type="checkbox" class="checkbox" id="allBox" name="allBox" checked="checked" autocomplete="off" onclick="filterTableType('filterTable2','familyInfoTable', 'exactBox2','allBox','refBox','nonrefBox')">
+                        <input type="checkbox" class="checkbox" id="allBox" name="allBox" checked="checked" autocomplete="off" onclick="filterData(unmodifiedData,'familyInfoTable', maxTableSize, 'btn', 'filterTable2','filterTable2', 'exactBox2', 'refBox','nonrefBox', true, false, 1, 'allBox')">
                         <label for="exactBox2">All</label>
                     </div>
-                    <div class="runinfo" id="familyinfo">
+                    <div class="runinfo largeTable" id="familyinfo">
                         {% if methods|length > 6 %}
                             <table class="run-information" id="familyInfoTable" style="width:1100px;">
                         {% else %}
                             <table class="run-information" id="familyInfoTable" style="width:900px;">
                         {% endif %}
                             <tr>
-                                <th class="header" onclick="sortTable('familyInfoTable', 0)">TE Family</th>
-                                <th class="header" onclick="sortTable('familyInfoTable', 1)">Type</th>
-                                <th class="header" onclick="sortTable('familyInfoTable', 2, numeric=true)"></th>
+                                <th class="header" onclick="predictionData = sortTableLarge(predictionData,'familyInfoTable', 0, maxTableSize, 'btn')">TE Family</th>
+                                <th class="header" onclick="predictionData = sortTableLarge(predictionData,'familyInfoTable', 1, maxTableSize, 'btn')">Type</th>
+                                <th class="header" onclick="predictionData = sortTableLarge(predictionData,'familyInfoTable', 2, maxTableSize, 'btn')"></th>
                                 {% set count = namespace(value=3) %}
                                 {% for method in methods %}
-                                    <th class="header" onclick="sortTable('familyInfoTable', {{ count.value }}, numeric=true)">{{method}}</th>
+                                    <th class="header" onclick="predictionData = sortTableLarge(predictionData,'familyInfoTable', {{ count.value }}, maxTableSize, 'btn', numeric=true)">{{method}}</th>
                                     {% set count.value = count.value + 1 %}
                                 {% endfor %}
                                 
                             </tr>
-                            {% set count = namespace(value=1) %}
-                            {% for prediction in predictions %}
-                                {% if count.value % 2 != 0 %}
-                                    <tr>
-                                        <td class="values">{{ prediction.family }}</td>
-                                        <td class="values">All</td>
-                                        <td class="values link"><a href="{{ prediction.family }}.html" class="tableLink">Report</a></td>
-                                        {% for val in prediction.all %}
-                                            <td class="values">{{ val }}</td>
-                                        {% endfor %}
-                                        
-                                    </tr>
-                                    <tr>
-                                        <td class="values even">{{ prediction.family }}</td>
-                                        <td class="values even">Reference</td>
-                                        <td class="values even">-</td>
-                                        {% for val in prediction.reference %}
-                                            <td class="values even">{{ val }}</td>
-                                        {% endfor %}
-                                        
-                                    </tr>
-                                    <tr>
-                                        <td class="values">{{ prediction.family }}</td>
-                                        <td class="values">Non-Reference</td>
-                                        <td class="values">-</td>
-                                        {% for val in prediction.nonreference %}
-                                            <td class="values">{{ val }}</td>
-                                        {% endfor %}
-                                        
-                                    </tr>
-                                {% else %}
-                                    <tr>
-                                        <td class="values even">{{ prediction.family }}</td>
-                                        <td class="values even">All</td>
-                                        <td class="values link even"><a href="{{ prediction.family }}.html" class="tableLink">Report</a></td>
-                                        {% for val in prediction.all %}
-                                            <td class="values even">{{ val }}</td>
-                                        {% endfor %}
-                                        
-                                    </tr>
-                                    <tr>
-                                        <td class="values">{{ prediction.family }}</td>
-                                        <td class="values">Reference</td>
-                                        <td class="values">-</td>
-                                        {% for val in prediction.reference %}
-                                            <td class="values">{{ val }}</td>
-                                        {% endfor %}
-                                    </tr>
-                                    <tr>
-                                        <td class="values even">{{ prediction.family }}</td>
-                                        <td class="values even">Non-Reference</td>
-                                        <td class="values even">-</td>
-                                        {% for val in prediction.nonreference %}
-                                            <td class="values even">{{ val }}</td>
-                                        {% endfor %}
-                                    </tr>
-                                {% endif %}
-                                {% set count.value = count.value + 1 %}
-                            {% endfor %}
                         </table>
                     </div>
+                </div>
+                <div class="pageChanger" id="pageChanger">
+                    <button class="pageChanger currentPage" id="btn1" value="1" onclick="showSection(predictionData, 'familyInfoTable', maxTableSize, 'btn1', 'btn')">1</button>
+                    <button class="hiddenRange" id="btnh1">...</button>
+                    <button class="pageChanger" id="btn2" value="2" onclick="showSection(predictionData, 'familyInfoTable', maxTableSize, 'btn2', 'btn')">2</button>
+                    <button class="pageChanger" id="btn3" value="3" onclick="showSection(predictionData, 'familyInfoTable', maxTableSize, 'btn3', 'btn')">3</button>
+                    <button class="pageChanger" id="btn4" value="4" onclick="showSection(predictionData, 'familyInfoTable', maxTableSize, 'btn4', 'btn')">4</button>
+                    <button class="pageChanger" id="btn5" value="5" onclick="showSection(predictionData, 'familyInfoTable', maxTableSize, 'btn5', 'btn')">5</button>
+                    <button class="pageChanger" id="btn6" value="6" onclick="showSection(predictionData, 'familyInfoTable', maxTableSize, 'btn6', 'btn')">6</button>
+                    <button class="hiddenRange" id="btnh2">...</button>
+                    <button class="pageChanger" id="btn7" value="19" onclick="showSection(predictionData, 'familyInfoTable', maxTableSize, 'btn7', 'btn')">19</button>
                 </div>
                 <div class="spacer2"></div>
             </div>
         </div>
-        <!-- plot 1: Tool Plots -->
+        <!-- data for prediction table -->
         <script>
-            var trace1 = {
-            x: [19, 37, 41, 331, 0, 78, 164],
-            y: ['ngs_te_mapper', 'RelocaTE', 'RelocaTE2','TEMP','RetroSeq','PopoolationTE',"TE-Locate"],
-            name: 'Reference',
-            orientation: 'h',
-            marker: {
-                color: 'rgba(25,25,25,0.6)',
-                width: 1
-            },
-            type: 'bar'
-            };
+            var maxTableSize = 20;
+            var predictionData = [
+                [
+                    'TE Family',
+                    'Type',
+                    '',
+                    {% for method in methods %}
+                        '{{ method }}',
+                    {% endfor %}
+                ],
+                {% for p in predictions %}
+                [
+                    '{{ p.family }}',
+                    'All',
+                    '<a href="{{ p.family }}.html" class="tableLink">Report</a>',
+                    {% for val in p.all %}
+                    '{{ val }}',
+                    {% endfor %}
+                ],
+                [
+                    '{{ p.family }}',
+                    'Reference',
+                    '-',
+                    {% for val in p.reference %}
+                    '{{ val }}',
+                    {% endfor %}
+                ],
+                [
+                    '{{ p.family }}',
+                    'Non-Reference',
+                    '-',
+                    {% for val in p.nonreference %}
+                    '{{ val }}',
+                    {% endfor %}
+                ],
 
-            var trace2 = {
-            x: [14, 7, 98, 55, 71, 64, 549],
-            y: ['ngs_te_mapper', 'RelocaTE', 'RelocaTE2','TEMP','RetroSeq','PopoolationTE',"TE-Locate"],
-            name: 'Non-Reference',
-            orientation: 'h',
-            type: 'bar',
-            marker: {
-                color: 'rgba(95,95,95,0.6)',
-                width: 1
-            }
-            };
+                {% endfor %}
+            ];
 
-            var data = [trace1, trace2];
-
-            var layout = {
-            barmode: 'stack',
-            font: {size: 12},
-            margin: {'t':50, 'b':50},
-            xaxis: {automargin: true},
-            yaxis: {automargin: true},
-            legend: {"orientation": "h", x: 0.3, y: 1.1}
-            };
-
-            var div = document.getElementsByClassName('toolplot')[0];
-            Plotly.newPlot(div, data, layout);
+            const unmodifiedData = [...predictionData];
         </script>
     </body>
 
