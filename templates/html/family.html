@@ -7,7 +7,15 @@
         <script type="text/javascript" src="../js/script.js"></script>
     </head>
     
-    <body>
+    <body onload="
+      {% for results in method_results %}
+        {% if results.method != "te-locate" %}
+            fillTable( {{results.method}}PredictionData, '{{results.method}}_table', maxTableSize); setupSectionButtons( {{results.method}}PredictionData, maxTableSize, '{{results.method}}btn');
+        {% else %}
+            fillTable( telocatePredictionData, '{{results.method}}_table', maxTableSize); setupSectionButtons( telocatePredictionData, maxTableSize, '{{results.method}}btn');
+        {% endif %}
+      {% endfor %}
+    ">
         <div class="navbar">
             <ul class="navbar">
                 <li class="navbar" id="logo"><a href="https://github.com/bergmanlab/mcclintock" target="_blank" class="logo">McClintock</a></li>
@@ -62,7 +70,7 @@
                                 </tr>
                                 <tr>
                                     <td class="header">Unique</td>
-                                    <td class="values odd">{{uniq_depth}}</td>
+                                    <td class="values">{{uniq_depth}}</td>
                                 </tr>
                             </table>
                         </div>
@@ -79,11 +87,11 @@
                     <div class="runinfo" id="familyinfo">
                         <table class="run-information" id="familyInfoTable">
                             <tr>
-                                <th class="header" onclick="sortTable('familyInfoTable', 0)">TE Family</th>
-                                <th class="header" onclick="sortTable('familyInfoTable', 1)">Type</th>
+                                <th class="headerNoHover">TE Family</th>
+                                <th class="headerNoHover">Type</th>
                                 {% set count = namespace(value=2) %}
                                 {% for method in methods %}
-                                    <th class="header" onclick="sortTable('familyInfoTable', {{ count.value }}, numeric=true)">{{method}}</th>
+                                    <th class="headerNoHover">{{method}}</th>
                                     {% set count.value = count.value + 1 %}
                                 {% endfor %}
                             </tr>
@@ -95,10 +103,10 @@
                                 {% endfor %}
                             </tr>
                             <tr>
-                                <td class="values even">{{family}}</td>
-                                <td class="values even">Reference</td>
+                                <td class="values">{{family}}</td>
+                                <td class="values">Reference</td>
                                 {% for value in prediction_summary.reference %}
-                                    <td class="values even">{{ value }}</td>
+                                    <td class="values">{{ value }}</td>
                                 {% endfor %}
                             </tr>
                             <tr>
@@ -122,48 +130,145 @@
                         <div class="runinfo" id="teinfo">
                             <div id="tester" class="{{results.method}}Plot" style="width:100%;height:{{chrom_plot_height}}px;"></div>
                         </div>
-                        <div id="familyinfoDiv">
-                            <div class="filter">
-                                <input type="button" id="{{results.method}}FilterButton" class="filterButton" name="{{results.method}}FilterButton" value="Filter" onclick="filterTableExtended('{{results.method}}Table1','{{results.method}}Table2','{{results.method}}_table', '{{results.method}}exactBox','{{results.method}}refBox','{{results.method}}nonrefBox','{{results.method}}filterOption')">
-                                <input type="text" class="filterTable" id="{{results.method}}Table1" autocomplete="off" placeholder="">
-                                <input type="button" id="{{results.method}}filterOption" class="filterOption" name="{{results.method}}filterOption" value="and" onclick="flipFilterOption('{{results.method}}filterOption');filterTableExtended('{{results.method}}Table1','{{results.method}}Table2','{{results.method}}_table', '{{results.method}}exactBox','{{results.method}}refBox','{{results.method}}nonrefBox','{{results.method}}filterOption');">
-                                <input type="text" class="filterTable" id="{{results.method}}Table2" autocomplete="off" placeholder="">
-                                <input type="checkbox" class="checkbox" id="{{results.method}}exactBox" name="{{results.method}}exactBox" autocomplete="off" onclick="filterTableExtended('{{results.method}}Table1','{{results.method}}Table2','{{results.method}}_table', '{{results.method}}exactBox','{{results.method}}refBox','{{results.method}}nonrefBox','{{results.method}}filterOption')">
-                                <label for="{{results.method}}exactBox">Exact Match</label>
-                                <input type="checkbox" class="checkbox" id="{{results.method}}refBox" name="{{results.method}}refBox" checked="checked" autocomplete="off" onclick="filterTableExtended('{{results.method}}Table1','{{results.method}}Table2','{{results.method}}_table', '{{results.method}}exactBox','{{results.method}}refBox','{{results.method}}nonrefBox','{{results.method}}filterOption')">
-                                <label for="{{results.method}}exactBox">Reference</label>
-                                <input type="checkbox" class="checkbox" id="{{results.method}}nonrefBox" name="{{results.method}}nonrefBox" checked="checked" autocomplete="off" onclick="filterTableExtended('{{results.method}}Table1','{{results.method}}Table2','{{results.method}}_table', '{{results.method}}exactBox','{{results.method}}refBox','{{results.method}}nonrefBox','{{results.method}}filterOption')">
-                                <label for="{{results.method}}exactBox">Non-Reference</label>
-                                
+
+                        {% if results.method != "te-locate" %}
+                            <div id="familyinfoDiv">
+                                <div class="filter">
+                                    <input type="button" id="{{results.method}}FilterButton" class="filterButton" name="{{results.method}}FilterButton" value="Filter" onclick="{{results.method}}PredictionData = filterData({{results.method}}UnmodifiedData, '{{results.method}}_table', maxTableSize, '{{results.method}}btn', '{{results.method}}Table1','{{results.method}}Table2', '{{results.method}}exactBox','{{results.method}}refBox','{{results.method}}nonrefBox', false, '{{results.method}}filterOption', 2, '')">
+                                    <input type="text" class="filterTable" id="{{results.method}}Table1" autocomplete="off" placeholder="">
+                                    <input type="button" id="{{results.method}}filterOption" class="filterOption" name="{{results.method}}filterOption" value="and" onclick="flipFilterOption('{{results.method}}filterOption')">
+                                    <input type="text" class="filterTable" id="{{results.method}}Table2" autocomplete="off" placeholder="">
+                                    <input type="checkbox" class="checkbox" id="{{results.method}}exactBox" name="{{results.method}}exactBox" autocomplete="off" onclick="{{results.method}}PredictionData = filterData({{results.method}}UnmodifiedData, '{{results.method}}_table', maxTableSize, '{{results.method}}btn', '{{results.method}}Table1','{{results.method}}Table2', '{{results.method}}exactBox','{{results.method}}refBox','{{results.method}}nonrefBox', false, '{{results.method}}filterOption', 2, '')">
+                                    <label for="{{results.method}}exactBox">Exact Match</label>
+                                    <input type="checkbox" class="checkbox" id="{{results.method}}refBox" name="{{results.method}}refBox" checked="checked" autocomplete="off" onclick="{{results.method}}PredictionData = filterData({{results.method}}UnmodifiedData, '{{results.method}}_table', maxTableSize, '{{results.method}}btn', '{{results.method}}Table1','{{results.method}}Table2', '{{results.method}}exactBox','{{results.method}}refBox','{{results.method}}nonrefBox', false, '{{results.method}}filterOption', 2, '')">
+                                    <label for="{{results.method}}exactBox">Reference</label>
+                                    <input type="checkbox" class="checkbox" id="{{results.method}}nonrefBox" name="{{results.method}}nonrefBox" checked="checked" autocomplete="off" onclick="{{results.method}}PredictionData = filterData({{results.method}}UnmodifiedData, '{{results.method}}_table', maxTableSize, '{{results.method}}btn', '{{results.method}}Table1','{{results.method}}Table2', '{{results.method}}exactBox','{{results.method}}refBox','{{results.method}}nonrefBox', false, '{{results.method}}filterOption', 2, '')">
+                                    <label for="{{results.method}}exactBox">Non-Reference</label>
+                                    
+                                </div>
+                                <div class="runinfo" id="predictions">
+                                    <table class="run-information" id="{{results.method}}_table">
+                                        <tr>
+                                            <th class="header" onclick="{{results.method}}PredictionData = sortTableLarge({{results.method}}PredictionData, '{{results.method}}_table', 0, maxTableSize, '{{results.method}}btn')">Contig</th>
+                                            <th class="header" onclick="{{results.method}}PredictionData = sortTableLarge({{results.method}}PredictionData, '{{results.method}}_table', 1, maxTableSize, '{{results.method}}btn')">Family</th>
+                                            <th class="header" onclick="{{results.method}}PredictionData = sortTableLarge({{results.method}}PredictionData, '{{results.method}}_table', 2, maxTableSize, '{{results.method}}btn')">Type</th>
+                                            <th class="header" onclick="{{results.method}}PredictionData = sortTableLarge({{results.method}}PredictionData, '{{results.method}}_table', 3, maxTableSize, '{{results.method}}btn', numeric=true)">Start</th>
+                                            <th class="header" onclick="{{results.method}}PredictionData = sortTableLarge({{results.method}}PredictionData, '{{results.method}}_table', 4, maxTableSize, '{{results.method}}btn', numeric=true)">End</th>
+                                            <th class="header" onclick="{{results.method}}PredictionData = sortTableLarge({{results.method}}PredictionData, '{{results.method}}_table', 5, maxTableSize, '{{results.method}}btn')">Strand</th>
+                                        </tr>
+                                    </table>
+                                </div>
                             </div>
-                            <div class="runinfo" id="predictions">
-                                <table class="run-information" id="{{results.method}}_table">
-                                    <tr>
-                                        <th class="header" onclick="sortTable('{{results.method}}_table', 0)">Contig</th>
-                                        <th class="header" onclick="sortTable('{{results.method}}_table', 1)">Family</th>
-                                        <th class="header" onclick="sortTable('{{results.method}}_table', 2)">Type</th>
-                                        <th class="header" onclick="sortTable('{{results.method}}_table', 3, numeric=true)">Start</th>
-                                        <th class="header" onclick="sortTable('{{results.method}}_table', 4, numeric=true)">End</th>
-                                        <th class="header" onclick="sortTable('{{results.method}}_table', 5)">Strand</th>
-                                    </tr>
-                                    {% for insertion in results.insertions %}
-                                    <tr>
-                                        <td class="values">{{insertion.chrom}}</td>
-                                        <td class="values">{{insertion.family}}</td>
-                                        <td class="values">{{insertion.type}}</td>
-                                        <td class="values">{{insertion.start}}</td>
-                                        <td class="values">{{insertion.end}}</td>
-                                        <td class="values">{{insertion.strand}}</td>
-                                    </tr>
-                                    {% endfor %}
-                                </table>
+                            <div class="pageChanger" id="pageChanger">
+                                <button class="pageChanger currentPage" id='{{results.method}}btn1' value="1" onclick="showSection({{results.method}}PredictionData, '{{results.method}}_table', maxTableSize, '{{results.method}}btn1', '{{results.method}}btn')">1</button>
+                                <button class="hiddenRange" id='{{results.method}}btnh1'>...</button>
+                                <button class="pageChanger" id='{{results.method}}btn2' value="2" onclick="showSection({{results.method}}PredictionData, '{{results.method}}_table', maxTableSize, '{{results.method}}btn2', '{{results.method}}btn')">2</button>
+                                <button class="pageChanger" id='{{results.method}}btn3' value="3" onclick="showSection({{results.method}}PredictionData, '{{results.method}}_table', maxTableSize, '{{results.method}}btn3', '{{results.method}}btn')">3</button>
+                                <button class="pageChanger" id='{{results.method}}btn4' value="4" onclick="showSection({{results.method}}PredictionData, '{{results.method}}_table', maxTableSize, '{{results.method}}btn4', '{{results.method}}btn')">4</button>
+                                <button class="pageChanger" id='{{results.method}}btn5' value="5" onclick="showSection({{results.method}}PredictionData, '{{results.method}}_table', maxTableSize, '{{results.method}}btn5', '{{results.method}}btn')">5</button>
+                                <button class="pageChanger" id='{{results.method}}btn6' value="6" onclick="showSection({{results.method}}PredictionData, '{{results.method}}_table', maxTableSize, '{{results.method}}btn6', '{{results.method}}btn')">6</button>
+                                <button class="hiddenRange" id='{{results.method}}btnh2'>...</button>
+                                <button class="pageChanger" id='{{results.method}}btn7' value="19" onclick="showSection({{results.method}}PredictionData, '{{results.method}}_table', maxTableSize, '{{results.method}}btn7', '{{results.method}}btn')">19</button>
                             </div>
-                        </div>
+                        {% else %}
+                            <div id="familyinfoDiv">
+                                <div class="filter">
+                                    <input type="button" id="{{results.method}}FilterButton" class="filterButton" name="{{results.method}}FilterButton" value="Filter" onclick="telocatePredictionData = filterData(telocateUnmodifiedData, '{{results.method}}_table', maxTableSize, '{{results.method}}btn', '{{results.method}}Table1','{{results.method}}Table2', '{{results.method}}exactBox','{{results.method}}refBox','{{results.method}}nonrefBox', false, '{{results.method}}filterOption', 2, '')">
+                                    <input type="text" class="filterTable" id="{{results.method}}Table1" autocomplete="off" placeholder="">
+                                    <input type="button" id="{{results.method}}filterOption" class="filterOption" name="{{results.method}}filterOption" value="and" onclick="flipFilterOption('{{results.method}}filterOption')">
+                                    <input type="text" class="filterTable" id="{{results.method}}Table2" autocomplete="off" placeholder="">
+                                    <input type="checkbox" class="checkbox" id="{{results.method}}exactBox" name="{{results.method}}exactBox" autocomplete="off" onclick="telocatePredictionData = filterData(telocateUnmodifiedData, '{{results.method}}_table', maxTableSize, '{{results.method}}btn', '{{results.method}}Table1','{{results.method}}Table2', '{{results.method}}exactBox','{{results.method}}refBox','{{results.method}}nonrefBox', false, '{{results.method}}filterOption', 2, '')">
+                                    <label for="{{results.method}}exactBox">Exact Match</label>
+                                    <input type="checkbox" class="checkbox" id="{{results.method}}refBox" name="{{results.method}}refBox" checked="checked" autocomplete="off" onclick="telocatePredictionData = filterData(telocateUnmodifiedData, '{{results.method}}_table', maxTableSize, '{{results.method}}btn', '{{results.method}}Table1','{{results.method}}Table2', '{{results.method}}exactBox','{{results.method}}refBox','{{results.method}}nonrefBox', false, '{{results.method}}filterOption', 2, '')">
+                                    <label for="{{results.method}}exactBox">Reference</label>
+                                    <input type="checkbox" class="checkbox" id="{{results.method}}nonrefBox" name="{{results.method}}nonrefBox" checked="checked" autocomplete="off" onclick="telocatePredictionData = filterData(telocateUnmodifiedData, '{{results.method}}_table', maxTableSize, '{{results.method}}btn', '{{results.method}}Table1','{{results.method}}Table2', '{{results.method}}exactBox','{{results.method}}refBox','{{results.method}}nonrefBox', false, '{{results.method}}filterOption', 2, '')">
+                                    <label for="{{results.method}}exactBox">Non-Reference</label>
+                                    
+                                </div>
+                                <div class="runinfo" id="predictions">
+                                    <table class="run-information" id="{{results.method}}_table">
+                                        <tr>
+                                            <th class="header" onclick="telocatePredictionData = sortTableLarge(telocatePredictionData, '{{results.method}}_table', 0, maxTableSize, '{{results.method}}btn')">Contig</th>
+                                            <th class="header" onclick="telocatePredictionData = sortTableLarge(telocatePredictionData, '{{results.method}}_table', 1, maxTableSize, '{{results.method}}btn')">Family</th>
+                                            <th class="header" onclick="telocatePredictionData = sortTableLarge(telocatePredictionData, '{{results.method}}_table', 2, maxTableSize, '{{results.method}}btn')">Type</th>
+                                            <th class="header" onclick="telocatePredictionData = sortTableLarge(telocatePredictionData, '{{results.method}}_table', 3, maxTableSize, '{{results.method}}btn', numeric=true)">Start</th>
+                                            <th class="header" onclick="telocatePredictionData = sortTableLarge(telocatePredictionData, '{{results.method}}_table', 4, maxTableSize, '{{results.method}}btn', numeric=true)">End</th>
+                                            <th class="header" onclick="telocatePredictionData = sortTableLarge(telocatePredictionData, '{{results.method}}_table', 5, maxTableSize, '{{results.method}}btn')">Strand</th>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="pageChanger" id="pageChanger">
+                                <button class="pageChanger currentPage" id='{{results.method}}btn1' value="1" onclick="showSection(telocatePredictionData, '{{results.method}}_table', maxTableSize, '{{results.method}}btn1', '{{results.method}}btn')">1</button>
+                                <button class="hiddenRange" id='{{results.method}}btnh1'>...</button>
+                                <button class="pageChanger" id='{{results.method}}btn2' value="2" onclick="showSection(telocatePredictionData, '{{results.method}}_table', maxTableSize, '{{results.method}}btn2', '{{results.method}}btn')">2</button>
+                                <button class="pageChanger" id='{{results.method}}btn3' value="3" onclick="showSection(telocatePredictionData, '{{results.method}}_table', maxTableSize, '{{results.method}}btn3', '{{results.method}}btn')">3</button>
+                                <button class="pageChanger" id='{{results.method}}btn4' value="4" onclick="showSection(telocatePredictionData, '{{results.method}}_table', maxTableSize, '{{results.method}}btn4', '{{results.method}}btn')">4</button>
+                                <button class="pageChanger" id='{{results.method}}btn5' value="5" onclick="showSection(telocatePredictionData, '{{results.method}}_table', maxTableSize, '{{results.method}}btn5', '{{results.method}}btn')">5</button>
+                                <button class="pageChanger" id='{{results.method}}btn6' value="6" onclick="showSection(telocatePredictionData, '{{results.method}}_table', maxTableSize, '{{results.method}}btn6', '{{results.method}}btn')">6</button>
+                                <button class="hiddenRange" id='{{results.method}}btnh2'>...</button>
+                                <button class="pageChanger" id='{{results.method}}btn7' value="19" onclick="showSection(telocatePredictionData, '{{results.method}}_table', maxTableSize, '{{results.method}}btn7', '{{results.method}}btn')">19</button>
+                            </div>
+                        {% endif %}
                     </div>
                 {% endfor %}
                 <div class="spacer2"></div>
             </div>
         </div>
+        <!-- table data -->
+        <script>
+            var maxTableSize = 20;
+            {% for results in method_results %}
+                {% if results.method != "te-locate" %}
+                    var {{results.method}}PredictionData = [
+                        [
+                            'Contig',
+                            'Family',
+                            'Type',
+                            'Start',
+                            'End',
+                            'Strand'
+                        ],
+                        {% for insertion in results.insertions %}
+                        [
+                            '{{insertion.chrom}}',
+                            '{{insertion.family}}',
+                            '{{insertion.type}}',
+                            '{{insertion.start}}',
+                            '{{insertion.end}}',
+                            '{{insertion.strand}}'
+                        ],
+                        {% endfor %}
+                    ];
+
+                    const {{results.method}}UnmodifiedData = [...{{results.method}}PredictionData];
+                {% else %}
+                    var telocatePredictionData = [
+                            [
+                                'Contig',
+                                'Family',
+                                'Type',
+                                'Start',
+                                'End',
+                                'Strand'
+                            ],
+                            {% for insertion in results.insertions %}
+                            [
+                                '{{insertion.chrom}}',
+                                '{{insertion.family}}',
+                                '{{insertion.type}}',
+                                '{{insertion.start}}',
+                                '{{insertion.end}}',
+                                '{{insertion.strand}}'
+                            ],
+                            {% endfor %}
+                        ];
+
+                    const telocateUnmodifiedData = [...telocatePredictionData];
+                {% endif %}
+            {% endfor %}
+        </script>
+
         <!-- plot 1: Family Summary -->
         {% if coverage %}
             <script>            

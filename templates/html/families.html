@@ -41,15 +41,15 @@
                 </div>
                 <div id="familyinfoDiv">
                     <div class="filter">
-                        <input type="button" id="filterButton" class="filterButton" name="filterButton" value="Filter" onclick="filterData(unmodifiedData,'familyInfoTable', maxTableSize, 'btn', 'filterTable2','filterTable2', 'exactBox2', 'refBox','nonrefBox', true, false, 1, 'allBox')">
+                        <input type="button" id="filterButton" class="filterButton" name="filterButton" value="Filter" onclick="predictionData = filterData(unmodifiedData,'familyInfoTable', maxTableSize, 'btn', 'filterTable2','filterTable2', 'exactBox2', 'refBox','nonrefBox', true, false, 1, 'allBox')">
                         <input type="text" class="filterTable" id="filterTable2" autocomplete="off" placeholder="">
-                        <input type="checkbox" class="checkbox" id="exactBox2" name="exactBox2" autocomplete="off" onclick="filterData(unmodifiedData,'familyInfoTable', maxTableSize, 'btn', 'filterTable2','filterTable2', 'exactBox2', 'refBox','nonrefBox', true, false, 1, 'allBox')">
+                        <input type="checkbox" class="checkbox" id="exactBox2" name="exactBox2" autocomplete="off" onclick="predictionData = filterData(unmodifiedData,'familyInfoTable', maxTableSize, 'btn', 'filterTable2','filterTable2', 'exactBox2', 'refBox','nonrefBox', true, false, 1, 'allBox')">
                         <label for="exactBox2">Exact Match</label>
-                        <input type="checkbox" class="checkbox" id="refBox" name="refBox" checked="checked" autocomplete="off" onclick="filterData(unmodifiedData,'familyInfoTable', maxTableSize, 'btn', 'filterTable2','filterTable2', 'exactBox2', 'refBox','nonrefBox', true, false, 1, 'allBox')">
+                        <input type="checkbox" class="checkbox" id="refBox" name="refBox" checked="checked" autocomplete="off" onclick="predictionData = filterData(unmodifiedData,'familyInfoTable', maxTableSize, 'btn', 'filterTable2','filterTable2', 'exactBox2', 'refBox','nonrefBox', true, false, 1, 'allBox')">
                         <label for="exactBox2">Reference</label>
-                        <input type="checkbox" class="checkbox" id="nonrefBox" name="nonrefBox" checked="checked" autocomplete="off" onclick="filterData(unmodifiedData,'familyInfoTable', maxTableSize, 'btn', 'filterTable2','filterTable2', 'exactBox2', 'refBox','nonrefBox', true, false, 1, 'allBox')">
+                        <input type="checkbox" class="checkbox" id="nonrefBox" name="nonrefBox" checked="checked" autocomplete="off" onclick="predictionData = filterData(unmodifiedData,'familyInfoTable', maxTableSize, 'btn', 'filterTable2','filterTable2', 'exactBox2', 'refBox','nonrefBox', true, false, 1, 'allBox')">
                         <label for="exactBox2">Non-Reference</label>
-                        <input type="checkbox" class="checkbox" id="allBox" name="allBox" checked="checked" autocomplete="off" onclick="filterData(unmodifiedData,'familyInfoTable', maxTableSize, 'btn', 'filterTable2','filterTable2', 'exactBox2', 'refBox','nonrefBox', true, false, 1, 'allBox')">
+                        <input type="checkbox" class="checkbox" id="allBox" name="allBox" checked="checked" autocomplete="off" onclick="predictionData = filterData(unmodifiedData,'familyInfoTable', maxTableSize, 'btn', 'filterTable2','filterTable2', 'exactBox2', 'refBox','nonrefBox', true, false, 1, 'allBox')">
                         <label for="exactBox2">All</label>
                     </div>
                     <div class="runinfo largeTable" id="familyinfo">

@@ -260,6 +260,14 @@ th.header {
     text-align: left;
 }
 
+th.headerNoHover {
+    border-color: #495868;
+    background-color: #495868;
+    color: #fff;
+    font-weight: normal;
+    text-align: left;
+}
+
 a.header2:hover {
     color: #fff;
 }
