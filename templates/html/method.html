@@ -7,7 +7,7 @@
         <script type="text/javascript" src="../js/script.js"></script>
     </head>
     
-    <body onload="fillTable(predictionData, 'predictionsTable', maxTableSize); setupSectionButtons(predictionData, maxTableSize, 'btn')">
+    <body onload="fillTable(predictionData, 'predictionsTable', maxTableSize); setupSectionButtons(predictionData, maxTableSize, 'btn', 1)">
         <div class="navbar">
             <ul class="navbar">
                 <li class="navbar" id="logo"><a href="https://github.com/bergmanlab/mcclintock" target="_blank" class="logo">McClintock</a></li>
@@ -101,6 +101,9 @@
                     <button class="pageChanger" id="btn6" value="6" onclick="showSection(predictionData, 'predictionsTable', maxTableSize, 'btn6', 'btn')">6</button>
                     <button class="hiddenRange" id="btnh2">...</button>
                     <button class="pageChanger" id="btn7" value="19" onclick="showSection(predictionData, 'predictionsTable', maxTableSize, 'btn7', 'btn')">19</button>
+                    <button class="goSection" id="btnGo" value="" onclick="goToSection('btnInput', predictionData, 'predictionsTable', maxTableSize, 'btn')">&rsaquo;</button>
+                    <input type="text" class="inputSection" id="btnInput" autocomplete="off" placeholder="">
+                    
                 </div>
                 <div class="spacer2"></div>
             </div>

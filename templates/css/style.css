@@ -466,3 +466,37 @@ button.hiddenRange {
 div.largeTable {
     max-height: none;
 }
+
+.inputSection {
+    font-family: 'Helvetica';
+    border-radius: 4px;
+    margin: 0px 3px 5px 3px;
+    width: 40px;
+    font-size: 14px;
+    padding: 6px 5px 6px 5px;
+    border: 1px solid #ddd;
+    float: right;
+    
+}
+
+button.goSection {
+    margin: 0px, 0px, 0px, 0px;
+    background-color: #EBEBEB;
+    color: #616161;
+    border: 1px solid #ddd;
+    font-family: "Helvetica";
+    font-size: 14px;
+    height: 30px;
+    border-radius: 4px;
+    outline:none;
+    float: right;
+}
+
+input.error {
+    border-color: rgb(255, 109, 109);
+    border-width: 2px;
+}
+
+button.goSection:hover {
+    background-color: #ddd;
+}

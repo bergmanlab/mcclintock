@@ -174,8 +174,13 @@ function filterData(rawData, tableId, maxTableSize, btnPrefix, filterId1, filter
 
 function showSection(inData, tableId, maxTableSize, btnId, btnPrefix){
     var dataToShow = [];
-    var button = document.getElementById(btnId);
-    var section = parseInt(button.value);
+    if (!isNaN(btnId)){
+        var section = parseInt(btnId);
+    } else {
+        var button = document.getElementById(btnId);
+        var section = parseInt(button.value);
+    }
+
 
     var data = [...inData];
     data.shift();
@@ -207,6 +212,7 @@ function showSection(inData, tableId, maxTableSize, btnId, btnPrefix){
     fillTable(dataToShow, tableId, maxTableSize);
 
     // add button coloring to shade current section
+    console.log(inData.length, maxTableSize, btnPrefix, section);
     setupSectionButtons(inData, maxTableSize, btnPrefix, section=section);
 }
 
@@ -234,11 +240,18 @@ function setupSectionButtons(inData, maxTableSize, btnPrefix, section=1){
     var hide1 = document.getElementById(btnPrefix+"h1");
     var hide2 = document.getElementById(btnPrefix+"h2");
 
-    // remove current page styling
+    // remove current page styling; reset hidden buttons
     for (var x = 1; x < 8; x++){
         var button = document.getElementById(btnPrefix+x.toString());
         button.classList.remove('currentPage');
+        button.style.display = "";
     }
+
+    // resets hidden input and input submit
+    var button = document.getElementById(btnPrefix+"Go");
+    button.style.display = "";
+    var button = document.getElementById(btnPrefix+"Input");
+    button.style.display = "";
 
     // no hidden sections
     if (binNum < 8){
@@ -254,9 +267,11 @@ function setupSectionButtons(inData, maxTableSize, btnPrefix, section=1){
             if (x > binNum){
                 button.style.display = "none";
             }
-            // if only one section, hide the button
+            // if only one section, hide the section button, submit button, and input
             if (binNum == 1 && x == 1){
                 button.style.display = "none";
+                document.getElementById(btnPrefix+"Go").style.display = "none";
+                document.getElementById(btnPrefix+"Input").style.display = "none";
             }
         }
     } else {
@@ -409,5 +424,26 @@ function hide(divId, hideButtomId){
     } else {
         x.style.display = "none";
         y.innerHTML = "Show";
+    }
+}
+
+function goToSection(inputId, inData, table, maxTableSize, btnPrefix){
+    console.log("goToSection");
+    var input  = document.getElementById(inputId);
+    var section = input.value;
+    var data = [...inData];
+    data.shift();
+
+    input.classList.remove("error");
+    var metrics = calcSectionMetrics(data, maxTableSize);
+    var start = metrics[0];
+    var end = metrics[1];
+    var binNum = metrics[2];
+
+    if (!isNaN(section) && section <= binNum && section > 0){
+        showSection(inData, table, maxTableSize, section, btnPrefix);
+    } else {
+        console.log("Error:", section);
+        input.classList.add("error");
     }
 }

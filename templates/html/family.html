@@ -169,6 +169,8 @@
                                 <button class="pageChanger" id='{{results.method}}btn6' value="6" onclick="showSection({{results.method}}PredictionData, '{{results.method}}_table', maxTableSize, '{{results.method}}btn6', '{{results.method}}btn')">6</button>
                                 <button class="hiddenRange" id='{{results.method}}btnh2'>...</button>
                                 <button class="pageChanger" id='{{results.method}}btn7' value="19" onclick="showSection({{results.method}}PredictionData, '{{results.method}}_table', maxTableSize, '{{results.method}}btn7', '{{results.method}}btn')">19</button>
+                                <button class="goSection" id="{{results.method}}btnGo" value="" onclick="goToSection('{{results.method}}btnInput', {{results.method}}PredictionData, '{{results.method}}_table', maxTableSize, '{{results.method}}btn')">&rsaquo;</button>
+                                <input type="text" class="inputSection" id="{{results.method}}btnInput" autocomplete="off" placeholder="">
                             </div>
                         {% else %}
                             <div id="familyinfoDiv">
@@ -208,6 +210,8 @@
                                 <button class="pageChanger" id='{{results.method}}btn6' value="6" onclick="showSection(telocatePredictionData, '{{results.method}}_table', maxTableSize, '{{results.method}}btn6', '{{results.method}}btn')">6</button>
                                 <button class="hiddenRange" id='{{results.method}}btnh2'>...</button>
                                 <button class="pageChanger" id='{{results.method}}btn7' value="19" onclick="showSection(telocatePredictionData, '{{results.method}}_table', maxTableSize, '{{results.method}}btn7', '{{results.method}}btn')">19</button>
+                                <button class="goSection" id="{{results.method}}btnGo" value="" onclick="goToSection('{{results.method}}btnInput', telocatePredictionData, '{{results.method}}_table', maxTableSize, '{{results.method}}btn')">&rsaquo;</button>
+                                <input type="text" class="inputSection" id="{{results.method}}btnInput" autocomplete="off" placeholder="">
                             </div>
                         {% endif %}
                     </div>
