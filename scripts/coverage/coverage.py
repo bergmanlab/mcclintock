@@ -208,7 +208,13 @@ def get_avg_depth(depth_file, trim_edges=0):
             split_line = line.split("\t")
             total += int(split_line[2])
     
-    avg_depth = total/positions
+    if positions > 0:
+        avg_depth = total/positions
+    else:
+        mccutils.log("coverage", "ERROR: no positions in: "+depth_file)
+        mccutils.log("coverage", "It's likely the length of the family for: "+depth_file+" is shorter than the trimmed edges parameter")
+        mccutils.log("coverage", "Setting avg depth to zero for this family, to avoid this, lower the OMIT_EDGES_LENGTH parameter in the coverage config file")
+        avg_depth = 0
 
     return avg_depth
 
