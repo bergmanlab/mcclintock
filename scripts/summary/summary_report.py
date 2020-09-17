@@ -499,255 +499,269 @@ def make_summary_page(jinja_env, methods, sample_name, commit, start_time, end_t
 def make_families_page(jinja_env, consensus, methods, out_file_map, out_dir):
     template = jinja_env.get_template('families.html')
 
-    families = []
-    with open(consensus,"r") as fa:
-        for line in fa:
-            if line[0] == ">":
-                family = line.replace(">","")
-                family = family.replace("\n","")
-                families.append(family)
-    
     prediction_methods = []
     for method in methods:
         if method != "coverage" and method != "trimgalore":
             prediction_methods.append(method)
 
-    prediction_list = []
-    for family in families:
-        prediction = count_predictions(prediction_methods,out_file_map, family)
-        prediction_list.append(prediction)
-
-    mccutils.mkdir(out_dir+"/data/families/")
-    prediction_summary_file = out_dir+"/data/families/family_prediction_summary.txt"
-    write_prediction_file(prediction_list, prediction_methods, prediction_summary_file)
-
-    rendered_lines = template.render(
-        methods=prediction_methods,
-        families=families,
-        predictions=prediction_list
-    )
-
-    out_file = out_dir+"/html/families.html"
-    with open(out_file,"w") as out:
-        for line in rendered_lines:
-            out.write(line)
-
-
-def make_family_pages(jinja_env, consensus, methods, out_file_map, chromosomes, out_dir):
-    families = []
-    with open(consensus,"r") as fa:
-        for line in fa:
-            if line[0] == ">":
-                family = line.replace(">","")
-                family = family.replace("\n","")
-                families.append(family)
-
-    prediction_methods = []
-    for method in methods:
-        if method != "coverage" and method != "trimgalore":
-            prediction_methods.append(method)
-
-
-    depth = {}
-    if "coverage" in methods:
-        with open(out_dir+"/data/coverage/te_depth.txt","r") as depth_file:
-            for i,line in enumerate(depth_file):
-                if i > 0:
-                    split_line = line.split(",")
-                    family = split_line[0]
-                    depth[family] = [split_line[1], split_line[2]]
-
-    for family in families:
-        all_cov = None
-        all_pos = None
-        uniq_cov = None
-        uniq_pos = None
-
-        template = jinja_env.get_template('family.html')
-
-        if "coverage" in methods:
-            all_pos = []
-            all_cov = []
-            with open(out_dir+"data/coverage/"+family+".allQ.normalized.txt","r") as data:
-                for line in data:
-                    line = line.replace("\n","")
-                    split_line = line.split("\t")
-                    all_pos.append(split_line[1])
-                    all_cov.append(split_line[2])
-            
-            uniq_pos = []
-            uniq_cov = []
-            with open(out_dir+"data/coverage/"+family+".highQ.normalized.txt","r") as data:
-                for line in data:
-                    line = line.replace("\n","")
-                    split_line = line.split("\t")
-                    uniq_pos.append(split_line[1])
-                    uniq_cov.append(split_line[2])
-
-        prediction = count_predictions(prediction_methods, out_file_map, family)
-        family_prediction_summary_file = out_dir+"/data/families/"+family+"_prediction_summary.txt"
-        write_prediction_file([prediction], prediction_methods, family_prediction_summary_file)
-
-        method_predictions = []
-        for method in prediction_methods:
-            method_prediction = count_predictions_chrom(method, out_file_map, family, chromosomes)
-            method_prediction.insertions = get_predictions(out_file_map[method], family=family)
-            family_predictions_file = out_dir+"/data/families/"+family+"_"+method+"_predictions.txt"
-            with open(family_predictions_file,"w") as predictions_file:
-                for insertion in method_prediction.insertions:
-                    line = ",".join([insertion.chrom, insertion.family, insertion.type, str(insertion.start), str(insertion.end), insertion.strand])
-                    predictions_file.write(line+"\n")
-            method_predictions.append(method_prediction)
-
-        height_per_entry = 20
-        min_height = 500
-        # determine height of plot of predictions per contig
-        chrom_plot_height = len(chromosomes) * height_per_entry
-        if chrom_plot_height < min_height:
-            chrom_plot_height = min_height
-
-        if "coverage" in methods:
-            rendered_lines = template.render(
-                methods=prediction_methods,
-                family=family,
-                coverage=True,
-                all_coverage=all_cov,
-                all_positions=all_pos,
-                uniq_coverage=uniq_cov,
-                uniq_positions=uniq_pos,
-                norm_depth=depth[family][0],
-                uniq_depth=depth[family][1],
-                prediction_summary=prediction,
-                chromosomes=chromosomes,
-                chrom_plot_height=chrom_plot_height,
-                method_results=method_predictions
-            )
-        else:
-            rendered_lines = template.render(
-                methods=prediction_methods,
-                family=family,
-                coverage=False,
-                all_coverage=None,
-                all_positions=None,
-                uniq_coverage=None,
-                uniq_positions=None,
-                norm_depth=None,
-                uniq_depth=None,
-                prediction_summary=prediction,
-                chromosomes=chromosomes,
-                chrom_plot_height=chrom_plot_height,
-                method_results=method_predictions
-            )
+    if len(prediction_methods) > 0:
+        families = []
+        with open(consensus,"r") as fa:
+            for line in fa:
+                if line[0] == ">":
+                    family = line.replace(">","")
+                    family = family.replace("\n","")
+                    families.append(family)
         
-        out_file = out_dir+"/html/"+family+".html"
-        with open(out_file,"w") as out:
-            for line in rendered_lines:
-                out.write(line)
+        prediction_methods = []
+        for method in methods:
+            if method != "coverage" and method != "trimgalore":
+                prediction_methods.append(method)
 
-
-def make_method_pages(jinja_env, methods, consensus, out_file_map, chromosomes, out_dir):
-    families = []
-    with open(consensus,"r") as fa:
-        for line in fa:
-            if line[0] == ">":
-                family = line.replace(">","")
-                family = family.replace("\n","")
-                families.append(family)
-
-    prediction_methods = []
-    for method in methods:
-        if method != "coverage" and method != "trimgalore":
-            prediction_methods.append(method)
-
-    mccutils.mkdir(out_dir+"/data/methods/")
-    for method in prediction_methods:
-        template = jinja_env.get_template('method.html')
-        mccutils.mkdir(out_dir+"/data/methods/"+method)
-
-        predictions_file = out_file_map[method]
-        reference_family_counts = []
-        nonreference_family_counts = []
+        prediction_list = []
         for family in families:
-            reference_count = 0
-            nonreference_count = 0
-            predictions = get_predictions(predictions_file, family=family)
-            for prediction in predictions:
-                if prediction.type == "Reference":
-                    reference_count += 1
-                else:
-                    nonreference_count += 1
-            
-            reference_family_counts.append(reference_count)
-            nonreference_family_counts.append(nonreference_count)
-        
-        with open(out_dir+"/data/methods/"+method+"/family_predictions.txt", "w") as raw_file:
-            header = ",".join(["Family","Reference","Non-Reference"])
-            raw_file.write(header+"\n")
-            for i, fam in enumerate(families):
-                line = ",".join([fam, str(reference_family_counts[i]), str(nonreference_family_counts[i])])
-                raw_file.write(line+"\n")
+            prediction = count_predictions(prediction_methods,out_file_map, family)
+            prediction_list.append(prediction)
 
-        # determine height of family counts plot, makes sure there is enough room for each bar
-        height_per_entry = 20
-        min_height = 500
-        family_plot_height = len(families) * height_per_entry
-        if family_plot_height < min_height:
-            family_plot_height = min_height
-
-        reference_chromosome_counts = []
-        nonreference_chromosome_counts = []
-        for chromosome in chromosomes:
-            reference_count = 0
-            nonreference_count = 0
-            predictions = get_predictions(predictions_file, chromosome=chromosome)
-            for prediction in predictions:
-                if prediction.type == "Reference":
-                    reference_count += 1
-                else:
-                    nonreference_count += 1
-            
-            reference_chromosome_counts.append(reference_count)
-            nonreference_chromosome_counts.append(nonreference_count)
-
-        with open(out_dir+"/data/methods/"+method+"/contig_predictions.txt", "w") as raw_file:
-            header = ",".join(["Contig","Reference","Non-Reference"])
-            raw_file.write(header+"\n")
-            for i, chrom in enumerate(chromosomes):
-                line = ",".join([chrom, str(reference_chromosome_counts[i]), str(nonreference_chromosome_counts[i])])
-                raw_file.write(line+"\n")
-
-        # determine height of plot of predictions per contig
-        chrom_plot_height = len(chromosomes) * height_per_entry
-        if chrom_plot_height < min_height:
-            chrom_plot_height = min_height
-
-        predictions = get_predictions(predictions_file)
-
-        with open(out_dir+"/data/methods/"+method+"/all_predictions.txt", "w") as raw_file:
-            header = ",".join(["Contig","Family","Type","Start","End","Strand"])
-            raw_file.write(header+"\n")
-            for prediction in predictions:
-                line = ",".join([prediction.chrom, prediction.family, prediction.type, str(prediction.start), str(prediction.end), prediction.strand])
-                raw_file.write(line+"\n")
+        mccutils.mkdir(out_dir+"/data/families/")
+        prediction_summary_file = out_dir+"/data/families/family_prediction_summary.txt"
+        write_prediction_file(prediction_list, prediction_methods, prediction_summary_file)
 
         rendered_lines = template.render(
             methods=prediction_methods,
-            method=method,
             families=families,
-            family_plot_height=family_plot_height,
-            reference_family_counts=reference_family_counts,
-            nonreference_family_counts=nonreference_family_counts,
-            chromosomes=chromosomes,
-            chrom_plot_height=chrom_plot_height,
-            reference_chromosome_counts=reference_chromosome_counts,
-            nonreference_chromosome_counts=nonreference_chromosome_counts,
-            predictions=predictions
+            predictions=prediction_list
         )
-        
-        out_file = out_dir+"/html/"+method+".html"
+
+        out_file = out_dir+"/html/families.html"
         with open(out_file,"w") as out:
             for line in rendered_lines:
                 out.write(line)
+
+
+def make_family_pages(jinja_env, consensus, methods, out_file_map, chromosomes, out_dir):
+
+    prediction_methods = []
+    for method in methods:
+        if method != "coverage" and method != "trimgalore":
+            prediction_methods.append(method)
+
+    if len(prediction_methods) > 0:
+        families = []
+        with open(consensus,"r") as fa:
+            for line in fa:
+                if line[0] == ">":
+                    family = line.replace(">","")
+                    family = family.replace("\n","")
+                    families.append(family)
+
+        prediction_methods = []
+        for method in methods:
+            if method != "coverage" and method != "trimgalore":
+                prediction_methods.append(method)
+
+
+        depth = {}
+        if "coverage" in methods:
+            with open(out_dir+"/data/coverage/te_depth.txt","r") as depth_file:
+                for i,line in enumerate(depth_file):
+                    if i > 0:
+                        split_line = line.split(",")
+                        family = split_line[0]
+                        depth[family] = [split_line[1], split_line[2]]
+
+        for family in families:
+            all_cov = None
+            all_pos = None
+            uniq_cov = None
+            uniq_pos = None
+
+            template = jinja_env.get_template('family.html')
+
+            if "coverage" in methods:
+                all_pos = []
+                all_cov = []
+                with open(out_dir+"data/coverage/"+family+".allQ.normalized.txt","r") as data:
+                    for line in data:
+                        line = line.replace("\n","")
+                        split_line = line.split("\t")
+                        all_pos.append(split_line[1])
+                        all_cov.append(split_line[2])
+                
+                uniq_pos = []
+                uniq_cov = []
+                with open(out_dir+"data/coverage/"+family+".highQ.normalized.txt","r") as data:
+                    for line in data:
+                        line = line.replace("\n","")
+                        split_line = line.split("\t")
+                        uniq_pos.append(split_line[1])
+                        uniq_cov.append(split_line[2])
+
+            prediction = count_predictions(prediction_methods, out_file_map, family)
+            family_prediction_summary_file = out_dir+"/data/families/"+family+"_prediction_summary.txt"
+            write_prediction_file([prediction], prediction_methods, family_prediction_summary_file)
+
+            method_predictions = []
+            for method in prediction_methods:
+                method_prediction = count_predictions_chrom(method, out_file_map, family, chromosomes)
+                method_prediction.insertions = get_predictions(out_file_map[method], family=family)
+                family_predictions_file = out_dir+"/data/families/"+family+"_"+method+"_predictions.txt"
+                with open(family_predictions_file,"w") as predictions_file:
+                    for insertion in method_prediction.insertions:
+                        line = ",".join([insertion.chrom, insertion.family, insertion.type, str(insertion.start), str(insertion.end), insertion.strand])
+                        predictions_file.write(line+"\n")
+                method_predictions.append(method_prediction)
+
+            height_per_entry = 20
+            min_height = 500
+            # determine height of plot of predictions per contig
+            chrom_plot_height = len(chromosomes) * height_per_entry
+            if chrom_plot_height < min_height:
+                chrom_plot_height = min_height
+
+            if "coverage" in methods:
+                rendered_lines = template.render(
+                    methods=prediction_methods,
+                    family=family,
+                    coverage=True,
+                    all_coverage=all_cov,
+                    all_positions=all_pos,
+                    uniq_coverage=uniq_cov,
+                    uniq_positions=uniq_pos,
+                    norm_depth=depth[family][0],
+                    uniq_depth=depth[family][1],
+                    prediction_summary=prediction,
+                    chromosomes=chromosomes,
+                    chrom_plot_height=chrom_plot_height,
+                    method_results=method_predictions
+                )
+            else:
+                rendered_lines = template.render(
+                    methods=prediction_methods,
+                    family=family,
+                    coverage=False,
+                    all_coverage=None,
+                    all_positions=None,
+                    uniq_coverage=None,
+                    uniq_positions=None,
+                    norm_depth=None,
+                    uniq_depth=None,
+                    prediction_summary=prediction,
+                    chromosomes=chromosomes,
+                    chrom_plot_height=chrom_plot_height,
+                    method_results=method_predictions
+                )
+            
+            out_file = out_dir+"/html/"+family+".html"
+            with open(out_file,"w") as out:
+                for line in rendered_lines:
+                    out.write(line)
+
+
+def make_method_pages(jinja_env, methods, consensus, out_file_map, chromosomes, out_dir):
+    prediction_methods = []
+    for method in methods:
+        if method != "coverage" and method != "trimgalore":
+            prediction_methods.append(method)
+
+    if len(prediction_methods) > 0:
+        families = []
+        with open(consensus,"r") as fa:
+            for line in fa:
+                if line[0] == ">":
+                    family = line.replace(">","")
+                    family = family.replace("\n","")
+                    families.append(family)
+
+        mccutils.mkdir(out_dir+"/data/methods/")
+        for method in prediction_methods:
+            template = jinja_env.get_template('method.html')
+            mccutils.mkdir(out_dir+"/data/methods/"+method)
+
+            predictions_file = out_file_map[method]
+            reference_family_counts = []
+            nonreference_family_counts = []
+            for family in families:
+                reference_count = 0
+                nonreference_count = 0
+                predictions = get_predictions(predictions_file, family=family)
+                for prediction in predictions:
+                    if prediction.type == "Reference":
+                        reference_count += 1
+                    else:
+                        nonreference_count += 1
+                
+                reference_family_counts.append(reference_count)
+                nonreference_family_counts.append(nonreference_count)
+            
+            with open(out_dir+"/data/methods/"+method+"/family_predictions.txt", "w") as raw_file:
+                header = ",".join(["Family","Reference","Non-Reference"])
+                raw_file.write(header+"\n")
+                for i, fam in enumerate(families):
+                    line = ",".join([fam, str(reference_family_counts[i]), str(nonreference_family_counts[i])])
+                    raw_file.write(line+"\n")
+
+            # determine height of family counts plot, makes sure there is enough room for each bar
+            height_per_entry = 20
+            min_height = 500
+            family_plot_height = len(families) * height_per_entry
+            if family_plot_height < min_height:
+                family_plot_height = min_height
+
+            reference_chromosome_counts = []
+            nonreference_chromosome_counts = []
+            for chromosome in chromosomes:
+                reference_count = 0
+                nonreference_count = 0
+                predictions = get_predictions(predictions_file, chromosome=chromosome)
+                for prediction in predictions:
+                    if prediction.type == "Reference":
+                        reference_count += 1
+                    else:
+                        nonreference_count += 1
+                
+                reference_chromosome_counts.append(reference_count)
+                nonreference_chromosome_counts.append(nonreference_count)
+
+            with open(out_dir+"/data/methods/"+method+"/contig_predictions.txt", "w") as raw_file:
+                header = ",".join(["Contig","Reference","Non-Reference"])
+                raw_file.write(header+"\n")
+                for i, chrom in enumerate(chromosomes):
+                    line = ",".join([chrom, str(reference_chromosome_counts[i]), str(nonreference_chromosome_counts[i])])
+                    raw_file.write(line+"\n")
+
+            # determine height of plot of predictions per contig
+            chrom_plot_height = len(chromosomes) * height_per_entry
+            if chrom_plot_height < min_height:
+                chrom_plot_height = min_height
+
+            predictions = get_predictions(predictions_file)
+
+            with open(out_dir+"/data/methods/"+method+"/all_predictions.txt", "w") as raw_file:
+                header = ",".join(["Contig","Family","Type","Start","End","Strand"])
+                raw_file.write(header+"\n")
+                for prediction in predictions:
+                    line = ",".join([prediction.chrom, prediction.family, prediction.type, str(prediction.start), str(prediction.end), prediction.strand])
+                    raw_file.write(line+"\n")
+
+            rendered_lines = template.render(
+                methods=prediction_methods,
+                method=method,
+                families=families,
+                family_plot_height=family_plot_height,
+                reference_family_counts=reference_family_counts,
+                nonreference_family_counts=nonreference_family_counts,
+                chromosomes=chromosomes,
+                chrom_plot_height=chrom_plot_height,
+                reference_chromosome_counts=reference_chromosome_counts,
+                nonreference_chromosome_counts=nonreference_chromosome_counts,
+                predictions=predictions
+            )
+            
+            out_file = out_dir+"/html/"+method+".html"
+            with open(out_file,"w") as out:
+                for line in rendered_lines:
+                    out.write(line)
 
 
 def count_predictions(methods, out_file_map, family):
