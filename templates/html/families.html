@@ -13,14 +13,16 @@
                 <li class="navbar" id="logo"><a href="https://github.com/bergmanlab/mcclintock" target="_blank" class="logo">McClintock</a></li>
                 <li class="navbar"><a href="../summary.html" class="navbar">Summary</a></li>
                 <li class="navbar"><a href="families.html" class="navbar">TE Families</a></li>
-                <li class="navbar dropdown">
-                    <a href="#" class="navbar dropdown">TE Detection Methods</a>
-                    <div class="dropdown-content">
-                        {% for method in methods %}
-                            <a href="{{method}}.html" class="dropdown-content">{{method}}</a>
-                        {% endfor %}
-                    </div>
-                </li>
+                {% if methods|length > 0 %}
+                    <li class="navbar dropdown">
+                        <a href="#" class="navbar dropdown">TE Detection Methods</a>
+                        <div class="dropdown-content">
+                            {% for method in methods %}
+                                <a href="{{method}}.html" class="dropdown-content">{{method}}</a>
+                            {% endfor %}
+                        </div>
+                    </li>
+                {% endif %}
             </ul> 
         </div>
 

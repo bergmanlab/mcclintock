@@ -441,6 +441,10 @@ def make_summary_page(jinja_env, methods, sample_name, commit, start_time, end_t
     prediction_methods = []
     reference_counts = []
     nonreference_counts = []
+    coverage = None
+    if "coverage" in methods:
+        coverage = True
+
     for method in methods:
         if method != "trimgalore" and method != "coverage":
             prediction_methods.append(method)
@@ -470,6 +474,7 @@ def make_summary_page(jinja_env, methods, sample_name, commit, start_time, end_t
         paired=paired,
         sample=sample_name,
         methods=methods,
+        coverage=coverage,
         commit=commit,
         run_start=start_time,
         run_end=end_time,
@@ -504,7 +509,7 @@ def make_families_page(jinja_env, consensus, methods, out_file_map, out_dir):
         if method != "coverage" and method != "trimgalore":
             prediction_methods.append(method)
 
-    if len(prediction_methods) > 0:
+    if len(prediction_methods) > 0 or "coverage" in methods:
         families = []
         with open(consensus,"r") as fa:
             for line in fa:
@@ -546,7 +551,7 @@ def make_family_pages(jinja_env, consensus, methods, out_file_map, chromosomes, 
         if method != "coverage" and method != "trimgalore":
             prediction_methods.append(method)
 
-    if len(prediction_methods) > 0:
+    if len(prediction_methods) > 0 or "coverage" in methods:
         families = []
         with open(consensus,"r") as fa:
             for line in fa:
