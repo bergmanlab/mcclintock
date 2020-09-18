@@ -238,11 +238,20 @@ The results of McClintock component methods are output to the directory `<output
 * Each component method has raw output files which can be found at `<output>/results/<method>/unfiltered/`.
 * Raw results are standardized into a bed format and can be found in `<output>/results/<method>/*.bed` where `<output>/results/<method>/*.nonredundant.bed` has any redundant predictions removed.
 * Standardized results are filtered by parameters defined in the `config` files for each method. These config files can be found in `/path/to/mcclintock/config/` and can be modified if you want to adjust default filtering parameters.
-#### Summary files : `<output>/results/summary/`
 
-* `summary_report.txt` : Summary Report of McClintock run. Contains information on the McClintock command used, when and where the script was run, details about the mapped reads, and table that shows the number of TE predictions produced from each method.
-* `te_summary.csv` : a comma-delimited table showing TE predictions (all, reference, non-reference) from each method for each TE family
-* `te_depth.csv` : (Only produced if coverage module is run) a comma-delimited table showing normalized depth for each consensus TE or TE provided in coverage fasta.
+#### HTML Summary Report: `<output>/results/summary/summary.html`
+* McClintock generates a summary report that contains information on how the run was executed, read mapping information, QC information, and a summary of component method predictions
+* This page also links to the pages that summarize the predictions from each method: all predictions by method, predictions for each family, predictions for each contig. `<output>/results/summary/html/<method>.html`
+* The HTML report also summarizes reference and non-reference predictions for all families. `<output>/results/summary/html/families.html`
+* A page is also generated for each family, which summarizes the coverage for the family consensus sequence and the family-specific predictions from each component method. `<output>/results/summary/html/<family>.html`
+
+#### Raw Summary files : 
+
+* `<output>/results/summary/data/run/summary_report.txt` : Summary Report of McClintock run. Contains information on the McClintock command used, when and where the script was run, details about the mapped reads, and table that shows the number of TE predictions produced from each method.
+* `<output>/results/summary/data/run/te_prediction_summary.txt` : A comma-delimited table showing reference and non-reference predictions for each component method
+* `<output>/results/summary/data/families/family_prediction_summary.txt` : a comma-delimited table showing TE predictions (all, reference, non-reference) from each method for each TE family
+* `<output>/results/summary/data/coverage/te_depth.txt` : (Only produced if coverage module is run) a comma-delimited table showing normalized depth for each consensus TE or TE provided in coverage fasta.
+* All tables and plots contain a link to the raw data so that users can manually filter or visualize it with other programs.
 
 #### TrimGalore : `<output>/results/trimgalore/`
 * `<fastq>_trimming_report.txt` : Information on parameters used and statistics related to adapter trimming with cutadapt. Provides an overview of sequences removed via the adapter trimming process.

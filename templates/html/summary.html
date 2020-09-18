@@ -19,10 +19,8 @@
                     <li class="navbar dropdown">
                         <a href="#" class="navbar dropdown">TE Detection Methods</a>
                         <div class="dropdown-content">
-                            {% for method in methods %}
-                                {% if 'trimgalore' not in method %}
-                                    <a href="html/{{method}}.html" class="dropdown-content">{{ method }}</a>
-                                {% endif %}
+                            {% for method in prediction_methods %}
+                                <a href="html/{{method}}.html" class="dropdown-content">{{ method }}</a>
                             {% endfor %}
                         </div>
                     </li>
@@ -49,6 +47,21 @@
                 <div class="pageHeader">
                     <p class="pageHeader">Summary Report: {{ sample }}</p>
                 </div>
+                {% if prediction_methods|length > 0 %}    
+                    <div class="spacer2"></div>
+                    <div class="sectionHeader">
+                        <a href="data/run/te_prediction_summary.txt"  target="_blank"><div class="sectionHeaderRaw">Raw</div></a>
+                        <div class="sectionHeaderName">TE Prediction Summary</div>
+                        <div class="sectionHeaderHide" id="plot1Header" onclick="hide('plot1Div','plot1Header')">Hide</div>
+                    </div>
+                    <div id="plot1Div">
+                        <div class="plot" id="teinfo">
+                            <!-- scale height with number of y values; div will be scrollable -->
+                            <div id="tester" class="toolplot" style="width:100%;height:500px;"></div>
+                        </div>
+                    </div>
+                {% endif %}
+                <div class="spacer2"></div>
                 <div class="sectionHeader">
                     <a href="data/run/summary_report.txt"  target="_blank"><div class="sectionHeaderRaw">Raw</div></a>
                     <div class="sectionHeaderName">Run Information</div>
@@ -215,21 +228,6 @@
                     </div>       
                 {% endif %}
 
-                {% if prediction_methods|length > 0 %}    
-                    <div class="spacer2"></div>
-                    <div class="sectionHeader">
-                        <a href="data/run/te_prediction_summary.txt"  target="_blank"><div class="sectionHeaderRaw">Raw</div></a>
-                        <div class="sectionHeaderName">TE Prediction Summary</div>
-                        <div class="sectionHeaderHide" id="plot1Header" onclick="hide('plot1Div','plot1Header')">Hide</div>
-                    </div>
-                    <div id="plot1Div">
-                        <div class="plot" id="teinfo">
-                            <!-- scale height with number of y values; div will be scrollable -->
-                            <div id="tester" class="toolplot" style="width:100%;height:500px;"></div>
-                        </div>
-                    </div>
-                {% endif %}
-                <div class="spacer2"></div>
             </div>
         </div>
         <!-- plot 1: Tool Plots -->
