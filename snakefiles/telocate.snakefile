@@ -7,7 +7,8 @@ rule telocate_taxonomy:
     threads: 1
 
     params:
-        log=config['args']['log_dir']+"processing.log"
+        log=config['args']['log_dir']+"processing.log",
+        tmp_dir=config['args']['out']+"/tmp"
 
     conda: config['envs']['mcc_processing']
 

@@ -27,21 +27,25 @@ def main():
     full_command = " ".join(["python3"] + sys.argv)
     current_directory = os.getcwd()
     args = parse_args()
-    check_input_files(args.reference, args.consensus, args.first, fq2=args.second, locations=args.locations, taxonomy=args.taxonomy, coverage_fasta=args.coverage_fasta, augment_fasta=args.augment)
+    check_input_files(args.reference, args.consensus, args.first, fq2=args.second, locations=args.locations, taxonomy=args.taxonomy, coverage_fasta=args.coverage_fasta, augment_fasta=args.augment, annotations_only=args.make_annotations)
     mccutils.mkdir(args.out+"/logs")
     mccutils.mkdir(args.out+"/tmp")
-    sample_name = mccutils.get_base_name(args.first, fastq=True)
+    if not args.make_annotations:
+        sample_name = mccutils.get_base_name(args.first, fastq=True)
+    else:
+        sample_name = "tmp"
     ref_name = mccutils.get_base_name(args.reference)
     run_id = make_run_config(args, sample_name, ref_name, full_command, current_directory)
     run_workflow(args, sample_name, ref_name, run_id, debug=args.debug, annotations_only=args.make_annotations)
+    mccutils.remove(args.out+"/tmp")
 
 def parse_args():
     parser = argparse.ArgumentParser(prog='McClintock', description="Meta-pipeline to identify transposable element insertions using next generation sequencing data")
 
     ## required ##
-    parser.add_argument("-r", "--reference", type=str, help="A reference genome sequence in fasta format", required='--install' not in sys.argv)
+    parser.add_argument("-r", "--reference", type=str, help="A reference genome sequence in fasta format", required=('--install' not in sys.argv))
     parser.add_argument("-c", "--consensus", type=str, help="The consensus sequences of the TEs for the species in fasta format", required='--install' not in sys.argv)
-    parser.add_argument("-1", "--first", type=str, help="The path of the first fastq file from paired end read sequencing or the fastq file from single read sequencing", required='--install' not in sys.argv)
+    parser.add_argument("-1", "--first", type=str, help="The path of the first fastq file from paired end read sequencing or the fastq file from single read sequencing", required=(('--install' not in sys.argv) and ('--make_annotations' not in sys.argv)))
     
 
     ## optional ##
@@ -77,11 +81,13 @@ def parse_args():
     args.reference = mccutils.get_abs_path(args.reference)
     #check -c
     args.consensus = mccutils.get_abs_path(args.consensus)
-    #check -1
-    args.first = mccutils.get_abs_path(args.first)
-    #check -2
-    if args.second is not None:
-        args.second = mccutils.get_abs_path(args.second)
+
+    if args.make_annotations != True:
+        #check -1
+        args.first = mccutils.get_abs_path(args.first)
+        #check -2
+        if args.second is not None:
+            args.second = mccutils.get_abs_path(args.second)
 
     #check -p
     if args.proc is None:
@@ -147,7 +153,7 @@ def parse_args():
     
     return args
 
-def check_input_files(ref, consensus, fq1, fq2=None, locations=None, taxonomy=None, coverage_fasta=None, augment_fasta=None):
+def check_input_files(ref, consensus, fq1, fq2=None, locations=None, taxonomy=None, coverage_fasta=None, augment_fasta=None, annotations_only=False):
     # check reference fasta
     mccutils.log("setup","checking reference fasta: "+ref)
     try:
@@ -158,16 +164,17 @@ def check_input_files(ref, consensus, fq1, fq2=None, locations=None, taxonomy=No
         print(e)
         sys.exit(ref+" appears to be a malformed FastA file..exiting...\n")
 
-    mccutils.log("setup","checking fq1: "+fq1)
-    #check fq1
-    if ".fastq" not in fq1 and ".fq" not in fq1:
-        sys.exit(fq1+" is not a (.fastq/.fq) file, exiting...\n")
-    
-    #check fq2
-    if fq2 is not None:
-        mccutils.log("setup","checking fq2: "+fq2)
-        if ".fastq" not in fq2 and ".fq" not in fq2:
-            sys.exit(fq2+" is not a (.fastq/.fq) file, exiting...\n")
+    if not annotations_only:
+        mccutils.log("setup","checking fq1: "+fq1)
+        #check fq1
+        if ".fastq" not in fq1 and ".fq" not in fq1:
+            sys.exit(fq1+" is not a (.fastq/.fq) file, exiting...\n")
+        
+        #check fq2
+        if fq2 is not None:
+            mccutils.log("setup","checking fq2: "+fq2)
+            if ".fastq" not in fq2 and ".fq" not in fq2:
+                sys.exit(fq2+" is not a (.fastq/.fq) file, exiting...\n")
     
 
     # checking consensus
