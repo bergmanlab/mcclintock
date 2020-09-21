@@ -68,14 +68,14 @@ rule telocate_run:
     conda: config['envs']['te-locate']
 
     output:
-        config['args']['out']+"/results/te-locate/unfiltered/te-locate-raw.info"
+        config['args']['out']+"results/te-locate/unfiltered/te-locate-raw.info"
     
     script:
         config['args']['mcc_path']+"/scripts/telocate/telocate_run.py"
 
 rule telocate_post:
     input:
-        telocate_raw = config['args']['out']+"/results/te-locate/unfiltered/te-locate-raw.info",
+        telocate_raw = config['args']['out']+"results/te-locate/unfiltered/te-locate-raw.info",
         te_gff = config['mcc']['telocate_te_gff']
     
     params:
@@ -88,7 +88,7 @@ rule telocate_post:
     conda: config['envs']['te-locate']
 
     output:
-        config['args']['out']+"/results/te-locate/"+config['args']['sample_name']+"_telocate_nonredundant.bed"
+        config['out']['te-locate']
     
     script:
         config['args']['mcc_path']+"/scripts/telocate/telocate_post.py"

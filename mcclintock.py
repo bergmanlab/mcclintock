@@ -33,7 +33,7 @@ def main():
     sample_name = mccutils.get_base_name(args.first, fastq=True)
     ref_name = mccutils.get_base_name(args.reference)
     run_id = make_run_config(args, sample_name, ref_name, full_command, current_directory)
-    run_workflow(args, sample_name, run_id, debug=args.debug)
+    run_workflow(args, sample_name, ref_name, run_id, debug=args.debug, annotations_only=args.make_annotations)
 
 def parse_args():
     parser = argparse.ArgumentParser(prog='McClintock', description="Meta-pipeline to identify transposable element insertions using next generation sequencing data")
@@ -60,6 +60,7 @@ def parse_args():
     parser.add_argument("--install", action="store_true", help="This option will install the dependencies of mcclintock", required=False)
     parser.add_argument("--debug", action="store_true", help="This option will allow snakemake to print progress to stdout", required=False)
     parser.add_argument("--slow", action="store_true", help="This option runs without attempting to optimize thread usage to run rules concurrently. Each multithread rule will use the max processors designated by -p/--proc", required=False)
+    parser.add_argument("--make_annotations", action="store_true", help="This option will only run the pipeline up to the creation of the repeat annotations", required=False)
 
     args = parser.parse_args()
 
@@ -322,8 +323,10 @@ def make_run_config(args, sample_name, ref_name, full_command, current_directory
     mccutils.mkdir(args.out+"/snakemake")
     mccutils.mkdir(args.out+"/snakemake/config")
     run_config = args.out+"/snakemake/config/config_"+str(run_id)+".json"
-    input_dir = args.out+"/method_input/"
-    results_dir = args.out+"/results/"
+    input_dir = args.out
+    reference_dir = args.out+"/"+ref_name+"/"
+    sample_dir = args.out+"/"+sample_name+"/"
+    results_dir = args.out+"/"+sample_name+"/results/"
 
     mcc_path = os.path.dirname(os.path.abspath(__file__))
 
@@ -351,6 +354,8 @@ def make_run_config(args, sample_name, ref_name, full_command, current_directory
     out_files = config.OUT_PATHS
     for key in out_files.keys():
         out_files[key] = out_files[key].replace(config.INPUT_DIR, input_dir)
+        out_files[key] = out_files[key].replace(config.REF_DIR, reference_dir)
+        out_files[key] = out_files[key].replace(config.SAM_DIR, sample_dir)
         out_files[key] = out_files[key].replace(config.RESULTS_DIR, results_dir)
         out_files[key] = out_files[key].replace(config.SAMPLE_NAME, sample_name)   
     
@@ -373,7 +378,7 @@ def make_run_config(args, sample_name, ref_name, full_command, current_directory
     data = {}
     data['args'] = {
         'proc': str(args.proc),
-        'out': str(args.out),
+        'out': sample_dir,
         'log_dir': log_dir,
         'augment_fasta': str(args.augment),
         'mcc_path': mcc_path,
@@ -407,6 +412,16 @@ def make_run_config(args, sample_name, ref_name, full_command, current_directory
     data["mcc"] = config.INTERMEDIATE_PATHS
     for key in data["mcc"].keys():
         data["mcc"][key] = data["mcc"][key].replace(config.INPUT_DIR, input_dir)
+        data["mcc"][key] = data["mcc"][key].replace(config.REF_DIR, reference_dir)
+        data["mcc"][key] = data["mcc"][key].replace(config.SAM_DIR, sample_dir)
+        data["mcc"][key] = data["mcc"][key].replace(config.REF_NAME, ref_name)
+        data["mcc"][key] = data["mcc"][key].replace(config.SAMPLE_NAME, sample_name)
+    
+    data["out"] = config.OUT_PATHS
+    for key in data["mcc"].keys():
+        data["mcc"][key] = data["mcc"][key].replace(config.INPUT_DIR, input_dir)
+        data["mcc"][key] = data["mcc"][key].replace(config.REF_DIR, reference_dir)
+        data["mcc"][key] = data["mcc"][key].replace(config.SAM_DIR, sample_dir)
         data["mcc"][key] = data["mcc"][key].replace(config.REF_NAME, ref_name)
         data["mcc"][key] = data["mcc"][key].replace(config.SAMPLE_NAME, sample_name)
     
@@ -423,16 +438,21 @@ def make_run_config(args, sample_name, ref_name, full_command, current_directory
     return run_id
 
 
-def run_workflow(args, sample_name, run_id, debug=False):
+def run_workflow(args, sample_name, ref_name, run_id, debug=False, annotations_only=False):
     log = args.out+"/mcclintock."+str(run_id)+".log"
 
-    results_dir = args.out+"/results/"
-    input_dir = args.out+"/method_input/"
+    input_dir = args.out
+    reference_dir = args.out+"/"+ref_name+"/"
+    sample_dir = args.out+"/"+sample_name+"/"
+    results_dir = args.out+"/"+sample_name+"/results/"
+
     out_files = config.OUT_PATHS
     for key in out_files.keys():
         out_files[key] = out_files[key].replace(config.INPUT_DIR, input_dir)
+        out_files[key] = out_files[key].replace(config.REF_DIR, reference_dir)
+        out_files[key] = out_files[key].replace(config.SAM_DIR, sample_dir)
         out_files[key] = out_files[key].replace(config.RESULTS_DIR, results_dir)
-        out_files[key] = out_files[key].replace(config.SAMPLE_NAME, sample_name)   
+        out_files[key] = out_files[key].replace(config.SAMPLE_NAME, sample_name)    
 
     path=os.path.dirname(os.path.abspath(__file__))
     mccutils.mkdir(args.out+"/snakemake")
@@ -449,27 +469,33 @@ def run_workflow(args, sample_name, run_id, debug=False):
     command += ["--configfile", args.out+"/snakemake/config/config_"+str(run_id)+".json"]
     command += ["--cores", str(args.proc)]
 
+    mccutils.mkdir(sample_dir)
+    mccutils.mkdir(sample_dir+"tmp")
+
     if args.clean:
         clean_command = command + ["--delete-all-output"]
         mccutils.run_command(clean_command)
         mccutils.remove(args.out+"/input")
 
 
-    for method in args.methods:
-        command.append(out_files[method])
-    
-    command.append(args.out+"/results/summary/data/run/summary_report.txt")
+    if not annotations_only:
+        for method in args.methods:
+            command.append(out_files[method])
+        
+        command.append(sample_dir+"results/summary/data/run/summary_report.txt")
+    else:
+        command.append(reference_dir+"reference_te_locations/inrefTEs.gff")
+        command.append(reference_dir+"te_taxonomy/taxonomy.tsv")
 
     # print(" ".join(command))
     try:
         mccutils.run_command(command)
-        mccutils.check_file_exists(args.out+"/results/summary/data/run/summary_report.txt")
     except Exception as e:
         track = traceback.format_exc()
         print(track, file=sys.stderr)
         print("McClintock Pipeline Failed... please open an issue at https://github.com/bergmanlab/mcclintock/issues if you are having trouble using McClintock", file=sys.stderr)
         sys.exit(1)
-    mccutils.remove(args.out+"/tmp")
+    mccutils.remove(sample_dir+"tmp")
 
 
 def calculate_max_threads(avail_procs, methods_used, multithread_methods, slow=False):

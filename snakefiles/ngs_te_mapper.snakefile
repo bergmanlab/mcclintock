@@ -18,7 +18,7 @@ rule ngs_te_mapper_run:
     conda: config['envs']['ngs_te_mapper']
 
     output:
-        config['args']['out']+"/results/ngs_te_mapper/unfiltered/bed_tsd/"+config['args']['sample_name']+"_insertions.bed"
+        config['args']['out']+"results/ngs_te_mapper/unfiltered/bed_tsd/"+config['args']['sample_name']+"_insertions.bed"
     
     script:
         config['args']['mcc_path']+"/scripts/ngs_te_mapper/ngs_te_mapper_run.py"
@@ -26,7 +26,7 @@ rule ngs_te_mapper_run:
 rule ngs_te_mapper_post:
     input:
         config = config['args']['mcc_path']+"/config/ngs_te_mapper/ngs_te_mapper_post.py",
-        raw_bed = config['args']['out']+"/results/ngs_te_mapper/unfiltered/bed_tsd/"+config['args']['sample_name']+"_insertions.bed"
+        raw_bed = config['args']['out']+"results/ngs_te_mapper/unfiltered/bed_tsd/"+config['args']['sample_name']+"_insertions.bed"
 
     params:
         out_dir = config['args']['out']+"/results/ngs_te_mapper/",
@@ -39,7 +39,7 @@ rule ngs_te_mapper_post:
     conda: config['envs']['ngs_te_mapper']
 
     output:
-        config['args']['out']+"/results/ngs_te_mapper/"+config['args']['sample_name']+"_ngs_te_mapper_nonredundant.bed"
+        config['out']['ngs_te_mapper']
     
     script:
         config['args']['mcc_path']+"/scripts/ngs_te_mapper/ngs_te_mapper_post.py"

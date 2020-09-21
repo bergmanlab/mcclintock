@@ -54,7 +54,7 @@ rule relocaTE_run:
         sample_name = config['args']['sample_name']
 
     output:
-        config['args']['out']+"/results/relocaTE/unfiltered/combined.gff"
+        config['args']['out']+"results/relocaTE/unfiltered/combined.gff"
     
     script:
         config['args']['mcc_path']+"/scripts/relocaTE/relocate_run.py"
@@ -62,7 +62,7 @@ rule relocaTE_run:
 rule relocaTE_post:
     input:
         config['args']['mcc_path']+"/config/relocate/relocate_post.py",
-        relocate_gff = config['args']['out']+"/results/relocaTE/unfiltered/combined.gff",
+        relocate_gff = config['args']['out']+"results/relocaTE/unfiltered/combined.gff",
         te_gff = config['mcc']['relocaTE_ref_TEs'],
 
     threads: 1
@@ -77,8 +77,7 @@ rule relocaTE_post:
         chromosomes = config['args']['chromosomes']
 
     output:
-        config['args']['out']+"/results/relocaTE/"+config['args']['sample_name']+"_relocate_redundant.bed",
-        config['args']['out']+"/results/relocaTE/"+config['args']['sample_name']+"_relocate_nonredundant.bed"
+        config['out']['relocate']
     
     script:
         config['args']['mcc_path']+"/scripts/relocaTE/relocate_post.py"

@@ -312,7 +312,7 @@ rule coverage:
     conda: config['envs']['coverage']
 
     output:
-        config['args']['out']+"/results/coverage/te_depth.csv"
+        config['out']['coverage']
 
     script:
         config['args']['mcc_path']+"/scripts/coverage/coverage.py"   
@@ -348,8 +348,8 @@ rule summary_report:
     conda: config['envs']['mcc_processing']
 
     output:
-        summary_report = config['args']['out']+"/results/summary/data/run/summary_report.txt",
-        html_summary_report = config['args']['out']+"/results/summary/summary.html"
+        summary_report = config['args']['out']+"results/summary/data/run/summary_report.txt",
+        html_summary_report = config['args']['out']+"results/summary/summary.html"
     
     script:
         config['args']['mcc_path']+"/scripts/summary/summary_report.py"
