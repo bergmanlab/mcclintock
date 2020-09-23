@@ -71,10 +71,28 @@ def parse_args():
     if args.debug is None:
         args.debug = False
 
+    #check -m
+    # If only one fastq has been supplied assume this is single ended data and launch only ngs_te_mapper and RelocaTE
+    if args.second is None and not args.install:
+        valid_methods = config.SINGLE_END_METHODS #from config.py
+    else:
+        valid_methods = config.ALL_METHODS #from config.py
+    
+    if args.methods is None:
+        args.methods = valid_methods
+    
+    else:
+        args.methods = args.methods.split(",")
+        for x,method in enumerate(args.methods):
+            args.methods[x] = method.lower()
+            if args.methods[x] not in valid_methods:
+                sys.stderr.write(" ".join(["Method:",method, "not a valid method...", "Valid methods:"," ".join(valid_methods),"\n"]))
+                sys.exit(1)
+
     if args.install:
         mccutils.log("install","installing dependencies")
         mccutils.log("install","WARNING: this could take awhile")
-        install(clean=args.clean, debug=args.debug)
+        install(args.methods, clean=args.clean, debug=args.debug)
         sys.exit(0)
 
     #check -r
@@ -106,25 +124,6 @@ def parse_args():
             print("cannot create output directory: ",args.out,"exiting...", file=sys.stderr)
             sys.exit(1)
 
-    
-
-    #check -m
-    # If only one fastq has been supplied assume this is single ended data and launch only ngs_te_mapper and RelocaTE
-    if args.second is None:
-        valid_methods = config.SINGLE_END_METHODS #from config.py
-    else:
-        valid_methods = config.ALL_METHODS #from config.py
-    
-    if args.methods is None:
-        args.methods = valid_methods
-    
-    else:
-        args.methods = args.methods.split(",")
-        for x,method in enumerate(args.methods):
-            args.methods[x] = method.lower()
-            if args.methods[x] not in valid_methods:
-                sys.stderr.write(" ".join(["Method:",method, "not a valid method...", "Valid methods:"," ".join(valid_methods),"\n"]))
-                sys.exit(1)
 
     # check -g
     if args.locations is not None:
@@ -259,7 +258,7 @@ def check_input_files(ref, consensus, fq1, fq2=None, locations=None, taxonomy=No
 
 
 
-def install(clean=False, debug=False):
+def install(methods, clean=False, debug=False):
 
     mcc_path = os.path.dirname(os.path.abspath(__file__))
     install_path = mcc_path+"/install/"
@@ -302,7 +301,11 @@ def install(clean=False, debug=False):
     os.chdir(install_path)
     mccutils.mkdir(log_dir)
 
-    for env in config.ALL_METHODS:
+    # temp requires te-locate scripts to make taxonomy file
+    if "temp" in methods and "te-locate" not in methods:
+        methods.append("te-locate")
+
+    for env in methods:
         if env not in config.NO_INSTALL_METHODS:
             mccutils.log("install","Installing conda environment for: "+env)
             command = ["snakemake","--use-conda", "--conda-frontend","mamba", "--conda-prefix", conda_env_dir, "--configfile", install_config, "--cores", "1", "--nolock", "--conda-create-envs-only", data['output'][env]]

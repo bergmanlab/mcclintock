@@ -7,6 +7,7 @@ import scripts.mccutils as mccutils
 import config.config as config
 from datetime import datetime
 from jinja2 import Environment, FileSystemLoader
+import traceback
 
 templateLoader = FileSystemLoader(searchpath=snakemake.config['args']['mcc_path']+"/templates/html/")
 env = Environment(loader=templateLoader)
@@ -68,17 +69,24 @@ def main():
         out_file_map[method] = config.OUT_PATHS[method]
         out_file_map[method] = out_file_map[method].replace("{{results}}", results_dir)
         out_file_map[method] = out_file_map[method].replace("{{samplename}}", sample_name)
+    
+    try:
+        if os.path.exists(taxonomy):
+            make_te_csv(methods, out_file_map, taxonomy, out_dir+"te_summary.csv")
+        
+        mapping_info,end_time = make_run_summary(out_file_map, commit, methods, fq1, fq2, ref, bam, flagstat, median_insert_size, command, execution_dir, start_time, out_dir, snakemake.output.summary_report, paired=paired)
+        make_local_css_js_copies(snakemake.config['args']['mcc_path']+"/templates/css/", snakemake.config['args']['mcc_path']+"/templates/js/", snakemake.params.out_dir)
+        make_data_copies(methods, snakemake.params.results_dir, snakemake.params.out_dir)
+        make_summary_page(env, methods, sample_name, commit, start_time, end_time, out_dir, execution_dir, command, snakemake.params.raw_fq1, snakemake.params.raw_fq2, mapping_info, out_file_map, paired, snakemake.output.html_summary_report)
+        make_families_page(env, consensus, methods, out_file_map, out_dir)
+        make_family_pages(env, consensus, methods, out_file_map, chromosomes, out_dir)
+        make_method_pages(env, methods, consensus, out_file_map, chromosomes, out_dir)
 
-    if os.path.exists(taxonomy):
-        make_te_csv(methods, out_file_map, taxonomy, out_dir+"te_summary.csv")
-
-    mapping_info,end_time = make_run_summary(out_file_map, commit, methods, fq1, fq2, ref, bam, flagstat, median_insert_size, command, execution_dir, start_time, out_dir, snakemake.output.summary_report, paired=paired)
-    make_local_css_js_copies(snakemake.config['args']['mcc_path']+"/templates/css/", snakemake.config['args']['mcc_path']+"/templates/js/", snakemake.params.out_dir)
-    make_data_copies(methods, snakemake.params.results_dir, snakemake.params.out_dir)
-    make_summary_page(env, methods, sample_name, commit, start_time, end_time, out_dir, execution_dir, command, snakemake.params.raw_fq1, snakemake.params.raw_fq2, mapping_info, out_file_map, paired, snakemake.output.html_summary_report)
-    make_families_page(env, consensus, methods, out_file_map, out_dir)
-    make_family_pages(env, consensus, methods, out_file_map, chromosomes, out_dir)
-    make_method_pages(env, methods, consensus, out_file_map, chromosomes, out_dir)
+    except Exception as e:
+        track = traceback.format_exc()
+        print(track, file=sys.stderr)
+        print("Failed to generate the McClintock Summary Report", file=sys.stderr)
+        sys.exit(1)
 
 def get_te_counts(bed):
     all_te = 0
