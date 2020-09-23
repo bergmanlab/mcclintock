@@ -48,7 +48,6 @@
                     <p class="pageHeader">Summary Report: {{ sample }}</p>
                 </div>
                 {% if prediction_methods|length > 0 %}    
-                    <div class="spacer2"></div>
                     <div class="sectionHeader">
                         <a href="data/run/te_prediction_summary.txt"  target="_blank"><div class="sectionHeaderRaw">Raw</div></a>
                         <div class="sectionHeaderName">TE Prediction Summary</div>
@@ -227,7 +226,7 @@
                         </table>
                     </div>       
                 {% endif %}
-
+                <div class="spacer2"></div>
             </div>
         </div>
         <!-- plot 1: Tool Plots -->
