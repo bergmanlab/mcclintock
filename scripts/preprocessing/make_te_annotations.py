@@ -39,9 +39,9 @@ def main():
         mccutils.log("processing","no reference TEs provided... finding reference TEs with RepeatMasker",log=log)
         te_gff = repeat_mask(reference, consensus, chromosomes, processors, run_id, log, mcc_out)
         taxonomy, te_gff = make_te_taxonomy_map(te_gff, consensus, run_id, mcc_out)
-    
-    taxonomy = mccutils.replace_special_chars_taxonomy(taxonomy, mcc_out+"/tmp/"+str(run_id)+"taxonomy.tsv")
-    te_gff = format_ref_te_gff(te_gff, run_id, mcc_out)
+    else:
+        taxonomy = mccutils.replace_special_chars_taxonomy(taxonomy, mcc_out+"/tmp/"+str(run_id)+"taxonomy.tsv")
+        te_gff = format_ref_te_gff(te_gff, run_id, mcc_out)
 
     mccutils.run_command(["cp", te_gff, out_te_gff])
     mccutils.run_command(["cp", taxonomy, out_taxonomy])
@@ -132,7 +132,7 @@ def make_te_taxonomy_map(ref_tes, consensus, run_id, out):
                     else:
                         te_family_counts[family] = 1
                     
-                    te_id = family+"_"+str(te_family_counts[family])
+                    te_id = family+"_"+str(te_family_counts[family])+"_"+run_id
                     split_line[2] = te_id
                     split_line[8] = ";".join(["ID="+te_id, "Name="+te_id, "Alias="+te_id])
                     line = "\t".join(split_line)

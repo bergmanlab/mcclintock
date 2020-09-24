@@ -20,8 +20,8 @@ rule relocaTE2_run:
         
     
     output:
-        config['args']['out']+"/results/relocaTE2/unfiltered/repeat/results/ALL.all_nonref_insert.gff",
-        config['args']['out']+"/results/relocaTE2/unfiltered/repeat/results/ALL.all_ref_insert.gff"
+        config['args']['out']+"results/relocaTE2/unfiltered/repeat/results/ALL.all_nonref_insert.gff",
+        config['args']['out']+"results/relocaTE2/unfiltered/repeat/results/ALL.all_ref_insert.gff"
     
     script:
         config['args']['mcc_path']+"/scripts/relocaTE2/relocate2_run.py"
@@ -32,8 +32,8 @@ rule relocaTE2_post:
     input:
         config['args']['mcc_path']+"/config/relocate2/relocate2_post.py",
         rm_out = config['mcc']['repeatmasker_out'],
-        nonref_gff = config['args']['out']+"/results/relocaTE2/unfiltered/repeat/results/ALL.all_nonref_insert.gff",
-        ref_gff = config['args']['out']+"/results/relocaTE2/unfiltered/repeat/results/ALL.all_ref_insert.gff"
+        nonref_gff = config['args']['out']+"results/relocaTE2/unfiltered/repeat/results/ALL.all_nonref_insert.gff",
+        ref_gff = config['args']['out']+"results/relocaTE2/unfiltered/repeat/results/ALL.all_ref_insert.gff"
 
     threads: 1
 
@@ -46,8 +46,7 @@ rule relocaTE2_post:
         chromosomes = config['args']['chromosomes']
     
     output:
-        config['args']['out']+"/results/relocaTE2/"+config['args']['sample_name']+"_relocate2_redundant.bed",
-        config['args']['out']+"/results/relocaTE2/"+config['args']['sample_name']+"_relocate2_nonredundant.bed"
+        config['out']['relocate2']
     
     script:
         config['args']['mcc_path']+"/scripts/relocaTE2/relocate2_post.py"

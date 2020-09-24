@@ -20,8 +20,8 @@ rule run_temp:
     threads: config['args']['max_threads_per_rule']
 
     output:
-        config['args']['out']+"/results/TEMP/unfiltered/"+config['args']['sample_name']+".insertion.refined.bp.summary",
-        config['args']['out']+"/results/TEMP/unfiltered/"+config['args']['sample_name']+".absence.refined.bp.summary"
+        config['args']['out']+"results/TEMP/unfiltered/"+config['args']['sample_name']+".insertion.refined.bp.summary",
+        config['args']['out']+"results/TEMP/unfiltered/"+config['args']['sample_name']+".absence.refined.bp.summary"
     
     script:
         config['args']['mcc_path']+"/scripts/TEMP/temp_run.py"
@@ -29,8 +29,8 @@ rule run_temp:
 rule process_temp:
     input:
         config['args']['mcc_path']+"/config/TEMP/temp_post.py",
-        insert_summary = config['args']['out']+"/results/TEMP/unfiltered/"+config['args']['sample_name']+".insertion.refined.bp.summary",
-        absence_summary = config['args']['out']+"/results/TEMP/unfiltered/"+config['args']['sample_name']+".absence.refined.bp.summary",
+        insert_summary = config['args']['out']+"results/TEMP/unfiltered/"+config['args']['sample_name']+".insertion.refined.bp.summary",
+        absence_summary = config['args']['out']+"results/TEMP/unfiltered/"+config['args']['sample_name']+".absence.refined.bp.summary",
         te_gff = config['mcc']['telocate_te_gff']
     
     conda: config['envs']['temp']
@@ -44,8 +44,7 @@ rule process_temp:
     threads: 1
 
     output:
-        config['args']['out']+"/results/TEMP/"+config['args']['sample_name']+"_temp_redundant.bed",
-        config['args']['out']+"/results/TEMP/"+config['args']['sample_name']+"_temp_nonredundant.bed"
+        config['out']['temp']
     
     script:
         config['args']['mcc_path']+"/scripts/TEMP/temp_post.py"

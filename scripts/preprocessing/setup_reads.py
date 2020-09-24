@@ -39,6 +39,8 @@ def main():
                 flags = trimgalore.PAIRED_END_FLAGS
                 trimmedfq, trimmedfq2 = run_trim_galore(fq1, run_id, log, mcc_out, fq2=fq2, cores=processors, flags=flags)
             
+            run_multiqc(mcc_out+"/results/trimgalore/")
+            
         
         # make unzipped copies in mcc input dir        
         if "gz" in trimmedfq.split(".")[-1]:
@@ -104,7 +106,9 @@ def run_trim_galore(fq1, run_id, log, out, fq2=None, cores=1, flags=[]):
         file_exists = mccutils.check_file_exists(outfq2)
         return outfq1, outfq2
 
-        
+def run_multiqc(trimgalore_dir):
+    os.chdir(trimgalore_dir)
+    mccutils.run_command(["multiqc","."])
 
 
 if __name__ == "__main__":                

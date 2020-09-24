@@ -53,15 +53,15 @@ rule popoolationTE_preprocessing:
     conda: config['envs']['popoolationte']
 
     params:
-        out_dir = config['args']['out']+"/results/popoolationTE/unfiltered/",
+        out_dir = config['args']['out']+"results/popoolationTE/unfiltered/",
         sample_name=config['args']['sample_name'],
         log = config['args']['log_dir']+"popoolationTE.log",
         script_dir = config['args']['mcc_path']+"/install/tools/popoolationte/"
 
     output:
-        config['args']['out']+"/results/popoolationTE/unfiltered/reads1.fastq",
-        config['args']['out']+"/results/popoolationTE/unfiltered/reads2.fastq",
-        config['args']['out']+"/results/popoolationTE/unfiltered/combined.sorted.sam"
+        config['args']['out']+"results/popoolationTE/unfiltered/reads1.fastq",
+        config['args']['out']+"results/popoolationTE/unfiltered/reads2.fastq",
+        config['args']['out']+"results/popoolationTE/unfiltered/combined.sorted.sam"
 
     script:
         config['args']['mcc_path']+"/scripts/popoolationte/popoolationte_pre.py"
@@ -71,29 +71,29 @@ rule popoolationTE_run:
         ref_fasta = config['mcc']['popoolationTE_ref_fasta'],
         taxonomy = config['mcc']['popoolationTE_taxonomy'],
         te_gff = config['mcc']['popoolationTE_gff'],
-        fq1 = config['args']['out']+"/results/popoolationTE/unfiltered/reads1.fastq",
-        fq2 = config['args']['out']+"/results/popoolationTE/unfiltered/reads2.fastq",
-        sam = config['args']['out']+"/results/popoolationTE/unfiltered/combined.sorted.sam"
+        fq1 = config['args']['out']+"results/popoolationTE/unfiltered/reads1.fastq",
+        fq2 = config['args']['out']+"results/popoolationTE/unfiltered/reads2.fastq",
+        sam = config['args']['out']+"results/popoolationTE/unfiltered/combined.sorted.sam"
     
     threads: 1
 
     conda: config['envs']['popoolationte']
 
     params:
-        out_dir = config['args']['out']+"/results/popoolationTE/unfiltered/",
+        out_dir = config['args']['out']+"results/popoolationTE/unfiltered/",
         sample_name=config['args']['sample_name'],
         log = config['args']['log_dir']+"popoolationTE.log",
         script_dir = config['args']['mcc_path']+"/install/tools/popoolationte/"
 
     output:
-        config['args']['out']+"/results/popoolationTE/unfiltered/te-poly-filtered.txt"
+        config['args']['out']+"results/popoolationTE/unfiltered/te-poly-filtered.txt"
 
     script:
         config['args']['mcc_path']+"/scripts/popoolationte/popoolationte_run.py"
 
 rule popoolationTE_post:
     input:
-        popoolationte_out = config['args']['out']+"/results/popoolationTE/unfiltered/te-poly-filtered.txt"
+        popoolationte_out = config['args']['out']+"results/popoolationTE/unfiltered/te-poly-filtered.txt"
     
     threads: 1
 
@@ -106,7 +106,7 @@ rule popoolationTE_post:
         log = config['args']['log_dir']+"popoolationTE.log"
 
     output:
-        config['args']['out']+"/results/popoolationTE/"+config['args']['sample_name']+"_popoolationte_nonredundant.bed"
+        config['out']['popoolationte']
 
     script:
         config['args']['mcc_path']+"/scripts/popoolationte/popoolationte_post.py"

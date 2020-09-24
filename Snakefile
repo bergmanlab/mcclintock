@@ -312,7 +312,7 @@ rule coverage:
     conda: config['envs']['coverage']
 
     output:
-        config['args']['out']+"/results/summary/te_depth.csv"
+        config['out']['coverage']
 
     script:
         config['args']['mcc_path']+"/scripts/coverage/coverage.py"   
@@ -326,6 +326,7 @@ rule summary_report:
     params:
         commit = config['args']['commit'],
         ref = config['mcc']['reference'],
+        consensus = config['mcc']['consensus'],
         taxonomy = config['mcc']['taxonomy'],
         bam = config['mcc']['bam'],
         flagstat = config['mcc']['flagstat'],
@@ -336,7 +337,9 @@ rule summary_report:
         command = config['args']['full_command'],
         execution_dir = config['args']['call_directory'],
         time = config['args']['time'],
+        raw_fq1 = config['in']['fq1'],
         raw_fq2 = config['in']['fq2'],
+        chromosomes = config['args']['chromosomes'],
         out_dir = config['args']['out']+"/results/summary/"
 
 
@@ -345,7 +348,8 @@ rule summary_report:
     conda: config['envs']['mcc_processing']
 
     output:
-        summary_report = config['args']['out']+"/results/summary/summary_report.txt"
+        summary_report = config['args']['out']+"results/summary/data/run/summary_report.txt",
+        html_summary_report = config['args']['out']+"results/summary/summary.html"
     
     script:
         config['args']['mcc_path']+"/scripts/summary/summary_report.py"

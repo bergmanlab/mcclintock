@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link href="../css/style.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Fauna+One">
+        <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+        <script type="text/javascript" src="../js/script.js"></script>
+    </head>
+    
+    <body onload="
+      {% for results in method_results %}
+        {% if results.method != "te-locate" %}
+            fillTable( {{results.method}}PredictionData, '{{results.method}}_table', maxTableSize); setupSectionButtons( {{results.method}}PredictionData, maxTableSize, '{{results.method}}btn');
+        {% else %}
+            fillTable( telocatePredictionData, '{{results.method}}_table', maxTableSize); setupSectionButtons( telocatePredictionData, maxTableSize, '{{results.method}}btn');
+        {% endif %}
+      {% endfor %}
+    ">
+        <div class="navbar">
+            <ul class="navbar">
+                <li class="navbar" id="logo"><a href="https://github.com/bergmanlab/mcclintock" target="_blank" class="logo">McClintock</a></li>
+                <li class="navbar"><a href="../summary.html" class="navbar">Summary</a></li>
+                <li class="navbar"><a href="families.html" class="navbar">TE Families</a></li>
+                {% if methods|length > 0 %}
+                    <li class="navbar dropdown">
+                        <a href="#" class="navbar dropdown">TE Detection Methods</a>
+                        <div class="dropdown-content">
+                            {% for method in methods%}
+                                <a href="{{method}}.html" class="dropdown-content">{{method}}</a>
+                            {% endfor %}
+                        </div>
+                    </li>
+                {% endif %}
+            </ul> 
+        </div>
+
+        <div class="row">
+            <div class="sidebar">
+                <ul class="sidebar">
+                    {% if coverage %}
+                        <li class="sidebar"><a href="#plot1Header" class="sidebar">{{family}} Coverage</a></li>
+                    {% endif %}
+                    {% if methods|length > 0 %}
+                        <li class="sidebar"><a href="#predictionHeader" class="sidebar">{{family}} Prediction Summary</a></li>
+                    {% endif %}
+                    {% for method in methods %}
+                        <li class="sidebar"><a href="#{{method}}Header" class="sidebar">{{method}}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="main">
+                <div class="pageHeader">
+                    <p class="pageHeader">TE Family: {{family}}</p>
+                </div>
+
+                {% if coverage %}
+                    <div class="spacer2"></div>
+                    <div class="sectionHeader">
+                        <a href="../data/coverage/{{family}}.allQ.normalized.txt"  target="_blank"><div class="sectionHeaderRaw"style="width:25px;">All</div></a>
+                        <a href="../data/coverage/{{family}}.highQ.normalized.txt"  target="_blank" ><div class="sectionHeaderRaw" style="width:25px;">Unique</div></a>
+                        <div class="sectionHeaderName" style="width: 700px;">{{family}} Normalized Coverage</div>
+                        <div class="sectionHeaderHide" id="plot1Header" onclick="hide('plot1Div','plot1Header')">Hide</div>
+                    </div>
+                    <div id="plot1Div">
+                        <div class="runinfo" id="teinfo">
+                            <div id="tester" class="plot1" style="width:100%;height:{{chrom_plot_height}}px;"></div>
+                        </div>
+                        <div class="runinfo" id="mapinfo">
+                            <table class="run-information">
+                                <tr>
+                                    <td class="header3" colspan="2">Mean Normalized Coverage</td>
+                                </tr>
+                                <tr>
+                                    <td class="header">All</td>
+                                    <td class="values">{{norm_depth}}</td>
+                                </tr>
+                                <tr>
+                                    <td class="header">Unique</td>
+                                    <td class="values">{{uniq_depth}}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                {% endif %}
+
+                <div class="spacer2"></div>
+
+                {% if methods|length > 0 %}
+                    <div class="sectionHeader">
+                        <a href="../data/families/{{family}}_prediction_summary.txt"  target="_blank"><div class="sectionHeaderRaw">Raw</div></a>
+                        <div class="sectionHeaderName">{{family}} Prediction Summary</div>
+                        <div class="sectionHeaderHide" id="predictionHeader" onclick="hide('familyinfoDiv','predictionHeader')">Hide</div>
+                    </div>
+                    <div id="familyinfoDiv">
+                        <div class="runinfo" id="familyinfo">
+                            <table class="run-information" id="familyInfoTable">
+                                <tr>
+                                    <th class="headerNoHover">TE Family</th>
+                                    <th class="headerNoHover">Type</th>
+                                    {% set count = namespace(value=2) %}
+                                    {% for method in methods %}
+                                        <th class="headerNoHover">{{method}}</th>
+                                        {% set count.value = count.value + 1 %}
+                                    {% endfor %}
+                                </tr>
+                                <tr>
+                                    <td class="values">{{family}}</td>
+                                    <td class="values">All</td>
+                                    {% for value in prediction_summary.all %}
+                                        <td class="values">{{ value }}</td>
+                                    {% endfor %}
+                                </tr>
+                                <tr>
+                                    <td class="values">{{family}}</td>
+                                    <td class="values">Reference</td>
+                                    {% for value in prediction_summary.reference %}
+                                        <td class="values">{{ value }}</td>
+                                    {% endfor %}
+                                </tr>
+                                <tr>
+                                    <td class="values">{{family}}</td>
+                                    <td class="values">Non-Reference</td>
+                                    {% for value in prediction_summary.nonreference %}
+                                        <td class="values">{{ value }}</td>
+                                    {% endfor %}
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                {% endif %}
+                {% for results in method_results %}
+                    <div class="spacer2"></div>
+                    <div class="sectionHeader">
+                        <a href="../data/families/{{family}}_{{results.method}}_predictions.txt"  target="_blank"><div class="sectionHeaderRaw">Raw</div></a>
+                        <div class="sectionHeaderName">{{results.method}}</div>
+                        <div class="sectionHeaderHide" id="{{results.method}}Header" onclick="hide('{{results.method}}','{{results.method}}Header')">Hide</div>
+                    </div>
+                    <div id="{{results.method}}">
+                        <div class="runinfo" id="teinfo">
+                            <div id="tester" class="{{results.method}}Plot" style="width:100%;height:{{chrom_plot_height}}px;"></div>
+                        </div>
+
+                        {% if results.method != "te-locate" %}
+                            <div id="familyinfoDiv">
+                                <div class="filter">
+                                    <input type="button" id="{{results.method}}FilterButton" class="filterButton" name="{{results.method}}FilterButton" value="Filter" onclick="{{results.method}}PredictionData = filterData({{results.method}}UnmodifiedData, '{{results.method}}_table', maxTableSize, '{{results.method}}btn', '{{results.method}}Table1','{{results.method}}Table2', '{{results.method}}exactBox','{{results.method}}refBox','{{results.method}}nonrefBox', false, '{{results.method}}filterOption', 2, '')">
+                                    <input type="text" class="filterTable" id="{{results.method}}Table1" autocomplete="off" placeholder="">
+                                    <input type="button" id="{{results.method}}filterOption" class="filterOption" name="{{results.method}}filterOption" value="and" onclick="flipFilterOption('{{results.method}}filterOption')">
+                                    <input type="text" class="filterTable" id="{{results.method}}Table2" autocomplete="off" placeholder="">
+                                    <input type="checkbox" class="checkbox" id="{{results.method}}exactBox" name="{{results.method}}exactBox" autocomplete="off" onclick="{{results.method}}PredictionData = filterData({{results.method}}UnmodifiedData, '{{results.method}}_table', maxTableSize, '{{results.method}}btn', '{{results.method}}Table1','{{results.method}}Table2', '{{results.method}}exactBox','{{results.method}}refBox','{{results.method}}nonrefBox', false, '{{results.method}}filterOption', 2, '')">
+                                    <label for="{{results.method}}exactBox">Exact Match</label>
+                                    <input type="checkbox" class="checkbox" id="{{results.method}}refBox" name="{{results.method}}refBox" checked="checked" autocomplete="off" onclick="{{results.method}}PredictionData = filterData({{results.method}}UnmodifiedData, '{{results.method}}_table', maxTableSize, '{{results.method}}btn', '{{results.method}}Table1','{{results.method}}Table2', '{{results.method}}exactBox','{{results.method}}refBox','{{results.method}}nonrefBox', false, '{{results.method}}filterOption', 2, '')">
+                                    <label for="{{results.method}}exactBox">Reference</label>
+                                    <input type="checkbox" class="checkbox" id="{{results.method}}nonrefBox" name="{{results.method}}nonrefBox" checked="checked" autocomplete="off" onclick="{{results.method}}PredictionData = filterData({{results.method}}UnmodifiedData, '{{results.method}}_table', maxTableSize, '{{results.method}}btn', '{{results.method}}Table1','{{results.method}}Table2', '{{results.method}}exactBox','{{results.method}}refBox','{{results.method}}nonrefBox', false, '{{results.method}}filterOption', 2, '')">
+                                    <label for="{{results.method}}exactBox">Non-Reference</label>
+                                    
+                                </div>
+                                <div class="runinfo" id="predictions">
+                                    <table class="run-information" id="{{results.method}}_table">
+                                        <tr>
+                                            <th class="header" onclick="{{results.method}}PredictionData = sortTableLarge({{results.method}}PredictionData, '{{results.method}}_table', 0, maxTableSize, '{{results.method}}btn')">Contig</th>
+                                            <th class="header" onclick="{{results.method}}PredictionData = sortTableLarge({{results.method}}PredictionData, '{{results.method}}_table', 1, maxTableSize, '{{results.method}}btn')">Family</th>
+                                            <th class="header" onclick="{{results.method}}PredictionData = sortTableLarge({{results.method}}PredictionData, '{{results.method}}_table', 2, maxTableSize, '{{results.method}}btn')">Type</th>
+                                            <th class="header" onclick="{{results.method}}PredictionData = sortTableLarge({{results.method}}PredictionData, '{{results.method}}_table', 3, maxTableSize, '{{results.method}}btn', numeric=true)">Start</th>
+                                            <th class="header" onclick="{{results.method}}PredictionData = sortTableLarge({{results.method}}PredictionData, '{{results.method}}_table', 4, maxTableSize, '{{results.method}}btn', numeric=true)">End</th>
+                                            <th class="header" onclick="{{results.method}}PredictionData = sortTableLarge({{results.method}}PredictionData, '{{results.method}}_table', 5, maxTableSize, '{{results.method}}btn')">Strand</th>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="pageChanger" id="pageChanger">
+                                <button class="pageChanger currentPage" id='{{results.method}}btn1' value="1" onclick="showSection({{results.method}}PredictionData, '{{results.method}}_table', maxTableSize, '{{results.method}}btn1', '{{results.method}}btn')">1</button>
+                                <button class="hiddenRange" id='{{results.method}}btnh1'>...</button>
+                                <button class="pageChanger" id='{{results.method}}btn2' value="2" onclick="showSection({{results.method}}PredictionData, '{{results.method}}_table', maxTableSize, '{{results.method}}btn2', '{{results.method}}btn')">2</button>
+                                <button class="pageChanger" id='{{results.method}}btn3' value="3" onclick="showSection({{results.method}}PredictionData, '{{results.method}}_table', maxTableSize, '{{results.method}}btn3', '{{results.method}}btn')">3</button>
+                                <button class="pageChanger" id='{{results.method}}btn4' value="4" onclick="showSection({{results.method}}PredictionData, '{{results.method}}_table', maxTableSize, '{{results.method}}btn4', '{{results.method}}btn')">4</button>
+                                <button class="pageChanger" id='{{results.method}}btn5' value="5" onclick="showSection({{results.method}}PredictionData, '{{results.method}}_table', maxTableSize, '{{results.method}}btn5', '{{results.method}}btn')">5</button>
+                                <button class="pageChanger" id='{{results.method}}btn6' value="6" onclick="showSection({{results.method}}PredictionData, '{{results.method}}_table', maxTableSize, '{{results.method}}btn6', '{{results.method}}btn')">6</button>
+                                <button class="hiddenRange" id='{{results.method}}btnh2'>...</button>
+                                <button class="pageChanger" id='{{results.method}}btn7' value="19" onclick="showSection({{results.method}}PredictionData, '{{results.method}}_table', maxTableSize, '{{results.method}}btn7', '{{results.method}}btn')">19</button>
+                                <button class="goSection" id="{{results.method}}btnGo" value="" onclick="goToSection('{{results.method}}btnInput', {{results.method}}PredictionData, '{{results.method}}_table', maxTableSize, '{{results.method}}btn')">&rsaquo;</button>
+                                <input type="text" class="inputSection" id="{{results.method}}btnInput" autocomplete="off" placeholder="">
+                            </div>
+                        {% else %}
+                            <div id="familyinfoDiv">
+                                <div class="filter">
+                                    <input type="button" id="{{results.method}}FilterButton" class="filterButton" name="{{results.method}}FilterButton" value="Filter" onclick="telocatePredictionData = filterData(telocateUnmodifiedData, '{{results.method}}_table', maxTableSize, '{{results.method}}btn', '{{results.method}}Table1','{{results.method}}Table2', '{{results.method}}exactBox','{{results.method}}refBox','{{results.method}}nonrefBox', false, '{{results.method}}filterOption', 2, '')">
+                                    <input type="text" class="filterTable" id="{{results.method}}Table1" autocomplete="off" placeholder="">
+                                    <input type="button" id="{{results.method}}filterOption" class="filterOption" name="{{results.method}}filterOption" value="and" onclick="flipFilterOption('{{results.method}}filterOption')">
+                                    <input type="text" class="filterTable" id="{{results.method}}Table2" autocomplete="off" placeholder="">
+                                    <input type="checkbox" class="checkbox" id="{{results.method}}exactBox" name="{{results.method}}exactBox" autocomplete="off" onclick="telocatePredictionData = filterData(telocateUnmodifiedData, '{{results.method}}_table', maxTableSize, '{{results.method}}btn', '{{results.method}}Table1','{{results.method}}Table2', '{{results.method}}exactBox','{{results.method}}refBox','{{results.method}}nonrefBox', false, '{{results.method}}filterOption', 2, '')">
+                                    <label for="{{results.method}}exactBox">Exact Match</label>
+                                    <input type="checkbox" class="checkbox" id="{{results.method}}refBox" name="{{results.method}}refBox" checked="checked" autocomplete="off" onclick="telocatePredictionData = filterData(telocateUnmodifiedData, '{{results.method}}_table', maxTableSize, '{{results.method}}btn', '{{results.method}}Table1','{{results.method}}Table2', '{{results.method}}exactBox','{{results.method}}refBox','{{results.method}}nonrefBox', false, '{{results.method}}filterOption', 2, '')">
+                                    <label for="{{results.method}}exactBox">Reference</label>
+                                    <input type="checkbox" class="checkbox" id="{{results.method}}nonrefBox" name="{{results.method}}nonrefBox" checked="checked" autocomplete="off" onclick="telocatePredictionData = filterData(telocateUnmodifiedData, '{{results.method}}_table', maxTableSize, '{{results.method}}btn', '{{results.method}}Table1','{{results.method}}Table2', '{{results.method}}exactBox','{{results.method}}refBox','{{results.method}}nonrefBox', false, '{{results.method}}filterOption', 2, '')">
+                                    <label for="{{results.method}}exactBox">Non-Reference</label>
+                                    
+                                </div>
+                                <div class="runinfo" id="predictions">
+                                    <table class="run-information" id="{{results.method}}_table">
+                                        <tr>
+                                            <th class="header" onclick="telocatePredictionData = sortTableLarge(telocatePredictionData, '{{results.method}}_table', 0, maxTableSize, '{{results.method}}btn')">Contig</th>
+                                            <th class="header" onclick="telocatePredictionData = sortTableLarge(telocatePredictionData, '{{results.method}}_table', 1, maxTableSize, '{{results.method}}btn')">Family</th>
+                                            <th class="header" onclick="telocatePredictionData = sortTableLarge(telocatePredictionData, '{{results.method}}_table', 2, maxTableSize, '{{results.method}}btn')">Type</th>
+                                            <th class="header" onclick="telocatePredictionData = sortTableLarge(telocatePredictionData, '{{results.method}}_table', 3, maxTableSize, '{{results.method}}btn', numeric=true)">Start</th>
+                                            <th class="header" onclick="telocatePredictionData = sortTableLarge(telocatePredictionData, '{{results.method}}_table', 4, maxTableSize, '{{results.method}}btn', numeric=true)">End</th>
+                                            <th class="header" onclick="telocatePredictionData = sortTableLarge(telocatePredictionData, '{{results.method}}_table', 5, maxTableSize, '{{results.method}}btn')">Strand</th>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="pageChanger" id="pageChanger">
+                                <button class="pageChanger currentPage" id='{{results.method}}btn1' value="1" onclick="showSection(telocatePredictionData, '{{results.method}}_table', maxTableSize, '{{results.method}}btn1', '{{results.method}}btn')">1</button>
+                                <button class="hiddenRange" id='{{results.method}}btnh1'>...</button>
+                                <button class="pageChanger" id='{{results.method}}btn2' value="2" onclick="showSection(telocatePredictionData, '{{results.method}}_table', maxTableSize, '{{results.method}}btn2', '{{results.method}}btn')">2</button>
+                                <button class="pageChanger" id='{{results.method}}btn3' value="3" onclick="showSection(telocatePredictionData, '{{results.method}}_table', maxTableSize, '{{results.method}}btn3', '{{results.method}}btn')">3</button>
+                                <button class="pageChanger" id='{{results.method}}btn4' value="4" onclick="showSection(telocatePredictionData, '{{results.method}}_table', maxTableSize, '{{results.method}}btn4', '{{results.method}}btn')">4</button>
+                                <button class="pageChanger" id='{{results.method}}btn5' value="5" onclick="showSection(telocatePredictionData, '{{results.method}}_table', maxTableSize, '{{results.method}}btn5', '{{results.method}}btn')">5</button>
+                                <button class="pageChanger" id='{{results.method}}btn6' value="6" onclick="showSection(telocatePredictionData, '{{results.method}}_table', maxTableSize, '{{results.method}}btn6', '{{results.method}}btn')">6</button>
+                                <button class="hiddenRange" id='{{results.method}}btnh2'>...</button>
+                                <button class="pageChanger" id='{{results.method}}btn7' value="19" onclick="showSection(telocatePredictionData, '{{results.method}}_table', maxTableSize, '{{results.method}}btn7', '{{results.method}}btn')">19</button>
+                                <button class="goSection" id="{{results.method}}btnGo" value="" onclick="goToSection('{{results.method}}btnInput', telocatePredictionData, '{{results.method}}_table', maxTableSize, '{{results.method}}btn')">&rsaquo;</button>
+                                <input type="text" class="inputSection" id="{{results.method}}btnInput" autocomplete="off" placeholder="">
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+                <div class="spacer2"></div>
+            </div>
+        </div>
+        <!-- table data -->
+        <script>
+            var maxTableSize = 20;
+            {% for results in method_results %}
+                {% if results.method != "te-locate" %}
+                    var {{results.method}}PredictionData = [
+                        [
+                            'Contig',
+                            'Family',
+                            'Type',
+                            'Start',
+                            'End',
+                            'Strand'
+                        ],
+                        {% for insertion in results.insertions %}
+                        [
+                            '{{insertion.chrom}}',
+                            '{{insertion.family}}',
+                            '{{insertion.type}}',
+                            '{{insertion.start}}',
+                            '{{insertion.end}}',
+                            '{{insertion.strand}}'
+                        ],
+                        {% endfor %}
+                    ];
+
+                    const {{results.method}}UnmodifiedData = [...{{results.method}}PredictionData];
+                {% else %}
+                    var telocatePredictionData = [
+                            [
+                                'Contig',
+                                'Family',
+                                'Type',
+                                'Start',
+                                'End',
+                                'Strand'
+                            ],
+                            {% for insertion in results.insertions %}
+                            [
+                                '{{insertion.chrom}}',
+                                '{{insertion.family}}',
+                                '{{insertion.type}}',
+                                '{{insertion.start}}',
+                                '{{insertion.end}}',
+                                '{{insertion.strand}}'
+                            ],
+                            {% endfor %}
+                        ];
+
+                    const telocateUnmodifiedData = [...telocatePredictionData];
+                {% endif %}
+            {% endfor %}
+        </script>
+
+        <!-- plot 1: Family Summary -->
+        {% if coverage %}
+            <script>            
+                var trace1 = {
+                x: [
+                {% for pos in uniq_positions %}
+                    {{pos}},
+                {% endfor %}
+                ],
+                y: [
+                {% for cov in uniq_coverage %}
+                    {{cov}},
+                {% endfor %}
+                ],
+                name: "Unique Coverage",
+                fill: 'tozeroy',
+                type: 'scatter',
+                fillcolor: 'rgba(25,25,25,0.6)',
+                line: {
+                    color: 'rgba(95,95,95,1)'
+                }
+                };
+
+                var trace2 = {
+                x: [
+                {% for pos in all_positions %}
+                    {{pos}},
+                {% endfor %}
+                ],
+                y: [
+                {% for cov in all_coverage %}
+                    {{cov}},
+                {% endfor %}
+                ],
+                name: "All Coverage",
+                fill: 'tonexty',
+                type: 'scatter',
+                fillcolor: 'rgba(95,95,95,0.6)',
+                line: {
+                    color: 'rgba(130,130,130,1)'
+                }
+                };
+
+                var layout = {
+                    showlegend: true,
+                    font: {size: 12},
+                    margin: {'t':50, 'b':50},
+                    xaxis: {automargin: true, side: 'top'},
+                    yaxis: {automargin: true}
+                };
+
+                var data = [trace1, trace2];
+                var div = document.getElementsByClassName('plot1')[0];
+                Plotly.newPlot(div, data, layout);
+            </script>
+        {% endif %}
+
+        <!-- plot 2: Chromosome Summary -->
+        {% for method_result in method_results %}
+            <script>
+                var trace1 = {
+                x: [
+                    {% for val in method_result.reference %}
+                        {{val}},
+                    {% endfor %}
+                ],
+                y: [
+                    {% for chromosome in chromosomes %}
+                        "{{chromosome}}",
+                    {% endfor %}
+                ],
+                name: 'Reference',
+                orientation: 'h',
+                marker: {
+                    color: 'rgba(25,25,25,0.6)',
+                    width: 1
+                },
+                type: 'bar'
+                };
+
+                var trace2 = {
+                x: [
+                    {% for val in method_result.nonreference %}
+                        {{val}},
+                    {% endfor %}
+                ],
+                y: [
+                    {% for chromosome in chromosomes %}
+                        "{{chromosome}}",
+                    {% endfor %}
+                ],
+                name: 'Non-Reference',
+                orientation: 'h',
+                type: 'bar',
+                marker: {
+                    color: 'rgba(95,95,95,0.6)',
+                    width: 1
+                }
+                };
+
+                var data = [trace1, trace2];
+
+                var layout = {
+                barmode: 'stack',
+                font: {size: 12},
+                margin: {'t':50, 'b':50},
+                xaxis: {automargin: true, side: 'top'},
+                yaxis: {automargin: true}
+                };
+
+                var div = document.getElementsByClassName('{{method_result.method}}Plot')[0];
+                Plotly.newPlot(div, data, layout);
+            </script>
+        {% endfor %}
+    </body>
+
+</html>

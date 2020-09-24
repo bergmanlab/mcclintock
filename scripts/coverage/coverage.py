@@ -208,7 +208,13 @@ def get_avg_depth(depth_file, trim_edges=0):
             split_line = line.split("\t")
             total += int(split_line[2])
     
-    avg_depth = total/positions
+    if positions > 0:
+        avg_depth = total/positions
+    else:
+        mccutils.log("coverage", "ERROR: no positions in: "+depth_file)
+        mccutils.log("coverage", "It's likely the length of the family for: "+depth_file+" is shorter than the trimmed edges parameter")
+        mccutils.log("coverage", "Setting avg depth to zero for this family, to avoid this, lower the OMIT_EDGES_LENGTH parameter in the coverage config file")
+        avg_depth = 0
 
     return avg_depth
 
@@ -237,6 +243,21 @@ def make_depth_table(te_fasta, bam, genome_depth, run_id, out, depth_csv, log, t
                 allQ = out+"/te-depth-files/"+te_name+".allQ.cov"
                 command = ["samtools", "depth", "-aa", "-r", te_name, bam, "-d", "0", "-Q", "0"]
                 mccutils.run_command_stdout(command, allQ, log=log)
+
+                # make normalized coverage files
+                allQ_chrom, allQ_pos, allQ_cov = read_samtools_depth_file(allQ)
+                with open(out+"/te-depth-files/"+te_name+".allQ.normalized.cov","w") as covfile:
+                    for i,pos in enumerate(allQ_pos):
+                        cov = str(round(allQ_cov[i]/genome_depth,2))
+                        line = "\t".join([allQ_chrom,str(pos),cov])
+                        covfile.write(line+"\n")
+                
+                highQ_chrom, highQ_pos, highQ_cov = read_samtools_depth_file(highQ)
+                with open(out+"/te-depth-files/"+te_name+".highQ.normalized.cov","w") as covfile:
+                    for i,pos in enumerate(highQ_pos):
+                        cov = str(round(highQ_cov[i]/genome_depth,2))
+                        line = "\t".join([highQ_chrom,str(pos),cov])
+                        covfile.write(line+"\n")
 
                 avg_depth = get_avg_depth(allQ, trim_edges=trim_edges)
                 avg_norm_depth = avg_depth/genome_depth
@@ -268,6 +289,7 @@ def make_plots(te_names, all_coverage_files, uniq_coverage_files, avg_norm_te_de
         output = out+"plots/"+te_name+".png"
         plot = plot_coverage(chrom, all_pos, all_cov, uniq_pos, uniq_cov, sample_name, plot_height, plot_width, genome_depth, hline, trim_edges=trim_edges)
         plot.savefig(output, bbox_inches="tight")
+        plot.close()
         mccutils.log("coverage","plot created: "+output)
 
 

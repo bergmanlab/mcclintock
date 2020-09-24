@@ -27,21 +27,25 @@ def main():
     full_command = " ".join(["python3"] + sys.argv)
     current_directory = os.getcwd()
     args = parse_args()
-    check_input_files(args.reference, args.consensus, args.first, fq2=args.second, locations=args.locations, taxonomy=args.taxonomy, coverage_fasta=args.coverage_fasta, augment_fasta=args.augment)
+    check_input_files(args.reference, args.consensus, args.first, fq2=args.second, locations=args.locations, taxonomy=args.taxonomy, coverage_fasta=args.coverage_fasta, augment_fasta=args.augment, annotations_only=args.make_annotations)
     mccutils.mkdir(args.out+"/logs")
     mccutils.mkdir(args.out+"/tmp")
-    sample_name = mccutils.get_base_name(args.first, fastq=True)
+    if not args.make_annotations:
+        sample_name = mccutils.get_base_name(args.first, fastq=True)
+    else:
+        sample_name = "tmp"
     ref_name = mccutils.get_base_name(args.reference)
     run_id = make_run_config(args, sample_name, ref_name, full_command, current_directory)
-    run_workflow(args, sample_name, run_id, debug=args.debug)
+    run_workflow(args, sample_name, ref_name, run_id, debug=args.debug, annotations_only=args.make_annotations)
+    mccutils.remove(args.out+"/tmp")
 
 def parse_args():
     parser = argparse.ArgumentParser(prog='McClintock', description="Meta-pipeline to identify transposable element insertions using next generation sequencing data")
 
     ## required ##
-    parser.add_argument("-r", "--reference", type=str, help="A reference genome sequence in fasta format", required='--install' not in sys.argv)
+    parser.add_argument("-r", "--reference", type=str, help="A reference genome sequence in fasta format", required=('--install' not in sys.argv))
     parser.add_argument("-c", "--consensus", type=str, help="The consensus sequences of the TEs for the species in fasta format", required='--install' not in sys.argv)
-    parser.add_argument("-1", "--first", type=str, help="The path of the first fastq file from paired end read sequencing or the fastq file from single read sequencing", required='--install' not in sys.argv)
+    parser.add_argument("-1", "--first", type=str, help="The path of the first fastq file from paired end read sequencing or the fastq file from single read sequencing", required=(('--install' not in sys.argv) and ('--make_annotations' not in sys.argv)))
     
 
     ## optional ##
@@ -60,27 +64,48 @@ def parse_args():
     parser.add_argument("--install", action="store_true", help="This option will install the dependencies of mcclintock", required=False)
     parser.add_argument("--debug", action="store_true", help="This option will allow snakemake to print progress to stdout", required=False)
     parser.add_argument("--slow", action="store_true", help="This option runs without attempting to optimize thread usage to run rules concurrently. Each multithread rule will use the max processors designated by -p/--proc", required=False)
+    parser.add_argument("--make_annotations", action="store_true", help="This option will only run the pipeline up to the creation of the repeat annotations", required=False)
 
     args = parser.parse_args()
 
     if args.debug is None:
         args.debug = False
 
+    #check -m
+    # If only one fastq has been supplied assume this is single ended data and launch only ngs_te_mapper and RelocaTE
+    if args.second is None and not args.install:
+        valid_methods = config.SINGLE_END_METHODS #from config.py
+    else:
+        valid_methods = config.ALL_METHODS #from config.py
+    
+    if args.methods is None:
+        args.methods = valid_methods
+    
+    else:
+        args.methods = args.methods.split(",")
+        for x,method in enumerate(args.methods):
+            args.methods[x] = method.lower()
+            if args.methods[x] not in valid_methods:
+                sys.stderr.write(" ".join(["Method:",method, "not a valid method...", "Valid methods:"," ".join(valid_methods),"\n"]))
+                sys.exit(1)
+
     if args.install:
         mccutils.log("install","installing dependencies")
         mccutils.log("install","WARNING: this could take awhile")
-        install(clean=args.clean, debug=args.debug)
+        install(args.methods, clean=args.clean, debug=args.debug)
         sys.exit(0)
 
     #check -r
     args.reference = mccutils.get_abs_path(args.reference)
     #check -c
     args.consensus = mccutils.get_abs_path(args.consensus)
-    #check -1
-    args.first = mccutils.get_abs_path(args.first)
-    #check -2
-    if args.second is not None:
-        args.second = mccutils.get_abs_path(args.second)
+
+    if args.make_annotations != True:
+        #check -1
+        args.first = mccutils.get_abs_path(args.first)
+        #check -2
+        if args.second is not None:
+            args.second = mccutils.get_abs_path(args.second)
 
     #check -p
     if args.proc is None:
@@ -99,25 +124,6 @@ def parse_args():
             print("cannot create output directory: ",args.out,"exiting...", file=sys.stderr)
             sys.exit(1)
 
-    
-
-    #check -m
-    # If only one fastq has been supplied assume this is single ended data and launch only ngs_te_mapper and RelocaTE
-    if args.second is None:
-        valid_methods = config.SINGLE_END_METHODS #from config.py
-    else:
-        valid_methods = config.ALL_METHODS #from config.py
-    
-    if args.methods is None:
-        args.methods = valid_methods
-    
-    else:
-        args.methods = args.methods.split(",")
-        for x,method in enumerate(args.methods):
-            args.methods[x] = method.lower()
-            if args.methods[x] not in valid_methods:
-                sys.stderr.write(" ".join(["Method:",method, "not a valid method...", "Valid methods:"," ".join(valid_methods),"\n"]))
-                sys.exit(1)
 
     # check -g
     if args.locations is not None:
@@ -146,7 +152,7 @@ def parse_args():
     
     return args
 
-def check_input_files(ref, consensus, fq1, fq2=None, locations=None, taxonomy=None, coverage_fasta=None, augment_fasta=None):
+def check_input_files(ref, consensus, fq1, fq2=None, locations=None, taxonomy=None, coverage_fasta=None, augment_fasta=None, annotations_only=False):
     # check reference fasta
     mccutils.log("setup","checking reference fasta: "+ref)
     try:
@@ -157,16 +163,17 @@ def check_input_files(ref, consensus, fq1, fq2=None, locations=None, taxonomy=No
         print(e)
         sys.exit(ref+" appears to be a malformed FastA file..exiting...\n")
 
-    mccutils.log("setup","checking fq1: "+fq1)
-    #check fq1
-    if ".fastq" not in fq1 and ".fq" not in fq1:
-        sys.exit(fq1+" is not a (.fastq/.fq) file, exiting...\n")
-    
-    #check fq2
-    if fq2 is not None:
-        mccutils.log("setup","checking fq2: "+fq2)
-        if ".fastq" not in fq2 and ".fq" not in fq2:
-            sys.exit(fq2+" is not a (.fastq/.fq) file, exiting...\n")
+    if not annotations_only:
+        mccutils.log("setup","checking fq1: "+fq1)
+        #check fq1
+        if ".fastq" not in fq1 and ".fq" not in fq1:
+            sys.exit(fq1+" is not a (.fastq/.fq) file, exiting...\n")
+        
+        #check fq2
+        if fq2 is not None:
+            mccutils.log("setup","checking fq2: "+fq2)
+            if ".fastq" not in fq2 and ".fq" not in fq2:
+                sys.exit(fq2+" is not a (.fastq/.fq) file, exiting...\n")
     
 
     # checking consensus
@@ -251,7 +258,7 @@ def check_input_files(ref, consensus, fq1, fq2=None, locations=None, taxonomy=No
 
 
 
-def install(clean=False, debug=False):
+def install(methods, clean=False, debug=False):
 
     mcc_path = os.path.dirname(os.path.abspath(__file__))
     install_path = mcc_path+"/install/"
@@ -294,10 +301,15 @@ def install(clean=False, debug=False):
     os.chdir(install_path)
     mccutils.mkdir(log_dir)
 
-    for env in config.ALL_METHODS:
+    # temp requires te-locate scripts to make taxonomy file
+    if "temp" in methods and "te-locate" not in methods:
+        methods.append("te-locate")
+
+    for env in methods:
         if env not in config.NO_INSTALL_METHODS:
             mccutils.log("install","Installing conda environment for: "+env)
-            command = ["snakemake","--use-conda", "--conda-prefix", conda_env_dir, "--configfile", install_config, "--cores", "1", "--nolock", "--create-envs-only", data['output'][env]]
+            command = ["snakemake","--use-conda", "--conda-frontend","mamba", "--conda-prefix", conda_env_dir, "--configfile", install_config, "--cores", "1", "--nolock", "--conda-create-envs-only", data['output'][env]]
+
             if not debug:
                 command.append("--quiet")
             mccutils.run_command(command)
@@ -309,7 +321,8 @@ def install(clean=False, debug=False):
             mccutils.run_command(command)
     
     mccutils.log("install", "Installing conda environment for processing steps")
-    command = ["snakemake","--use-conda", "--conda-prefix", conda_env_dir, "--configfile", install_config, "--cores", "1", "--nolock", "--create-envs-only", data['output']['processing']]
+    command = ["snakemake","--use-conda", "--conda-frontend","mamba", "--conda-prefix", conda_env_dir, "--configfile", install_config, "--cores", "1", "--nolock", "--conda-create-envs-only", data['output']['processing']]
+
     if not debug:
         command.append("--quiet")
     mccutils.run_command(command)
@@ -320,8 +333,10 @@ def make_run_config(args, sample_name, ref_name, full_command, current_directory
     mccutils.mkdir(args.out+"/snakemake")
     mccutils.mkdir(args.out+"/snakemake/config")
     run_config = args.out+"/snakemake/config/config_"+str(run_id)+".json"
-    input_dir = args.out+"/method_input/"
-    results_dir = args.out+"/results/"
+    input_dir = args.out
+    reference_dir = args.out+"/"+ref_name+"/"
+    sample_dir = args.out+"/"+sample_name+"/"
+    results_dir = args.out+"/"+sample_name+"/results/"
 
     mcc_path = os.path.dirname(os.path.abspath(__file__))
 
@@ -349,6 +364,8 @@ def make_run_config(args, sample_name, ref_name, full_command, current_directory
     out_files = config.OUT_PATHS
     for key in out_files.keys():
         out_files[key] = out_files[key].replace(config.INPUT_DIR, input_dir)
+        out_files[key] = out_files[key].replace(config.REF_DIR, reference_dir)
+        out_files[key] = out_files[key].replace(config.SAM_DIR, sample_dir)
         out_files[key] = out_files[key].replace(config.RESULTS_DIR, results_dir)
         out_files[key] = out_files[key].replace(config.SAMPLE_NAME, sample_name)   
     
@@ -371,7 +388,7 @@ def make_run_config(args, sample_name, ref_name, full_command, current_directory
     data = {}
     data['args'] = {
         'proc': str(args.proc),
-        'out': str(args.out),
+        'out': sample_dir,
         'log_dir': log_dir,
         'augment_fasta': str(args.augment),
         'mcc_path': mcc_path,
@@ -405,6 +422,16 @@ def make_run_config(args, sample_name, ref_name, full_command, current_directory
     data["mcc"] = config.INTERMEDIATE_PATHS
     for key in data["mcc"].keys():
         data["mcc"][key] = data["mcc"][key].replace(config.INPUT_DIR, input_dir)
+        data["mcc"][key] = data["mcc"][key].replace(config.REF_DIR, reference_dir)
+        data["mcc"][key] = data["mcc"][key].replace(config.SAM_DIR, sample_dir)
+        data["mcc"][key] = data["mcc"][key].replace(config.REF_NAME, ref_name)
+        data["mcc"][key] = data["mcc"][key].replace(config.SAMPLE_NAME, sample_name)
+    
+    data["out"] = config.OUT_PATHS
+    for key in data["mcc"].keys():
+        data["mcc"][key] = data["mcc"][key].replace(config.INPUT_DIR, input_dir)
+        data["mcc"][key] = data["mcc"][key].replace(config.REF_DIR, reference_dir)
+        data["mcc"][key] = data["mcc"][key].replace(config.SAM_DIR, sample_dir)
         data["mcc"][key] = data["mcc"][key].replace(config.REF_NAME, ref_name)
         data["mcc"][key] = data["mcc"][key].replace(config.SAMPLE_NAME, sample_name)
     
@@ -421,16 +448,21 @@ def make_run_config(args, sample_name, ref_name, full_command, current_directory
     return run_id
 
 
-def run_workflow(args, sample_name, run_id, debug=False):
+def run_workflow(args, sample_name, ref_name, run_id, debug=False, annotations_only=False):
     log = args.out+"/mcclintock."+str(run_id)+".log"
 
-    results_dir = args.out+"/results/"
-    input_dir = args.out+"/method_input/"
+    input_dir = args.out
+    reference_dir = args.out+"/"+ref_name+"/"
+    sample_dir = args.out+"/"+sample_name+"/"
+    results_dir = args.out+"/"+sample_name+"/results/"
+
     out_files = config.OUT_PATHS
     for key in out_files.keys():
         out_files[key] = out_files[key].replace(config.INPUT_DIR, input_dir)
+        out_files[key] = out_files[key].replace(config.REF_DIR, reference_dir)
+        out_files[key] = out_files[key].replace(config.SAM_DIR, sample_dir)
         out_files[key] = out_files[key].replace(config.RESULTS_DIR, results_dir)
-        out_files[key] = out_files[key].replace(config.SAMPLE_NAME, sample_name)   
+        out_files[key] = out_files[key].replace(config.SAMPLE_NAME, sample_name)    
 
     path=os.path.dirname(os.path.abspath(__file__))
     mccutils.mkdir(args.out+"/snakemake")
@@ -447,27 +479,33 @@ def run_workflow(args, sample_name, run_id, debug=False):
     command += ["--configfile", args.out+"/snakemake/config/config_"+str(run_id)+".json"]
     command += ["--cores", str(args.proc)]
 
+    mccutils.mkdir(sample_dir)
+    mccutils.mkdir(sample_dir+"tmp")
+
     if args.clean:
         clean_command = command + ["--delete-all-output"]
         mccutils.run_command(clean_command)
         mccutils.remove(args.out+"/input")
 
 
-    for method in args.methods:
-        command.append(out_files[method])
-    
-    command.append(args.out+"/results/summary/summary_report.txt")
+    if not annotations_only:
+        for method in args.methods:
+            command.append(out_files[method])
+        
+        command.append(sample_dir+"results/summary/data/run/summary_report.txt")
+    else:
+        command.append(reference_dir+"reference_te_locations/inrefTEs.gff")
+        command.append(reference_dir+"te_taxonomy/taxonomy.tsv")
 
     # print(" ".join(command))
     try:
         mccutils.run_command(command)
-        mccutils.check_file_exists(args.out+"/results/summary/summary_report.txt")
     except Exception as e:
         track = traceback.format_exc()
         print(track, file=sys.stderr)
         print("McClintock Pipeline Failed... please open an issue at https://github.com/bergmanlab/mcclintock/issues if you are having trouble using McClintock", file=sys.stderr)
         sys.exit(1)
-    mccutils.remove(args.out+"/tmp")
+    mccutils.remove(sample_dir+"tmp")
 
 
 def calculate_max_threads(avail_procs, methods_used, multithread_methods, slow=False):
