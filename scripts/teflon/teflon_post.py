@@ -3,7 +3,7 @@ import sys
 import subprocess
 sys.path.append(snakemake.config['args']['mcc_path'])
 import scripts.mccutils as mccutils
-# import config.teflon.teflon_post as config
+import config.teflon.teflon_post as config
 
 def main():
     mccutils.log("teflon","TEFLoN postprocessing")
@@ -16,7 +16,15 @@ def main():
     out = snakemake.output.out
 
     ref_tes = get_ref_tes(ref_te_bed)
-    insertions = read_insertions(teflon_raw, chromosomes, sample_name, ref_tes)
+    insertions = read_insertions(
+        teflon_raw, 
+        chromosomes, 
+        sample_name, 
+        ref_tes,
+        min_presence=config.PARAMETERS['min_presence_reads'], 
+        max_absence=config.PARAMETERS['max_absence_reads'],
+        min_presence_fraction=config.PARAMETERS['min_presence_fraction']
+    )
     if len(insertions) >= 1:
         insertions = mccutils.make_redundant_bed(insertions, sample_name, out_dir, method="teflon")
         mccutils.make_nonredundant_bed(insertions, sample_name, out_dir, method="teflon")
@@ -36,7 +44,7 @@ def get_ref_tes(ref_te_bed):
     
     return ref_tes
 
-def read_insertions(predictions, chroms, sample, ref_tes):
+def read_insertions(predictions, chroms, sample, ref_tes, min_presence=3, max_absence=None, min_presence_fraction=0.7):
     insertions = []
 
     with open(predictions, "r") as tsv:
@@ -84,7 +92,12 @@ def read_insertions(predictions, chroms, sample, ref_tes):
 
                 insert.name = split_line[3]+"_"+insert.type+"_"+sample+"_teflon_"
 
-                insertions.append(insert)
+                if (
+                    (insert.teflon.presence_reads >= min_presence) 
+                    and (max_absence is None or insert.teflon.absence_reads <= max_absence)
+                    and (insert.teflon.allele_frequency >= min_presence_fraction)
+                ):
+                    insertions.append(insert)
     
     return insertions
             
