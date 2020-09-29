@@ -63,6 +63,15 @@ class Tepid:
         self.id = -1
         self.support = 0
 
+class Teflon:
+    def __init__(self):
+        left_sc_support = False
+        right_sc_support = False
+        presence_reads = 0
+        absence_reads = 0
+        ambiguous_reads = 0
+        allele_frequency = 0.0
+
 class Insertion:
     def __init__(self):
         self.chromosome = "None"
@@ -81,6 +90,7 @@ class Insertion:
         self.temp = Temp()
         self.ngs_te_mapper = Ngs_te_mapper()
         self.tepid = Tepid()
+        self.teflon = Teflon()
 
 
 def mkdir(indir, log=None):
@@ -420,6 +430,10 @@ def make_nonredundant_bed(insertions, sample_name, out_dir, method="popoolationt
             
             elif method == "tepid":
                 if insert.tepid.support > uniq_inserts[key].tepid.support:
+                    uniq_inserts[key] = insert
+            
+            elif method == "teflon":
+                if insert.teflon.presence_reads > uniq_inserts[key].teflon.presence_reads:
                     uniq_inserts[key] = insert
     
     tmp_bed = out_dir+"/tmp.bed"

@@ -6,6 +6,6 @@ channels:
 dependencies:
   - mamba
   - python=3.7.8
-  - snakemake=5.23.0
+  - snakemake=5.25.0
   - biopython=1.77
   - git=2.23.0

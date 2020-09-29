@@ -7,6 +7,7 @@ include: config['args']['mcc_path']+"/snakefiles/telocate.snakefile"
 include: config['args']['mcc_path']+"/snakefiles/ngs_te_mapper.snakefile"
 include: config['args']['mcc_path']+"/snakefiles/retroseq.snakefile"
 include: config['args']['mcc_path']+"/snakefiles/tepid.snakefile"
+include: config['args']['mcc_path']+"/snakefiles/teflon.snakefile"
 
 rule setup_reads:
     input:

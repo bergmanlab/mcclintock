@@ -136,6 +136,7 @@ rule tepid:
     shell:
         "echo 'TEPID env installed' > {output}"
 
+
 rule processing:
     output:
         config['output']['processing'] 
@@ -144,6 +145,22 @@ rule processing:
 
     shell:
         "echo 'processing env installed' > {output}"
+
+rule teflon:
+    params:
+        url = config["URLs"]['teflon'],
+        md5 = config['MD5s']['teflon'],
+        zipfile = config['paths']['install']+"tools/teflon.zip",
+        log = config['paths']['log_dir']+"install.log"
+        
+    conda: 
+        config['ENVs']['teflon']
+
+    output:
+        config['output']['teflon']
+
+    script:
+        config['paths']['install']+"scripts/teflon.py"
 
 rule install_all:
     input:
