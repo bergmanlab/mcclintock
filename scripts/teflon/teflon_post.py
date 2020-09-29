@@ -72,18 +72,18 @@ def read_insertions(predictions, chroms, sample, ref_tes, min_presence=3, max_ab
                 # if reference prediction, uses ref TE coordinates
                 if split_line[6] != "-":
                     insert.type = "reference"
-                    chroms = split_line[6].split(",")
-                    chrom_set = False
-                    for chrom in chroms:
-                        if chrom in ref_tes.keys():
-                            chrom_set = True
-                            insert.chromosome = ref_tes[split_line[6]][0]
-                            break
+                    te_names = split_line[6].split(",")
+                    te_name = ""
+                    for name in te_names:
+                        if name in ref_tes.keys():
+                            if te_name == "":
+                                te_name = split_line[6]
                     
-                    if not chrom_set:
+                    if te_name == "":
                         sys.exit("TEFLON ERROR: can't find:"+split_line[6]+" in reference TEs...\n")
-                    insert.start = ref_tes[split_line[6]][1]
-                    insert.end = ref_tes[split_line[6]][2]
+                    insert.chromosome = ref_tes[te_name][0]
+                    insert.start = ref_tes[te_name][1]
+                    insert.end = ref_tes[te_name][2]
 
                 else:
                     insert.type = "non-reference"
