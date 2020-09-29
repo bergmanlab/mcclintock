@@ -8,5 +8,5 @@ C13: genotype for every TE (allele frequency for pooled data, present/absent for
 PARAMETERS = {
     "min_presence_reads" : 3,
     "max_absence_reads" : None,
-    "min_presence_fraction" : 0.7 # prescence/(absence+presence)
+    "min_presence_fraction" : 0.7 # presence/(absence+presence)
 }
