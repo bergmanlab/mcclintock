@@ -341,7 +341,8 @@ rule summary_report:
         raw_fq1 = config['in']['fq1'],
         raw_fq2 = config['in']['fq2'],
         chromosomes = config['args']['chromosomes'],
-        out_dir = config['args']['out']+"/results/summary/"
+        out_dir = config['args']['out']+"/results/summary/",
+        coverage_fa = config['mcc']['coverage_fasta']
 
 
     threads: config['args']['max_threads_per_rule']

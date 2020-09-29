@@ -29,11 +29,14 @@ def main():
     
     # always use consensus fasta for masking the genome
     mccutils.mkdir(coverage_out+"/input")
+    mccutils.mkdir(coverage_out+"/te-depth-files")
     masked_reference, masked_gff = repeatmask_genome(snakemake.input.ref, te_seqs, snakemake.threads, run_id, coverage_out, log)
 
     # uses coverage fasta (if exists) for augmenting and coverage analysis
     if snakemake.config['in']['coverage_fasta'] != "None":
-        te_seqs = snakemake.input.coverage_fa
+        mccutils.run_command(["cp", snakemake.input.coverage_fa, coverage_out+"/input/coverage_tes_unfixed.fasta"])
+        te_seqs = coverage_out+"/input/coverage_tes_unfixed.fasta"
+        mccutils.replace_special_chars_fasta(coverage_out+"/input/coverage_tes_unfixed.fasta", te_seqs)
 
     augmented_reference = augment_genome(masked_reference, te_seqs, run_id, coverage_out)
     index_genome(snakemake.input.ref, log)
