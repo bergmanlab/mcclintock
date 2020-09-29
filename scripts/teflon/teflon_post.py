@@ -77,7 +77,7 @@ def read_insertions(predictions, chroms, sample, ref_tes, min_presence=3, max_ab
                     for name in te_names:
                         if name in ref_tes.keys():
                             if te_name == "":
-                                te_name = split_line[6]
+                                te_name = name
                     
                     if te_name == "":
                         sys.exit("TEFLON ERROR: can't find:"+split_line[6]+" in reference TEs...\n")
