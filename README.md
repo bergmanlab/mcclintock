@@ -31,9 +31,10 @@ python3 mcclintock.py \
 * [Software Components](#methods)
 * [Software Dependencies](#dependency)
 * [Installing McClintock](#install)
-* [Running McClintock](#run)
+* [McClintock Usage](#run)
 * [McClintock Input](#input)
 * [McClintock Output](#output)
+* [Run Examples](#examples)
 
 
 ## <a name="intro"></a> Introduction
@@ -104,29 +105,7 @@ python3 mcclintock.py --install
 ```
 * This command installs each of the TE insertion detection tools and installs a conda environment for each method.
 
-## <a name="run"></a> Running McClintock
-Some test data is provided in the `test/` directory, though the fastQ files must be downloaded using the `test/download_test_data.py` script.
-```
-python test/download_test_data.py
-```
-* The test data provided is a UCSC sacCer2 yeast reference genome, an annotation of TEs in the yeast reference genome from [Carr, Bensasson and Bergman (2012)](http://www.plosone.org/article/info%3Adoi%2F10.1371%2Fjournal.pone.0050978), and a pair of fastq files from SRA.
-
-#### Run McClintock with test data
-```
-python3 mcclintock.py \
-    -r test/sacCer2.fasta \
-    -c test/sac_cer_TE_seqs.fasta \
-    -g test/reference_TE_locations.gff \
-    -t test/sac_cer_te_families.tsv \
-    -1 test/SRR800842_1.fastq.gz \
-    -2 test/SRR800842_2.fastq.gz \
-    -p 4 \
-    -o /path/to/output/directory
-```
-* change `/path/to/output/directory` to a real path where you desire the McClintock output to be created.
-* you can also increase `-p 4` to a higher number if you have more CPU threads available.
-
-#### McClintock Parameters
+## <a name="run"></a> McClintock Usage
 ```
 ##########################
 ##       Required       ##
@@ -234,13 +213,6 @@ python3 mcclintock.py \
   * A FASTA file of TE sequences that will be included as extra chromosomes in the reference genome file (`-r`)
   * Some methods leverage the reference TE sequences to find non-reference TEs insertions. The augment FASTA can be used to augment the reference genome with additional TEs that can be used to locate non-reference TE insertions that do not have a representative in the reference genome.
 
-#### (TIP) Pre-generating TE locations GFF and Taxonomy TSV
-* If you plan to run McClintock with multiple samples using the same reference genome, but you lack a TE locations GFF and a TE Taxonomy TSV, you can run McClintock with the `--make_annotations` flag to produce these files
-* When run with `--make_annotations`, McClintock will produce the reference TE locations GFF and taxonomy file using RepeatMasker, then exit the run. 
-  * Reference TE locations GFF: `<output>/<reference_name>/<reference_te_locations>/unaugmented_inrefTEs.gff`
-  * TE Taxonomy TSV:  `<output>/<reference_name>/te_taxonomy/unaugmented_taxonomy.tsv`
-* This will allow you to use these files for all of your mcclintock runs using the same reference genome without having to redundantly generate them for each run.
-
 ## <a name="output"></a> McClintock Output
 The results of McClintock component methods are output to the directory `<output>/<sample>/results`.
 * Summary files from the run can be located at `<output>/<sample>/results/summary/`.
@@ -306,6 +278,97 @@ The results of McClintock component methods are output to the directory `<output
 * `unfiltered/te-locate-raw.info` : A tab-delimited table containing reference ("old") and non-reference ("new") predictions using 1-based positions. TSD intervals are not predicted for non-reference TEs, instead a single position is reported.
 * `<reference>_telocate_nonredundant.bed` : BED file containing all reference and non-reference predictions from `unfiltered/te-locate-raw.info`. Coordinates for both reference and non-reference TE predictions are converted to a 0-based interval. The reference TE end position is extended by the `len` column in `unfiltered/te-locate-raw.info`. Non-reference TE predictions are a single position as TE-Locate does not predict the TSD size.
 
+
+## <a name="examples"></a> Run Examples
+#### Run McClintock with test data
+Some test data is provided in the `test/` directory, though the fastQ files must be downloaded using the `test/download_test_data.py` script.
+```
+python test/download_test_data.py
+```
+* The test data provided is a UCSC sacCer2 yeast reference genome, an annotation of TEs in the yeast reference genome from [Carr, Bensasson and Bergman (2012)](http://www.plosone.org/article/info%3Adoi%2F10.1371%2Fjournal.pone.0050978), and a pair of fastq files from SRA.
+
+```
+python3 mcclintock.py \
+    -r test/sacCer2.fasta \
+    -c test/sac_cer_TE_seqs.fasta \
+    -g test/reference_TE_locations.gff \
+    -t test/sac_cer_te_families.tsv \
+    -1 test/SRR800842_1.fastq.gz \
+    -2 test/SRR800842_2.fastq.gz \
+    -p 4 \
+    -o /path/to/output/directory
+```
+* change `/path/to/output/directory` to a real path where you desire the McClintock output to be created.
+* you can also increase `-p 4` to a higher number if you have more CPU threads available.
+
+#### Run McClintock with specific component methods
+* By default, McClintock runs all component methods with the data provided.
+* If you only want to run a specific component method, you can use the `-m` flag to specify which method to run
+```
+python3 mcclintock.py \
+    -r test/sacCer2.fasta \
+    -c test/sac_cer_TE_seqs.fasta \
+    -g test/reference_TE_locations.gff \
+    -t test/sac_cer_te_families.tsv \
+    -1 test/SRR800842_1.fastq.gz \
+    -2 test/SRR800842_2.fastq.gz \
+    -p 4 \
+    -m temp \
+    -o /path/to/output/directory
+```
+* Yoy can also specify multiple methods to run by writing a comma-separated list of the methods after the `-m` flag
+```
+python3 mcclintock.py \
+    -r test/sacCer2.fasta \
+    -c test/sac_cer_TE_seqs.fasta \
+    -g test/reference_TE_locations.gff \
+    -t test/sac_cer_te_families.tsv \
+    -1 test/SRR800842_1.fastq.gz \
+    -2 test/SRR800842_2.fastq.gz \
+    -p 4 \
+    -m temp,ngs_te_mapper,retroseq \
+    -o /path/to/output/directory
+```
+
+#### Run McClintock with multiple samples using same reference genome
+* When running McClintock on multiple samples that use the same reference genome and consensus TEs, it is advised to pregenerate the TE locations GFF and a TE Taxonomy TSV. Otherwise, these will be redundantly created by mcclintock for each sample
+* If you lack a TE locations GFF and a TE Taxonomy TSV, you can run McClintock with the `--make_annotations` flag to produce these files in advance.
+```
+python3 mcclintock.py \
+    -r test/sacCer2.fasta \
+    -c test/sac_cer_TE_seqs.fasta \
+    -p 4 \
+    -o <output> \
+    --make_annotations
+```
+* With the `--make_annotations` flag, McClintock will produce the reference TE locations GFF and taxonomy file using RepeatMasker, then exit the run.
+  * Reference TE locations GFF: `<output>/<reference_name>/reference_te_locations/unaugmented_inrefTEs.gff`
+  * TE Taxonomy TSV:  `<output>/<reference_name>/te_taxonomy/unaugmented_taxonomy.tsv`
+* This will allow you to use these files for all of your mcclintock runs using the same reference genome without having to redundantly generate them for each run.
+```bash
+python3 mcclintock.py \
+    -r test/sacCer2.fasta \
+    -c test/sac_cer_TE_seqs.fasta \
+    -g <output>/sacCer2/reference_te_locations/unaugmented_inrefTEs.gff \
+    -t <output>/sacCer2/te_taxonomy/unaugmented_taxonomy.tsv \
+    -1 /path/to/sample1_1.fastq.gz \
+    -2 /path/to/sample1_2.fastq.gz \
+    -p 4 \
+    -o <output>
+
+python3 mcclintock.py \
+    -r test/sacCer2.fasta \
+    -c test/sac_cer_TE_seqs.fasta \
+    -g <output>/sacCer2/reference_te_locations/unaugmented_inrefTEs.gff \
+    -t <output>/sacCer2/te_taxonomy/unaugmented_taxonomy.tsv \
+    -1 /path/to/sample2_1.fastq.gz \
+    -2 /path/to/sample2_2.fastq.gz \
+    -p 4 \
+    -o <output>
+
+## etc ##
+```
+* Individual smaples can be run in a serial manner as shown in the example above, or run in parallel, such as through separate jobs on a HPC cluster.
 License
 ------
 Copyright 2014-2020 Preston Basting, Michael G. Nelson, Shunhua Han, and Casey M. Bergman
