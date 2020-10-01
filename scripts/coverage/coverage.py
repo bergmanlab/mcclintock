@@ -34,7 +34,7 @@ def main():
 
     # uses coverage fasta (if exists) for augmenting and coverage analysis
     if snakemake.config['in']['coverage_fasta'] != "None":
-        te_seqs = snakemake.input.coverage_fasta
+        te_seqs = snakemake.input.coverage_fa
 
 
     augmented_reference = augment_genome(masked_reference, te_seqs, run_id, coverage_out)
