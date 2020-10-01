@@ -34,9 +34,8 @@ def main():
 
     # uses coverage fasta (if exists) for augmenting and coverage analysis
     if snakemake.config['in']['coverage_fasta'] != "None":
-        mccutils.run_command(["cp", snakemake.input.coverage_fa, coverage_out+"/input/coverage_tes_unfixed.fasta"])
-        te_seqs = coverage_out+"/input/coverage_tes_unfixed.fasta"
-        mccutils.replace_special_chars_fasta(coverage_out+"/input/coverage_tes_unfixed.fasta", te_seqs)
+        te_seqs = snakemake.input.coverage_fasta
+
 
     augmented_reference = augment_genome(masked_reference, te_seqs, run_id, coverage_out)
     index_genome(snakemake.input.ref, log)
@@ -78,6 +77,14 @@ def repeatmask_genome(reference, lib, threads, run_id, out, log):
     repeat_masker_gff = outdir+"/"+ref_name+".out.gff"
 
     return masked_fasta, repeat_masker_gff
+
+def fix_fasta_lines(infasta, outfasta, length=80):
+    lines = fix_fasta.fix_fasta_lines(infasta, length)
+    with open(outfasta, "w") as fa:
+        for line in lines:
+            fa.write(line+"\n")
+    
+    return outfasta
 
 
 def augment_genome(fasta1, fasta2, run_id, out):

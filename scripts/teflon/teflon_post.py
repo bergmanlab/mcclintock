@@ -63,7 +63,10 @@ def read_insertions(predictions, chroms, sample, ref_tes, min_presence=3, max_ab
                 if split_line[2] != "-":
                     insert.end = int(split_line[2])
                 else:
-                    insert.start = int(split_line[1])+1
+                    insert.end = int(split_line[1])+1
+
+                if insert.start == insert.end:
+                    insert.end += 1
 
                 insert.family = split_line[3]
                 

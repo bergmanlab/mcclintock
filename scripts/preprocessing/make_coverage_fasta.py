@@ -25,7 +25,8 @@ def main():
             fasta3 = snakemake.params.coverage_fasta
             fastas.append(fasta3)
             lines = fix_fasta.fix_fasta_lines(fasta3, length)
-            write_fasta(lines, snakemake.output.coverage_fasta)
+            write_fasta(lines, snakemake.output.coverage_fasta+".tmp")
+            mccutils.replace_special_chars_fasta(snakemake.output.coverage_fasta+".tmp", snakemake.output.coverage_fasta)
     
     except Exception as e:
         track = traceback.format_exc()
