@@ -440,14 +440,15 @@ def get_predicted_insertions(out):
     methods = []
     for d in os.listdir(out):
         rep = d
-        if os.path.exists(out+"/"+d+"/results/"):
-            for e in os.listdir(out+"/"+d+"/results/"):
+        rep_num = d.replace("run_","")
+        if os.path.exists(out+"/"+d+"/"+rep_num+"/results/"):
+            for e in os.listdir(out+"/"+d+"/"+rep_num+"/results/"):
                 method = e
-                for f in os.listdir(out+"/"+d+"/results/"+e):
+                for f in os.listdir(out+"/"+d+"/"+rep_num+"/results/"+e):
                     if "nonredundant.bed" in f:
                         if method not in methods:
                             methods.append(method)
-                        with open(out+"/"+d+"/results/"+e+"/"+f, "r") as bed:
+                        with open(out+"/"+d+"/"+rep_num+"/results/"+e+"/"+f, "r") as bed:
                             if method not in predicted_insertions.keys():
                                 predicted_insertions[method] = {rep: []}
                             elif rep not in predicted_insertions[method].keys():

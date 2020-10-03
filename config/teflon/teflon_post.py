@@ -8,5 +8,8 @@ C13: genotype for every TE (allele frequency for pooled data, present/absent for
 PARAMETERS = {
     "min_presence_reads" : 3,
     "max_absence_reads" : None,
-    "min_presence_fraction" : 0.7 # presence/(absence+presence)
+    "min_presence_fraction" : 0.7, # presence/(absence+presence),
+    "require_tsd" : True, # non-ref predictions must have a target site duplication
+    "require_both_breakpoints" : True # non-ref predictions must have both breakpoints predicted
+
 }

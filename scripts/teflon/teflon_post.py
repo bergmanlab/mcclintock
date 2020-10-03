@@ -23,7 +23,9 @@ def main():
         ref_tes,
         min_presence=config.PARAMETERS['min_presence_reads'], 
         max_absence=config.PARAMETERS['max_absence_reads'],
-        min_presence_fraction=config.PARAMETERS['min_presence_fraction']
+        min_presence_fraction=config.PARAMETERS['min_presence_fraction'],
+        require_tsd=config.PARAMETERS['require_tsd'],
+        require_both_breakpoints=config.PARAMETERS['require_both_breakpoints']
     )
     if len(insertions) >= 1:
         insertions = mccutils.make_redundant_bed(insertions, sample_name, out_dir, method="teflon")
@@ -44,7 +46,7 @@ def get_ref_tes(ref_te_bed):
     
     return ref_tes
 
-def read_insertions(predictions, chroms, sample, ref_tes, min_presence=3, max_absence=None, min_presence_fraction=0.7):
+def read_insertions(predictions, chroms, sample, ref_tes, min_presence=3, max_absence=None, min_presence_fraction=0.7, require_tsd=False, require_both_breakpoints=False):
     insertions = []
 
     with open(predictions, "r") as tsv:
@@ -54,19 +56,34 @@ def read_insertions(predictions, chroms, sample, ref_tes, min_presence=3, max_ab
 
             insert.chromosome = split_line[0]
 
+            both_ends = False
+            tsd = False
             if insert.chromosome in chroms:
-                if split_line[1] != "-":
-                    insert.start = int(split_line[1])
-                else:
-                    insert.start = int(split_line[2])-1
-                
-                if split_line[2] != "-":
-                    insert.end = int(split_line[2])
-                else:
-                    insert.end = int(split_line[1])+1
+                if split_line[1] != "-" and split_line[2] != "-":
+                    left = int(split_line[1])
+                    right = int(split_line[2])
+                    both_ends = True
 
-                if insert.start == insert.end:
-                    insert.end += 1
+                elif split_line[1] == "-":
+                    left = int(split_line[2])
+                    right = int(split_line[2])
+                else:
+                    left = int(split_line[1])
+                    right = int(split_line[1])
+                
+                if left > right:
+                    tsd = True
+                    tmp = right
+                    right = left
+                    left = tmp
+                
+                elif left == right:
+                    tsd = True
+                    right += 1
+                
+
+                insert.start = left
+                insert.end = right
 
                 insert.family = split_line[3]
                 
@@ -74,6 +91,8 @@ def read_insertions(predictions, chroms, sample, ref_tes, min_presence=3, max_ab
                 
                 # if reference prediction, uses ref TE coordinates
                 if split_line[6] != "-":
+                    tsd = True
+                    both_ends = True
                     insert.type = "reference"
                     te_names = split_line[6].split(",")
                     te_name = ""
@@ -108,6 +127,7 @@ def read_insertions(predictions, chroms, sample, ref_tes, min_presence=3, max_ab
                     (insert.teflon.presence_reads >= min_presence) 
                     and (max_absence is None or insert.teflon.absence_reads <= max_absence)
                     and (insert.teflon.allele_frequency >= min_presence_fraction)
+                    and ((tsd or not require_tsd) and (both_ends or not require_both_breakpoints))
                 ):
                     insertions.append(insert)
     
