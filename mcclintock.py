@@ -35,7 +35,7 @@ def main():
     else:
         sample_name = "tmp"
     ref_name = mccutils.get_base_name(args.reference)
-    run_id = make_run_config(args, sample_name, ref_name, full_command, current_directory)
+    run_id = make_run_config(args, sample_name, ref_name, full_command, current_directory, debug=args.debug)
     run_workflow(args, sample_name, ref_name, run_id, debug=args.debug, annotations_only=args.make_annotations)
     mccutils.remove(args.out+"/tmp")
 
@@ -62,7 +62,7 @@ def parse_args():
     parser.add_argument("-a", "--augment", type=str, help="A fasta file of TE sequences that will be included as extra chromosomes in the reference file (useful if the organism is known to have TEs that are not present in the reference strain)", required=False)
     parser.add_argument("--clean", action="store_true", help="This option will make sure mcclintock runs from scratch and doesn't reuse files already created", required=False)
     parser.add_argument("--install", action="store_true", help="This option will install the dependencies of mcclintock", required=False)
-    parser.add_argument("--debug", action="store_true", help="This option will allow snakemake to print progress to stdout", required=False)
+    parser.add_argument("--debug", action="store_true", help="This option will preserve intermediate files and allow snakemake to print progress to stdout", required=False)
     parser.add_argument("--slow", action="store_true", help="This option runs without attempting to optimize thread usage to run rules concurrently. Each multithread rule will use the max processors designated by -p/--proc", required=False)
     parser.add_argument("--make_annotations", action="store_true", help="This option will only run the pipeline up to the creation of the repeat annotations", required=False)
 
@@ -183,7 +183,7 @@ def check_input_files(ref, consensus, fq1, fq2=None, locations=None, taxonomy=No
         with open(consensus,"r") as fa:
             for record in SeqIO.parse(fa, "fasta"):
                 seq_name = mccutils.replace_special_chars(str(record.id))
-                consensus_seq_names.append(str(record.id))
+                consensus_seq_names.append(seq_name)
     except Exception as e:
         print(e)
         sys.exit(consensus+" appears to be a malformed FastA file..exiting...\n")
@@ -332,7 +332,7 @@ def install(methods, clean=False, debug=False):
     mccutils.run_command(command)
 
 
-def make_run_config(args, sample_name, ref_name, full_command, current_directory):
+def make_run_config(args, sample_name, ref_name, full_command, current_directory, debug=False):
     run_id = random.randint(1000000,9999999)
     mccutils.mkdir(args.out+"/snakemake")
     mccutils.mkdir(args.out+"/snakemake/config")
@@ -407,7 +407,8 @@ def make_run_config(args, sample_name, ref_name, full_command, current_directory
         'full_command' : full_command,
         'call_directory': current_directory,
         'time': now.strftime("%Y-%m-%d %H:%M:%S"),
-        "chromosomes" : ",".join(chromosomes)
+        "chromosomes" : ",".join(chromosomes),
+        "debug": str(debug)
     }
 
     # input paths for files

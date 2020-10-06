@@ -306,7 +306,8 @@ rule coverage:
     
     params: 
         sample=config['args']['sample_name'],
-        log=config['args']['log_dir']+"coverage.log"
+        log=config['args']['log_dir']+"coverage.log",
+        debug=config['args']['debug']
 
     threads: config['args']['max_threads_per_rule']
 

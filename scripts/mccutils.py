@@ -267,7 +267,7 @@ def check_file_exists(infile):
 
 
 def replace_special_chars(string, encode="_"):
-    special_chars = [";","&","(",")","|","*","?","[","]","~","{","}","<","!","^",'"',"'","\\","$","/","+","-","#"]
+    special_chars = [";","&","(",")","|","*","?","[","]","~","{","}","<","!","^",'"',"'","\\","$","/","+","-","#"," "]
     for char in special_chars:
         string = string.replace(char,encode)
     
