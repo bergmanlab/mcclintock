@@ -82,7 +82,7 @@ def read_insertions(predictions, chroms, sample, ref_tes, min_presence=3, max_ab
                     right += 1
                 
 
-                insert.start = left
+                insert.start = left-1
                 insert.end = right
 
                 insert.family = split_line[3]

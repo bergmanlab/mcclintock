@@ -182,6 +182,7 @@ def check_input_files(ref, consensus, fq1, fq2=None, locations=None, taxonomy=No
     try:
         with open(consensus,"r") as fa:
             for record in SeqIO.parse(fa, "fasta"):
+                seq_name = mccutils.replace_special_chars(str(record.id))
                 consensus_seq_names.append(str(record.id))
     except Exception as e:
         print(e)
@@ -204,6 +205,7 @@ def check_input_files(ref, consensus, fq1, fq2=None, locations=None, taxonomy=No
                         for feat in split_feats:
                             if feat[:3] == "ID=":
                                 gff_id = feat.split("=")[1].replace("\n","")
+                                gff_id = mccutils.replace_special_chars(gff_id)
                                 if gff_id not in gff_ids:
                                     gff_ids.append(gff_id)
                                 else:
@@ -222,7 +224,9 @@ def check_input_files(ref, consensus, fq1, fq2=None, locations=None, taxonomy=No
                     sys.exit(taxonomy+" does not have two columns. Should be tab-separated file with feature ID and TE family as columns\n")
                 else:
                     te_id = split_line[0]
+                    te_id = mccutils.replace_special_chars(te_id)
                     te_family = split_line[1].replace("\n","")
+                    te_family = mccutils.replace_special_chars(te_family)
 
                     if te_id not in gff_ids:
                         sys.exit("TE ID: "+te_id+" not found in IDs from GFF: "+locations+"\nplease make sure each ID in: "+taxonomy+" is found in:"+locations+"\n")
