@@ -51,6 +51,7 @@ The complete pipeline requires a fasta reference genome, a fasta consensus set o
  * [PoPoolationTE](https://sourceforge.net/projects/popoolationte/) - [Kofler *et al.* (2012)](http://www.plosgenetics.org/article/info%3Adoi%2F10.1371%2Fjournal.pgen.1002487;jsessionid=2CFC9BF7DEF785D90070915204B5F846)
  * [PoPoolationTE2](https://sourceforge.net/p/popoolation-te2/wiki/Home) - [Kofler *et al.* (2016)](https://academic.oup.com/mbe/article/33/10/2759/2925581)
  * [TE-locate](https://sourceforge.net/projects/te-locate/) - [Platzer *et al.* (2012)](http://www.mdpi.com/2079-7737/1/2/395)
+ * [TEFLoN](https://github.com/jradrion/TEFLoN) - [Adrion *et al.* (2017)](https://academic.oup.com/gbe/article/9/5/1329/3064433)
 
 ## <a name="dependency"></a> Software Dependencies
 McClintock is written in Python3 leveraging the [SnakeMake](https://snakemake.readthedocs.io/en/stable/) workflow system and is designed to run on linux operating systems. Installation of software dependencies for McClintock is automated by [Conda](https://docs.conda.io/en/latest/), thus a working installation of Conda is required to install  McClintock. Conda can be installed via the [Miniconda installer](https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh).
@@ -130,8 +131,6 @@ python3 mcclintock.py --install
                         read sequencing
   -p PROC, --proc PROC  The number of processors to use for parallel stages of
                         the pipeline [default = 1]
-  -M MEM, --mem MEM     The amount of memory available for the pipeline in GB.
-                        [default = 4]
   -o OUT, --out OUT     An output folder for the run. [default = '.']
   -m METHODS, --methods METHODS
                         A comma-delimited list containing the software you
@@ -183,6 +182,7 @@ python3 mcclintock.py --install
   * `popoolationte` : Runs the [PoPoolation TE](https://sourceforge.net/p/popoolationte/wiki/Main) component method (Paired-End Only)
   * `popoolationte2` : Runs the [PoPoolation TE2](https://sourceforge.net/p/popoolation-te2/wiki/Home) component method (Paired-End Only)
   * `te-locate` : Runs the [TE-locate](https://sourceforge.net/projects/te-locate) component method (Paired-End Only)
+  * `teflon` : Runs the [TEFLoN](https://github.com/jradrion/TEFLoN) component method (Paired-End Only)
 
 ## <a name="input"></a> Mcclintock Input Files
 #### Required
@@ -278,6 +278,26 @@ The results of McClintock component methods are output to the directory `<output
 * `unfiltered/te-locate-raw.info` : A tab-delimited table containing reference ("old") and non-reference ("new") predictions using 1-based positions. TSD intervals are not predicted for non-reference TEs, instead a single position is reported.
 * `<reference>_telocate_nonredundant.bed` : BED file containing all reference and non-reference predictions from `unfiltered/te-locate-raw.info`. Coordinates for both reference and non-reference TE predictions are converted to a 0-based interval. The reference TE end position is extended by the `len` column in `unfiltered/te-locate-raw.info`. Non-reference TE predictions are a single position as TE-Locate does not predict the TSD size.
 
+#### TEFLoN : `<output>/<sample>/results/teflon/`
+* `unfiltered/genotypes/sample.genotypes.txt` : A tab-delimited table containing all of the breakpoints and support information for insertion predictions. Predictions are treated as reference predictions if they contain a TE ID in column 7.
+```bash
+# from: https://github.com/jradrion/TEFLoN
+C1: chromosome
+C2: 5' breakpoint estimate ("-" if estimate not available)
+C3: 3' breakpoint estimate ("-" if estimate not available)
+C4: search level id (Usually TE family)
+C5: cluster level id (Usually TE order or class)
+C6: strand ("." if strand could not be detected)
+C7: reference TE ID ("-" if novel insertion)
+C8: 5' breakpoint is supported by soft-clipped reads (if TRUE "+" else "-")
+C9: 3' breakpoint is supported by soft-clipped reads (if TRUE "+" else "-")
+C10: read count for "presence reads"
+C11: read count for "absence reads"
+C12: read count for "ambiguous reads"
+C13: genotype for every TE (allele frequency for pooled data, present/absent for haploid, present/absent/heterozygous for diploid) #Note: haploid/diploid caller is under construction, use "pooled" for presence/absence read counts
+C14: numbered identifier for each TE in the population
+```
+* `<reference>_teflon_nonredundant.bed` : BED file containing all reference and non-reference predictions from `unfiltered/genotypes/sample.genotypes.txt`. Reference predictions use the coordinates for the TE with the reference ID from column 7. By default, only non-reference predictions with both breakpoints (C2 and C3) are kept in this file. Non-reference predictions must also have at least 3 presence reads (C10) and an allele frequency greater than `0.7` (C13). These filtering restrictions can be changed by modifying the TEFLoN config file: `/path/to/mcclintock/config/teflon/teflon_post.py`
 
 ## <a name="examples"></a> Run Examples
 #### Run McClintock with test data
