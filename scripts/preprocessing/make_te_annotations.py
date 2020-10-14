@@ -136,8 +136,8 @@ def make_te_taxonomy_map(ref_tes, consensus, run_id, out):
                     split_line[2] = te_id
                     split_line[8] = ";".join(["ID="+te_id, "Name="+te_id, "Alias="+te_id])
                     line = "\t".join(split_line)
-                    gff_lines.append(line+"\n")
                     if family in consensus_families:
+                        gff_lines.append(line+"\n")
                         outtsv.write(te_id+"\t"+family+"\n")
     
     with open(ref_tes, "w") as outgff:
