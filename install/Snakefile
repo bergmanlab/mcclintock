@@ -162,6 +162,23 @@ rule teflon:
     script:
         config['paths']['install']+"scripts/teflon.py"
 
+rule jitterbug:
+    params:
+        url = config["URLs"]['jitterbug'],
+        md5 = config['MD5s']['jitterbug'],
+        zipfile = config['paths']['install']+"tools/jitterbug.zip",
+        patch = config['paths']['install']+"patches/jitterbug/jitterbug.patch",
+        log = config['paths']['log_dir']+"install.log"
+        
+    conda: 
+        config['ENVs']['jitterbug']
+
+    output:
+        config['output']['jitterbug']
+
+    script:
+        config['paths']['install']+"scripts/jitterbug.py"
+
 rule install_all:
     input:
         config['output']['te-locate'],

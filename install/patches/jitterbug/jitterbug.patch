@@ -1,0 +1,19 @@
+--- jitterbug.py	2017-01-23 11:05:32.000000000 -0500
++++ jitterbug_patched.py	2020-10-14 12:57:56.465203900 -0400
+@@ -70,11 +70,11 @@
+     if output_folder == "":
+        output_folder = os.getcwd()
+     st = os.stat(output_folder)
+-    if bool(st.st_mode & stat.S_IXOTH) and bool(st.st_mode & stat.S_IROTH) and bool(st.st_mode & stat.S_IWOTH):
+-       pass #its ok
+-    else:
+-       print "Error in output folder permissions"
+-       parser.error( "please set to chmod -R 777 for %s"%output_folder)
++#    if bool(st.st_mode & stat.S_IXOTH) and bool(st.st_mode & stat.S_IROTH) and bool(st.st_mode & stat.S_IWOTH):
++#       pass #its ok
++#    else:
++#       print "Error in output folder permissions"
++#       parser.error( "please set to chmod -R 777 for %s"%output_folder)
+ 
+     if not os.path.exists(args.mapped_reads):
+         parser.error("error in required argument mapped_reads: file %s cannot be found. " % (args.mapped_reads))

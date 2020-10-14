@@ -435,6 +435,9 @@ def make_nonredundant_bed(insertions, sample_name, out_dir, method="popoolationt
             elif method == "teflon":
                 if insert.teflon.presence_reads > uniq_inserts[key].teflon.presence_reads:
                     uniq_inserts[key] = insert
+            
+            elif method == "jitterbug":
+                uniq_inserts[key] = insert
     
     tmp_bed = out_dir+"/tmp.bed"
     with open(tmp_bed, "w") as outbed:

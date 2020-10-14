@@ -8,7 +8,8 @@ URL = {
     "popoolationte2": "http://downloads.sourceforge.net/project/popoolation-te2/popte2-v1.10.03.jar",
     "relocate2" : "https://github.com/stajichlab/RelocaTE2/archive/v2.0.1.zip",
     "tepid" : "https://github.com/ListerLab/TEPID/archive/ad46d65b5c41bf8a9171215d49b3ffaecdceaab0.zip",
-    "teflon": "https://github.com/jradrion/TEFLoN/archive/9eca0152f3dd9dc6c44787a30d590f7e321b442c.zip"
+    "teflon": "https://github.com/jradrion/TEFLoN/archive/9eca0152f3dd9dc6c44787a30d590f7e321b442c.zip",
+    "jitterbug": "https://github.com/elzbth/jitterbug/archive/b6b3f9c7ee4af042d4410137269f174a1399b752.zip"
 }
 
 MD5 = {
@@ -21,7 +22,8 @@ MD5 = {
     "popoolationte2": "0c06186f0b1df215949f57a5cbb2d039",
     "relocate2" : "63eb7dbc09ffeb4063aef4857d198b06",
     "tepid" : "51f61acf138b07842074f054aba780d5",
-    "teflon" : "87080f4f455a97eaeaa5d8e3d8c4f35f"
+    "teflon" : "87080f4f455a97eaeaa5d8e3d8c4f35f",
+    "jitterbug": "05f165fb6a79a7a611d09981a355d27e"
 }
 
 
@@ -38,6 +40,7 @@ ENV = {
     "relocate2" : ENV_PATH+"mcc_relocate2.yml",
     "tepid" : ENV_PATH+"mcc_tepid.yml",
     "teflon" : ENV_PATH+"mcc_teflon.yml",
+    "jitterbug": ENV_PATH+"mcc_jitterbug.yml",
     "mcc_processing":  ENV_PATH+"mcc_processing.yml"
 }
 
@@ -55,5 +58,6 @@ OUTPUT = {
     "relocate2" : INSTALL_PATH+"tools/relocate2/relocaTE2.log",
     "tepid" : INSTALL_PATH+"tools/tepid/tepid-map",
     "teflon" : INSTALL_PATH+"tools/teflon/teflon.v0.4.py",
+    "jitterbug": INSTALL_PATH+"tools/jitterbug/jitterbug.py",
     "processing" : INSTALL_PATH+"tools/processing.log"
 }

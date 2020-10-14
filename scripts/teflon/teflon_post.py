@@ -12,7 +12,7 @@ def main():
     ref_te_bed = snakemake.input.ref_bed
     out_dir = snakemake.params.out_dir
     sample_name = snakemake.params.sample_name
-    chromosomes = snakemake.params.chromosomes
+    chromosomes = snakemake.params.chromosomes.split(",")
     out = snakemake.output.out
 
     ref_tes = get_ref_tes(ref_te_bed)
@@ -33,8 +33,6 @@ def main():
     else:
         mccutils.run_command(["touch", out_dir+"/"+sample_name+"_teflon_redundant.bed"])
         mccutils.run_command(["touch", out_dir+"/"+sample_name+"_teflon_nonredundant.bed"])
-
-    mccutils.run_command(["touch", out])
 
 
 def get_ref_tes(ref_te_bed):
