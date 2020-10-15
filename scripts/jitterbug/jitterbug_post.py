@@ -3,7 +3,7 @@ import sys
 import subprocess
 sys.path.append(snakemake.config['args']['mcc_path'])
 import scripts.mccutils as mccutils
-from collections import Counter
+import config.jitterbug.jitterbug_post as config
 
 def main():
     mccutils.log("jitterbug","jitterbug postprocessing")
@@ -18,8 +18,16 @@ def main():
 
     out = snakemake.output.out
 
-    insertions = read_insertions(jitterbug_out, te_taxonomy, chromosomes, sample_name)
-    print("INSERTIONS:", len(insertions))
+    insertions = read_insertions(
+                        jitterbug_out,
+                        te_taxonomy,
+                        chromosomes,
+                        sample_name,
+                        min_fwd_read_support=config.FILTER['MIN_FWD_READ_SUPPORT'],
+                        min_rev_read_support=config.FILTER['MIN_REV_READ_SUPPORT'],
+                        min_sr_support=config.FILTER['MIN_SPLIT_READ_SUPPORT'],
+                        min_zygosity=config.FILTER['MIN_ZYGOSITY']
+    )
 
     if len(insertions) >= 1:
         insertions = mccutils.make_redundant_bed(insertions, sample_name, out_dir, method="jitterbug")
@@ -31,7 +39,7 @@ def main():
     # mccutils.run_command(["touch", out])
 
 
-def read_insertions(jitterbug_gff, taxonomy, chroms, sample_name):
+def read_insertions(jitterbug_gff, taxonomy, chroms, sample_name, min_fwd_read_support=0, min_rev_read_support=0, min_sr_support=0, min_zygosity=0.0):
     insertions = []
 
     te_family = {}
@@ -58,34 +66,51 @@ def read_insertions(jitterbug_gff, taxonomy, chroms, sample_name):
                     feats = feats.replace(" ","")
                     feats = feats.split(";")
                     supporting_families = []
+                    sr = False
+                    family = "NONE"
                     for feat in feats:
                         if "softclipped_pos" in feat:
                             pos = feat.split("=")[1]
                             pos = pos.replace("(","")
                             pos = pos.replace(")","")
                             pos = pos.split(",")
-                            start = int(pos[0])
+                            start = int(pos[0])-1
                             end = int(pos[1])
 
                             if start > -1 and end > -1:
                                 insert.start = start
                                 insert.end = end
+                                sr = True
                         
-                        if "Inserted_TE_tags" in feat:
-                            te_list = feat.split("=")[1]
-                            te_list = te_list.split(",")
-                            for te in te_list:
-                                family = te_family[te]
-                                supporting_families.append(family)
+                        if "predicted_superfam" in feat:
+                            te  = feat.split("=")[1]
+                            family = te_family[te]
+                        
+                        if "supporting_fwd_reads" in feat:
+                            insert.jitterbug.supporting_fwd_reads = int(feat.split("=")[1])
+                        
+                        if "supporting_rev_reads" in feat:
+                            insert.jitterbug.supporting_rev_reads = int(feat.split("=")[1])
+                        
+                        if "softclipped_support" in feat:
+                            insert.jitterbug.split_read_support = int(feat.split("=")[1])
+                        
+                        if "zygosity" in feat:
+                            insert.jitterbug.zygosity = float(feat.split("=")[1])
+                
+                    insert.name = family+"_non-reference_"+sample_name+"_jitterbug_"
+                    if sr:
+                        insert.name += "sr_"
+                    else:
+                        insert.name = "rp_"
 
-                    family_counts = Counter(supporting_families)
-                    best_support = ["None",0]
-                    for fam in supporting_families:
-                        if family_counts[fam] > best_support[1]:
-                            best_support = [fam, family_counts[fam]]
-
-                    insert.name = best_support[0]+"_non-reference_"+sample_name+"_jitterbug_"
-                    insertions.append(insert)
+                    if (
+                        (insert.jitterbug.supporting_fwd_reads >= min_fwd_read_support) and 
+                        (insert.jitterbug.supporting_rev_reads >= min_rev_read_support) and
+                        (insert.jitterbug.split_read_support >= min_sr_support) and
+                        (insert.jitterbug.zygosity >= min_zygosity)
+                    ):
+                        insertions.append(insert)
     
     return insertions
 

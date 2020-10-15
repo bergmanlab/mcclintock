@@ -1,0 +1,7 @@
+
+FILTER = {
+    "MIN_FWD_READ_SUPPORT" : 0,
+    "MIN_REV_READ_SUPPORT" : 0,
+    "MIN_SPLIT_READ_SUPPORT" : 0,
+    "MIN_ZYGOSITY" : 0.0
+}

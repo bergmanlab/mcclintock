@@ -72,6 +72,13 @@ class Teflon:
         ambiguous_reads = 0
         allele_frequency = 0.0
 
+class Jitterbug:
+    def __init__(self):
+        supporting_fwd_reads = 0
+        supporting_rev_reads = 0
+        split_read_support = 0
+        zygosity = 0.0
+
 class Insertion:
     def __init__(self):
         self.chromosome = "None"
@@ -91,6 +98,7 @@ class Insertion:
         self.ngs_te_mapper = Ngs_te_mapper()
         self.tepid = Tepid()
         self.teflon = Teflon()
+        self.jitterbug = Jitterbug()
 
 
 def mkdir(indir, log=None):
@@ -437,7 +445,8 @@ def make_nonredundant_bed(insertions, sample_name, out_dir, method="popoolationt
                     uniq_inserts[key] = insert
             
             elif method == "jitterbug":
-                uniq_inserts[key] = insert
+                if insert.jitterbug.split_read_support > uniq_inserts[key].jitterbug.split_read_support:
+                    uniq_inserts[key] = insert
     
     tmp_bed = out_dir+"/tmp.bed"
     with open(tmp_bed, "w") as outbed:
