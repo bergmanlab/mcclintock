@@ -6,8 +6,6 @@ import scripts.mccutils as mccutils
 import config.jitterbug.jitterbug_run as config
 
 def main():
-    mccutils.log("jitterbug","Running jitterbug")
-
     reference_te_gff = snakemake.input.reference_tes
     bam = snakemake.input.bam
 
@@ -19,7 +17,19 @@ def main():
 
     out = snakemake.output.out
 
-    out_gff, config_file = run_jitterbug(script_dir, bam, reference_te_gff, sample_name, out_dir, threads=threads, log=log)
+    mccutils.log("jitterbug","Running jitterbug", log=log)
+
+    out_gff, config_file = run_jitterbug(
+                            script_dir, 
+                            bam, 
+                            reference_te_gff, 
+                            sample_name, out_dir, 
+                            minmapq=config.RUN['MINMAPQ'], 
+                            min_cluster_size=config.RUN['MIN_CLUSTER_SIZE'], 
+                            threads=threads, 
+                            log=log
+    )
+
     config_file = make_config(
                         config_file, 
                         out_dir,
@@ -32,12 +42,14 @@ def main():
     filter_jitterbug(script_dir, out_gff, config_file, sample_name, out, log=log)
 
 
-def run_jitterbug(script_dir, bam, ref_te_gff, sample_name, out_dir, threads=1, log=None):
+def run_jitterbug(script_dir, bam, ref_te_gff, sample_name, out_dir, minmapq=15, min_cluster_size=2, threads=1, log=None):
     command = [
         script_dir+"jitterbug.py", 
             "--mem", 
             "--numCPUs", str(threads), 
             "--output_prefix", out_dir+"/"+sample_name, 
+            "-q", str(minmapq),
+            "-c", str(min_cluster_size),
             bam,
             ref_te_gff
     ]
