@@ -43,6 +43,7 @@ def main():
     fq1 = snakemake.input.fq1
     fq2 = snakemake.input.fq2
 
+    coverage_fa = snakemake.params.coverage_fa
     commit = snakemake.params.commit
     ref = snakemake.params.ref
     consensus = snakemake.params.consensus
@@ -59,6 +60,16 @@ def main():
     raw_fq2 = snakemake.params.raw_fq2
     chromosomes = snakemake.params.chromosomes.split(",")
     out_dir = snakemake.params.out_dir
+
+    tmp = []
+    for method in methods:
+        if coverage_fa != "None":
+            if method != "coverage":
+                tmp.append(method)
+        else:
+            tmp.append(method)
+    
+    methods = tmp
 
     paired = True
     if raw_fq2 == "None":

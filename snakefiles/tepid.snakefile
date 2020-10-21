@@ -18,20 +18,20 @@ rule tepid_run:
         log = config['args']['log_dir']+"tepid.log"
     
     output:
-        config['args']['out']+"/results/tepid/unfiltered/insertions_"+config['args']['ref_name']+".bed",
-        config['args']['out']+"/results/tepid/unfiltered/deletions_"+config['args']['ref_name']+".bed",
-        insertions_support = config['args']['out']+"/results/tepid/unfiltered/insertion_reads_"+config['args']['ref_name']+".txt",
-        deletions_support = config['args']['out']+"/results/tepid/unfiltered/deletion_reads_"+config['args']['ref_name']+".txt"
+        config['args']['out']+"results/tepid/unfiltered/insertions_"+config['args']['ref_name']+".bed",
+        config['args']['out']+"results/tepid/unfiltered/deletions_"+config['args']['ref_name']+".bed",
+        insertions_support = config['args']['out']+"results/tepid/unfiltered/insertion_reads_"+config['args']['ref_name']+".txt",
+        deletions_support = config['args']['out']+"results/tepid/unfiltered/deletion_reads_"+config['args']['ref_name']+".txt"
 
     script:
         config['args']['mcc_path']+"/scripts/tepid/tepid_run.py"
 
 rule tepid_post:
     input:
-        insertions_bed = config['args']['out']+"/results/tepid/unfiltered/insertions_"+config['args']['ref_name']+".bed",
-        deletions_bed = config['args']['out']+"/results/tepid/unfiltered/deletions_"+config['args']['ref_name']+".bed",
-        insertions_support = config['args']['out']+"/results/tepid/unfiltered/insertion_reads_"+config['args']['ref_name']+".txt",
-        deletions_support = config['args']['out']+"/results/tepid/unfiltered/deletion_reads_"+config['args']['ref_name']+".txt",
+        insertions_bed = config['args']['out']+"results/tepid/unfiltered/insertions_"+config['args']['ref_name']+".bed",
+        deletions_bed = config['args']['out']+"results/tepid/unfiltered/deletions_"+config['args']['ref_name']+".bed",
+        insertions_support = config['args']['out']+"results/tepid/unfiltered/insertion_reads_"+config['args']['ref_name']+".txt",
+        deletions_support = config['args']['out']+"results/tepid/unfiltered/deletion_reads_"+config['args']['ref_name']+".txt",
         te_gff = config['mcc']['locations'],
         te_taxonomy = config['mcc']['taxonomy']
 
@@ -45,7 +45,7 @@ rule tepid_post:
         chromosomes = config['args']['chromosomes']
 
     output:
-        config['args']['out']+"/results/tepid/"+config['args']['sample_name']+"_tepid_nonredundant.bed"
+        config['out']['tepid']
     
     script:
         config['args']['mcc_path']+"/scripts/tepid/tepid_post.py"

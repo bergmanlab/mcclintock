@@ -63,6 +63,22 @@ class Tepid:
         self.id = -1
         self.support = 0
 
+class Teflon:
+    def __init__(self):
+        left_sc_support = False
+        right_sc_support = False
+        presence_reads = 0
+        absence_reads = 0
+        ambiguous_reads = 0
+        allele_frequency = 0.0
+
+class Jitterbug:
+    def __init__(self):
+        supporting_fwd_reads = 0
+        supporting_rev_reads = 0
+        split_read_support = 0
+        zygosity = 0.0
+
 class Insertion:
     def __init__(self):
         self.chromosome = "None"
@@ -81,6 +97,8 @@ class Insertion:
         self.temp = Temp()
         self.ngs_te_mapper = Ngs_te_mapper()
         self.tepid = Tepid()
+        self.teflon = Teflon()
+        self.jitterbug = Jitterbug()
 
 
 def mkdir(indir, log=None):
@@ -257,7 +275,7 @@ def check_file_exists(infile):
 
 
 def replace_special_chars(string, encode="_"):
-    special_chars = [";","&","(",")","|","*","?","[","]","~","{","}","<","!","^",'"',"'","\\","$","/","+","-","#"]
+    special_chars = [";","&","(",")","|","*","?","[","]","~","{","}","<","!","^",'"',"'","\\","$","/","+","-","#"," "]
     for char in special_chars:
         string = string.replace(char,encode)
     
@@ -420,6 +438,14 @@ def make_nonredundant_bed(insertions, sample_name, out_dir, method="popoolationt
             
             elif method == "tepid":
                 if insert.tepid.support > uniq_inserts[key].tepid.support:
+                    uniq_inserts[key] = insert
+            
+            elif method == "teflon":
+                if insert.teflon.presence_reads > uniq_inserts[key].teflon.presence_reads:
+                    uniq_inserts[key] = insert
+            
+            elif method == "jitterbug":
+                if insert.jitterbug.split_read_support > uniq_inserts[key].jitterbug.split_read_support:
                     uniq_inserts[key] = insert
     
     tmp_bed = out_dir+"/tmp.bed"

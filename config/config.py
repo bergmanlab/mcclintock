@@ -1,9 +1,6 @@
-# ALL_METHODS = ["ngs_te_mapper", "relocate", "relocate2", "temp", "retroseq", "popoolationte", "popoolationte2", "te-locate", "tepid", "coverage", "trimgalore"]
-# SINGLE_END_METHODS = ["ngs_te_mapper","relocate", "relocate2", "coverage", "tepid", "trimgalore"]
-# MULTI_THREAD_METHODS = ["coverage", "temp", "relocate2", "ngs_te_mapper", "popoolationte", "tepid", "trimgalore"]
-ALL_METHODS = ["ngs_te_mapper", "relocate", "relocate2", "temp", "retroseq", "popoolationte", "popoolationte2", "te-locate", "coverage", "trimgalore"]
+ALL_METHODS = ["ngs_te_mapper", "relocate", "relocate2", "temp", "retroseq", "popoolationte", "popoolationte2", "te-locate", "teflon", "coverage", "trimgalore"]
 SINGLE_END_METHODS = ["ngs_te_mapper","relocate", "relocate2", "coverage", "trimgalore"]
-MULTI_THREAD_METHODS = ["coverage", "temp", "relocate2", "ngs_te_mapper", "popoolationte", "trimgalore"]
+MULTI_THREAD_METHODS = ["coverage", "temp", "relocate2", "ngs_te_mapper", "popoolationte", "teflon", "trimgalore"]
 NO_INSTALL_METHODS = ["trimgalore"]
 
 INPUT_DIR = "{{indir}}"
@@ -56,5 +53,7 @@ OUT_PATHS = {
         'te-locate': RESULTS_DIR+"te-locate/"+SAMPLE_NAME+"_telocate_nonredundant.bed",
         'trimgalore': SAM_DIR+"intermediate/fastq/"+SAMPLE_NAME+"_1.fq",
         'relocate2': RESULTS_DIR+"relocaTE2/"+SAMPLE_NAME+"_relocate2_nonredundant.bed",
-        'tepid': RESULTS_DIR+"tepid/"+SAMPLE_NAME+"_tepid_nonredundant.bed"
+        'tepid': RESULTS_DIR+"tepid/"+SAMPLE_NAME+"_tepid_nonredundant.bed",
+        'teflon': RESULTS_DIR+"teflon/"+SAMPLE_NAME+"_teflon_nonredundant.bed",
+        'jitterbug': RESULTS_DIR+"jitterbug/"+SAMPLE_NAME+"_jitterbug_nonredundant.bed"
 }

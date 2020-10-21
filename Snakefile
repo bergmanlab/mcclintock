@@ -7,6 +7,8 @@ include: config['args']['mcc_path']+"/snakefiles/telocate.snakefile"
 include: config['args']['mcc_path']+"/snakefiles/ngs_te_mapper.snakefile"
 include: config['args']['mcc_path']+"/snakefiles/retroseq.snakefile"
 include: config['args']['mcc_path']+"/snakefiles/tepid.snakefile"
+include: config['args']['mcc_path']+"/snakefiles/teflon.snakefile"
+include: config['args']['mcc_path']+"/snakefiles/jitterbug.snakefile"
 
 rule setup_reads:
     input:
@@ -305,7 +307,8 @@ rule coverage:
     
     params: 
         sample=config['args']['sample_name'],
-        log=config['args']['log_dir']+"coverage.log"
+        log=config['args']['log_dir']+"coverage.log",
+        debug=config['args']['debug']
 
     threads: config['args']['max_threads_per_rule']
 
@@ -340,7 +343,8 @@ rule summary_report:
         raw_fq1 = config['in']['fq1'],
         raw_fq2 = config['in']['fq2'],
         chromosomes = config['args']['chromosomes'],
-        out_dir = config['args']['out']+"/results/summary/"
+        out_dir = config['args']['out']+"/results/summary/",
+        coverage_fa = config['in']['coverage_fasta']
 
 
     threads: config['args']['max_threads_per_rule']

@@ -440,14 +440,15 @@ def get_predicted_insertions(out):
     methods = []
     for d in os.listdir(out):
         rep = d
-        if os.path.exists(out+"/"+d+"/results/"):
-            for e in os.listdir(out+"/"+d+"/results/"):
+        rep_num = d.replace("run_","")
+        if os.path.exists(out+"/"+d+"/"+rep_num+"/results/"):
+            for e in os.listdir(out+"/"+d+"/"+rep_num+"/results/"):
                 method = e
-                for f in os.listdir(out+"/"+d+"/results/"+e):
+                for f in os.listdir(out+"/"+d+"/"+rep_num+"/results/"+e):
                     if "nonredundant.bed" in f:
                         if method not in methods:
                             methods.append(method)
-                        with open(out+"/"+d+"/results/"+e+"/"+f, "r") as bed:
+                        with open(out+"/"+d+"/"+rep_num+"/results/"+e+"/"+f, "r") as bed:
                             if method not in predicted_insertions.keys():
                                 predicted_insertions[method] = {rep: []}
                             elif rep not in predicted_insertions[method].keys():
@@ -478,11 +479,12 @@ def get_predicted_insertions(out):
     return predicted_insertions, methods
 
 def make_out_table(actual_insertions, predicted_insertions, methods, out_csv):
-    columns = [["Method","Reference","Nonreference", "Exact", "Within-100", "Within-300", "Within-500"]]
+    columns = [["Method","Reference","Nonreference", "Exact", "Within-5", "Within-100", "Within-300", "Within-500"]]
     for method in methods:
         ref_counts = []
         nonref_counts = []
         exacts = []
+        within_5s = []
         within_100s = []
         within_300s = []
         within_500s = []
@@ -490,6 +492,7 @@ def make_out_table(actual_insertions, predicted_insertions, methods, out_csv):
             ref_count = 0
             nonref_count = 0
             exact = 0
+            within_5 = 0
             within_100 = 0
             within_300 = 0
             within_500 = 0
@@ -502,6 +505,11 @@ def make_out_table(actual_insertions, predicted_insertions, methods, out_csv):
                         if (actual_insertions[rep].start == insert.start and insert.end == actual_insertions[rep].end):
                             exact += 1
                         
+                        window = 5
+                        if ((actual_insertions[rep].start-window <= insert.start and insert.start <= actual_insertions[rep].end+window) or
+                        (insert.start <= actual_insertions[rep].start-window and actual_insertions[rep].start-window <= insert.end)):
+                            within_5 += 1
+
                         window = 100
                         if ((actual_insertions[rep].start-window <= insert.start and insert.start <= actual_insertions[rep].end+window) or
                         (insert.start <= actual_insertions[rep].start-window and actual_insertions[rep].start-window <= insert.end)):
@@ -520,6 +528,7 @@ def make_out_table(actual_insertions, predicted_insertions, methods, out_csv):
             ref_counts.append(ref_count)
             nonref_counts.append(nonref_count)
             exacts.append(exact)
+            within_5s.append(within_5)
             within_100s.append(within_100)
             within_300s.append(within_300)
             within_500s.append(within_500)
@@ -528,10 +537,11 @@ def make_out_table(actual_insertions, predicted_insertions, methods, out_csv):
         ref_mean = statistics.mean(ref_counts)
         nonref_mean = statistics.mean(nonref_counts)
         exact_mean = statistics.mean(exacts)
+        mean_5 = statistics.mean(within_5s)
         mean_100 = statistics.mean(within_100s)
         mean_300 = statistics.mean(within_300s)
         mean_500 = statistics.mean(within_500s)
-        columns.append([method, str(ref_mean), str(nonref_mean), str(exact_mean), str(mean_100), str(mean_300), str(mean_500)])
+        columns.append([method, str(ref_mean), str(nonref_mean), str(exact_mean), str(mean_5), str(mean_100), str(mean_300), str(mean_500)])
     
     with open(out_csv, "w") as csv:
         for y in range(0, len(columns[0])):

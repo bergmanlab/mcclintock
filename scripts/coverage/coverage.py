@@ -19,6 +19,8 @@ def main():
     coverage_out = mcc_out+"/results/coverage/"
     mccutils.mkdir(coverage_out)
 
+    debug = (snakemake.params.debug == 'True')
+
     # ensures intermediate files from previous runs are removed
     for f in os.listdir(coverage_out):
         mccutils.remove(coverage_out+"/"+f)
@@ -29,11 +31,13 @@ def main():
     
     # always use consensus fasta for masking the genome
     mccutils.mkdir(coverage_out+"/input")
+    mccutils.mkdir(coverage_out+"/te-depth-files")
     masked_reference, masked_gff = repeatmask_genome(snakemake.input.ref, te_seqs, snakemake.threads, run_id, coverage_out, log)
 
     # uses coverage fasta (if exists) for augmenting and coverage analysis
     if snakemake.config['in']['coverage_fasta'] != "None":
         te_seqs = snakemake.input.coverage_fa
+
 
     augmented_reference = augment_genome(masked_reference, te_seqs, run_id, coverage_out)
     index_genome(snakemake.input.ref, log)
@@ -58,8 +62,10 @@ def main():
     te_names, all_coverage_files, uniq_coverage_files, avg_norm_te_depths = make_depth_table(te_seqs, bam, genome_depth, run_id, coverage_out, snakemake.output[0], log, trim_edges=edge_trim)
     make_plots(te_names, all_coverage_files, uniq_coverage_files, avg_norm_te_depths, genome_depth, snakemake.params.sample, coverage_out, trim_edges=edge_trim)
 
-    mccutils.remove(sam)
-    mccutils.remove(bam)
+    # keeps SAM and BAM files if run on debug mode
+    if not debug:
+        mccutils.remove(sam)
+        mccutils.remove(bam)
 
 
 def repeatmask_genome(reference, lib, threads, run_id, out, log):
@@ -75,6 +81,14 @@ def repeatmask_genome(reference, lib, threads, run_id, out, log):
     repeat_masker_gff = outdir+"/"+ref_name+".out.gff"
 
     return masked_fasta, repeat_masker_gff
+
+def fix_fasta_lines(infasta, outfasta, length=80):
+    lines = fix_fasta.fix_fasta_lines(infasta, length)
+    with open(outfasta, "w") as fa:
+        for line in lines:
+            fa.write(line+"\n")
+    
+    return outfasta
 
 
 def augment_genome(fasta1, fasta2, run_id, out):

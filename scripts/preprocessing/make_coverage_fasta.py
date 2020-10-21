@@ -16,16 +16,15 @@ except Exception as e:
 
 def main():
     mccutils.log("processing","making coverage fasta")
-    fastas = []
     try:
         length = 80
         if snakemake.params.coverage_fasta == "None":
             mccutils.run_command(["touch", snakemake.output.coverage_fasta])
         else:
             fasta3 = snakemake.params.coverage_fasta
-            fastas.append(fasta3)
             lines = fix_fasta.fix_fasta_lines(fasta3, length)
-            write_fasta(lines, snakemake.output.coverage_fasta)
+            write_fasta(lines, snakemake.output.coverage_fasta+".tmp")
+            mccutils.replace_special_chars_fasta(snakemake.output.coverage_fasta+".tmp", snakemake.output.coverage_fasta)
     
     except Exception as e:
         track = traceback.format_exc()
