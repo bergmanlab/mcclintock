@@ -297,7 +297,7 @@ C12: read count for "ambiguous reads"
 C13: genotype for every TE (allele frequency for pooled data, present/absent for haploid, present/absent/heterozygous for diploid) #Note: haploid/diploid caller is under construction, use "pooled" for presence/absence read counts
 C14: numbered identifier for each TE in the population
 ```
-* `<reference>_teflon_nonredundant.bed` : BED file containing all reference and non-reference predictions from `unfiltered/genotypes/sample.genotypes.txt`. Reference predictions use the coordinates for the TE with the reference ID from column 7. By default, only non-reference predictions with both breakpoints (C2 and C3) are kept in this file. Non-reference predictions must also have at least 3 presence reads (C10) and an allele frequency greater than `0.7` (C13). These filtering restrictions can be changed by modifying the TEFLoN config file: `/path/to/mcclintock/config/teflon/teflon_post.py`
+* `<reference>_teflon_nonredundant.bed` : BED file containing all reference and non-reference predictions from `unfiltered/genotypes/sample.genotypes.txt`. Reference predictions use the coordinates for the TE with the reference ID from column 7. By default, only non-reference predictions with both breakpoints (C2 and C3) are kept in this file. Non-reference predictions must also have at least 3 presence reads (C10) and an allele frequency greater than `0.1` (C13). These filtering restrictions can be changed by modifying the TEFLoN config file: `/path/to/mcclintock/config/teflon/teflon_post.py`
 
 ## <a name="examples"></a> Run Examples
 #### Run McClintock with test data

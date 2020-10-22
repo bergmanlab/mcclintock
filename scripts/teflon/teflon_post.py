@@ -44,7 +44,7 @@ def get_ref_tes(ref_te_bed):
     
     return ref_tes
 
-def read_insertions(predictions, chroms, sample, ref_tes, min_presence=3, max_absence=None, min_presence_fraction=0.7, require_tsd=False, require_both_breakpoints=False):
+def read_insertions(predictions, chroms, sample, ref_tes, min_presence=3, max_absence=None, min_presence_fraction=0.1, require_tsd=False, require_both_breakpoints=False):
     insertions = []
 
     with open(predictions, "r") as tsv:
@@ -119,7 +119,7 @@ def read_insertions(predictions, chroms, sample, ref_tes, min_presence=3, max_ab
                 insert.teflon.ambiguous_reads = int(split_line[11])
                 insert.teflon.allele_frequency = float(split_line[12])
 
-                insert.name = split_line[3]+"_"+insert.type+"_"+sample+"_teflon_"
+                insert.name = split_line[3]+"_"+insert.type+"_"+str(insert.teflon.allele_frequency)+"_"+sample+"_teflon_"
 
                 if (
                     (insert.teflon.presence_reads >= min_presence) 
