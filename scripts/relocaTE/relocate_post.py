@@ -66,10 +66,10 @@ def get_insertions(gff, sample_name, chromosomes, ref_l_threshold=0, ref_r_thres
                         insert.relocate.right_support = int(feat.split("=")[1])
                 
                 if insert.type == "reference":
-                    insert.name = feat_te_name+"_reference_"+sample_name+"_relocate_sr_"
+                    insert.name = feat_te_name+"|reference|"+sample_name+"|relocate|sr|"
                 elif insert.type == "non-reference":
                     feat_te_name = feat_id.split(".")[0]
-                    insert.name = feat_te_name+"_non-reference_"+sample_name+"_relocate_sr_"
+                    insert.name = feat_te_name+"|non-reference|"+sample_name+"|relocate|sr|"
             
             if insert.type == "reference" and insert.relocate.left_support >= ref_l_threshold and insert.relocate.right_support >= ref_r_threshold and insert.chromosome in chromosomes:
                 insertions.append(insert)

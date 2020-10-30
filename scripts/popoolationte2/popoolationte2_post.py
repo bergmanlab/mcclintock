@@ -82,10 +82,10 @@ def read_insertions(predictions, ref_tes, chroms, sample, both_end_support_neede
                         insert.strand = ref_tes[x].strand
                 
                 if insert.type == "reference":
-                    insert.name = insert.family+"_reference_"+str(insert.popoolationte2.frequency)+"_"+sample+"_popoolationte2_rp_"
+                    insert.name = insert.family+"|reference|"+str(insert.popoolationte2.frequency)+"|"+sample+"|popoolationte2|rp|"
                 else:
                     insert.type = "non-reference"
-                    insert.name = insert.family+"_non-reference_"+str(insert.popoolationte2.frequency)+"_"+sample+"_popoolationte2_rp_"
+                    insert.name = insert.family+"|non-reference|"+str(insert.popoolationte2.frequency)+"|"+sample+"|popoolationte2|rp|"
                 
                 if not insert.popoolationte2.added:
                     insertions.append(insert)

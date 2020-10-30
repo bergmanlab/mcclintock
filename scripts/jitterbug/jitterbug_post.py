@@ -98,11 +98,11 @@ def read_insertions(jitterbug_gff, taxonomy, chroms, sample_name, min_fwd_read_s
                         if "zygosity" in feat:
                             insert.jitterbug.zygosity = float(feat.split("=")[1])
                 
-                    insert.name = family+"_non-reference_"+sample_name+"_jitterbug_"
+                    insert.name = family+"|non-reference|"+sample_name+"|jitterbug|"
                     if sr:
-                        insert.name += "sr_"
+                        insert.name += "sr|"
                     else:
-                        insert.name = "rp_"
+                        insert.name = "rp|"
 
                     if (
                         (insert.jitterbug.supporting_fwd_reads >= min_fwd_read_support) and 
