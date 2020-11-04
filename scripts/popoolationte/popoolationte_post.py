@@ -9,16 +9,19 @@ import config.popoolationte.popoolationte_post as config
 def main():
     mccutils.log("popoolationte","processing PopoolationTE results")
     popoolationte_out = snakemake.input.popoolationte_out
+    genome_fasta = snakemake.input.ref
 
     out_dir = snakemake.params.out_dir
     sample_name = snakemake.params.sample_name
     log = snakemake.params.log
     chromosomes = snakemake.params.chromosomes.split(",")
+    
 
     insertions = read_insertions(popoolationte_out, sample_name, chromosomes, require_both_end_support=config.REQUIRE_BOTH_END_SUPPORT, percent_read_support_threshold=config.PERCENT_READ_SUPPORT_THRESHOLD)
     if len(insertions) >= 1:
         insertions = mccutils.make_redundant_bed(insertions, sample_name, out_dir, method="popoolationte")
-        mccutils.make_nonredundant_bed(insertions, sample_name, out_dir, method="popoolationte")
+        insertions = mccutils.make_nonredundant_bed(insertions, sample_name, out_dir, method="popoolationte")
+        # mccutils.write_vcf(insertions, genome_fasta, sample_name, "popoolationte", out_dir)
     else:
         mccutils.run_command(["touch",out_dir+"/"+sample_name+"_popoolationte_redundant.bed"])
         mccutils.run_command(["touch",out_dir+"/"+sample_name+"_popoolationte_nonredundant.bed"])
@@ -52,6 +55,7 @@ def read_insertions(popoolationte, sample_name, chromosomes, require_both_end_su
                 insert.type = "reference"
                 insert.name = split_line[3]+"|reference|"+split_line[4]+"|"+sample_name+"|popoolationte|rp|"
 
+            insert.family = split_line[3]
             insert.popoolationte.support_type = split_line[2]
 
             if "F" in insert.popoolationte.support_type:
