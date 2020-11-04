@@ -151,7 +151,8 @@ rule teflon:
         url = config["URLs"]['teflon'],
         md5 = config['MD5s']['teflon'],
         zipfile = config['paths']['install']+"tools/teflon.zip",
-        log = config['paths']['log_dir']+"install.log"
+        log = config['paths']['log_dir']+"install.log",
+        patch = config['paths']['install']+"patches/teflon/pseudo2refConvert.patch"
         
     conda: 
         config['ENVs']['teflon']

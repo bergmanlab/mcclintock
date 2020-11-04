@@ -1,0 +1,11 @@
+--- org_pseudo2refConvert.py    2020-11-03 12:21:51.881929316 -0500
++++ pseudo2refConvert.py        2020-11-03 15:14:16.000000000 -0500
+@@ -30,7 +30,7 @@
+             ls=orgls[:-3]+orgls[-1:]
+             chrom=ls[0]
+             for ch in pseudoMap:
+-                if ch == chrom:
++                if ch == chrom and len(pseudoMap[chrom]) > 0:
+                     if ls[1].isdigit() and not ls[2].isdigit():
+                         if isGap(chrom,ls[1],pseudoMap) == 0:
+                             ls[1]=pseudoMap[chrom][int(ls[1])-1]

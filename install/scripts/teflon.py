@@ -29,6 +29,10 @@ def main():
         command = ["mv", install_path+"TEFLoN-9eca0152f3dd9dc6c44787a30d590f7e321b442c/"+f, install_path+"teflon"]
         mccutils.run_command(command, log=snakemake.params.log)
 
+
+    command = ["patch","-i", snakemake.params.patch, install_path+"teflon/teflon_scripts/pseudo2refConvert.py"]
+    mccutils.run_command(command, log=snakemake.params.log)
+
     mccutils.remove(install_path+"TEFLoN-9eca0152f3dd9dc6c44787a30d590f7e321b442c")
     mccutils.remove(snakemake.params.zipfile)
 
