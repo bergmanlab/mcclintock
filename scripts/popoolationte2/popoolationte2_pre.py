@@ -36,7 +36,8 @@ def index_fasta(fasta, log=None):
 def map_reads(ref, fq1, fq2, out, threads=1, log=None):
     mccutils.log("popoolationte2","mapping reads", log=log)
     sam = out+"/"+"mapped.sam"
-    mccutils.run_command_stdout(["bwa","mem", "-M", "-t", str(threads), ref, fq1, fq2], sam, log=log)
+    # mccutils.run_command_stdout(["bwa","mem", "-M", "-t", str(threads), ref, fq1, fq2], sam, log=log)
+    mccutils.run_command_stdout(["bwa","bwasw", "-t", str(threads), ref, fq1, fq2], sam, log=log)
     return sam
 
 def sam_to_bam(sam, bam, threads=1, log=None):
