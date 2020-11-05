@@ -44,7 +44,7 @@ def read_insertion_summary(infile, sample):
                     insert.chromosome = split_line[0]
                     insert.start = int(split_line[1])-1
                     insert.end = int(split_line[2])
-                    insert.name = split_line[3]+"_non-reference_"+split_line[7]+"_"+sample+"_temp_"
+                    insert.name = split_line[3]+"|non-reference|"+split_line[7]+"|"+sample+"|temp|"
 
                     if  "antisense" in split_line[4]:
                         insert.strand = "-"
@@ -68,11 +68,11 @@ def read_insertion_summary(infile, sample):
                         if insert.temp.junction1Support > 0 and insert.temp.junction2Support > 0:
                             insert.start = insert.temp.junction1
                             insert.end = insert.temp.junction2
-                            insert.name = insert.name+"sr_"
+                            insert.name = insert.name+"sr|"
 
                         # read pair
                         else:
-                            insert.name = insert.name+"rp_" 
+                            insert.name = insert.name+"rp|" 
 
                         insertions.append(insert)
                     else:
@@ -119,7 +119,7 @@ def get_non_absent_ref_tes(te_gff, absence_bed, sample, out, log):
                 insert.chromosome = split_line[0]
                 insert.start = int(split_line[3])
                 insert.end = int(split_line[4])
-                insert.name = split_line[9].split("=")[1]+"_reference_"+sample+"_temp_nonab_"
+                insert.name = split_line[9].split("=")[1]+"|reference|"+sample+"|temp|nonab|"
                 insert.strand = split_line[6]
                 insert.type = "reference"
                 

@@ -76,7 +76,7 @@ def get_insertions(gff, sample_name, chromosomes, l_support_threshold=0, r_suppo
                     insert.type = "non-reference"
                     te_name = split_line[9].split("=")[1]
                     te_name = te_name.split("/")[0]
-                    insert.name = te_name+"_non-reference_"+sample_name+"_relocate2_sr_"
+                    insert.name = te_name+"|non-reference|"+sample_name+"|relocate2|sr|"
                     insert.relocate2.right_junction = int(split_line[12].split("=")[1])
                     insert.relocate2.left_junction = int(split_line[13].split("=")[1])
                     insert.relocate2.right_support = int(split_line[14].split("=")[1])
@@ -115,7 +115,7 @@ def fix_ref_te_names(insertions, repeatmaskerout, sample_name):
                 te_names[key] = te_name
     
     for insert in insertions:
-        insert.name = te_names[insert.name]+"_reference_"+sample_name+"_relocate2_sr_"
+        insert.name = te_names[insert.name]+"|reference|"+sample_name+"|relocate2|sr|"
         out_insertions.append(insert)
     
     return out_insertions

@@ -164,11 +164,8 @@ def make_te_csv(methods, out_file_map, taxonomy, out_csv):
                     split_line = line.split("\t")
                     if len(split_line) == 6:
                         name = split_line[3]
-                        te_name = ""
-                        split_name = name.split("_")
-                        for x,part in enumerate(split_name):
-                            if part == "reference" or part == "non-reference":
-                                te_name = "_".join(split_name[:x])
+                        split_name = name.split("|")
+                        te_name = split_name[0]
                         
                         if te_name == "":
                             print("ERROR: couldn't find TE name in:", name)
@@ -474,9 +471,9 @@ def make_summary_page(jinja_env, methods, sample_name, commit, start_time, end_t
                 for line in bed:
                     split_line = line.split("\t")
                     if len(split_line) > 3:
-                        if "_reference_" in split_line[3]:
+                        if "|reference|" in split_line[3]:
                             reference += 1
-                        elif "_non-reference_" in split_line[3]:
+                        elif "|non-reference|" in split_line[3]:
                             nonreference += 1
             reference_counts.append(reference)
             nonreference_counts.append(nonreference)
@@ -802,10 +799,10 @@ def count_predictions(methods, out_file_map, family):
                     split_line = line.split("\t")
                     if len(split_line) > 3:
                         info = split_line[3]
-                        if "_reference_" in info:
-                            split_info = info.split("_reference_")
+                        if "|reference|" in info:
+                            split_info = info.split("|reference|")
                         else:
-                            split_info = info.split("_non-reference_")
+                            split_info = info.split("|non-reference|")
                         if split_info[0] == family:
                             all_count += 1
                             if "non-reference" in info:
@@ -834,10 +831,10 @@ def count_predictions_chrom(method, out_file_map, family, chromosomes):
                     split_line = line.split("\t")
                     if len(split_line) > 3:
                         info = split_line[3]
-                        if "_reference_" in info:
-                            split_info = info.split("_reference_")
+                        if "|reference|" in info:
+                            split_info = info.split("|reference|")
                         else:
-                            split_info = info.split("_non-reference_")
+                            split_info = info.split("|non-reference|")
                         if split_info[0] == family and split_line[0] == chromosome:
                             all_count += 1
                             if "non-reference" in info:
@@ -860,11 +857,11 @@ def get_predictions(bed, family=None, chromosome=None):
             if len(split_line) > 3:
                 info = split_line[3]
                 insert_type = ""
-                if "_reference_" in info:
-                    split_info = info.split("_reference_")
+                if "|reference|" in info:
+                    split_info = info.split("|reference|")
                     insert_type = "Reference"
                 else:
-                    split_info = info.split("_non-reference_")
+                    split_info = info.split("|non-reference|")
                     insert_type = "Non-Reference"
                 if (split_info[0] == family or family is None) and (split_line[0] == chromosome or chromosome is None):
                     insertion = Insertion()

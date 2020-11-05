@@ -463,7 +463,7 @@ def get_predicted_insertions(out):
                                         insertion.chromosome = split_line[0]
                                         insertion.start = int(split_line[1])
                                         insertion.end = int(split_line[2])
-                                        info = split_line[3].split("_")
+                                        info = split_line[3].split("|")
                                         for x, inf in enumerate(info):
                                             if "reference" in inf:
                                                 family = "_".join(info[:x])

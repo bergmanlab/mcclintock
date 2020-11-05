@@ -6,6 +6,7 @@ import hashlib
 import socket
 import shutil
 import errno
+from datetime import date
 
 class Ngs_te_mapper:
     def __init__(self):
@@ -467,5 +468,61 @@ def make_nonredundant_bed(insertions, sample_name, out_dir, method="popoolationt
             for line in inbed:
                 outbed.write(line)
 
+    out_inserts = []
+    with open(nonredundant_bed, "r") as outbed:
+        for line in outbed:
+            if "track name=" not in line and "description=" not in line:
+                split_line = line.split("\t")
+                ref_type = split_line[3].split("|")[1]
+                key = "_".join([split_line[0], str(int(split_line[1])+1), split_line[2], ref_type])
+                out_inserts.append(uniq_inserts[key])
     remove(tmp_bed)
     remove(sorted_bed)
+
+    return out_inserts
+
+def write_vcf(inserts, genome_fasta, sample_name, method, out_dir):
+    contig_lengths = {}
+    with open(genome_fasta+".fai","r") as fai:
+        for line in fai:
+            split_line = line.split("\t")
+            contig_lengths[split_line[0]] = split_line[1]
+    
+
+    contigs_with_inserts = []
+    for insert in inserts:
+        if insert.chromosome not in contigs_with_inserts:
+            contigs_with_inserts.append(insert.chromosome)
+    
+
+    out_vcf = out_dir+"/"+sample_name+"_"+method+"_nonredundant_non-reference.vcf"
+    with open(out_vcf, "w") as vcf:
+        today = date.today()
+        today_date = today.strftime("%Y-%m-%d")
+        meta = [
+            "##fileformat=VCFv4.2",
+            "##fileDate="+today_date,
+            "##source=McClintock",
+            "##reference="+genome_fasta
+        ]
+        for contig in contigs_with_inserts:
+            meta.append("##contig=<ID="+contig+",length="+contig_lengths[contig]+">")
+        
+        meta.append('##INFO=<ID=END,Number=1,Type=Integer,Description="End position of the structure variant">')
+        meta.append('##INFO=<ID=SVTYPE,Number=1,Type=String,Description="Type of structural variant">')
+        meta.append('##INFO=<ID=STRAND,Number=1,Type=String,Description="Strand orientation">')
+        meta.append('##INFO=<ID=FAMILY,Number=1,Type=String,Description="TE family">')
+
+        for line in meta:
+            vcf.write(line+"\n")
+        header = "\t".join(["#CHROM","POS","ID","REF","ALT","QUAL","FILTER","INFO"])
+        vcf.write(header+"\n")
+
+        ##TODO get ref sequence
+        ref = "N"
+        for insert in inserts:
+            vals = [insert.chromosome, str(insert.start), ".", ref, "<INS:ME>", ".", "."]
+            info = ["END="+str(insert.end),"SVTYPE=INS", "STRAND="+insert.strand, "FAMILY="+insert.family]
+
+            out_line = ("\t".join(vals)) + (";".join(info))
+            vcf.write(out_line+"\n")

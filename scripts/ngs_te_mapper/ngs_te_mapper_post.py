@@ -45,7 +45,7 @@ def read_insertions(bed, chromosomes, sample_name, out_dir, min_read_cutoff=0):
             insert.type = split_line[8].replace("\n","")
             insert.strand = split_line[4]
             insert.family = split_line[5]
-            insert.name = insert.family+"_"+insert.type+"_"+sample_name+"_ngs_te_mapper_sr_"
+            insert.name = insert.family+"|"+insert.type+"|"+sample_name+"|ngs_te_mapper|sr|"
             insert.ngs_te_mapper.support = int(split_line[7])
             if insert.ngs_te_mapper.support > min_read_cutoff and insert.chromosome in chromosomes:
                 insertions.append(insert)

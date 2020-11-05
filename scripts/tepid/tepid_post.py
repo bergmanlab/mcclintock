@@ -83,14 +83,14 @@ def read_insertions(bed, te_to_family, sample_name, te_pos_to_family, chromosome
                     insert.family = te_to_family[te_name]
                     insert.strand = split_line[3]
                     insert.type = "reference"
-                    insert.name = insert.family+"_reference_"+sample_name+"_tepid_nonab_"
+                    insert.name = insert.family+"|reference|"+sample_name+"|tepid|nonab|"
                 else:
                     te_chrom = split_line[3]
                     te_start = split_line[4]
                     te_end = split_line[5]
                     insert.family = te_pos_to_family[te_chrom+"_"+te_start+"_"+te_end]
                     insert.type = "non-reference"
-                    insert.name = insert.family+"_non-reference_"+sample_name+"_tepid_"
+                    insert.name = insert.family+"|non-reference|"+sample_name+"|tepid|"
                 
                 insert.tepid.id = split_line[-1].replace("\n","")
                 inserts.append(insert)
@@ -137,7 +137,7 @@ def get_non_absent_ref_tes(deletions, te_gff, te_to_family, sample_name):
             
             ref_te.family = te_to_family[te_id]
             ref_te.type = "reference"
-            ref_te.name = ref_te.family+"_reference_"+sample_name+"_tepid_nonab_"
+            ref_te.name = ref_te.family+"|reference|"+sample_name+"|tepid|nonab|"
             ref_tes.append(ref_te)
     
     absent = []

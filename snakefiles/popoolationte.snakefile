@@ -93,7 +93,8 @@ rule popoolationTE_run:
 
 rule popoolationTE_post:
     input:
-        popoolationte_out = config['args']['out']+"results/popoolationTE/unfiltered/te-poly-filtered.txt"
+        popoolationte_out = config['args']['out']+"results/popoolationTE/unfiltered/te-poly-filtered.txt",
+        ref = config['mcc']['unaugmented_reference']
     
     threads: 1
 

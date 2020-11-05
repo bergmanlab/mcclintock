@@ -119,7 +119,7 @@ def read_insertions(predictions, chroms, sample, ref_tes, min_presence=3, max_ab
                 insert.teflon.ambiguous_reads = int(split_line[11])
                 insert.teflon.allele_frequency = float(split_line[12])
 
-                insert.name = split_line[3]+"_"+insert.type+"_"+str(insert.teflon.allele_frequency)+"_"+sample+"_teflon_"
+                insert.name = split_line[3]+"|"+insert.type+"|"+str(insert.teflon.allele_frequency)+"|"+sample+"|teflon|"
 
                 if (
                     (insert.teflon.presence_reads >= min_presence) 
