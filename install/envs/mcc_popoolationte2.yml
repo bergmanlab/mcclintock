@@ -1,4 +1,4 @@
-name: mcc_populationte2
+name: mcc_popoolationte2
 channels:
   - bioconda
   - conda-forge

@@ -1,0 +1,11 @@
+--- org_teflon.v0.4.py	2020-11-10 11:06:55.964561431 -0500
++++ teflon.v0.4.py	2020-11-10 11:07:01.000000000 -0500
+@@ -277,7 +277,7 @@
+         if sd > 100:
+             print "!!! Warning: insert size standard deviation reported as",sd,"!!!"
+             print "Please ensure this is correct and use the override option!"
+-            sys.exit()
++            # sys.exit()
+     else:
+         sd=args.stdev
+ 

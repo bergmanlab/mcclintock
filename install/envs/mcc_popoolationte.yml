@@ -1,10 +1,10 @@
-name: mcc_populationte
+name: mcc_popoolationte
 channels:
   - bioconda
   - conda-forge
   - defaults
 dependencies:
   - perl-bioperl-run=1.006900
-  - bwa=0.7.4
+  - bwa=0.7.17
   - bedtools=2.17.0
   - samtools=0.1.19
