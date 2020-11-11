@@ -210,7 +210,7 @@ def writelog(log, msg):
             out.write(msg)
 
 
-def download(url, out_file, md5=None, timeout=15, _attempt=1, max_attempts=1):
+def download(url, out_file, md5=None, timeout=60, _attempt=1, max_attempts=1):
     if _attempt > max_attempts:
         return False
     socket.setdefaulttimeout(timeout)
