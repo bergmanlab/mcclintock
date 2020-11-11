@@ -14,6 +14,7 @@ def main():
     out_dir = snakemake.params.out_dir
     sample_name = snakemake.params.sample_name
     log = snakemake.params.log
+    debug = (snakemake.params.debug == 'True')
 
     taxonomy = format_taxonomy(taxonomy, out_dir)
     ppileup = popoolationte2_ppileup(jar, config.ppileup, bam, taxonomy, out_dir, log=log)
@@ -23,7 +24,8 @@ def main():
     signatures = popoolationte2_frequency(jar, ppileup, signatures, out_dir, log=log)
     te_insertions = popoolationte2_pairup(jar, config.pairupSignatures, signatures, ref_fasta, taxonomy, out_dir, log=log)
 
-    mccutils.remove(bam)
+    if not debug:
+        mccutils.remove(bam)
 
 def format_taxonomy(taxon, out):
     out_taxon = out+"/input.taxonomy.txt"

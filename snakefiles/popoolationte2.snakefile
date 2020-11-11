@@ -12,7 +12,8 @@ rule popoolationTE2_preprocessing:
     params:
         out_dir = config['args']['out']+"results/popoolationTE2/unfiltered/",
         sample_name=config['args']['sample_name'],
-        log = config['args']['log_dir']+"popoolationTE2.log"
+        log = config['args']['log_dir']+"popoolationTE2.log",
+        debug=config['args']['debug']
 
     output:
         bam = config['args']['out']+"results/popoolationTE2/unfiltered/sorted.bam"
@@ -35,7 +36,8 @@ rule popoolationTE2_run:
         out_dir = config['args']['out']+"/results/popoolationTE2/unfiltered/",
         sample_name=config['args']['sample_name'],
         log = config['args']['log_dir']+"popoolationTE2.log",
-        jar = config['args']['mcc_path']+"/install/tools/popoolationte2/popte2-v1.10.03.jar"
+        jar = config['args']['mcc_path']+"/install/tools/popoolationte2/popte2-v1.10.03.jar",
+        debug=config['args']['debug']
 
     output:
         config['args']['out']+"results/popoolationTE2/unfiltered/teinsertions.txt"

@@ -14,6 +14,7 @@ def main():
     log = snakemake.params.log
     out_dir = snakemake.params.out_dir
     threads = snakemake.threads
+    debug = (snakemake.params.debug == 'True')
 
     # ensures intermediate files from previous runs are removed
     for f in os.listdir(out_dir):
@@ -24,8 +25,9 @@ def main():
     bam = sam_to_bam(sam, out_dir+"/tmp.bam", threads=threads, log=log)
     sorted_bam = sort_bam(bam, snakemake.output.bam, threads=threads, log=log)
 
-    mccutils.remove(sam)
-    mccutils.remove(bam)
+    if not debug:
+        mccutils.remove(sam)
+        mccutils.remove(bam)
 
 
 def index_fasta(fasta, log=None):

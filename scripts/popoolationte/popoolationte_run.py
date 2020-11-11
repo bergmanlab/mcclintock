@@ -17,6 +17,8 @@ def main():
     fq2 = snakemake.input.fq2
     sam = snakemake.input.sam
     log = snakemake.params.log
+    debug = (snakemake.params.debug == 'True')
+
     with open(log,"a") as l:
         l.write("reference fasta: "+ref_fasta+"\n")
         l.write("Taxonomy TSV: "+taxonomy+"\n")
@@ -56,9 +58,10 @@ def main():
 
     mccutils.run_command(["touch", snakemake.output[0]])
 
-    mccutils.remove(sam)
-    mccutils.remove(fq1)
-    mccutils.remove(fq2)
+    if not debug:
+        mccutils.remove(sam)
+        mccutils.remove(fq1)
+        mccutils.remove(fq2)
 
 
 def get_read_length(fq1, fq2):
