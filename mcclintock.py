@@ -212,6 +212,7 @@ def format_fasta(in_fasta, out_fasta, mask_symbols=False):
                     masked_seq_name = mccutils.replace_special_chars(seq_name)
                     if seq_name != masked_seq_name and not mask_symbols:
                         mccutils.log("setup", in_fasta+": ERROR problematic symbol in feature name: "+seq_name+" ... reformat this feature name or use --mask_symbols to do this automatically")
+                        print("Problematic symbols:"," ".join(mccutils.INVALID_SYMBOLS))
                         sys.exit(1)
                     
                     if masked_seq_name not in seq_names:
