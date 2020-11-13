@@ -40,14 +40,12 @@ def main():
         te_gff = repeat_mask(reference, consensus, chromosomes, processors, run_id, log, mcc_out)
         taxonomy, te_gff = make_te_taxonomy_map(te_gff, consensus, run_id, mcc_out)
     else:
-        taxonomy = mccutils.replace_special_chars_taxonomy(taxonomy, mcc_out+"/tmp/"+str(run_id)+"taxonomy.tsv")
         te_gff = format_ref_te_gff(te_gff, run_id, mcc_out)
 
     mccutils.run_command(["cp", te_gff, out_te_gff])
     mccutils.run_command(["cp", taxonomy, out_taxonomy])
 
     if augment != "None":
-        augment = mccutils.replace_special_chars_fasta(augment, mcc_out+"/tmp/"+str(run_id)+"augment.tmp")
         taxonomy = augment_taxonomy(taxonomy, augment, mcc_out+"/tmp/"+str(run_id)+"taxonomy2.tsv")
         te_gff = augment_gff(te_gff, augment, mcc_out+"/tmp/"+str(run_id)+"reference_tes.gff")
     
@@ -161,7 +159,6 @@ def format_ref_te_gff(ref_tes, run_id, out):
                         if "ID=" in feat:
                             te_id = feat.split("=")[1]
                     
-                    te_id = mccutils.replace_special_chars(te_id)
                     split_line[2] = te_id
                     features = ";".join(["ID="+te_id, "Name="+te_id, "Alias="+te_id])
                     line = "\t".join(split_line[0:8])

@@ -214,7 +214,10 @@ def format_fasta(in_fasta, out_fasta, mask_symbols=False):
                         mccutils.log("setup", in_fasta+": ERROR problematic symbol in feature name: "+seq_name+" ... reformat this feature name or use --mask_symbols to do this automatically")
                         sys.exit(1)
                     
-                    seq_names.append(masked_seq_name)
+                    if masked_seq_name not in seq_names:
+                        seq_names.append(masked_seq_name)
+                    else:
+                        sys.exit(in_fasta+": Duplicate sequence name:"+masked_seq_name+"...exiting...\n")
 
                     outfa.write(">"+masked_seq_name+"\n")
                     outfa.write(str(record.seq)+"\n")
