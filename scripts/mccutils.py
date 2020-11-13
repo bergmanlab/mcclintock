@@ -8,6 +8,10 @@ import shutil
 import errno
 from datetime import date
 
+
+INVALID_SYMBOLS = [";","&","(",")","|","*","?","[","]","~","{","}","<","!","^",'"',"'","\\","$","/","+","-","#"," "]
+
+
 class Ngs_te_mapper:
     def __init__(self):
         self.support = -1
@@ -129,6 +133,11 @@ def get_base_name(path, fastq=False):
 
     return no_ext
 
+def is_empty_file(infile):
+    if os.stat(infile).st_size == 0:
+        return True
+    else:
+        return False
 
 def run_command_stdout(cmd_list, out_file, log=None):
     msg = ""
@@ -276,8 +285,7 @@ def check_file_exists(infile):
 
 
 def replace_special_chars(string, encode="_"):
-    special_chars = [";","&","(",")","|","*","?","[","]","~","{","}","<","!","^",'"',"'","\\","$","/","+","-","#"," "]
-    for char in special_chars:
+    for char in INVALID_SYMBOLS:
         string = string.replace(char,encode)
     
     return string
