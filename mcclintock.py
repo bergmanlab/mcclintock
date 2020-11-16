@@ -29,7 +29,7 @@ def main():
     args = parse_args()
     mccutils.mkdir(args.out+"/logs")
     mccutils.mkdir(args.out+"/tmp")
-    args.reference, args.consensus, args.locations, args.taxonomy, args.coverage_fasta, args.augment = check_input_files(args.reference, args.consensus, args.first, args.out+"/tmp", fq2=args.second, locations=args.locations, taxonomy=args.taxonomy, coverage_fasta=args.coverage_fasta, augment_fasta=args.augment, annotations_only=args.make_annotations, mask_symbols=args.mask_symbols)
+    args.reference, args.consensus, args.locations, args.taxonomy, args.coverage_fasta, args.augment = check_input_files(args.reference, args.consensus, args.first, args.out+"/tmp", fq2=args.second, locations=args.locations, taxonomy=args.taxonomy, coverage_fasta=args.coverage_fasta, augment_fasta=args.augment, annotations_only=args.make_annotations, replace_invalid_symbols=args.replace_invalid_symbols)
     if not args.make_annotations:
         sample_name = mccutils.get_base_name(args.first, fastq=True)
     else:
@@ -65,7 +65,7 @@ def parse_args():
     parser.add_argument("--debug", action="store_true", help="This option will preserve intermediate files and allow snakemake to print progress to stdout", required=False)
     parser.add_argument("--slow", action="store_true", help="This option runs without attempting to optimize thread usage to run rules concurrently. Each multithread rule will use the max processors designated by -p/--proc", required=False)
     parser.add_argument("--make_annotations", action="store_true", help="This option will only run the pipeline up to the creation of the repeat annotations", required=False)
-    parser.add_argument("--mask_symbols", action="store_true", help="This option will mask symbols as '_' in the feature names for your imput files to ensure they do not cause issues with component methods", required=False)
+    parser.add_argument("--replace_invalid_symbols", action="store_true", help="This option will mask symbols as '_' in the feature names for your imput files to ensure they do not cause issues with component methods", required=False)
 
     args = parser.parse_args()
 
@@ -153,10 +153,10 @@ def parse_args():
     
     return args
 
-def check_input_files(ref, consensus, fq1, out, fq2=None, locations=None, taxonomy=None, coverage_fasta=None, augment_fasta=None, annotations_only=False, mask_symbols=False):
+def check_input_files(ref, consensus, fq1, out, fq2=None, locations=None, taxonomy=None, coverage_fasta=None, augment_fasta=None, annotations_only=False, replace_invalid_symbols=False):
     # check reference fasta
     out_ref = out+"/"+ (mccutils.get_base_name(ref)) + ".fasta"
-    format_fasta(ref, out_ref, mask_symbols=mask_symbols)
+    format_fasta(ref, out_ref, replace_invalid_symbols=replace_invalid_symbols)
 
     if not annotations_only:
         #check fq1
@@ -167,26 +167,26 @@ def check_input_files(ref, consensus, fq1, out, fq2=None, locations=None, taxono
     
     # checking consensus
     out_consensus = out+"/consensusTEs.fasta"
-    consensus_seq_names = format_fasta(consensus, out_consensus, mask_symbols=mask_symbols)
+    consensus_seq_names = format_fasta(consensus, out_consensus, replace_invalid_symbols=replace_invalid_symbols)
     
     #check locations gff
     gff_ids = []
     out_locations = None
     if locations is not None:
         out_locations = out+"/te_locations.gff"
-        gff_ids = format_gff(locations, out_locations, mask_symbols=mask_symbols)
+        gff_ids = format_gff(locations, out_locations, replace_invalid_symbols=replace_invalid_symbols)
     
     # check taxonomy
     out_taxonomy = None
     if taxonomy is not None:
         out_taxonomy = out+"/te_taxonomy.tsv"
-        format_taxonomy(taxonomy, out_taxonomy, gff_ids, consensus_seq_names, consensus, locations, mask_symbols=mask_symbols)
+        format_taxonomy(taxonomy, out_taxonomy, gff_ids, consensus_seq_names, consensus, locations, replace_invalid_symbols=replace_invalid_symbols)
 
     #check coverage fasta
     out_coverage_fasta = None
     if coverage_fasta is not None:
         out_coverage_fasta = out+"/coverageTEs.fasta"
-        format_fasta(coverage_fasta, out_coverage_fasta, mask_symbols=mask_symbols)
+        format_fasta(coverage_fasta, out_coverage_fasta, replace_invalid_symbols=replace_invalid_symbols)
 
     #check augment fasta
     out_augment_fasta = None
@@ -196,7 +196,7 @@ def check_input_files(ref, consensus, fq1, out, fq2=None, locations=None, taxono
     
     return out_ref, out_consensus, out_locations, out_taxonomy, out_coverage_fasta, out_augment_fasta
 
-def format_fasta(in_fasta, out_fasta, mask_symbols=False):
+def format_fasta(in_fasta, out_fasta, replace_invalid_symbols=False):
     mccutils.log("setup","checking fasta: "+in_fasta)
     seq_names = []
     try:
@@ -210,8 +210,8 @@ def format_fasta(in_fasta, out_fasta, mask_symbols=False):
                         mccutils.log("setup", in_fasta+": replacing "+org_seq_name+" with "+seq_name+" for compatibility with RepeatMasker")
 
                     masked_seq_name = mccutils.replace_special_chars(seq_name)
-                    if seq_name != masked_seq_name and not mask_symbols:
-                        mccutils.log("setup", in_fasta+": ERROR problematic symbol in feature name: "+seq_name+" ... reformat this feature name or use --mask_symbols to do this automatically")
+                    if seq_name != masked_seq_name and not replace_invalid_symbols:
+                        mccutils.log("setup", in_fasta+": ERROR problematic symbol in feature name: "+seq_name+" ... reformat this feature name or use --replace_invalid_symbols to do this automatically")
                         print("Problematic symbols:"," ".join(mccutils.INVALID_SYMBOLS))
                         sys.exit(1)
                     
@@ -244,7 +244,7 @@ def check_fastq(fastq):
     if (mccutils.is_empty_file(fastq)):
         sys.exit(fastq+" is empty... exiting...\n")
 
-def format_gff(ingff, outgff, mask_symbols=False):
+def format_gff(ingff, outgff, replace_invalid_symbols=False):
     mccutils.log("setup","checking locations gff: "+ingff)
     gff_ids = []
     with open(ingff,"r") as gff:
@@ -262,8 +262,8 @@ def format_gff(ingff, outgff, mask_symbols=False):
                             if feat[:3] == "ID=":
                                 gff_id = feat.split("=")[1].replace("\n","")
                                 masked_gff_id = mccutils.replace_special_chars(gff_id)
-                                if gff_id != masked_gff_id and not mask_symbols:
-                                    mccutils.log("setup", ingff+": ERROR problematic symbol in feature name: "+gff_id+" ... reformat this feature name or use --mask_symbols to do this automatically")
+                                if gff_id != masked_gff_id and not replace_invalid_symbols:
+                                    mccutils.log("setup", ingff+": ERROR problematic symbol in feature name: "+gff_id+" ... reformat this feature name or use --replace_invalid_symbols to do this automatically")
                                     print("Problematic symbols:"," ".join(mccutils.INVALID_SYMBOLS))
                                     sys.exit(1)
 
@@ -281,7 +281,7 @@ def format_gff(ingff, outgff, mask_symbols=False):
     
     return gff_ids
 
-def format_taxonomy(in_taxonomy, out_taxonomy, gff_ids, consensus_ids, consensus_fasta, locations_gff, mask_symbols=False):
+def format_taxonomy(in_taxonomy, out_taxonomy, gff_ids, consensus_ids, consensus_fasta, locations_gff, replace_invalid_symbols=False):
     mccutils.log("setup","checking taxonomy TSV: "+in_taxonomy)
     with open(in_taxonomy, "r") as tsv:
         with open(out_taxonomy, "w") as out:
@@ -292,8 +292,8 @@ def format_taxonomy(in_taxonomy, out_taxonomy, gff_ids, consensus_ids, consensus
                 else:
                     te_id = split_line[0]
                     masked_te_id = mccutils.replace_special_chars(te_id)
-                    if masked_te_id != te_id and not mask_symbols:
-                        mccutils.log("setup", in_taxonomy+": ERROR problematic symbol in feature name: "+te_id+" ... reformat this feature name or use --mask_symbols to do this automatically")
+                    if masked_te_id != te_id and not replace_invalid_symbols:
+                        mccutils.log("setup", in_taxonomy+": ERROR problematic symbol in feature name: "+te_id+" ... reformat this feature name or use --replace_invalid_symbols to do this automatically")
                         print("Problematic symbols:"," ".join(mccutils.INVALID_SYMBOLS))
                         sys.exit(1)
 
@@ -304,8 +304,8 @@ def format_taxonomy(in_taxonomy, out_taxonomy, gff_ids, consensus_ids, consensus
                         mccutils.log("setup", in_taxonomy+": replacing "+org_te_family+" with "+te_family+" for compatibility with RepeatMasker")
 
                     masked_te_family = mccutils.replace_special_chars(te_family)
-                    if masked_te_family != te_family and not mask_symbols:
-                        mccutils.log("setup", in_taxonomy+": ERROR problematic symbol in feature name: "+te_family+" ... reformat this feature name or use --mask_symbols to do this automatically")
+                    if masked_te_family != te_family and not replace_invalid_symbols:
+                        mccutils.log("setup", in_taxonomy+": ERROR problematic symbol in feature name: "+te_family+" ... reformat this feature name or use --replace_invalid_symbols to do this automatically")
                         print("Problematic symbols:"," ".join(mccutils.INVALID_SYMBOLS))
                         sys.exit(1)
 
