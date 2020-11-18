@@ -11,6 +11,7 @@ def main():
     ref_fasta = snakemake.input.ref_fasta
     fq1 = snakemake.input.fq1
     fq2 = snakemake.input.fq2
+    jar = snakemake.params.jar
     log = snakemake.params.log
     out_dir = snakemake.params.out_dir
     threads = snakemake.threads
@@ -21,13 +22,15 @@ def main():
         mccutils.remove(out_dir+"/"+f)
 
     index_fasta(ref_fasta, log=log)
-    sam = map_reads(ref_fasta, fq1, fq2, out_dir, threads=threads, log=log)
-    bam = sam_to_bam(sam, out_dir+"/tmp.bam", threads=threads, log=log)
-    sorted_bam = sort_bam(bam, snakemake.output.bam, threads=threads, log=log)
+    fq1 = format_fastq(fq1, out_dir+"/reads_1.fastq", log=log)
+    fq2 = format_fastq(fq2, out_dir+"/reads_2.fastq", log=log)
+    sam1 = map_reads(ref_fasta, fq1, out_dir+"/mapped_1.sam", threads=threads, log=log)
+    sam2 = map_reads(ref_fasta, fq2, out_dir+"/mapped_2.sam", threads=threads, log=log)
+    bam = sam_to_bam(jar, fq1, fq2, sam1, sam2, snakemake.output.bam, threads=threads, log=log)
 
     if not debug:
-        mccutils.remove(sam)
-        mccutils.remove(bam)
+        mccutils.remove(sam1)
+        mccutils.remove(sam2)
 
 
 def index_fasta(fasta, log=None):
@@ -35,22 +38,35 @@ def index_fasta(fasta, log=None):
     command = ["bwa", "index", fasta]
     mccutils.run_command(command, log=log)
 
-def map_reads(ref, fq1, fq2, out, threads=1, log=None):
-    mccutils.log("popoolationte2","mapping reads", log=log)
-    sam = out+"/"+"mapped.sam"
-    # mccutils.run_command_stdout(["bwa","mem", "-M", "-t", str(threads), ref, fq1, fq2], sam, log=log)
-    mccutils.run_command_stdout(["bwa","bwasw", "-t", str(threads), ref, fq1, fq2], sam, log=log)
-    return sam
+def format_fastq(fq, out_fq, log=None):
+    mccutils.log("popoolationte2","formatting fastq read names", log=log)
+    with open(fq,"r") as inf:
+        with open(out_fq,"w") as of:
+            for ln,line in enumerate(inf, start=4):
+                if (ln%4) == 0:
+                    line = line.split(" ")[0]
+                    line += "\n"
+                of.write(line)
+    
+    return out_fq
 
-def sam_to_bam(sam, bam, threads=1, log=None):
+
+def map_reads(ref, fq, outsam, threads=1, log=None):
+    mccutils.log("popoolationte2","mapping reads", log=log)
+    mccutils.run_command_stdout(["bwa","bwasw", "-t", str(threads), ref, fq], outsam, log=log)
+    return outsam
+
+def sam_to_bam(jar, fq1, fq2, sam1, sam2, bam, threads=1, log=None):
     mccutils.log("popoolationte2","converting SAM to BAM", log=log)
-    mccutils.run_command_stdout(["samtools", "view","-@",str(threads), "-Sb", sam], bam, log=log)
+    mccutils.run_command(["java", "-jar",jar, "se2pe", 
+                                              "--fastq1", fq1,
+                                              "--fastq2", fq2,
+                                              "--bam1", sam1,
+                                              "--bam2", sam2,
+                                              "--sort",
+                                              "--output", bam], log=log)
     return bam
 
-def sort_bam(bam, sorted_bam, threads=1, log=None):
-    mccutils.log("popoolationte2","sorting BAM", log=log)
-    mccutils.run_command(["samtools","sort","-@", str(threads), bam, "-o", sorted_bam], log=log)
-    return sorted_bam
 
 
 if __name__ == "__main__":                
