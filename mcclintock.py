@@ -192,7 +192,7 @@ def check_input_files(ref, consensus, fq1, out, fq2=None, locations=None, taxono
     out_augment_fasta = None
     if augment_fasta is not None:
         out_augment_fasta = out+"/augment.fasta"
-        format_fasta(augment_fasta, out_augment_fasta)
+        format_fasta(augment_fasta, out_augment_fasta, replace_invalid_symbols=replace_invalid_symbols)
     
     return out_ref, out_consensus, out_locations, out_taxonomy, out_coverage_fasta, out_augment_fasta
 
