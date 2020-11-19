@@ -44,6 +44,7 @@ def format_fastq(fq, out_fq, log=None):
         with open(out_fq,"w") as of:
             for ln,line in enumerate(inf, start=4):
                 if (ln%4) == 0:
+                    line = line.replace("\n","")
                     line = line.split(" ")[0]
                     line += "\n"
                 of.write(line)
