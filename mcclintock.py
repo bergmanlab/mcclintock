@@ -163,7 +163,8 @@ def check_input_files(ref, consensus, fq1, out, fq2=None, locations=None, taxono
         check_fastq(fq1)
         
         #check fq2
-        check_fastq(fq2)
+        if fq2 is not None:
+            check_fastq(fq2)
     
     # checking consensus
     out_consensus = out+"/consensusTEs.fasta"

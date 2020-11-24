@@ -403,7 +403,7 @@ def run_mcclintock(fastq1, fastq2, reference, consensus, locations, taxonomy, re
         os.mkdir(mcc_out)
     
     mcc_path = config['mcclintock']['path']
-    command = ["python3",mcc_path+"/mcclintock.py", "-r", reference, "-c", consensus, "-1", fastq1, "-2", fastq2, "-p", str(threads), "-o", mcc_out, "-g", locations, "-t", taxonomy, "-m", config['mcclintock']['methods']]
+    command = ["python3",mcc_path+"/mcclintock.py", "-r", reference, "-c", consensus, "-1", fastq1, "-2", fastq2, "-p", str(threads), "-o", mcc_out, "-g", locations, "-t", taxonomy, "-m", config['mcclintock']['methods'], "--replace_invalid_symbols"]
     if 'augment' in config['mcclintock'].keys() and config['mcclintock']['augment'] is not None:
         command += ["-a", config['mcclintock']['augment']]
     print("running mcclintock... output:", mcc_out)
