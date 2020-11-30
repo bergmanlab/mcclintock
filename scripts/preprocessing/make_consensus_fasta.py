@@ -25,9 +25,7 @@ def main():
     if not os.path.exists(mcc_out+"/tmp"):
         mccutils.mkdir(mcc_out+"/tmp")
 
-    tmp = mcc_out+"/tmp/"+str(run_id)+"consensus.tmp"
-    consensus = fix_fasta_lines(consensus, tmp)
-    consensus = mccutils.replace_special_chars_fasta(consensus, out_consensus)
+    fix_fasta_lines(consensus, out_consensus)
 
     mccutils.log("processing","consensus fasta created")
 
