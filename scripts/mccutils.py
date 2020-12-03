@@ -123,13 +123,11 @@ def get_abs_path(in_file, log=None):
         writelog(log, msg)
         sys.exit(1)
 
-def get_base_name(path, fastq=False):
+def get_base_name(path):
     no_path = os.path.basename(path)
-    no_ext = no_path.split(".")[0]
-    
-    if fastq == True:
-        no_ext = no_ext.replace("_1","")
-        no_ext = no_ext.replace("_2","")
+    if no_path[-3:] == ".gz":
+        no_path = no_path.replace(".gz","")
+    no_ext = ".".join(no_path.split(".")[:-1])
 
     return no_ext
 

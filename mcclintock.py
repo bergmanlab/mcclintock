@@ -30,13 +30,9 @@ def main():
     mccutils.mkdir(args.out+"/logs")
     mccutils.mkdir(args.out+"/tmp")
     args.reference, args.consensus, args.locations, args.taxonomy, args.coverage_fasta, args.augment = check_input_files(args.reference, args.consensus, args.first, args.out+"/tmp", fq2=args.second, locations=args.locations, taxonomy=args.taxonomy, coverage_fasta=args.coverage_fasta, augment_fasta=args.augment, annotations_only=args.make_annotations, replace_invalid_symbols=args.replace_invalid_symbols)
-    if not args.make_annotations:
-        sample_name = mccutils.get_base_name(args.first, fastq=True)
-    else:
-        sample_name = "tmp"
     ref_name = mccutils.get_base_name(args.reference)
-    run_id = make_run_config(args, sample_name, ref_name, full_command, current_directory, debug=args.debug)
-    run_workflow(args, sample_name, ref_name, run_id, debug=args.debug, annotations_only=args.make_annotations)
+    run_id = make_run_config(args, args.sample_name, ref_name, full_command, current_directory, debug=args.debug)
+    run_workflow(args, args.sample_name, ref_name, run_id, debug=args.debug, annotations_only=args.make_annotations)
     mccutils.remove(args.out+"/tmp")
 
 def parse_args():
@@ -60,6 +56,7 @@ def parse_args():
     # parser.add_argument("-b", "--keep_bam", action="store_true", help="Retain the sorted and indexed BAM file of the paired end data aligned to the reference genome", required=False)
     # parser.add_argument("-i", "--remove_intermediate", action="store_true", help="If this option is specified then all sample specific intermediate files will be removed, leaving only the overall results. The default is to leave sample specific intermediate files", required=False)
     parser.add_argument("-a", "--augment", type=str, help="A fasta file of TE sequences that will be included as extra chromosomes in the reference file (useful if the organism is known to have TEs that are not present in the reference strain)", required=False)
+    parser.add_argument("--sample_name", type=str, help="The sample name to use for output files [default: fastq1 name]", required=False)
     parser.add_argument("--clean", action="store_true", help="This option will make sure mcclintock runs from scratch and doesn't reuse files already created", required=False)
     parser.add_argument("--install", action="store_true", help="This option will install the dependencies of mcclintock", required=False)
     parser.add_argument("--debug", action="store_true", help="This option will preserve intermediate files and allow snakemake to print progress to stdout", required=False)
@@ -151,6 +148,16 @@ def parse_args():
     if args.augment is not None:
         args.augment = mccutils.get_abs_path(args.augment)
     
+    # check sample name
+    if args.sample_name is not None:
+        if "/" in args.sample_name:
+            sys.exit(args.sample_name+" is not a valid sample name...\n")
+    else:
+        if not args.make_annotations:
+            args.sample_name = mccutils.get_base_name(args.first)
+        else:
+            args.sample_name = "tmp"
+
     return args
 
 def check_input_files(ref, consensus, fq1, out, fq2=None, locations=None, taxonomy=None, coverage_fasta=None, augment_fasta=None, annotations_only=False, replace_invalid_symbols=False):
