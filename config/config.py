@@ -1,7 +1,7 @@
-ALL_METHODS = ["ngs_te_mapper", "relocate", "relocate2", "temp", "retroseq", "popoolationte", "popoolationte2", "te-locate", "teflon", "coverage", "trimgalore"]
+ALL_METHODS = ["ngs_te_mapper", "relocate", "relocate2", "temp", "retroseq", "popoolationte", "popoolationte2", "te-locate", "teflon", "coverage", "trimgalore","map_reads"]
 SINGLE_END_METHODS = ["ngs_te_mapper","relocate", "relocate2", "coverage", "trimgalore"]
 MULTI_THREAD_METHODS = ["coverage", "temp", "relocate2", "ngs_te_mapper", "popoolationte", "teflon", "trimgalore"]
-NO_INSTALL_METHODS = ["trimgalore"]
+NO_INSTALL_METHODS = ["trimgalore", "map_reads"]
 
 INPUT_DIR = "{{indir}}"
 REF_DIR = "{{refdir}}"
@@ -52,6 +52,7 @@ OUT_PATHS = {
         'popoolationte2': RESULTS_DIR+"popoolationTE2/"+SAMPLE_NAME+"_popoolationte2_nonredundant.bed",
         'te-locate': RESULTS_DIR+"te-locate/"+SAMPLE_NAME+"_telocate_nonredundant.bed",
         'trimgalore': SAM_DIR+"intermediate/fastq/"+SAMPLE_NAME+"_1.fq",
+        'map_reads': SAM_DIR+"intermediate/mapped_reads/"+SAMPLE_NAME+".sorted.bam",
         'relocate2': RESULTS_DIR+"relocaTE2/"+SAMPLE_NAME+"_relocate2_nonredundant.bed",
         'tepid': RESULTS_DIR+"tepid/"+SAMPLE_NAME+"_tepid_nonredundant.bed",
         'teflon': RESULTS_DIR+"teflon/"+SAMPLE_NAME+"_teflon_nonredundant.bed",

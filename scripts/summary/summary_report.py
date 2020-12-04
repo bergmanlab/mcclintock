@@ -38,6 +38,8 @@ class Insertion:
         self.strand = "."
 
 
+NO_PRED_METHODS = ["trimgalore", "coverage", "map_reads"]
+
 def main():
     out_files = snakemake.input.out_files
     fq1 = snakemake.input.fq1
@@ -462,7 +464,7 @@ def make_summary_page(jinja_env, methods, sample_name, commit, start_time, end_t
         coverage = True
 
     for method in methods:
-        if method != "trimgalore" and method != "coverage":
+        if method not in NO_PRED_METHODS:
             prediction_methods.append(method)
             results = out_file_map[method]
             nonreference = 0
@@ -522,7 +524,7 @@ def make_families_page(jinja_env, consensus, methods, out_file_map, out_dir):
 
     prediction_methods = []
     for method in methods:
-        if method != "coverage" and method != "trimgalore":
+        if method not in NO_PRED_METHODS:
             prediction_methods.append(method)
 
     if len(prediction_methods) > 0 or "coverage" in methods:
@@ -536,7 +538,7 @@ def make_families_page(jinja_env, consensus, methods, out_file_map, out_dir):
         
         prediction_methods = []
         for method in methods:
-            if method != "coverage" and method != "trimgalore":
+            if method not in NO_PRED_METHODS:
                 prediction_methods.append(method)
 
         prediction_list = []
@@ -564,7 +566,7 @@ def make_family_pages(jinja_env, consensus, methods, out_file_map, chromosomes, 
 
     prediction_methods = []
     for method in methods:
-        if method != "coverage" and method != "trimgalore":
+        if method not in NO_PRED_METHODS:
             prediction_methods.append(method)
 
     if len(prediction_methods) > 0 or "coverage" in methods:
@@ -578,7 +580,7 @@ def make_family_pages(jinja_env, consensus, methods, out_file_map, chromosomes, 
 
         prediction_methods = []
         for method in methods:
-            if method != "coverage" and method != "trimgalore":
+            if method not in NO_PRED_METHODS:
                 prediction_methods.append(method)
 
 
@@ -682,7 +684,7 @@ def make_family_pages(jinja_env, consensus, methods, out_file_map, chromosomes, 
 def make_method_pages(jinja_env, methods, consensus, out_file_map, chromosomes, out_dir):
     prediction_methods = []
     for method in methods:
-        if method != "coverage" and method != "trimgalore":
+        if method not in NO_PRED_METHODS:
             prediction_methods.append(method)
 
     if len(prediction_methods) > 0:
