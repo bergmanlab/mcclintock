@@ -23,7 +23,11 @@ def main():
         else:
             fasta3 = snakemake.params.coverage_fasta
             lines = fix_fasta.fix_fasta_lines(fasta3, length)
-            write_fasta(lines, snakemake.output.coverage_fasta)
+            if not os.path.exists(mcc_out+"/tmp"):
+                mccutils.mkdir(mcc_out+"/tmp")
+            tmp = mcc_out+"/tmp/"+str(run_id)+"coverage.tmp"
+            write_fasta(lines, tmp)
+            mccutils.replace_special_chars_fasta(tmp, snakemake.output.coverage_fasta)
     
     except Exception as e:
         track = traceback.format_exc()

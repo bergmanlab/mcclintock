@@ -42,15 +42,16 @@ def main():
     else:
         te_gff = format_ref_te_gff(te_gff, run_id, mcc_out)
 
-    mccutils.run_command(["cp", te_gff, out_te_gff])
-    mccutils.run_command(["cp", taxonomy, out_taxonomy])
+    mccutils.replace_special_chars_taxonomy(taxonomy, out_taxonomy)
+    mccutils.replace_special_chars_gff(te_gff, out_te_gff)
 
     if augment != "None":
         taxonomy = augment_taxonomy(taxonomy, augment, mcc_out+"/tmp/"+str(run_id)+"taxonomy2.tsv")
         te_gff = augment_gff(te_gff, augment, mcc_out+"/tmp/"+str(run_id)+"reference_tes.gff")
     
+    mccutils.replace_special_chars_taxonomy(taxonomy, out_aug_taxonomy)
+    mccutils.replace_special_chars_gff(te_gff, out_te_gff)
     mccutils.run_command(["cp", te_gff, out_aug_te_gff])
-    mccutils.run_command(["cp", taxonomy, out_aug_taxonomy])
 
     mccutils.log("processing","reference TE annotations created")
 

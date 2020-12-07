@@ -30,9 +30,11 @@ def main():
 
     tmp = mcc_out+"/tmp/"+str(run_id)+"reference.tmp"
     reference = fix_fasta_lines(reference, tmp)
+    reference = mccutils.replace_special_chars_fasta(reference, tmp+"1")
     augmented_reference = reference
     if augment != "None":
         augment = fix_fasta_lines(augment, tmp+"2")
+        augment = mccutils.replace_special_chars_fasta(augment, tmp+"3")
         augmented_reference = augment_reference(reference, augment, tmp+"4")
     
     mccutils.run_command(["cp", reference, out_ref])
