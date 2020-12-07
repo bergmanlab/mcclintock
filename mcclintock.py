@@ -150,7 +150,7 @@ def parse_args():
     
     # check sample name
     if args.sample_name is not None:
-        if "/" in args.sample_name:
+        if "/" in args.sample_name or args.sample_name == "tmp":
             sys.exit(args.sample_name+" is not a valid sample name...\n")
     else:
         if not args.make_annotations:
@@ -530,9 +530,12 @@ def run_workflow(args, sample_name, ref_name, run_id, debug=False, annotations_o
 
     if not args.resume:
         mccutils.log("setup","removing existing intermediate files, use --resume to continue an existing mcclintock run")
-        clean_command = command + ["--delete-all-output"]
-        mccutils.run_command(clean_command)
-        mccutils.remove(reference_dir)
+        # command = command + ["--delete-all-output"]
+        # mccutils.run_command(clean_command)
+        mccutils.remove(reference_dir+"/consensus_fasta/")
+        mccutils.remove(reference_dir+"/genome_fasta/")
+        mccutils.remove(reference_dir+"/reference_te_locations/")
+        mccutils.remove(reference_dir+"/te_taxonomy/")
         mccutils.remove(results_dir)
         mccutils.remove(sample_dir+"/indermediate/")
     
@@ -544,9 +547,10 @@ def run_workflow(args, sample_name, ref_name, run_id, debug=False, annotations_o
             if prev_config != "config_"+str(run_id)+".json":
                 config_found = True
                 config_compatible = config_compatibility(input_dir+"/snakemake/config/config_"+str(run_id)+".json", args.out+"/snakemake/config/"+prev_config)
+                if not config_compatible:
+                    sys.exit(1)
 
-
-
+    
     if not annotations_only:
         for method in args.methods:
             command.append(out_files[method])
@@ -570,7 +574,7 @@ def config_compatibility(run_config, prev_config):
     with open(run_config) as f:
         run_config_data = json.load(f)
     
-    with open(run_config) as f:
+    with open(prev_config) as f:
         prev_config_data = json.load(f)
     
     # check ref compatibility
@@ -583,9 +587,25 @@ def config_compatibility(run_config, prev_config):
             if run_config_data["in"]["reference"] != prev_config_data["in"]["reference"]:
                 mccutils.log("setup", "previous mcclintock run intermediate files are incompatible due to differences in -r/--reference, remove the --resume flag for a clean run")
                 return False
-        
-    # check conensus compatibility
-    # if os.path.exists(run_config_data["mcc"]["consensus"]):
+    
+    # check consensus compatibility
+    if os.path.exists(run_config_data["mcc"]["consensus"]):
+        if run_config_data["mcc"]["consensus"] == prev_config_data["mcc"]["consensus"] and run_config_data["in"]["consensus"] != prev_config_data["in"]["consensus"]:
+            mccutils.log("setup", "previous mcclintock run intermediate files are incompatible due to differences in -c/--consensus, remove the --resume flag for a clean run")
+            return False
+    
+    # check fastq compatibility
+    if os.path.exists(run_config_data["mcc"]["fq1"]):
+        if run_config_data["mcc"]["fq1"] == prev_config_data["mcc"]["fq1"]:
+            if run_config_data["in"]["fq1"] != prev_config_data["in"]["fq1"]:
+                mccutils.log("setup", "previous mcclintock run intermediate files are incompatible due to differences in -1/--first, remove the --resume flag for a clean run")
+                return False
+            
+            if ("trimgalore" in run_config_data["args"]["methods"] and "trimgalore" not in prev_config_data["args"]["methods"]) or ("trimgalore" in prev_config_data["args"]["methods"] and "trimgalore" not in run_config_data["args"]["methods"]):
+                mccutils.log("setup", "previous mcclintock run intermediate files are incompatible due to differences in running Trimgalore, remove the --resume flag for a clean run")
+                return False
+
+    return True
 
 
 def calculate_max_threads(avail_procs, methods_used, multithread_methods, slow=False):
