@@ -39,11 +39,6 @@ def main():
     sorted_bam = sort_bam(bam, threads=threads, log=log)
     sorted_sam = bam_to_sam(sorted_bam, threads=threads, log=log)
 
-    if not debug:
-        files_to_remove = [sam1, sam2, combined_sam, bam, sorted_bam]
-        for f in files_to_remove:
-            mccutils.remove(f)
-
     mccutils.log("popoolationte","PopoolationTE preprocessing complete")
 
 def format_read_names(fq1, fq2, sample_name, out_dir):

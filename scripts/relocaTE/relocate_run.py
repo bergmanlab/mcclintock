@@ -82,10 +82,16 @@ def main():
     mccutils.run_command(command, log=log)
     combine_gffs(out_dir, out_gff)
 
-    mccutils.remove(out_dir+"/input/fastq")
-    for d in os.listdir(out_dir):
-        if os.path.exists(d+"/te_containing_fq/"):
-            mccutils.remove(d+"/te_containing_fq/")
+    # move TE directories to a single directory for easy cleanup
+    mccutils.mkdir(out_dir+"/TEs/")
+    with open(consensus_fasta,"r") as fa:
+        for line in fa:
+            if line[0] == ">":
+                te_name = line.replace(">","")
+                te_name = te_name.replace("\n","")
+                te_name = te_name.split(" ")[0]
+                if os.path.exists(out_dir+"/"+te_name):
+                    mccutils.run_command(["mv", out_dir+"/"+te_name, out_dir+"/TEs/"])
             
     mccutils.log("relocate","RelocaTE run complete")
 

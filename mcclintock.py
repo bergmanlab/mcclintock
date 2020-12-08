@@ -63,6 +63,7 @@ def parse_args():
     parser.add_argument("--slow", action="store_true", help="This option runs without attempting to optimize thread usage to run rules concurrently. Each multithread rule will use the max processors designated by -p/--proc", required=False)
     parser.add_argument("--make_annotations", action="store_true", help="This option will only run the pipeline up to the creation of the repeat annotations", required=False)
     parser.add_argument("--replace_invalid_symbols", action="store_true", help="This option will mask symbols as '_' in the feature names for your imput files to ensure they do not cause issues with component methods", required=False)
+    parser.add_argument("-k","--keep_intermediate", type=str, help="This option determines which intermediate files are preserved after McClintock completes [default: essential][options: essential, general, methods, <list,of,methods>, all]", required=False)
 
     args = parser.parse_args()
 
@@ -157,6 +158,16 @@ def parse_args():
             args.sample_name = mccutils.get_base_name(args.first)
         else:
             args.sample_name = "tmp"
+
+    keep_intermediate_options = ["essential","general", "methods", "all"] + valid_methods
+    if args.keep_intermediate is None:
+        args.keep_intermediate = ["essential"]
+    else:
+        args.keep_intermediate = args.keep_intermediate.split(",")
+        for option in args.keep_intermediate:
+            if option not in keep_intermediate_options:
+                sys.stderr.write("keep_intermediate option: "+option+" is not valid. Valid options: "+" ".join(keep_intermediate_options)+"\nExample:(--keep_intermediate general,methods)\n")
+                sys.exit(1)
 
     return args
 
@@ -481,6 +492,11 @@ def make_run_config(args, sample_name, ref_name, full_command, current_directory
         data["mcc"][key] = data["mcc"][key].replace(config.REF_NAME, ref_name)
         data["mcc"][key] = data["mcc"][key].replace(config.SAMPLE_NAME, sample_name)
     
+    data["essential"] = config.ESSENTIAL_PATHS
+    for key in data["essential"].keys():
+        for x,val in enumerate(data["essential"][key]):
+            data["essential"][key][x] = val.replace(config.RESULTS_DIR, results_dir)
+            data["essential"][key][x] = data["essential"][key][x].replace(config.SAMPLE_NAME, sample_name)
 
     env_path = os.path.dirname(os.path.abspath(__file__))+"/install/envs/"
     data["envs"] = config_install.ENV
@@ -566,6 +582,7 @@ def run_workflow(args, sample_name, ref_name, run_id, debug=False, annotations_o
         print("McClintock Pipeline Failed... please open an issue at https://github.com/bergmanlab/mcclintock/issues if you are having trouble using McClintock", file=sys.stderr)
         sys.exit(1)
     mccutils.remove(sample_dir+"tmp")
+    remove_intermediate_files(args.keep_intermediate, args.out+"/snakemake/config/config_"+str(run_id)+".json", args.methods, ref_name, sample_name, args.out)
 
 def config_compatibility(run_config, prev_config):
     with open(run_config) as f:
@@ -657,6 +674,39 @@ def calculate_max_threads(avail_procs, methods_used, multithread_methods, slow=F
                 max_threads = max_threads-1
 
     return max_threads        
+
+
+def remove_intermediate_files(options, run_config_file, methods, ref_name, sample_name, outdir):
+    if "all" in options:
+        return
+
+    if "general" not in options:
+        mccutils.remove(outdir+"/"+sample_name+"/intermediate/")
+
+    with open(run_config_file) as f:
+        run_config_data = json.load(f)
+
+    if "methods" not in options:
+        for method in methods:
+            if method not in options:
+                method_out = "/".join(run_config_data['out'][method].split("/")[:-1]) + "/"
+                essential_paths = run_config_data['essential'][method]
+                if os.path.exists(method_out):
+                    for root, subdirs, files in os.walk(method_out):
+                        for f in files:
+                            file_path = os.path.join(root, f)
+                            is_essential = False
+                            for essential_path in essential_paths:
+                                if essential_path in file_path:
+                                    is_essential = True
+                            
+                            if not is_essential:
+                                mccutils.remove(file_path)
+
+
+
+
+
 
 
 if __name__ == "__main__":                

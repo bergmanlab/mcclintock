@@ -58,3 +58,39 @@ OUT_PATHS = {
         'teflon': RESULTS_DIR+"teflon/"+SAMPLE_NAME+"_teflon_nonredundant.bed",
         'jitterbug': RESULTS_DIR+"jitterbug/"+SAMPLE_NAME+"_jitterbug_nonredundant.bed"
 }
+
+ESSENTIAL_PATHS = {
+        'coverage': [
+                RESULTS_DIR+"coverage/te_depth.csv",
+                RESULTS_DIR+"coverage/plots/",
+                RESULTS_DIR+"coverage/te-depth-files/"
+        ],
+
+        'ngs_te_mapper': [
+                RESULTS_DIR+"ngs_te_mapper/unfiltered/bed_tsd/"+SAMPLE_NAME+"_insertions.bed"
+        ],
+
+        'relocate': [
+
+        ],
+
+        'temp': [
+
+        ],
+
+        'retroseq': [
+
+        ],
+
+        'popoolationte': [
+
+        ],
+        'popoolationte2': [],
+        'te-locate': [],
+        'trimgalore': [],
+        'map_reads': [],
+        'relocate2': [],
+        'tepid': [],
+        'teflon': [],
+        'jitterbug': []
+}
