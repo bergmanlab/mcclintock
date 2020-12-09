@@ -82,8 +82,6 @@ def main():
 
     mccutils.run_command(command, log=log)
 
-    mccutils.remove(out_dir+"/unfiltered/repeat/te_containing_fq/")
-
     mccutils.log("relocate2","RelocaTE2 run complete")
 
 

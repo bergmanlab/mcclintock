@@ -253,9 +253,9 @@ def download(url, out_file, md5=None, timeout=60, _attempt=1, max_attempts=1):
 
 
 def remove(infile):
-    if os.path.exists(infile):
+    if os.path.exists(infile) or os.path.islink(infile):
         try:
-            if os.path.isfile(infile):
+            if os.path.isfile(infile) or os.path.islink(infile):
                 os.remove(infile)
             elif os.path.isdir(infile):
                 shutil.rmtree(infile)

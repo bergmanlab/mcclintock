@@ -159,7 +159,7 @@ def parse_args():
         else:
             args.sample_name = "tmp"
 
-    keep_intermediate_options = ["essential","general", "methods", "all"] + valid_methods
+    keep_intermediate_options = ["essential","general", "methods", "all"] + args.methods
     if args.keep_intermediate is None:
         args.keep_intermediate = ["essential"]
     else:
@@ -168,6 +168,15 @@ def parse_args():
             if option not in keep_intermediate_options:
                 sys.stderr.write("keep_intermediate option: "+option+" is not valid. Valid options: "+" ".join(keep_intermediate_options)+"\nExample:(--keep_intermediate general,methods)\n")
                 sys.exit(1)
+
+    if len(args.methods) == 1:
+        if "trimgalore" in args.methods:
+            args.keep_intermediate.append("trimgalore")
+        elif "map_reads" in args.methods:
+            args.keep_intermediate.append("map_reads")
+    if len(args.methods) == 2 and "trimgalore" in args.methods and "map_reads" in args.methods:
+        args.keep_intermediate.append("trimgalore")
+        args.keep_intermediate.append("map_reads")
 
     return args
 
@@ -497,6 +506,7 @@ def make_run_config(args, sample_name, ref_name, full_command, current_directory
         for x,val in enumerate(data["essential"][key]):
             data["essential"][key][x] = val.replace(config.RESULTS_DIR, results_dir)
             data["essential"][key][x] = data["essential"][key][x].replace(config.SAMPLE_NAME, sample_name)
+            data["essential"][key][x] = data["essential"][key][x].replace(config.REF_NAME, ref_name)
 
     env_path = os.path.dirname(os.path.abspath(__file__))+"/install/envs/"
     data["envs"] = config_install.ENV
@@ -680,28 +690,51 @@ def remove_intermediate_files(options, run_config_file, methods, ref_name, sampl
     if "all" in options:
         return
 
-    if "general" not in options:
-        mccutils.remove(outdir+"/"+sample_name+"/intermediate/")
-
     with open(run_config_file) as f:
         run_config_data = json.load(f)
 
+    keep_paths = []
     if "methods" not in options:
         for method in methods:
+            method_out = "/".join(run_config_data['out'][method].split("/")[:-1])+"/"
             if method not in options:
-                method_out = "/".join(run_config_data['out'][method].split("/")[:-1]) + "/"
                 essential_paths = run_config_data['essential'][method]
                 if os.path.exists(method_out):
-                    for root, subdirs, files in os.walk(method_out):
+                    # delete all files not marked as essential
+                    for root, subdirs, files in os.walk(method_out, topdown=False):
                         for f in files:
                             file_path = os.path.join(root, f)
                             is_essential = False
                             for essential_path in essential_paths:
-                                if essential_path in file_path:
+                                if (os.path.isdir(essential_path) and essential_path in file_path) or (essential_path == file_path):
                                     is_essential = True
                             
                             if not is_essential:
+                                print(file_path)
                                 mccutils.remove(file_path)
+                    
+                    # remove empty directories
+                    for root, subdirs, files in os.walk(method_out, topdown=False):
+                        for d in subdirs:
+                            dir_path = os.path.join(root, d)
+                            if len(os.listdir(dir_path)) < 1:
+                                mccutils.remove(dir_path)
+            
+            else:
+                keep_paths.append(method_out)
+    
+    if "general" not in options:
+        for root, subdirs, files in os.walk(outdir+"/"+sample_name+"/intermediate/", topdown=False):
+            for f in files:
+                file_path = os.path.join(root, f)
+                keep = False
+                for keep_path in keep_paths:
+                    if keep_path in file_path:
+                        keep = True
+                
+                if not keep:
+                    print(file_path)
+                    mccutils.remove(file_path)
 
 
 
