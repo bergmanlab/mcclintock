@@ -14,7 +14,6 @@ def main():
     out_dir = snakemake.params.out_dir
     sample_name = snakemake.params.sample_name
     log = snakemake.params.log
-    debug = (snakemake.params.debug == 'True')
 
     taxonomy = format_taxonomy(taxonomy, out_dir)
     ppileup = popoolationte2_ppileup(jar, config.ppileup, bam, taxonomy, out_dir, log=log)

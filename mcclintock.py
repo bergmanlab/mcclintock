@@ -59,7 +59,7 @@ def parse_args():
     parser.add_argument("--sample_name", type=str, help="The sample name to use for output files [default: fastq1 name]", required=False)
     parser.add_argument("--resume", action="store_true", help="This option will attempt to use existing intermediate files from a previous McClintock run", required=False)
     parser.add_argument("--install", action="store_true", help="This option will install the dependencies of mcclintock", required=False)
-    parser.add_argument("--debug", action="store_true", help="This option will preserve intermediate files and allow snakemake to print progress to stdout", required=False)
+    parser.add_argument("--debug", action="store_true", help="This option will allow snakemake to print progress to stdout", required=False)
     parser.add_argument("--slow", action="store_true", help="This option runs without attempting to optimize thread usage to run rules concurrently. Each multithread rule will use the max processors designated by -p/--proc", required=False)
     parser.add_argument("--make_annotations", action="store_true", help="This option will only run the pipeline up to the creation of the repeat annotations", required=False)
     parser.add_argument("--replace_invalid_symbols", action="store_true", help="This option will mask symbols as '_' in the feature names for your imput files to ensure they do not cause issues with component methods", required=False)
@@ -710,7 +710,6 @@ def remove_intermediate_files(options, run_config_file, methods, ref_name, sampl
                                     is_essential = True
                             
                             if not is_essential:
-                                print(file_path)
                                 mccutils.remove(file_path)
                     
                     # remove empty directories
@@ -733,7 +732,6 @@ def remove_intermediate_files(options, run_config_file, methods, ref_name, sampl
                         keep = True
                 
                 if not keep:
-                    print(file_path)
                     mccutils.remove(file_path)
 
 

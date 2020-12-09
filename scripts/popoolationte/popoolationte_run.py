@@ -17,7 +17,6 @@ def main():
     fq2 = snakemake.input.fq2
     sam = snakemake.input.sam
     log = snakemake.params.log
-    debug = (snakemake.params.debug == 'True')
 
     with open(log,"a") as l:
         l.write("reference fasta: "+ref_fasta+"\n")

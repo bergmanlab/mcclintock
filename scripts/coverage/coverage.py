@@ -19,8 +19,6 @@ def main():
     coverage_out = mcc_out+"/results/coverage/"
     mccutils.mkdir(coverage_out)
 
-    debug = (snakemake.params.debug == 'True')
-
     # ensures intermediate files from previous runs are removed
     for f in os.listdir(coverage_out):
         mccutils.remove(coverage_out+"/"+f)

@@ -15,7 +15,6 @@ def main():
     log = snakemake.params.log
     out_dir = snakemake.params.out_dir
     threads = snakemake.threads
-    debug = (snakemake.params.debug == 'True')
 
     # ensures intermediate files from previous runs are removed
     for f in os.listdir(out_dir):
@@ -27,10 +26,6 @@ def main():
     sam1 = map_reads(ref_fasta, fq1, out_dir+"/mapped_1.sam", threads=threads, log=log)
     sam2 = map_reads(ref_fasta, fq2, out_dir+"/mapped_2.sam", threads=threads, log=log)
     bam = sam_to_bam(jar, fq1, fq2, sam1, sam2, snakemake.output.bam, threads=threads, log=log)
-
-    if not debug:
-        mccutils.remove(sam1)
-        mccutils.remove(sam2)
 
 
 def index_fasta(fasta, log=None):

@@ -16,7 +16,6 @@ def main():
     sample_name = snakemake.params.sample_name
     log = snakemake.params.log
     script_dir = snakemake.params.script_dir
-    debug = (snakemake.params.debug == 'True')
 
     threads = snakemake.threads
 
