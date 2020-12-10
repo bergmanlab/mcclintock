@@ -601,6 +601,15 @@ def config_compatibility(run_config, prev_config):
     with open(prev_config) as f:
         prev_config_data = json.load(f)
     
+    # check McClintock commit compatibility
+    if run_config_data['args']['commit'] != prev_config_data['args']['commit']:
+        sys.stderr.write("ERROR: Unable to resume McClintock run\n")
+        sys.stderr.write("       Previous mcclintock run intermediate files are incompatible due to differences in McClintock commit version\n")
+        sys.stderr.write("       Current McClintock Version:"+run_config_data['args']['commit']+"\n")
+        sys.stderr.write("       Previous McClintock run Version:"+prev_config_data['args']['commit']+"\n")
+        sys.stderr.write("       Remove the --resume flag for a clean run\n")
+        return False
+
     # check ref compatibility
     if os.path.exists(run_config_data["mcc"]["reference"]):
         if run_config_data["mcc"]["reference"] == prev_config_data["mcc"]["reference"]:
