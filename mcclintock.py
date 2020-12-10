@@ -63,7 +63,7 @@ def parse_args():
     parser.add_argument("--slow", action="store_true", help="This option runs without attempting to optimize thread usage to run rules concurrently. Each multithread rule will use the max processors designated by -p/--proc", required=False)
     parser.add_argument("--make_annotations", action="store_true", help="This option will only run the pipeline up to the creation of the repeat annotations", required=False)
     parser.add_argument("--replace_invalid_symbols", action="store_true", help="This option will mask symbols as '_' in the feature names for your imput files to ensure they do not cause issues with component methods", required=False)
-    parser.add_argument("-k","--keep_intermediate", type=str, help="This option determines which intermediate files are preserved after McClintock completes [default: essential][options: essential, general, methods, <list,of,methods>, all]", required=False)
+    parser.add_argument("-k","--keep_intermediate", type=str, help="This option determines which intermediate files are preserved after McClintock completes [default: general][options: minimal, general, methods, <list,of,methods>, all]", required=False)
 
     args = parser.parse_args()
 
@@ -159,9 +159,9 @@ def parse_args():
         else:
             args.sample_name = "tmp"
 
-    keep_intermediate_options = ["essential","general", "methods", "all"] + args.methods
+    keep_intermediate_options = ["minimal","general", "methods", "all"] + args.methods
     if args.keep_intermediate is None:
-        args.keep_intermediate = ["essential"]
+        args.keep_intermediate = ["general"]
     else:
         args.keep_intermediate = args.keep_intermediate.split(",")
         for option in args.keep_intermediate:
@@ -742,7 +742,8 @@ def remove_intermediate_files(options, run_config_file, methods, ref_name, sampl
                 keep_paths.append(method_out)
     
     if "general" not in options:
-        for root, subdirs, files in os.walk(outdir+"/"+sample_name+"/intermediate/", topdown=False):
+        intermediate_dir = outdir+"/"+sample_name+"/intermediate/"
+        for root, subdirs, files in os.walk(intermediate_dir, topdown=False):
             for f in files:
                 file_path = os.path.join(root, f)
                 keep = False
@@ -752,6 +753,16 @@ def remove_intermediate_files(options, run_config_file, methods, ref_name, sampl
                 
                 if not keep:
                     mccutils.remove(file_path)
+        
+        # remove empty directories
+        for root, subdirs, files in os.walk(intermediate_dir, topdown=False):
+            for d in subdirs:
+                dir_path = os.path.join(root, d)
+                if len(os.listdir(dir_path)) < 1:
+                    mccutils.remove(dir_path)
+
+        if len(os.listdir(intermediate_dir)) < 1:
+            mccutils.remove(intermediate_dir)
 
 
 
