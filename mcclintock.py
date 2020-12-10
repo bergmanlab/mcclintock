@@ -603,71 +603,81 @@ def config_compatibility(run_config, prev_config):
     
     # check McClintock commit compatibility
     if run_config_data['args']['commit'] != prev_config_data['args']['commit']:
-        sys.stderr.write("ERROR: Unable to resume McClintock run\n")
-        sys.stderr.write("       Previous mcclintock run intermediate files are incompatible due to differences in McClintock commit version\n")
-        sys.stderr.write("       Current McClintock Version:"+run_config_data['args']['commit']+"\n")
-        sys.stderr.write("       Previous McClintock run Version:"+prev_config_data['args']['commit']+"\n")
-        sys.stderr.write("       Remove the --resume flag for a clean run\n")
+        sys.stderr.write("(--resume) ERROR: Unable to resume McClintock run\n")
+        sys.stderr.write("                  Previous mcclintock run intermediate files are incompatible due to differences in McClintock commit version\n")
+        sys.stderr.write("                  Current McClintock Version: "+run_config_data['args']['commit']+"\n")
+        sys.stderr.write("                  Previous McClintock run Version: "+prev_config_data['args']['commit']+"\n")
         return False
 
     # check ref compatibility
     if os.path.exists(run_config_data["mcc"]["reference"]):
         if run_config_data["mcc"]["reference"] == prev_config_data["mcc"]["reference"]:
             if run_config_data["args"]["augment_fasta"] != prev_config_data["args"]["augment_fasta"]:
-                sys.stderr.write("ERROR: Unable to resume McClintock run\n       Previous mcclintock run intermediate files are incompatible due to differences in --augment\n       Remove the --resume flag for a clean run\n")
+                sys.stderr.write("(--resume) ERROR: Unable to resume McClintock run\n")
+                sys.stderr.write("                  Previous mcclintock run intermediate files are incompatible due to differences in --augment\n")
                 return False
             
             if run_config_data["in"]["reference"] != prev_config_data["in"]["reference"]:
-                sys.stderr.write("ERROR: Unable to resume McClintock run\n       Previous McClintock run intermediate files are incompatible due to differences in -r/--reference\n       Remove the --resume flag for a clean run\n")
+                sys.stderr.write("(--resume) ERROR: Unable to resume McClintock run\n")
+                sys.stderr.write("                  Previous McClintock run intermediate files are incompatible due to differences in -r/--reference\n")
                 return False
     
     # check consensus compatibility
     if os.path.exists(run_config_data["mcc"]["consensus"]):
         if run_config_data["mcc"]["consensus"] == prev_config_data["mcc"]["consensus"] and run_config_data["in"]["consensus"] != prev_config_data["in"]["consensus"]:
-            sys.stderr.write("ERROR: Unable to resume McClintock run\n       Previous McClintock run intermediate files are incompatible due to differences in -c/--consensus\n       Remove the --resume flag for a clean run\n")
+            sys.stderr.write("(--resume) ERROR: Unable to resume McClintock run\n")
+            sys.stderr.write("                  Previous McClintock run intermediate files are incompatible due to differences in -c/--consensus\n")
             return False
     
     # check fastq compatibility
     if "--make_annotations" not in prev_config_data['args']['full_command']:
         if os.path.exists(run_config_data["mcc"]["fq1"]):
             if run_config_data["in"]["fq1"] != prev_config_data["in"]["fq1"]:
-                sys.stderr.write("ERROR: Unable to resume McClintock run\n       Previous McClintock run intermediate files are incompatible due to differences in -1/--first\n       Remove the --resume flag for a clean run\n")
+                sys.stderr.write("(--resume) ERROR: Unable to resume McClintock run\n")
+                sys.stderr.write("                  Previous McClintock run intermediate files are incompatible due to differences in -1/--first\n")
                 return False
 
             if run_config_data["in"]["fq2"] != prev_config_data["in"]["fq2"]:
-                sys.stderr.write("ERROR: Unable to resume McClintock run\n       Previous McClintock run intermediate files are incompatible due to differences in -2/--second\n       Remove the --resume flag for a clean run\n")
+                sys.stderr.write("(--resume) ERROR: Unable to resume McClintock run\n")
+                sys.stderr.write("                  Previous McClintock run intermediate files are incompatible due to differences in -2/--second\n")
                 return False
 
             if ("trimgalore" in run_config_data["args"]["methods"] and "trimgalore" not in prev_config_data["args"]["methods"]) or ("trimgalore" in prev_config_data["args"]["methods"] and "trimgalore" not in run_config_data["args"]["methods"]):
-                sys.stderr.write("ERROR: Unable to resume McClintock run\n       Previous McClintock run intermediate files are incompatible due to differences in running Trimgalore\n       Remove the --resume flag for a clean run\n")
+                sys.stderr.write("(--resume) ERROR: Unable to resume McClintock run\n")
+                sys.stderr.write("                  Previous McClintock run intermediate files are incompatible due to differences in running Trimgalore\n")
                 return False
     
     # check locations gff compatibility
     if os.path.exists(run_config_data["mcc"]["locations"]):
         if run_config_data["mcc"]["locations"] == prev_config_data["mcc"]["locations"]:
             if run_config_data["args"]["augment_fasta"] != prev_config_data["args"]["augment_fasta"]:
-                sys.stderr.write("ERROR: Unable to resume McClintock run\n       Previous mcclintock run intermediate files are incompatible due to differences in --augment\n       Remove the --resume flag for a clean run\n")
+                sys.stderr.write("(--resume) ERROR: Unable to resume McClintock run\n")
+                sys.stderr.write("                  Previous mcclintock run intermediate files are incompatible due to differences in --augment\n")
                 return False
 
             if run_config_data["in"]["locations"] != prev_config_data["in"]["locations"]:
-                sys.stderr.write("ERROR: Unable to resume McClintock run\n       Previous McClintock run intermediate files are incompatible due to differences in -g/--locations\n       Remove the --resume flag for a clean run\n")
+                sys.stderr.write("(--resume) ERROR: Unable to resume McClintock run\n")
+                sys.stderr.write("                  Previous McClintock run intermediate files are incompatible due to differences in -g/--locations\n")
                 return False
             
     # check taxonomy compatibility
     if os.path.exists(run_config_data["mcc"]["taxonomy"]):
         if run_config_data["mcc"]["taxonomy"] == prev_config_data["mcc"]["taxonomy"]:
             if run_config_data["args"]["augment_fasta"] != prev_config_data["args"]["augment_fasta"]:
-                sys.stderr.write("ERROR: Unable to resume McClintock run\n       Previous mcclintock run intermediate files are incompatible due to differences in --augment\n       Remove the --resume flag for a clean run\n")
+                sys.stderr.write("(--resume) ERROR: Unable to resume McClintock run\n")
+                sys.stderr.write("                  Previous mcclintock run intermediate files are incompatible due to differences in --augment\n")
                 return False
 
             if run_config_data["in"]["taxonomy"] != prev_config_data["in"]["taxonomy"]:
-                sys.stderr.write("ERROR: Unable to resume McClintock run\n       Previous McClintock run intermediate files are incompatible due to differences in -t/--taxonomy\n       Remove the --resume flag for a clean run\n")
+                sys.stderr.write("(--resume) ERROR: Unable to resume McClintock run\n")
+                sys.stderr.write("                  Previous McClintock run intermediate files are incompatible due to differences in -t/--taxonomy\n")
                 return False
 
     # check coverage fasta compatibility
     if os.path.exists(run_config_data["mcc"]["coverage_fasta"]):
         if run_config_data["mcc"]["coverage_fasta"] == prev_config_data["mcc"]["coverage_fasta"] and run_config_data["in"]["coverage_fasta"] != prev_config_data["in"]["coverage_fasta"]:
-            sys.stderr.write("ERROR: Unable to resume McClintock run\n       Previous McClintock run intermediate files are incompatible due to differences in -s/--coverage_fasta\n       Remove the --resume flag for a clean run\n")
+            sys.stderr.write("(--resume) ERROR: Unable to resume McClintock run\n")
+            sys.stderr.write("                  Previous McClintock run intermediate files are incompatible due to differences in -s/--coverage_fasta\n")
             return False
 
 
