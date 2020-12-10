@@ -243,7 +243,8 @@ rule make_ref_te_bed:
 
 rule median_insert_size:
     input:
-        config['mcc']['sam']
+        config['mcc']['sam'],
+        config['mcc']['bam']
     
     threads: 1
 

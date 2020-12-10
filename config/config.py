@@ -36,7 +36,7 @@ INTERMEDIATE_PATHS = {
         'bam' : SAM_DIR+"intermediate/mapped_reads/"+SAMPLE_NAME+".sorted.bam",
         'telocate_sam' : SAM_DIR+"intermediate/mapped_reads/"+SAMPLE_NAME+".telocate.sam",
         'flagstat' : SAM_DIR+"intermediate/mapped_reads/"+SAMPLE_NAME+".bam.flagstat",
-        'median_insert_size' : SAM_DIR+"intermediate/median_insert.size",
+        'median_insert_size' : SAM_DIR+"intermediate/mapped_reads/median_insert.size",
         'repeatmasker_out' : SAM_DIR+"intermediate/"+REF_NAME+".repeatmasker.out"
     }
 
@@ -52,7 +52,7 @@ OUT_PATHS = {
         'popoolationte2': RESULTS_DIR+"popoolationTE2/"+SAMPLE_NAME+"_popoolationte2_nonredundant.bed",
         'te-locate': RESULTS_DIR+"te-locate/"+SAMPLE_NAME+"_telocate_nonredundant.bed",
         'trimgalore': SAM_DIR+"intermediate/fastq/"+SAMPLE_NAME+"_1.fq",
-        'map_reads': SAM_DIR+"intermediate/mapped_reads/"+SAMPLE_NAME+".sorted.bam",
+        'map_reads': SAM_DIR+"intermediate/mapped_reads/median_insert.size",
         'relocate2': RESULTS_DIR+"relocaTE2/"+SAMPLE_NAME+"_relocate2_nonredundant.bed",
         'tepid': RESULTS_DIR+"tepid/"+SAMPLE_NAME+"_tepid_nonredundant.bed",
         'teflon': RESULTS_DIR+"teflon/"+SAMPLE_NAME+"_teflon_nonredundant.bed",
