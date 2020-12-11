@@ -50,8 +50,7 @@ def main():
         te_gff = augment_gff(te_gff, augment, mcc_out+"/tmp/"+str(run_id)+"reference_tes.gff")
     
     mccutils.replace_special_chars_taxonomy(taxonomy, out_aug_taxonomy)
-    mccutils.replace_special_chars_gff(te_gff, out_te_gff)
-    mccutils.run_command(["cp", te_gff, out_aug_te_gff])
+    mccutils.replace_special_chars_gff(te_gff, out_aug_te_gff)
 
     mccutils.log("processing","reference TE annotations created")
 

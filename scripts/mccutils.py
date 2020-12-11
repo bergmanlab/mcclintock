@@ -317,6 +317,7 @@ def replace_special_chars_gff(infile,outfile):
                     line = line.replace("\n","")
                     split_line = line.split("\t")
                     split_line[0] = replace_special_chars(split_line[0])
+                    split_line[2] = replace_special_chars(split_line[2])
                     split_feats = split_line[8].split(";")
                     out_feats = []
                     for feat in split_feats:
