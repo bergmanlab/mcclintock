@@ -17,6 +17,8 @@ except Exception as e:
 
 def main():
     mccutils.log("processing","making coverage fasta")
+    mcc_out = snakemake.params.out
+    run_id = snakemake.params.run_id
     try:
         length = 80
         if snakemake.params.coverage_fasta == "None":

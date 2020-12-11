@@ -35,7 +35,9 @@ rule setup_reads:
 
 rule make_coverage_fasta:
     params:
-        coverage_fasta = config['in']['coverage_fasta']
+        coverage_fasta = config['in']['coverage_fasta'],
+        out = config['args']['out'],
+        run_id = config['args']['run_id']
     
     threads: 1
 
