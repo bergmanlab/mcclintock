@@ -428,6 +428,7 @@ def make_summary_page(jinja_env, methods, sample_name, commit, start_time, end_t
             fq2_trimgalore_results, fq2_trimgalore_file = read_trimgalore_results(fq2, out_dir+"/data/trimgalore/")
             fq2_trimgalore_file = "data/trimgalore/"+fq2_trimgalore_file
         else:
+            fq2_trimgalore_file = None
             fq2_trimgalore_results = None
     else:
         fq1_trimgalore_file = None
