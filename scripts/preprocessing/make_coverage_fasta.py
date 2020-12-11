@@ -35,8 +35,6 @@ def main():
         print(track, file=sys.stderr)
         print("ERROR...failed to create coverage fasta, check the formatting of :", snakemake.params.coverage_fasta, file=sys.stderr)
         mccutils.remove(snakemake.output[0])
-        mccutils.remove(snakemake.output[1])
-        mccutils.remove(snakemake.output[2])
         sys.exit(1)        
 
     mccutils.log("processing","coverage fasta created")
