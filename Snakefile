@@ -35,7 +35,9 @@ rule setup_reads:
 
 rule make_coverage_fasta:
     params:
-        coverage_fasta = config['in']['coverage_fasta']
+        coverage_fasta = config['in']['coverage_fasta'],
+        out = config['args']['out'],
+        run_id = config['args']['run_id']
     
     threads: 1
 
@@ -243,7 +245,8 @@ rule make_ref_te_bed:
 
 rule median_insert_size:
     input:
-        config['mcc']['sam']
+        config['mcc']['sam'],
+        config['mcc']['bam']
     
     threads: 1
 
@@ -307,8 +310,7 @@ rule coverage:
     
     params: 
         sample=config['args']['sample_name'],
-        log=config['args']['log_dir']+"coverage.log",
-        debug=config['args']['debug']
+        log=config['args']['log_dir']+"coverage.log"
 
     threads: config['args']['max_threads_per_rule']
 

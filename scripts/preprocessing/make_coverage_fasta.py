@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import sys
+import os
 from Bio import SeqIO
 import traceback
 try:
@@ -16,6 +17,8 @@ except Exception as e:
 
 def main():
     mccutils.log("processing","making coverage fasta")
+    mcc_out = snakemake.params.out
+    run_id = snakemake.params.run_id
     try:
         length = 80
         if snakemake.params.coverage_fasta == "None":
@@ -23,15 +26,17 @@ def main():
         else:
             fasta3 = snakemake.params.coverage_fasta
             lines = fix_fasta.fix_fasta_lines(fasta3, length)
-            write_fasta(lines, snakemake.output.coverage_fasta)
+            if not os.path.exists(mcc_out+"/tmp"):
+                mccutils.mkdir(mcc_out+"/tmp")
+            tmp = mcc_out+"/tmp/"+str(run_id)+"coverage.tmp"
+            write_fasta(lines, tmp)
+            mccutils.replace_special_chars_fasta(tmp, snakemake.output.coverage_fasta)
     
     except Exception as e:
         track = traceback.format_exc()
         print(track, file=sys.stderr)
         print("ERROR...failed to create coverage fasta, check the formatting of :", snakemake.params.coverage_fasta, file=sys.stderr)
         mccutils.remove(snakemake.output[0])
-        mccutils.remove(snakemake.output[1])
-        mccutils.remove(snakemake.output[2])
         sys.exit(1)        
 
     mccutils.log("processing","coverage fasta created")

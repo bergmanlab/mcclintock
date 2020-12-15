@@ -123,13 +123,11 @@ def get_abs_path(in_file, log=None):
         writelog(log, msg)
         sys.exit(1)
 
-def get_base_name(path, fastq=False):
+def get_base_name(path):
     no_path = os.path.basename(path)
-    no_ext = no_path.split(".")[0]
-    
-    if fastq == True:
-        no_ext = no_ext.replace("_1","")
-        no_ext = no_ext.replace("_2","")
+    if no_path[-3:] == ".gz":
+        no_path = no_path.replace(".gz","")
+    no_ext = ".".join(no_path.split(".")[:-1])
 
     return no_ext
 
@@ -255,9 +253,9 @@ def download(url, out_file, md5=None, timeout=60, _attempt=1, max_attempts=1):
 
 
 def remove(infile):
-    if os.path.exists(infile):
+    if os.path.exists(infile) or os.path.islink(infile):
         try:
-            if os.path.isfile(infile):
+            if os.path.isfile(infile) or os.path.islink(infile):
                 os.remove(infile)
             elif os.path.isdir(infile):
                 shutil.rmtree(infile)
@@ -309,6 +307,28 @@ def replace_special_chars_taxonomy(infile, outfile):
                 line = replace_special_chars(line)
                 o.write(line)
     
+    return outfile
+
+def replace_special_chars_gff(infile,outfile):
+    with open(infile,"r") as i:
+        with open(outfile,"w") as o:
+            for line in i:
+                if line[0] != "#":
+                    line = line.replace("\n","")
+                    split_line = line.split("\t")
+                    split_line[0] = replace_special_chars(split_line[0])
+                    split_line[2] = replace_special_chars(split_line[2])
+                    split_feats = split_line[8].split(";")
+                    out_feats = []
+                    for feat in split_feats:
+                        split_feat_val = feat.split("=")
+                        split_feat_val[1] = replace_special_chars(split_feat_val[1])
+                        feat = "=".join(split_feat_val)
+                        out_feats.append(feat)
+                    split_line[8] = ";".join(out_feats)
+                    out_line = "\t".join(split_line)
+                    o.write(out_line+"\n")
+                    
     return outfile
 
 

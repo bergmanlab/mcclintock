@@ -19,8 +19,6 @@ def main():
     coverage_out = mcc_out+"/results/coverage/"
     mccutils.mkdir(coverage_out)
 
-    debug = (snakemake.params.debug == 'True')
-
     # ensures intermediate files from previous runs are removed
     for f in os.listdir(coverage_out):
         mccutils.remove(coverage_out+"/"+f)
@@ -39,7 +37,7 @@ def main():
         te_seqs = snakemake.input.coverage_fa
 
 
-    augmented_reference = augment_genome(masked_reference, te_seqs, run_id, coverage_out)
+    augmented_reference = augment_genome(masked_reference, te_seqs, coverage_out)
     index_genome(snakemake.input.ref, log)
     index_genome(augmented_reference, log)
     
@@ -62,10 +60,7 @@ def main():
     te_names, all_coverage_files, uniq_coverage_files, avg_norm_te_depths = make_depth_table(te_seqs, bam, genome_depth, run_id, coverage_out, snakemake.output[0], log, trim_edges=edge_trim)
     make_plots(te_names, all_coverage_files, uniq_coverage_files, avg_norm_te_depths, genome_depth, snakemake.params.sample, coverage_out, trim_edges=edge_trim)
 
-    # keeps SAM and BAM files if run on debug mode
-    if not debug:
-        mccutils.remove(sam)
-        mccutils.remove(bam)
+    mccutils.remove(sam)
 
 
 def repeatmask_genome(reference, lib, threads, run_id, out, log):
@@ -91,9 +86,9 @@ def fix_fasta_lines(infasta, outfasta, length=80):
     return outfasta
 
 
-def augment_genome(fasta1, fasta2, run_id, out):
+def augment_genome(fasta1, fasta2, out):
     mccutils.log("coverage","augmenting reference genome")
-    augmented_genome = out+"/input/"+run_id+"_augmented_reference.fasta"
+    augmented_genome = out+"/input/augmented_reference.fasta"
     lines = []
     with open(fasta1,"r") as fa1:
         for line in fa1:

@@ -160,9 +160,8 @@ python3 mcclintock.py --install
                         extra chromosomes in the reference file (useful if the
                         organism is known to have TEs that are not present in
                         the reference strain)
-
-  --clean               This option will make sure mcclintock runs from
-                        scratch and doesn't reuse files already created
+  --resume              This option will attempt to use existing intermediate
+                        files from a previous McClintock run
   --install             This option will install the dependencies of
                         mcclintock
   --debug               This option will allow snakemake to print progress to
@@ -178,6 +177,7 @@ python3 mcclintock.py --install
 * Available methods to use with `-m/--methods`:
   * `trimgalore` : Runs [Trim Galore](https://github.com/FelixKrueger/TrimGalore) to QC the fastq file(s) and trim the adaptors prior to running the component methods
   * `coverage` : Estimates copy number based on normalized coverage and creates coverage plots for each TE in the fasta provided by `-c/--consensus` or `-s/coverage_fasta` if provided
+  * `map_reads` : Maps the reads to the reference genome. This is useful to ensure the BAM alignment file is produced regardless if another method requires it as input
   * `ngs_te_mapper` : Runs the [ngs_te_mapper](https://github.com/bergmanlab/ngs_te_mapper) component method
   * `relocate` : Runs the [RelocaTE](https://github.com/srobb1/RelocaTE) component method
   * `relocate2` : Runs the [RelocaTE2](https://github.com/stajichlab/RelocaTE2) component method
@@ -368,31 +368,30 @@ python3 mcclintock.py \
 * With the `--make_annotations` flag, McClintock will produce the reference TE locations GFF and taxonomy file using RepeatMasker, then exit the run.
   * Reference TE locations GFF: `<output>/<reference_name>/reference_te_locations/unaugmented_inrefTEs.gff`
   * TE Taxonomy TSV:  `<output>/<reference_name>/te_taxonomy/unaugmented_taxonomy.tsv`
-* This will allow you to use these files for all of your mcclintock runs using the same reference genome without having to redundantly generate them for each run.
+* You can then use the `--resume` flag for future runs with the same reference genome and output directory without having to redundantly generate them for each run.
+
 ```bash
 python3 mcclintock.py \
     -r test/sacCer2.fasta \
     -c test/sac_cer_TE_seqs.fasta \
-    -g <output>/sacCer2/reference_te_locations/unaugmented_inrefTEs.gff \
-    -t <output>/sacCer2/te_taxonomy/unaugmented_taxonomy.tsv \
     -1 /path/to/sample1_1.fastq.gz \
     -2 /path/to/sample1_2.fastq.gz \
     -p 4 \
-    -o <output>
+    -o <output> \
+    --resume
 
 python3 mcclintock.py \
     -r test/sacCer2.fasta \
     -c test/sac_cer_TE_seqs.fasta \
-    -g <output>/sacCer2/reference_te_locations/unaugmented_inrefTEs.gff \
-    -t <output>/sacCer2/te_taxonomy/unaugmented_taxonomy.tsv \
     -1 /path/to/sample2_1.fastq.gz \
     -2 /path/to/sample2_2.fastq.gz \
     -p 4 \
-    -o <output>
+    -o <output> \
+    --resume
 
 ## etc ##
 ```
-* Individual smaples can be run in a serial manner as shown in the example above, or run in parallel, such as through separate jobs on a HPC cluster.
+* Individual samples can be run in a serial manner as shown in the example above, or run in parallel, such as through separate jobs on a HPC cluster.
 License
 ------
 Copyright 2014-2020 Preston Basting, Michael G. Nelson, Shunhua Han, and Casey M. Bergman

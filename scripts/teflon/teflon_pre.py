@@ -30,6 +30,8 @@ def main():
 
     map_reads(out_dir, fq1, fq2, threads=threads, log=log)
 
+    mccutils.log("teflon","setup for TEFLoN complete")
+
 
 
 def make_reference_bed(reference_gff, reference_bed):

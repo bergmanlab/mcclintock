@@ -16,7 +16,6 @@ def main():
     sample_name = snakemake.params.sample_name
     log = snakemake.params.log
     script_dir = snakemake.params.script_dir
-    debug = (snakemake.params.debug == 'True')
 
     threads = snakemake.threads
 
@@ -38,11 +37,6 @@ def main():
     bam = sam_to_bam(combined_sam, threads=threads, log=log)
     sorted_bam = sort_bam(bam, threads=threads, log=log)
     sorted_sam = bam_to_sam(sorted_bam, threads=threads, log=log)
-
-    if not debug:
-        files_to_remove = [sam1, sam2, combined_sam, bam, sorted_bam]
-        for f in files_to_remove:
-            mccutils.remove(f)
 
     mccutils.log("popoolationte","PopoolationTE preprocessing complete")
 

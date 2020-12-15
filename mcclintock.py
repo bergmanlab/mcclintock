@@ -29,14 +29,10 @@ def main():
     args = parse_args()
     mccutils.mkdir(args.out+"/logs")
     mccutils.mkdir(args.out+"/tmp")
-    args.reference, args.consensus, args.locations, args.taxonomy, args.coverage_fasta, args.augment = check_input_files(args.reference, args.consensus, args.first, args.out+"/tmp", fq2=args.second, locations=args.locations, taxonomy=args.taxonomy, coverage_fasta=args.coverage_fasta, augment_fasta=args.augment, annotations_only=args.make_annotations, replace_invalid_symbols=args.replace_invalid_symbols)
-    if not args.make_annotations:
-        sample_name = mccutils.get_base_name(args.first, fastq=True)
-    else:
-        sample_name = "tmp"
+    check_input_files(args.reference, args.consensus, args.first, fq2=args.second, locations=args.locations, taxonomy=args.taxonomy, coverage_fasta=args.coverage_fasta, augment_fasta=args.augment, annotations_only=args.make_annotations, replace_invalid_symbols=args.replace_invalid_symbols)
     ref_name = mccutils.get_base_name(args.reference)
-    run_id = make_run_config(args, sample_name, ref_name, full_command, current_directory, debug=args.debug)
-    run_workflow(args, sample_name, ref_name, run_id, debug=args.debug, annotations_only=args.make_annotations)
+    run_id = make_run_config(args, args.sample_name, ref_name, full_command, current_directory, debug=args.debug)
+    run_workflow(args, args.sample_name, ref_name, run_id, debug=args.debug, annotations_only=args.make_annotations)
     mccutils.remove(args.out+"/tmp")
 
 def parse_args():
@@ -60,12 +56,14 @@ def parse_args():
     # parser.add_argument("-b", "--keep_bam", action="store_true", help="Retain the sorted and indexed BAM file of the paired end data aligned to the reference genome", required=False)
     # parser.add_argument("-i", "--remove_intermediate", action="store_true", help="If this option is specified then all sample specific intermediate files will be removed, leaving only the overall results. The default is to leave sample specific intermediate files", required=False)
     parser.add_argument("-a", "--augment", type=str, help="A fasta file of TE sequences that will be included as extra chromosomes in the reference file (useful if the organism is known to have TEs that are not present in the reference strain)", required=False)
-    parser.add_argument("--clean", action="store_true", help="This option will make sure mcclintock runs from scratch and doesn't reuse files already created", required=False)
+    parser.add_argument("--sample_name", type=str, help="The sample name to use for output files [default: fastq1 name]", required=False)
+    parser.add_argument("--resume", action="store_true", help="This option will attempt to use existing intermediate files from a previous McClintock run", required=False)
     parser.add_argument("--install", action="store_true", help="This option will install the dependencies of mcclintock", required=False)
-    parser.add_argument("--debug", action="store_true", help="This option will preserve intermediate files and allow snakemake to print progress to stdout", required=False)
+    parser.add_argument("--debug", action="store_true", help="This option will allow snakemake to print progress to stdout", required=False)
     parser.add_argument("--slow", action="store_true", help="This option runs without attempting to optimize thread usage to run rules concurrently. Each multithread rule will use the max processors designated by -p/--proc", required=False)
     parser.add_argument("--make_annotations", action="store_true", help="This option will only run the pipeline up to the creation of the repeat annotations", required=False)
     parser.add_argument("--replace_invalid_symbols", action="store_true", help="This option will mask symbols as '_' in the feature names for your imput files to ensure they do not cause issues with component methods", required=False)
+    parser.add_argument("-k","--keep_intermediate", type=str, help="This option determines which intermediate files are preserved after McClintock completes [default: general][options: minimal, general, methods, <list,of,methods>, all]", required=False)
 
     args = parser.parse_args()
 
@@ -93,7 +91,7 @@ def parse_args():
     if args.install:
         mccutils.log("install","installing dependencies")
         mccutils.log("install","WARNING: this could take awhile")
-        install(args.methods, clean=args.clean, debug=args.debug)
+        install(args.methods, resume=args.resume, debug=args.debug)
         sys.exit(0)
 
     #check -r
@@ -151,12 +149,40 @@ def parse_args():
     if args.augment is not None:
         args.augment = mccutils.get_abs_path(args.augment)
     
+    # check sample name
+    if args.sample_name is not None:
+        if "/" in args.sample_name or args.sample_name == "tmp":
+            sys.exit(args.sample_name+" is not a valid sample name...\n")
+    else:
+        if not args.make_annotations:
+            args.sample_name = mccutils.get_base_name(args.first)
+        else:
+            args.sample_name = "tmp"
+
+    keep_intermediate_options = ["minimal","general", "methods", "all"] + args.methods
+    if args.keep_intermediate is None:
+        args.keep_intermediate = ["general"]
+    else:
+        args.keep_intermediate = args.keep_intermediate.split(",")
+        for option in args.keep_intermediate:
+            if option not in keep_intermediate_options:
+                sys.stderr.write("keep_intermediate option: "+option+" is not valid. Valid options: "+" ".join(keep_intermediate_options)+"\nExample:(--keep_intermediate general,methods)\n")
+                sys.exit(1)
+
+    if len(args.methods) == 1:
+        if "trimgalore" in args.methods:
+            args.keep_intermediate.append("trimgalore")
+        elif "map_reads" in args.methods:
+            args.keep_intermediate.append("map_reads")
+    if len(args.methods) == 2 and "trimgalore" in args.methods and "map_reads" in args.methods:
+        args.keep_intermediate.append("trimgalore")
+        args.keep_intermediate.append("map_reads")
+
     return args
 
-def check_input_files(ref, consensus, fq1, out, fq2=None, locations=None, taxonomy=None, coverage_fasta=None, augment_fasta=None, annotations_only=False, replace_invalid_symbols=False):
+def check_input_files(ref, consensus, fq1, fq2=None, locations=None, taxonomy=None, coverage_fasta=None, augment_fasta=None, annotations_only=False, replace_invalid_symbols=False):
     # check reference fasta
-    out_ref = out+"/"+ (mccutils.get_base_name(ref)) + ".fasta"
-    format_fasta(ref, out_ref, replace_invalid_symbols=replace_invalid_symbols)
+    format_fasta(ref, replace_invalid_symbols=replace_invalid_symbols)
 
     if not annotations_only:
         #check fq1
@@ -167,62 +193,48 @@ def check_input_files(ref, consensus, fq1, out, fq2=None, locations=None, taxono
             check_fastq(fq2)
     
     # checking consensus
-    out_consensus = out+"/consensusTEs.fasta"
-    consensus_seq_names = format_fasta(consensus, out_consensus, replace_invalid_symbols=replace_invalid_symbols)
+    consensus_seq_names = format_fasta(consensus, replace_invalid_symbols=replace_invalid_symbols)
     
     #check locations gff
     gff_ids = []
-    out_locations = None
     if locations is not None:
-        out_locations = out+"/te_locations.gff"
-        gff_ids = format_gff(locations, out_locations, replace_invalid_symbols=replace_invalid_symbols)
+        gff_ids = format_gff(locations, replace_invalid_symbols=replace_invalid_symbols)
     
     # check taxonomy
-    out_taxonomy = None
     if taxonomy is not None:
-        out_taxonomy = out+"/te_taxonomy.tsv"
-        format_taxonomy(taxonomy, out_taxonomy, gff_ids, consensus_seq_names, consensus, locations, replace_invalid_symbols=replace_invalid_symbols)
+        format_taxonomy(taxonomy, gff_ids, consensus_seq_names, consensus, locations, replace_invalid_symbols=replace_invalid_symbols)
 
     #check coverage fasta
-    out_coverage_fasta = None
     if coverage_fasta is not None:
-        out_coverage_fasta = out+"/coverageTEs.fasta"
-        format_fasta(coverage_fasta, out_coverage_fasta, replace_invalid_symbols=replace_invalid_symbols)
+        format_fasta(coverage_fasta, replace_invalid_symbols=replace_invalid_symbols)
 
     #check augment fasta
-    out_augment_fasta = None
     if augment_fasta is not None:
-        out_augment_fasta = out+"/augment.fasta"
-        format_fasta(augment_fasta, out_augment_fasta, replace_invalid_symbols=replace_invalid_symbols)
-    
-    return out_ref, out_consensus, out_locations, out_taxonomy, out_coverage_fasta, out_augment_fasta
+        format_fasta(augment_fasta, replace_invalid_symbols=replace_invalid_symbols)
 
-def format_fasta(in_fasta, out_fasta, replace_invalid_symbols=False):
+
+def format_fasta(in_fasta, replace_invalid_symbols=False):
     mccutils.log("setup","checking fasta: "+in_fasta)
     seq_names = []
     try:
         with open(in_fasta,"r") as infa:
-            with open(out_fasta,"w") as outfa:
-                for record in SeqIO.parse(infa, "fasta"):
-                    seq_name = str(record.id)
-                    if "#" in seq_name:
-                        org_seq_name = seq_name
-                        seq_name = seq_name[:(seq_name.find("#"))]
-                        mccutils.log("setup", in_fasta+": replacing "+org_seq_name+" with "+seq_name+" for compatibility with RepeatMasker")
+            for record in SeqIO.parse(infa, "fasta"):
+                seq_name = str(record.id)
+                if "#" in seq_name:
+                    org_seq_name = seq_name
+                    seq_name = seq_name[:(seq_name.find("#"))]
+                    mccutils.log("setup", in_fasta+": replacing "+org_seq_name+" with "+seq_name+" for compatibility with RepeatMasker")
 
-                    masked_seq_name = mccutils.replace_special_chars(seq_name)
-                    if seq_name != masked_seq_name and not replace_invalid_symbols:
-                        mccutils.log("setup", in_fasta+": ERROR problematic symbol in feature name: "+seq_name+" ... reformat this feature name or use --replace_invalid_symbols to do this automatically")
-                        print("Problematic symbols:"," ".join(mccutils.INVALID_SYMBOLS))
-                        sys.exit(1)
-                    
-                    if masked_seq_name not in seq_names:
-                        seq_names.append(masked_seq_name)
-                    else:
-                        sys.exit(in_fasta+": Duplicate sequence name:"+masked_seq_name+"...exiting...\n")
-
-                    outfa.write(">"+masked_seq_name+"\n")
-                    outfa.write(str(record.seq)+"\n")
+                masked_seq_name = mccutils.replace_special_chars(seq_name)
+                if seq_name != masked_seq_name and not replace_invalid_symbols:
+                    mccutils.log("setup", in_fasta+": ERROR problematic symbol in feature name: "+seq_name+" ... reformat this feature name or use --replace_invalid_symbols to do this automatically")
+                    print("Problematic symbols:"," ".join(mccutils.INVALID_SYMBOLS))
+                    sys.exit(1)
+                
+                if masked_seq_name not in seq_names:
+                    seq_names.append(masked_seq_name)
+                else:
+                    sys.exit(in_fasta+": Duplicate sequence name:"+masked_seq_name+"...exiting...\n")
 
     except Exception as e:
         print(e)
@@ -245,80 +257,71 @@ def check_fastq(fastq):
     if (mccutils.is_empty_file(fastq)):
         sys.exit(fastq+" is empty... exiting...\n")
 
-def format_gff(ingff, outgff, replace_invalid_symbols=False):
+def format_gff(ingff, replace_invalid_symbols=False):
     mccutils.log("setup","checking locations gff: "+ingff)
     gff_ids = []
     with open(ingff,"r") as gff:
-        with open(outgff,"w") as out:
-            for line in gff:
-                if "#" not in line[0]:
-                    split_line = line.split("\t")
-                    if len(split_line) < 9:
-                        sys.exit(ingff+" appears to be a malformed GFF file..exiting...\n")
-                    else:
-                        feats = split_line[8]
-                        split_feats = feats.split(";")
-                        gff_id = ""
-                        for feat in split_feats:
-                            if feat[:3] == "ID=":
-                                gff_id = feat.split("=")[1].replace("\n","")
-                                masked_gff_id = mccutils.replace_special_chars(gff_id)
-                                if gff_id != masked_gff_id and not replace_invalid_symbols:
-                                    mccutils.log("setup", ingff+": ERROR problematic symbol in feature name: "+gff_id+" ... reformat this feature name or use --replace_invalid_symbols to do this automatically")
-                                    print("Problematic symbols:"," ".join(mccutils.INVALID_SYMBOLS))
-                                    sys.exit(1)
+        for line in gff:
+            if "#" not in line[0]:
+                split_line = line.split("\t")
+                if len(split_line) < 9:
+                    sys.exit(ingff+" appears to be a malformed GFF file..exiting...\n")
+                else:
+                    feats = split_line[8]
+                    split_feats = feats.split(";")
+                    gff_id = ""
+                    for feat in split_feats:
+                        if feat[:3] == "ID=":
+                            gff_id = feat.split("=")[1].replace("\n","")
+                            masked_gff_id = mccutils.replace_special_chars(gff_id)
+                            if gff_id != masked_gff_id and not replace_invalid_symbols:
+                                mccutils.log("setup", ingff+": ERROR problematic symbol in feature name: "+gff_id+" ... reformat this feature name or use --replace_invalid_symbols to do this automatically")
+                                print("Problematic symbols:"," ".join(mccutils.INVALID_SYMBOLS))
+                                sys.exit(1)
 
-                                if masked_gff_id not in gff_ids:
-                                    gff_ids.append(masked_gff_id)
-                                else:
-                                    sys.exit("ID: "+masked_gff_id+" is not unique. please ensure each feature has a unique ID\n")
-                        if masked_gff_id == "":
-                            sys.exit("GFF line: "+line+" is missing an ID attribute (ex. ID=chr1_TY1s1+\n")
-
-                    split_line[8] = "ID="+masked_gff_id
-                    line = "\t".join(split_line)
-                    line += "\n"
-                    out.write(line)
+                            if masked_gff_id not in gff_ids:
+                                gff_ids.append(masked_gff_id)
+                            else:
+                                sys.exit("ID: "+masked_gff_id+" is not unique. please ensure each feature has a unique ID\n")
+                    if masked_gff_id == "":
+                        sys.exit("GFF line: "+line+" is missing an ID attribute (ex. ID=chr1_TY1s1+\n")
     
     return gff_ids
 
-def format_taxonomy(in_taxonomy, out_taxonomy, gff_ids, consensus_ids, consensus_fasta, locations_gff, replace_invalid_symbols=False):
+def format_taxonomy(in_taxonomy, gff_ids, consensus_ids, consensus_fasta, locations_gff, replace_invalid_symbols=False):
     mccutils.log("setup","checking taxonomy TSV: "+in_taxonomy)
     with open(in_taxonomy, "r") as tsv:
-        with open(out_taxonomy, "w") as out:
-            for line in tsv:
-                split_line = line.split("\t")
-                if len(split_line) != 2:
-                    sys.exit(in_taxonomy+" does not have two columns. Should be tab-separated file with feature ID and TE family as columns\n")
-                else:
-                    te_id = split_line[0]
-                    masked_te_id = mccutils.replace_special_chars(te_id)
-                    if masked_te_id != te_id and not replace_invalid_symbols:
-                        mccutils.log("setup", in_taxonomy+": ERROR problematic symbol in feature name: "+te_id+" ... reformat this feature name or use --replace_invalid_symbols to do this automatically")
-                        print("Problematic symbols:"," ".join(mccutils.INVALID_SYMBOLS))
-                        sys.exit(1)
+        for line in tsv:
+            split_line = line.split("\t")
+            if len(split_line) != 2:
+                sys.exit(in_taxonomy+" does not have two columns. Should be tab-separated file with feature ID and TE family as columns\n")
+            else:
+                te_id = split_line[0]
+                masked_te_id = mccutils.replace_special_chars(te_id)
+                if masked_te_id != te_id and not replace_invalid_symbols:
+                    mccutils.log("setup", in_taxonomy+": ERROR problematic symbol in feature name: "+te_id+" ... reformat this feature name or use --replace_invalid_symbols to do this automatically")
+                    print("Problematic symbols:"," ".join(mccutils.INVALID_SYMBOLS))
+                    sys.exit(1)
 
-                    te_family = split_line[1].replace("\n","")
-                    if "#" in te_family:
-                        org_te_family = te_family
-                        te_family = te_family[:(te_family.find("#"))]
-                        mccutils.log("setup", in_taxonomy+": replacing "+org_te_family+" with "+te_family+" for compatibility with RepeatMasker")
+                te_family = split_line[1].replace("\n","")
+                if "#" in te_family:
+                    org_te_family = te_family
+                    te_family = te_family[:(te_family.find("#"))]
+                    mccutils.log("setup", in_taxonomy+": replacing "+org_te_family+" with "+te_family+" for compatibility with RepeatMasker")
 
-                    masked_te_family = mccutils.replace_special_chars(te_family)
-                    if masked_te_family != te_family and not replace_invalid_symbols:
-                        mccutils.log("setup", in_taxonomy+": ERROR problematic symbol in feature name: "+te_family+" ... reformat this feature name or use --replace_invalid_symbols to do this automatically")
-                        print("Problematic symbols:"," ".join(mccutils.INVALID_SYMBOLS))
-                        sys.exit(1)
+                masked_te_family = mccutils.replace_special_chars(te_family)
+                if masked_te_family != te_family and not replace_invalid_symbols:
+                    mccutils.log("setup", in_taxonomy+": ERROR problematic symbol in feature name: "+te_family+" ... reformat this feature name or use --replace_invalid_symbols to do this automatically")
+                    print("Problematic symbols:"," ".join(mccutils.INVALID_SYMBOLS))
+                    sys.exit(1)
 
-                    if masked_te_id not in gff_ids:
-                        sys.exit("TE ID: "+masked_te_id+" not found in IDs from GFF: "+locations_gff+"\nplease make sure each ID in: "+in_taxonomy+" is found in:"+locations_gff+"\n")
-                    
-                    if masked_te_family not in consensus_ids:
-                        sys.exit("TE Family: "+masked_te_family+" not found in sequence names from: "+consensus_fasta+"\nplease make sure each family in: "+in_taxonomy+" is found in: "+consensus_fasta+"\n")
-                    
-                    out.write(masked_te_id+"\t"+masked_te_family+"\n")
+                if masked_te_id not in gff_ids:
+                    sys.exit("TE ID: "+masked_te_id+" not found in IDs from GFF: "+locations_gff+"\nplease make sure each ID in: "+in_taxonomy+" is found in:"+locations_gff+"\n")
+                
+                if masked_te_family not in consensus_ids:
+                    sys.exit("TE Family: "+masked_te_family+" not found in sequence names from: "+consensus_fasta+"\nplease make sure each family in: "+in_taxonomy+" is found in: "+consensus_fasta+"\n")
 
-def install(methods, clean=False, debug=False):
+def install(methods, resume=False, debug=False):
 
     mcc_path = os.path.dirname(os.path.abspath(__file__))
     install_path = mcc_path+"/install/"
@@ -351,7 +354,9 @@ def install(methods, clean=False, debug=False):
 
 
     # removes installed tools and conda environments
-    if clean:
+    if not resume:
+        mccutils.log("install","Removing all previously installed McClintock conda envs and tools")
+        mccutils.log("install","Use the --resume option if you don't want to perform a clean installation")
         mccutils.log("install","Removing conda envs from: "+conda_env_dir)
         mccutils.log("install","Removing installed tools from: "+install_path+"tools")
         mccutils.remove(conda_env_dir)
@@ -496,6 +501,12 @@ def make_run_config(args, sample_name, ref_name, full_command, current_directory
         data["mcc"][key] = data["mcc"][key].replace(config.REF_NAME, ref_name)
         data["mcc"][key] = data["mcc"][key].replace(config.SAMPLE_NAME, sample_name)
     
+    data["essential"] = config.ESSENTIAL_PATHS
+    for key in data["essential"].keys():
+        for x,val in enumerate(data["essential"][key]):
+            data["essential"][key][x] = val.replace(config.RESULTS_DIR, results_dir)
+            data["essential"][key][x] = data["essential"][key][x].replace(config.SAMPLE_NAME, sample_name)
+            data["essential"][key][x] = data["essential"][key][x].replace(config.REF_NAME, ref_name)
 
     env_path = os.path.dirname(os.path.abspath(__file__))+"/install/envs/"
     data["envs"] = config_install.ENV
@@ -540,15 +551,27 @@ def run_workflow(args, sample_name, ref_name, run_id, debug=False, annotations_o
     command += ["--configfile", args.out+"/snakemake/config/config_"+str(run_id)+".json"]
     command += ["--cores", str(args.proc)]
 
-    mccutils.mkdir(sample_dir)
-    mccutils.mkdir(sample_dir+"tmp")
+    if not args.resume:
+        if os.path.exists(reference_dir) and len(os.listdir(reference_dir)) > 0:
+            sys.exit("ERROR: output directory:"+reference_dir+" is not empty. If wanting to resume a previous run, use --resume, otherwise please delete this directory or change your -o/--output\n")
+        if os.path.exists(sample_dir) and len(os.listdir(sample_dir)) > 0:
+            sys.exit("ERROR: output directory:"+sample_dir+" is not empty. If wanting to resume a previous run, use --resume, otherwise please delete this directory or change your -o/--output or --sample_name\n")
 
-    if args.clean:
-        clean_command = command + ["--delete-all-output"]
-        mccutils.run_command(clean_command)
-        mccutils.remove(args.out+"/input")
-
-
+    
+    # check that previous runs are compatible
+    else:
+        mccutils.log("setup","Checking config files to ensure previous intermediate files are compatible with this run")
+        config_found = False
+        for prev_config in os.listdir(input_dir+"/snakemake/config/"):
+            if prev_config != "config_"+str(run_id)+".json":
+                config_found = True
+                config_compatible = config_compatibility(input_dir+"/snakemake/config/config_"+str(run_id)+".json", args.out+"/snakemake/config/"+prev_config)
+                if not config_compatible:
+                    sys.exit(1)
+        
+        if not config_found:
+            sys.exit("ERROR: Unable to resume run. No config files from previous runs found in:"+input_dir+"/snakemake/config/ Remove --resume for clean run\n")
+    
     if not annotations_only:
         for method in args.methods:
             command.append(out_files[method])
@@ -560,6 +583,8 @@ def run_workflow(args, sample_name, ref_name, run_id, debug=False, annotations_o
 
     # print(" ".join(command))
     try:
+        mccutils.mkdir(sample_dir)
+        mccutils.mkdir(sample_dir+"tmp")
         mccutils.run_command(command)
     except Exception as e:
         track = traceback.format_exc()
@@ -567,6 +592,96 @@ def run_workflow(args, sample_name, ref_name, run_id, debug=False, annotations_o
         print("McClintock Pipeline Failed... please open an issue at https://github.com/bergmanlab/mcclintock/issues if you are having trouble using McClintock", file=sys.stderr)
         sys.exit(1)
     mccutils.remove(sample_dir+"tmp")
+    remove_intermediate_files(args.keep_intermediate, args.out+"/snakemake/config/config_"+str(run_id)+".json", args.methods, ref_name, sample_name, args.out)
+
+def config_compatibility(run_config, prev_config):
+    with open(run_config) as f:
+        run_config_data = json.load(f)
+    
+    with open(prev_config) as f:
+        prev_config_data = json.load(f)
+    
+    # check McClintock commit compatibility
+    if run_config_data['args']['commit'] != prev_config_data['args']['commit']:
+        sys.stderr.write("(--resume) ERROR: Unable to resume McClintock run\n")
+        sys.stderr.write("                  Previous mcclintock run intermediate files are incompatible due to differences in McClintock commit version\n")
+        sys.stderr.write("                  Current McClintock Version: "+run_config_data['args']['commit']+"\n")
+        sys.stderr.write("                  Previous McClintock run Version: "+prev_config_data['args']['commit']+"\n")
+        return False
+
+    # check ref compatibility
+    if os.path.exists(run_config_data["mcc"]["reference"]):
+        if run_config_data["mcc"]["reference"] == prev_config_data["mcc"]["reference"]:
+            if run_config_data["args"]["augment_fasta"] != prev_config_data["args"]["augment_fasta"]:
+                sys.stderr.write("(--resume) ERROR: Unable to resume McClintock run\n")
+                sys.stderr.write("                  Previous mcclintock run intermediate files are incompatible due to differences in --augment\n")
+                return False
+            
+            if run_config_data["in"]["reference"] != prev_config_data["in"]["reference"]:
+                sys.stderr.write("(--resume) ERROR: Unable to resume McClintock run\n")
+                sys.stderr.write("                  Previous McClintock run intermediate files are incompatible due to differences in -r/--reference\n")
+                return False
+    
+    # check consensus compatibility
+    if os.path.exists(run_config_data["mcc"]["consensus"]):
+        if run_config_data["mcc"]["consensus"] == prev_config_data["mcc"]["consensus"] and run_config_data["in"]["consensus"] != prev_config_data["in"]["consensus"]:
+            sys.stderr.write("(--resume) ERROR: Unable to resume McClintock run\n")
+            sys.stderr.write("                  Previous McClintock run intermediate files are incompatible due to differences in -c/--consensus\n")
+            return False
+    
+    # check fastq compatibility
+    if "--make_annotations" not in prev_config_data['args']['full_command']:
+        if os.path.exists(run_config_data["mcc"]["fq1"]):
+            if run_config_data["in"]["fq1"] != prev_config_data["in"]["fq1"]:
+                sys.stderr.write("(--resume) ERROR: Unable to resume McClintock run\n")
+                sys.stderr.write("                  Previous McClintock run intermediate files are incompatible due to differences in -1/--first\n")
+                return False
+
+            if run_config_data["in"]["fq2"] != prev_config_data["in"]["fq2"]:
+                sys.stderr.write("(--resume) ERROR: Unable to resume McClintock run\n")
+                sys.stderr.write("                  Previous McClintock run intermediate files are incompatible due to differences in -2/--second\n")
+                return False
+
+            if ("trimgalore" in run_config_data["args"]["methods"] and "trimgalore" not in prev_config_data["args"]["methods"]) or ("trimgalore" in prev_config_data["args"]["methods"] and "trimgalore" not in run_config_data["args"]["methods"]):
+                sys.stderr.write("(--resume) ERROR: Unable to resume McClintock run\n")
+                sys.stderr.write("                  Previous McClintock run intermediate files are incompatible due to differences in running Trimgalore\n")
+                return False
+    
+    # check locations gff compatibility
+    if os.path.exists(run_config_data["mcc"]["locations"]):
+        if run_config_data["mcc"]["locations"] == prev_config_data["mcc"]["locations"]:
+            if run_config_data["args"]["augment_fasta"] != prev_config_data["args"]["augment_fasta"]:
+                sys.stderr.write("(--resume) ERROR: Unable to resume McClintock run\n")
+                sys.stderr.write("                  Previous mcclintock run intermediate files are incompatible due to differences in --augment\n")
+                return False
+
+            if run_config_data["in"]["locations"] != prev_config_data["in"]["locations"]:
+                sys.stderr.write("(--resume) ERROR: Unable to resume McClintock run\n")
+                sys.stderr.write("                  Previous McClintock run intermediate files are incompatible due to differences in -g/--locations\n")
+                return False
+            
+    # check taxonomy compatibility
+    if os.path.exists(run_config_data["mcc"]["taxonomy"]):
+        if run_config_data["mcc"]["taxonomy"] == prev_config_data["mcc"]["taxonomy"]:
+            if run_config_data["args"]["augment_fasta"] != prev_config_data["args"]["augment_fasta"]:
+                sys.stderr.write("(--resume) ERROR: Unable to resume McClintock run\n")
+                sys.stderr.write("                  Previous mcclintock run intermediate files are incompatible due to differences in --augment\n")
+                return False
+
+            if run_config_data["in"]["taxonomy"] != prev_config_data["in"]["taxonomy"]:
+                sys.stderr.write("(--resume) ERROR: Unable to resume McClintock run\n")
+                sys.stderr.write("                  Previous McClintock run intermediate files are incompatible due to differences in -t/--taxonomy\n")
+                return False
+
+    # check coverage fasta compatibility
+    if os.path.exists(run_config_data["mcc"]["coverage_fasta"]):
+        if run_config_data["mcc"]["coverage_fasta"] == prev_config_data["mcc"]["coverage_fasta"] and run_config_data["in"]["coverage_fasta"] != prev_config_data["in"]["coverage_fasta"]:
+            sys.stderr.write("(--resume) ERROR: Unable to resume McClintock run\n")
+            sys.stderr.write("                  Previous McClintock run intermediate files are incompatible due to differences in -s/--coverage_fasta\n")
+            return False
+
+
+    return True
 
 
 def calculate_max_threads(avail_procs, methods_used, multithread_methods, slow=False):
@@ -588,6 +703,71 @@ def calculate_max_threads(avail_procs, methods_used, multithread_methods, slow=F
                 max_threads = max_threads-1
 
     return max_threads        
+
+
+def remove_intermediate_files(options, run_config_file, methods, ref_name, sample_name, outdir):
+    if "all" in options:
+        return
+
+    with open(run_config_file) as f:
+        run_config_data = json.load(f)
+
+    keep_paths = []
+    if "methods" not in options:
+        for method in methods:
+            method_out = "/".join(run_config_data['out'][method].split("/")[:-1])+"/"
+            if method not in options:
+                essential_paths = run_config_data['essential'][method]
+                if os.path.exists(method_out):
+                    # delete all files not marked as essential
+                    for root, subdirs, files in os.walk(method_out, topdown=False):
+                        for f in files:
+                            file_path = os.path.join(root, f)
+                            is_essential = False
+                            for essential_path in essential_paths:
+                                if (os.path.isdir(essential_path) and essential_path in file_path) or (essential_path == file_path):
+                                    is_essential = True
+                            
+                            if not is_essential:
+                                mccutils.remove(file_path)
+                    
+                    # remove empty directories
+                    for root, subdirs, files in os.walk(method_out, topdown=False):
+                        for d in subdirs:
+                            dir_path = os.path.join(root, d)
+                            if len(os.listdir(dir_path)) < 1:
+                                mccutils.remove(dir_path)
+            
+            else:
+                keep_paths.append(method_out)
+    
+    if "general" not in options:
+        intermediate_dir = outdir+"/"+sample_name+"/intermediate/"
+        for root, subdirs, files in os.walk(intermediate_dir, topdown=False):
+            for f in files:
+                file_path = os.path.join(root, f)
+                keep = False
+                for keep_path in keep_paths:
+                    if keep_path in file_path:
+                        keep = True
+                
+                if not keep:
+                    mccutils.remove(file_path)
+        
+        # remove empty directories
+        for root, subdirs, files in os.walk(intermediate_dir, topdown=False):
+            for d in subdirs:
+                dir_path = os.path.join(root, d)
+                if len(os.listdir(dir_path)) < 1:
+                    mccutils.remove(dir_path)
+
+        if len(os.listdir(intermediate_dir)) < 1:
+            mccutils.remove(intermediate_dir)
+
+
+
+
+
 
 
 if __name__ == "__main__":                

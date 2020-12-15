@@ -81,11 +81,6 @@ def main():
     
     mccutils.run_command(command, log=log)
     combine_gffs(out_dir, out_gff)
-
-    mccutils.remove(out_dir+"/input/fastq")
-    for d in os.listdir(out_dir):
-        if os.path.exists(d+"/te_containing_fq/"):
-            mccutils.remove(d+"/te_containing_fq/")
             
     mccutils.log("relocate","RelocaTE run complete")
 
