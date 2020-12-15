@@ -3,6 +3,7 @@ import sys
 import subprocess
 sys.path.append(snakemake.config['args']['mcc_path'])
 import scripts.mccutils as mccutils
+import scripts.output as output
 import config.TEMP.temp_post as config
 
 def main():
@@ -21,8 +22,8 @@ def main():
     insertions += non_absent_ref_insertions
     insertions = filter_insertions(insertions, chromosomes, acceptable_classes=config.ACCEPTABLE_INSERTION_SUPPORT_CLASSES, frequency_theshold=config.FREQUENCY_THRESHOLD)
     if len(insertions) > 0:
-        insertions = mccutils.make_redundant_bed(insertions, sample_name, out_dir, method="temp")
-        mccutils.make_nonredundant_bed(insertions, sample_name, out_dir, method="temp")
+        insertions = output.make_redundant_bed(insertions, sample_name, out_dir, method="temp")
+        output.make_nonredundant_bed(insertions, sample_name, out_dir, method="temp")
     else:
         mccutils.run_command(["touch", out_dir+"/"+sample_name+"_temp_redundant.bed"])
         mccutils.run_command(["touch", out_dir+"/"+sample_name+"_temp_nonredundant.bed"])
@@ -38,7 +39,7 @@ def read_insertion_summary(infile, sample):
     with open(infile,"r") as inf:
         for x,line in enumerate(inf):
             if x > 0:
-                insert = mccutils.Insertion()
+                insert = output.Insertion(output.Temp())
                 split_line = line.split("\t")
                 if len(split_line) == 14:
                     insert.chromosome = split_line[0]
@@ -51,23 +52,23 @@ def read_insertion_summary(infile, sample):
                     else:
                         insert.strand = "+"
                         
-                    insert.temp.classification = split_line[5]
-                    insert.temp.support = float(split_line[6])
-                    insert.temp.frequency = float(split_line[7])
-                    insert.temp.junction1 = int(split_line[8])
-                    insert.temp.junction1Support = int(split_line[9])
-                    insert.temp.junction2 = int(split_line[10])
-                    insert.temp.junction2Support = int(split_line[11])
-                    insert.temp.fivePrimeSupport = float(split_line[12])
-                    insert.temp.threePrimeSupport = float(split_line[13].replace("\n",""))
+                    insert.support_info.support['class'].value = split_line[5]
+                    insert.support_info.support['variantsupport'].value = float(split_line[6])
+                    insert.support_info.support['frequency'].value = float(split_line[7])
+                    insert.support_info.support['junction1'].value = int(split_line[8])
+                    insert.support_info.support['junction1support'].value = int(split_line[9])
+                    insert.support_info.support['junction2'].value = int(split_line[10])
+                    insert.support_info.support['junction2support'].value = int(split_line[11])
+                    insert.support_info.support['fiveprimesupport'].value = float(split_line[12])
+                    insert.support_info.support['threeprimesupport'].value = float(split_line[13].replace("\n",""))
                     insert.type = "non-reference"
 
                     if insert.end >= insert.start and insert.end > 0 and insert.start > -1:
 
                         # if split read, use junction positions as start and end
-                        if insert.temp.junction1Support > 0 and insert.temp.junction2Support > 0:
-                            insert.start = insert.temp.junction1
-                            insert.end = insert.temp.junction2
+                        if insert.support_info.support['junction1support'].value > 0 and insert.support_info.support['junction2support'].value > 0:
+                            insert.start = insert.support_info.support['junction1'].value
+                            insert.end = insert.support_info.support['junction2'].value
                             insert.name = insert.name+"sr|"
 
                         # read pair
@@ -119,7 +120,7 @@ def get_non_absent_ref_tes(te_gff, absence_bed, sample, out, log):
                 insert.chromosome = split_line[0]
                 insert.start = int(split_line[3])
                 insert.end = int(split_line[4])
-                insert.name = split_line[9].split("=")[1]+"|reference|"+sample+"|temp|nonab|"
+                insert.name = split_line[9].split("=")[1]+"|reference|NA|"+sample+"|temp|nonab|"
                 insert.strand = split_line[6]
                 insert.type = "reference"
                 
@@ -133,7 +134,10 @@ def get_non_absent_ref_tes(te_gff, absence_bed, sample, out, log):
 def filter_insertions(insertions, chromosomes, acceptable_classes=["1p1"], frequency_theshold=0.1):
     out = []
     for insert in insertions:
-        if insert.chromosome in chromosomes and (insert.type == "reference" or (insert.temp.classification in acceptable_classes and insert.temp.frequency > frequency_theshold)):
+        if ( insert.chromosome in chromosomes and 
+           ( insert.type == "reference" or 
+               (insert.support_info.support['class'].value in acceptable_classes and 
+                insert.support_info.support['frequency'].value > frequency_theshold))):
             out.append(insert)
     
     return out

@@ -3,6 +3,7 @@ import sys
 import subprocess
 sys.path.append(snakemake.config['args']['mcc_path'])
 import scripts.mccutils as mccutils
+import scripts.output as output
 import config.telocate.telocate_post as config
 
 
@@ -18,8 +19,8 @@ def main():
     insertions = read_insertions(telocate_raw, sample_name, chromosomes, rp_threshold=config.READ_PAIR_SUPPORT_THRESHOLD)
     insertions = filter_by_reference(insertions, te_gff)
     if len(insertions) > 0:
-        insertions = mccutils.make_redundant_bed(insertions, sample_name, out_dir, method="telocate")
-        mccutils.make_nonredundant_bed(insertions, sample_name, out_dir,method="telocate")
+        insertions = output.make_redundant_bed(insertions, sample_name, out_dir, method="telocate")
+        output.make_nonredundant_bed(insertions, sample_name, out_dir,method="telocate")
     else:
         mccutils.run_command(["touch", out_dir+"/"+sample_name+"_telocate_redundant.bed"])
         mccutils.run_command(["touch", out_dir+"/"+sample_name+"_telocate_nonredundant.bed"])
@@ -32,7 +33,7 @@ def read_insertions(telocate_out, sample_name, chromosomes, rp_threshold=0):
     with open(telocate_out,"r") as raw:
         for x, line in enumerate(raw):
             if x > 1:
-                insert = mccutils.Insertion()
+                insert = output.Insertion(output.Telocate())
                 split_line = line.split("\t")
                 insert.chromosome = split_line[0]
                 insert.start = int(split_line[1])
@@ -41,11 +42,11 @@ def read_insertions(telocate_out, sample_name, chromosomes, rp_threshold=0):
                 if "old" in split_line[15]:
                     insert.type = "reference"
                     insert.end = insert.start+int(split_line[2])
-                    insert.name = te_name+"|reference|"+sample_name+"|telocate|rp|"
+                    insert.name = te_name+"|reference|NA|"+sample_name+"|telocate|rp|"
                 else:
                     insert.type = "non-reference"
                     insert.end = insert.start
-                    insert.name = te_name+"|non-reference|"+sample_name+"|telocate|rp|"
+                    insert.name = te_name+"|non-reference|NA|"+sample_name+"|telocate|rp|"
 
                 if split_line[12] == "parallel":
                     insert.strand = "+"
@@ -54,9 +55,9 @@ def read_insertions(telocate_out, sample_name, chromosomes, rp_threshold=0):
                 else:
                     insert.strand = "-"
 
-                insert.telocate.read_pair_support = int(split_line[7])
+                insert.support_info.support['read_pair_support'].value = int(split_line[7])
 
-                if insert.telocate.read_pair_support >= rp_threshold and insert.chromosome in chromosomes:
+                if insert.support_info.support['read_pair_support'].value >= rp_threshold and insert.chromosome in chromosomes:
                     insertions.append(insert)
     
     return insertions

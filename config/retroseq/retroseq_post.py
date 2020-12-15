@@ -1,6 +1,6 @@
 # https://github.com/tk2/RetroSeq/wiki/RetroSeq-Tutorial
 '''
-The calls are annotated with information on number of supporting reads (GQ tag)
+Number of correctly mapped read pairs spanning breakpoint
 '''
 READ_SUPPORT_THRESHOLD = 0
 
