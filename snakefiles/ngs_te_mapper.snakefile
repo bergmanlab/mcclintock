@@ -26,7 +26,8 @@ rule ngs_te_mapper_run:
 rule ngs_te_mapper_post:
     input:
         config = config['args']['mcc_path']+"/config/ngs_te_mapper/ngs_te_mapper_post.py",
-        raw_bed = config['args']['out']+"results/ngs_te_mapper/unfiltered/bed_tsd/"+config['args']['sample_name']+"_insertions.bed"
+        raw_bed = config['args']['out']+"results/ngs_te_mapper/unfiltered/bed_tsd/"+config['args']['sample_name']+"_insertions.bed",
+        reference_fasta = config['mcc']['reference']
 
     params:
         out_dir = config['args']['out']+"/results/ngs_te_mapper/",
@@ -36,7 +37,7 @@ rule ngs_te_mapper_post:
     
     threads: 1
 
-    conda: config['envs']['ngs_te_mapper']
+    conda: config['envs']['mcc_processing']
 
     output:
         config['out']['ngs_te_mapper']

@@ -33,11 +33,12 @@ rule relocaTE2_post:
         config['args']['mcc_path']+"/config/relocate2/relocate2_post.py",
         rm_out = config['mcc']['repeatmasker_out'],
         nonref_gff = config['args']['out']+"results/relocaTE2/unfiltered/repeat/results/ALL.all_nonref_insert.gff",
-        ref_gff = config['args']['out']+"results/relocaTE2/unfiltered/repeat/results/ALL.all_ref_insert.gff"
+        ref_gff = config['args']['out']+"results/relocaTE2/unfiltered/repeat/results/ALL.all_ref_insert.gff",
+        reference_fasta = config['mcc']['reference']
 
     threads: 1
 
-    conda: config['envs']['relocate2']
+    conda: config['envs']['mcc_processing']
 
     params:
         out_dir = config['args']['out']+"/results/relocaTE2/",

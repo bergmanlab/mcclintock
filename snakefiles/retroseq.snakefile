@@ -25,11 +25,12 @@ rule retroseq_run:
 
 rule retroseq_post:
     input:
-        retroseq_out = config['args']['out']+"results/retroseq/unfiltered/"+config['args']['sample_name']+".call"
+        retroseq_out = config['args']['out']+"results/retroseq/unfiltered/"+config['args']['sample_name']+".call",
+        reference_fasta = config['mcc']['reference']
 
     threads: 1
 
-    conda: config['envs']['retroseq']
+    conda: config['envs']['mcc_processing']
 
     params:
         out_dir = config['args']['out']+"/results/retroseq/",

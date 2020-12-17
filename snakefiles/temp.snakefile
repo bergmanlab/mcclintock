@@ -31,9 +31,10 @@ rule process_temp:
         config['args']['mcc_path']+"/config/TEMP/temp_post.py",
         insert_summary = config['args']['out']+"results/TEMP/unfiltered/"+config['args']['sample_name']+".insertion.refined.bp.summary",
         absence_summary = config['args']['out']+"results/TEMP/unfiltered/"+config['args']['sample_name']+".absence.refined.bp.summary",
-        te_gff = config['mcc']['telocate_te_gff']
+        te_gff = config['mcc']['telocate_te_gff'],
+        reference_fasta = config['mcc']['reference']
     
-    conda: config['envs']['temp']
+    conda: config['envs']['mcc_processing']
 
     params:
         log = config['args']['log_dir']+"TEMP.log",

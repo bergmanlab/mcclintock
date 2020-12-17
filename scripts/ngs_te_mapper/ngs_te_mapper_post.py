@@ -9,6 +9,7 @@ import config.ngs_te_mapper.ngs_te_mapper_post as config
 
 def main():
     raw_bed = snakemake.input.raw_bed
+    reference_fasta = snakemake.input.reference_fasta
 
     threads = snakemake.threads
     log = snakemake.params.log
@@ -26,7 +27,9 @@ def main():
 
     if len(insertions) > 0:
         insertions = output.make_redundant_bed(insertions, sample_name, out_dir, method="ngs_te_mapper")
-        output.make_nonredundant_bed(insertions, sample_name, out_dir, method="ngs_te_mapper")
+        intertions = output.make_nonredundant_bed(insertions, sample_name, out_dir, method="ngs_te_mapper")
+        output.write_vcf(insertions, reference_fasta, sample_name, "ngs_te_mapper", out_dir)
+
     else:
         mccutils.run_command(["touch", out_dir+"/"+sample_name+"_ngs_te_mapper_redundant.bed"])
         mccutils.run_command(["touch", out_dir+"/"+sample_name+"_ngs_te_mapper_nonredundant.bed"])

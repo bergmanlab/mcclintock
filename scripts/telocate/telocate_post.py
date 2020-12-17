@@ -11,6 +11,7 @@ def main():
     mccutils.log("te-locate","processing TE-Locate results")
     telocate_raw = snakemake.input.telocate_raw
     te_gff = snakemake.input.te_gff
+    reference_fasta = snakemake.input.reference_fasta
 
     out_dir = snakemake.params.out_dir
     sample_name = snakemake.params.sample_name
@@ -20,7 +21,8 @@ def main():
     insertions = filter_by_reference(insertions, te_gff)
     if len(insertions) > 0:
         insertions = output.make_redundant_bed(insertions, sample_name, out_dir, method="telocate")
-        output.make_nonredundant_bed(insertions, sample_name, out_dir,method="telocate")
+        intertions = output.make_nonredundant_bed(insertions, sample_name, out_dir,method="telocate")
+        output.write_vcf(insertions, reference_fasta, sample_name, "telocate", out_dir)
     else:
         mccutils.run_command(["touch", out_dir+"/"+sample_name+"_telocate_redundant.bed"])
         mccutils.run_command(["touch", out_dir+"/"+sample_name+"_telocate_nonredundant.bed"])
@@ -39,6 +41,7 @@ def read_insertions(telocate_out, sample_name, chromosomes, rp_threshold=0):
                 insert.start = int(split_line[1])
                 
                 te_name = split_line[3].split("/")[1]
+                insert.family = te_name
                 if "old" in split_line[15]:
                     insert.type = "reference"
                     insert.end = insert.start+int(split_line[2])
@@ -55,7 +58,7 @@ def read_insertions(telocate_out, sample_name, chromosomes, rp_threshold=0):
                 else:
                     insert.strand = "-"
 
-                insert.support_info.support['read_pair_support'].value = int(split_line[7])
+                insert.support_info.support['read_pair_support'].value = int(split_line[6])
 
                 if insert.support_info.support['read_pair_support'].value >= rp_threshold and insert.chromosome in chromosomes:
                     insertions.append(insert)

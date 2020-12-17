@@ -11,6 +11,7 @@ def main():
     nonref_gff = snakemake.input.nonref_gff
     ref_gff = snakemake.input.ref_gff
     rm_out = snakemake.input.rm_out
+    reference_fasta = snakemake.input.reference_fasta
 
     log = snakemake.params.log
     out_dir = snakemake.params.out_dir
@@ -43,7 +44,8 @@ def main():
 
     if len(all_insertions) >= 1:
         all_insertions = output.make_redundant_bed(all_insertions, sample_name, out_dir, method="relocate2")
-        output.make_nonredundant_bed(all_insertions, sample_name, out_dir, method="relocate2")
+        insertions = output.make_nonredundant_bed(all_insertions, sample_name, out_dir, method="relocate2")
+        output.write_vcf(insertions, reference_fasta, sample_name, "relocate2", out_dir)
     else:
         mccutils.run_command(["touch", out_dir+"/"+sample_name+"_relocate2_redundant.bed"])
         mccutils.run_command(["touch", out_dir+"/"+sample_name+"_relocate2_nonredundant.bed"])
@@ -77,6 +79,7 @@ def get_insertions(gff, sample_name, chromosomes, l_support_threshold=0, r_suppo
                     insert.type = "non-reference"
                     te_name = split_line[9].split("=")[1]
                     te_name = te_name.split("/")[0]
+                    insert.family = te_name
                     insert.name = te_name+"|non-reference|NA|"+sample_name+"|relocate2|sr|"
                     insert.support_info.support['right_junction_reads'].value = int(split_line[12].split("=")[1])
                     insert.support_info.support['left_junction_reads'].value = int(split_line[13].split("=")[1])

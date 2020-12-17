@@ -49,11 +49,12 @@ rule popoolationTE2_post:
     input:
         popoolationte2_out = config['args']['out']+"results/popoolationTE2/unfiltered/teinsertions.txt",
         te_gff = config['mcc']['popoolationTE_gff'],
-        taxonomy = config['mcc']['popoolationTE_taxonomy']
+        taxonomy = config['mcc']['popoolationTE_taxonomy'],
+        reference_fasta = config['mcc']['popoolationTE_ref_fasta']
     
     threads: 1
 
-    conda: config['envs']['popoolationte2']
+    conda: config['envs']['mcc_processing']
 
     params:
         out_dir = config['args']['out']+"/results/popoolationTE2/",
