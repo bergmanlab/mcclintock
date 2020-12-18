@@ -44,7 +44,7 @@ def read_insertions(retroseq_vcf, sample_name, chromosomes, support_threshold=0,
                     if "=" in i:
                         info[i.split("=")[0]] = i.split("=")[1]
                 
-                family = (info['MEINFO'].split(",")[0]).split("-")[0]
+                insert.family = (info['MEINFO'].split(",")[0]).split("-")[0]
                 insert.start = int(info['MEINFO'].split(",")[1])
                 insert.end = int(info['MEINFO'].split(",")[2])
                 
@@ -59,7 +59,7 @@ def read_insertions(retroseq_vcf, sample_name, chromosomes, support_threshold=0,
                 insert.support_info.support['clip5'].value = int(form['CLIP5'])
                 insert.support_info.support['call_status'].value = int(form['FL'])
                 insert.type = "non-reference"
-                insert.name = family+"|non-reference|NA|"+sample_name+"|retroseq|rp|"
+                insert.name = insert.family+"|non-reference|NA|"+sample_name+"|retroseq|rp|"
 
                 if insert.support_info.support['read_pair_support'].value >= support_threshold and insert.support_info.support['call_status'].value >= breakpoint_threshold and insert.chromosome in chromosomes:
                     insertions.append(insert)

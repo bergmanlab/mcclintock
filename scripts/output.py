@@ -62,12 +62,7 @@ class Retroseq:
             "clip3" : Info("CLIP3", "Number of soft clipped reads downstream of the breakpoint", 0, "Integer"),
             "clip5" : Info("CLIP5", "Number of soft clipped reads upstream of the breakpoint", 0, "Integer"),
             "call_status" : Info(
-                "CALL_STATUS", 
-                """Call Status - for reference calls a flag to say if the call failed a particular filter. 
-                Filters are ordered by priority in calling (higher number indicates closer to being called). 
-                1 - depth too high in region, 2 - not enough reads in cluster, 3 - not enough total flanking reads, 
-                4 - not enough inconsistently mapped reads, 5 - neither side passes ratio test, 6 - one side passes ratio test, 
-                7 - distance too large at breakpoint, 8 - PASSED all filters""",
+                "CALL_STATUS", "Call Status - for reference calls a flag to say if the call failed a particular filter. Filters are ordered by priority in calling (higher number indicates closer to being called). 1 - depth too high in region, 2 - not enough reads in cluster, 3 - not enough total flanking reads, 4 - not enough inconsistently mapped reads, 5 - neither side passes ratio test, 6 - one side passes ratio test, 7 - distance too large at breakpoint, 8 - PASSED all filters",
                 0,
                 "Integer"
             )
@@ -92,7 +87,7 @@ class Relocate:
 class Popoolationte:
     def __init__(self):
         self.support = {
-            "flanks_supported" : Info("FLANKS_SUPPORTED", " is the TE insertion supported by a forward (F), by a reverse (R) or by both (FR) insertions", "", "String"),
+            "flanks_supported" : Info("FLANKS_SUPPORTED", "is the TE insertion supported by a forward (F), by a reverse (R) or by both (FR) insertions", "", "String"),
             "frequency" : Info("FREQUENCY", "population frequency (1..fixed)", 0.0, "Float"),
             "forward_insert_start" : Info("FORWARD_INSERT_START", "start of the range of the forward insertion", 0, "Integer"),
             "forward_insert_end" : Info("FORWARD_INSERT_END", "end of the range of the forward insertion", 0, "Integer"),
@@ -112,7 +107,7 @@ class Popoolationte2:
     def __init__(self):
         self.support = {
             "flanks_supported" : Info("FLANKS_SUPPORTED", "support for the TE insertions; either a single forward signature (F) or a single reverse signature (R) or a matching pair of forward and reverse signatures (FR)", "", "String"),
-            "frequency" : Info("FREQUENCY", "the population frequency of the TE insertions", 0.0, "Integer")
+            "frequency" : Info("FREQUENCY", "the population frequency of the TE insertions", 0.0, "Float")
         }
         self.added = False
 
@@ -218,7 +213,7 @@ def make_nonredundant_bed(insertions, sample_name, out_dir, method="popoolationt
                     uniq_inserts[key] = insert
             
             elif method == "relocate":
-                if (insert.support_info.support['left_flanking_reads'].value + insert.relocate.support_info.support['right_flanking_reads'].value) > (uniq_inserts[key].support_info.support['left_flanking_reads'].value + uniq_inserts[key].support_info.support['right_flanking_reads'].value):
+                if (insert.support_info.support['left_flanking_reads'].value + insert.support_info.support['right_flanking_reads'].value) > (uniq_inserts[key].support_info.support['left_flanking_reads'].value + uniq_inserts[key].support_info.support['right_flanking_reads'].value):
                     uniq_inserts[key] = insert
             
             elif method == "relocate2":
