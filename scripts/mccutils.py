@@ -290,75 +290,45 @@ def replace_special_chars(string, encode="_"):
 
 
 def replace_special_chars_fasta(fasta, new_fasta):
-    org_to_modified = {}
     with open(fasta,"r") as fa:
         with open(new_fasta, "w") as out:
             for line in fa:
                 if ">" in line:
-                    org_line = line[1:].replace("\n","")
                     line = replace_special_chars(line)
-                    org_to_modified[org_line] = line[1:].replace("\n","")
                 
                 out.write(line)
     
-    with open(new_fasta+".fixed_name_map.tsv","w") as outf:
-        for key,val in org_to_modified.items():
-            outf.write(key+"\t"+val+"\n")
-
     return new_fasta
 
 def replace_special_chars_taxonomy(infile, outfile):
-    org_to_modified = {}
     with open(infile,"r") as i:
         with open(outfile, "w") as o:
             for line in i:
-                line = line.replace("\n","")
-                split_line = line.split("\t")
-                org_te_name = split_line[0]
-                org_te_family = split_line[0]
-                te_name = replace_special_chars(org_te_name)
-                te_family = replace_special_chars(org_te_family)
-                org_to_modified[org_te_name] = te_name
-                org_to_modified[org_te_family] = te_family
-                o.write(te_name+"\t"+te_family+"\n")
-
-    with open(outfile+".fixed_name_map.tsv","w") as outf:
-        for key,val in org_to_modified.items():
-            outf.write(key+"\t"+val+"\n")
-
+                line = replace_special_chars(line)
+                o.write(line)
+    
     return outfile
 
 def replace_special_chars_gff(infile,outfile):
-    org_to_modified = {}
     with open(infile,"r") as i:
         with open(outfile,"w") as o:
             for line in i:
                 if line[0] != "#":
                     line = line.replace("\n","")
                     split_line = line.split("\t")
-                    key = split_line[0]
                     split_line[0] = replace_special_chars(split_line[0])
-                    org_to_modified[key] = split_line[0]
-                    key = split_line[2]
                     split_line[2] = replace_special_chars(split_line[2])
-                    org_to_modified[key] = split_line[2]
                     split_feats = split_line[8].split(";")
                     out_feats = []
                     for feat in split_feats:
                         split_feat_val = feat.split("=")
-                        key = split_feat_val[1]
                         split_feat_val[1] = replace_special_chars(split_feat_val[1])
-                        org_to_modified[key] = split_feat_val[1]
                         feat = "=".join(split_feat_val)
                         out_feats.append(feat)
                     split_line[8] = ";".join(out_feats)
                     out_line = "\t".join(split_line)
                     o.write(out_line+"\n")
-
-    with open(outfile+".fixed_name_map.tsv","w") as outf:
-        for key,val in org_to_modified.items():
-            outf.write(key+"\t"+val+"\n")
-
+                    
     return outfile
 
 
