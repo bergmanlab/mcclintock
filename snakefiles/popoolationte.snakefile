@@ -98,7 +98,7 @@ rule popoolationTE_post:
     
     threads: 1
 
-    conda: config['envs']['popoolationte']
+    conda: config['envs']['mcc_processing']
 
     params:
         out_dir = config['args']['out']+"/results/popoolationTE/",

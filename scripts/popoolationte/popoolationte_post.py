@@ -3,6 +3,7 @@ import sys
 import subprocess
 sys.path.append(snakemake.config['args']['mcc_path'])
 import scripts.mccutils as mccutils
+import scripts.output as output
 import config.popoolationte.popoolationte_post as config
 
 
@@ -19,9 +20,9 @@ def main():
 
     insertions = read_insertions(popoolationte_out, sample_name, chromosomes, require_both_end_support=config.REQUIRE_BOTH_END_SUPPORT, percent_read_support_threshold=config.PERCENT_READ_SUPPORT_THRESHOLD)
     if len(insertions) >= 1:
-        insertions = mccutils.make_redundant_bed(insertions, sample_name, out_dir, method="popoolationte")
-        insertions = mccutils.make_nonredundant_bed(insertions, sample_name, out_dir, method="popoolationte")
-        # mccutils.write_vcf(insertions, genome_fasta, sample_name, "popoolationte", out_dir)
+        insertions = output.make_redundant_bed(insertions, sample_name, out_dir, method="popoolationte")
+        insertions = output.make_nonredundant_bed(insertions, sample_name, out_dir, method="popoolationte")
+        output.write_vcf(insertions, genome_fasta, sample_name, "popoolationte", out_dir)
     else:
         mccutils.run_command(["touch",out_dir+"/"+sample_name+"_popoolationte_redundant.bed"])
         mccutils.run_command(["touch",out_dir+"/"+sample_name+"_popoolationte_nonredundant.bed"])
@@ -33,49 +34,83 @@ def read_insertions(popoolationte, sample_name, chromosomes, require_both_end_su
 
     with open(popoolationte, "r") as tsv:
         for line in tsv:
-            insert = mccutils.Insertion()
+            insert = output.Insertion(output.Popoolationte())
             split_line = line.split("\t")
             insert.chromosome = split_line[0]
-            if "-" in split_line[8]:
-                insert.start = int(float(split_line[1]))
-                insert.end = int(float(split_line[15]))
+            pos_in_reference_seq = to_number(split_line[1])
+            insert.support_info.support["flanks_supported"].value = split_line[2]
+            insert.family = split_line[3]
+            insert.support_info.support["frequency"].value = to_number(split_line[4], to_float=True)
+            ref_te_id = split_line[6]
+            insert.support_info.support["forward_insert_start"].value = to_number(split_line[8])
+            insert.support_info.support["forward_insert_end"].value = to_number(split_line[9])
+            insert.support_info.support["forward_insert_freq"].value = to_number(split_line[10], to_float=True)
+            insert.support_info.support["forward_insert_cov"].value = to_number(split_line[11])
+            insert.support_info.support["forward_presence_reads"].value = to_number(split_line[12])
+            insert.support_info.support["forward_absence_reads"].value = to_number(split_line[13])
+            insert.support_info.support["reverse_insert_start"].value = to_number(split_line[15])
+            insert.support_info.support["reverse_insert_end"].value = to_number(split_line[16])
+            insert.support_info.support["reverse_insert_freq"].value = to_number(split_line[17], to_float=True)
+            insert.support_info.support["reverse_insert_cov"].value = to_number(split_line[18])
+            insert.support_info.support["reverse_presence_reads"].value = to_number(split_line[19])
+            insert.support_info.support["reverse_absence_reads"].value = to_number(split_line[20])
             
-            elif "-" in split_line[15]:
-                insert.start = int(float(split_line[9]))
-                insert.end = int(float(split_line[1]))
+            if insert.support_info.support["forward_insert_start"].value == 0:
+                insert.start = pos_in_reference_seq
+                insert.end = insert.support_info.support["reverse_insert_start"].value
+            
+            elif insert.support_info.support["reverse_insert_start"].value == 0:
+                insert.start = insert.support_info.support["forward_insert_end"].value
+                insert.end = pos_in_reference_seq
             
             else:
-                insert.start = int(float(split_line[9]))
-                insert.end = int(float(split_line[15]))               
+                insert.start = insert.support_info.support["forward_insert_end"].value
+                insert.end = insert.support_info.support["reverse_insert_start"].value           
 
-            if "-" in split_line[6]:
+            if "-" == ref_te_id:
                 insert.type = "non-reference"
-                insert.name = split_line[3]+"|non-reference|"+split_line[4]+"|"+sample_name+"|popoolationte|rp|"
+                insert.name = insert.family+"|non-reference|"+str(insert.support_info.support["frequency"].value)+"|"+sample_name+"|popoolationte|rp|"
             else:
                 insert.type = "reference"
-                insert.name = split_line[3]+"|reference|"+split_line[4]+"|"+sample_name+"|popoolationte|rp|"
-
-            insert.family = split_line[3]
-            insert.popoolationte.support_type = split_line[2]
-
-            if "F" in insert.popoolationte.support_type:
-                insert.popoolationte.f_read_support = int(split_line[12])
-                insert.popoolationte.f_read_support_percent = float(split_line[10])
-            
-            if "R" in insert.popoolationte.support_type:
-                insert.popoolationte.r_read_support = int(split_line[19])
-                insert.popoolationte.r_read_support_percent = float(split_line[17])
+                insert.name = insert.family+"|reference|"+str(insert.support_info.support["frequency"].value)+"|"+sample_name+"|popoolationte|rp|"
 
             if not require_both_end_support:
-                if (insert.popoolationte.f_read_support_percent >= percent_read_support_threshold or insert.popoolationte.r_read_support_percent >= percent_read_support_threshold) and insert.chromosome in chromosomes:
+                if ("FR" in insert.support_info.support["flanks_supported"].value and 
+                        (insert.support_info.support["frequency"].value >= percent_read_support_threshold) and 
+                        insert.chromosome in chromosomes):
                     insertions.append(insert)
-            
+
+                elif ("F" in insert.support_info.support["flanks_supported"].value and
+                        (insert.support_info.support["forward_insert_freq"].value >= percent_read_support_threshold) and 
+                        insert.chromosome in chromosomes):
+                    insertions.append(insert)
+
+                elif ((insert.support_info.support["reverse_insert_freq"].value >= percent_read_support_threshold) and
+                        insert.chromosome in chromosomes):
+                    insertions.append(insert)
             else:
-                if "FR" in insert.popoolationte.support_type and (insert.popoolationte.f_read_support_percent >= percent_read_support_threshold or insert.popoolationte.r_read_support_percent >= percent_read_support_threshold) and insert.chromosome in chromosomes:
+                if ("FR" in insert.support_info.support["flanks_supported"].value and 
+                        (insert.support_info.support["forward_insert_freq"].value >= percent_read_support_threshold or
+                            insert.support_info.support["reverse_insert_freq"].value >= percent_read_support_threshold) and 
+                        insert.chromosome in chromosomes):
                     insertions.append(insert)
-            
+
     return insertions
 
+
+def to_number(value, to_float=False):
+    if not to_float:
+        try:
+            out_val = int(float(value))
+        except ValueError as e:
+            out_val = 0
+    else:
+        try:
+            out_val = float(value)
+        except ValueError as e:
+            out_val = 0.0
+    
+    return out_val
 
 
 if __name__ == "__main__":                

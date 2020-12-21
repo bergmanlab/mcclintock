@@ -3,12 +3,14 @@ import sys
 import subprocess
 sys.path.append(snakemake.config['args']['mcc_path'])
 import scripts.mccutils as mccutils
+import scripts.output as output
 import config.relocate.relocate_post as config
 
 
 def main():
     relocate_gff = snakemake.input.relocate_gff
     te_gff = snakemake.input.te_gff
+    reference_fasta = snakemake.input.reference_fasta
 
     out_dir = snakemake.params.out_dir
     log = snakemake.params.log
@@ -22,8 +24,9 @@ def main():
     insertions = set_ref_orientations(insertions, te_gff)
 
     if len(insertions) >= 1:
-        insertions = mccutils.make_redundant_bed(insertions, sample_name, out_dir, method="relocate")
-        mccutils.make_nonredundant_bed(insertions, sample_name, out_dir, method="relocate")
+        insertions = output.make_redundant_bed(insertions, sample_name, out_dir, method="relocate")
+        insertions = output.make_nonredundant_bed(insertions, sample_name, out_dir, method="relocate")
+        output.write_vcf(insertions, reference_fasta, sample_name, "relocate", out_dir)
     else:
         mccutils.run_command(["touch",out_dir+"/"+sample_name+"_relocate_redundant.bed"])
         mccutils.run_command(["touch",out_dir+"/"+sample_name+"_relocate_nonredundant.bed"])
@@ -38,7 +41,7 @@ def get_insertions(gff, sample_name, chromosomes, ref_l_threshold=0, ref_r_thres
             if "#" not in line:
                 split_line = line.split("\t")
                 feats = split_line[8].split(";")
-                insert = mccutils.Insertion()
+                insert = output.Insertion(output.Relocate())
                 insert.chromosome = split_line[0]
                 insert.start = int(split_line[3])
                 insert.end = int(split_line[4])
@@ -60,20 +63,22 @@ def get_insertions(gff, sample_name, chromosomes, ref_l_threshold=0, ref_r_thres
                             insert.type = "missing"
                     
                     elif "left_flanking_read_count=" in feat:
-                        insert.relocate.left_support = int(feat.split("=")[1])
+                        insert.support_info.support['left_flanking_reads'].value = int(feat.split("=")[1])
                     
                     elif "right_flanking_read_count=" in feat:
-                        insert.relocate.right_support = int(feat.split("=")[1])
+                        insert.support_info.support['right_flanking_reads'].value = int(feat.split("=")[1])
                 
                 if insert.type == "reference":
-                    insert.name = feat_te_name+"|reference|"+sample_name+"|relocate|sr|"
+                    insert.family = feat_te_name
+                    insert.name = feat_te_name+"|reference|NA|"+sample_name+"|relocate|sr|"
                 elif insert.type == "non-reference":
                     feat_te_name = feat_id.split(".")[0]
-                    insert.name = feat_te_name+"|non-reference|"+sample_name+"|relocate|sr|"
+                    insert.family = feat_te_name
+                    insert.name = feat_te_name+"|non-reference|NA|"+sample_name+"|relocate|sr|"
             
-            if insert.type == "reference" and insert.relocate.left_support >= ref_l_threshold and insert.relocate.right_support >= ref_r_threshold and insert.chromosome in chromosomes:
+            if insert.type == "reference" and insert.support_info.support['left_flanking_reads'].value >= ref_l_threshold and insert.support_info.support['right_flanking_reads'].value >= ref_r_threshold and insert.chromosome in chromosomes:
                 insertions.append(insert)
-            elif insert.type == "non-reference" and insert.relocate.left_support >= nonref_l_threshold and insert.relocate.right_support >= nonref_r_threshold and insert.chromosome in chromosomes:
+            elif insert.type == "non-reference" and insert.support_info.support['left_flanking_reads'].value >= nonref_l_threshold and insert.support_info.support['right_flanking_reads'].value >= nonref_r_threshold and insert.chromosome in chromosomes:
                 insertions.append(insert)
     
     return insertions

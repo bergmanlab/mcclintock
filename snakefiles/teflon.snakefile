@@ -52,11 +52,12 @@ rule teflon_run:
 rule teflon_post:
     input:
         teflon_out = config['args']['out']+"results/teflon/unfiltered/genotypes/sample.genotypes.txt",
-        ref_bed = config['args']['out']+"results/teflon/unfiltered/reference_te.bed"
+        ref_bed = config['args']['out']+"results/teflon/unfiltered/reference_te.bed",
+        reference_fasta = config['mcc']['reference']
 
     threads: 1
 
-    conda: config['envs']['teflon']
+    conda: config['envs']['mcc_processing']
 
     params:
         out_dir = config['args']['out']+"results/teflon/",

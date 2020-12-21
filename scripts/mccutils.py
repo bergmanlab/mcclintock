@@ -289,49 +289,6 @@ def replace_special_chars(string, encode="_"):
     return string
 
 
-def replace_special_chars_fasta(fasta, new_fasta):
-    with open(fasta,"r") as fa:
-        with open(new_fasta, "w") as out:
-            for line in fa:
-                if ">" in line:
-                    line = replace_special_chars(line)
-                
-                out.write(line)
-    
-    return new_fasta
-
-def replace_special_chars_taxonomy(infile, outfile):
-    with open(infile,"r") as i:
-        with open(outfile, "w") as o:
-            for line in i:
-                line = replace_special_chars(line)
-                o.write(line)
-    
-    return outfile
-
-def replace_special_chars_gff(infile,outfile):
-    with open(infile,"r") as i:
-        with open(outfile,"w") as o:
-            for line in i:
-                if line[0] != "#":
-                    line = line.replace("\n","")
-                    split_line = line.split("\t")
-                    split_line[0] = replace_special_chars(split_line[0])
-                    split_line[2] = replace_special_chars(split_line[2])
-                    split_feats = split_line[8].split(";")
-                    out_feats = []
-                    for feat in split_feats:
-                        split_feat_val = feat.split("=")
-                        split_feat_val[1] = replace_special_chars(split_feat_val[1])
-                        feat = "=".join(split_feat_val)
-                        out_feats.append(feat)
-                    split_line[8] = ";".join(out_feats)
-                    out_line = "\t".join(split_line)
-                    o.write(out_line+"\n")
-                    
-    return outfile
-
-
 def estimate_read_length(fq, reads=10000):
     lengths = []
     with open(fq,"r") as f:

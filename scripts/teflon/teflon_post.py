@@ -3,6 +3,7 @@ import sys
 import subprocess
 sys.path.append(snakemake.config['args']['mcc_path'])
 import scripts.mccutils as mccutils
+import scripts.output as output
 import config.teflon.teflon_post as config
 
 def main():
@@ -10,6 +11,8 @@ def main():
 
     teflon_raw = snakemake.input.teflon_out
     ref_te_bed = snakemake.input.ref_bed
+    reference_fasta = snakemake.input.reference_fasta
+
     out_dir = snakemake.params.out_dir
     sample_name = snakemake.params.sample_name
     chromosomes = snakemake.params.chromosomes.split(",")
@@ -28,8 +31,9 @@ def main():
         require_both_breakpoints=config.PARAMETERS['require_both_breakpoints']
     )
     if len(insertions) >= 1:
-        insertions = mccutils.make_redundant_bed(insertions, sample_name, out_dir, method="teflon")
-        mccutils.make_nonredundant_bed(insertions, sample_name, out_dir, method="teflon")
+        insertions = output.make_redundant_bed(insertions, sample_name, out_dir, method="teflon")
+        insertions = output.make_nonredundant_bed(insertions, sample_name, out_dir, method="teflon")
+        output.write_vcf(insertions, reference_fasta, sample_name, "teflon", out_dir)
     else:
         mccutils.run_command(["touch", out_dir+"/"+sample_name+"_teflon_redundant.bed"])
         mccutils.run_command(["touch", out_dir+"/"+sample_name+"_teflon_nonredundant.bed"])
@@ -50,7 +54,7 @@ def read_insertions(predictions, chroms, sample, ref_tes, min_presence=3, max_ab
     with open(predictions, "r") as tsv:
         for line in tsv:
             split_line = line.split("\t")
-            insert = mccutils.Insertion()
+            insert = output.Insertion(output.Teflon())
 
             insert.chromosome = split_line[0]
 
@@ -108,23 +112,20 @@ def read_insertions(predictions, chroms, sample, ref_tes, min_presence=3, max_ab
                 else:
                     insert.type = "non-reference"
                 
-                if split_line[7] == "+":
-                    insert.teflon.left_sc_support = True
+                insert.support_info.support['five_prime_supported'].value = split_line[7]
+                insert.support_info.support['three_prime_supported'].value = split_line[7]
                 
-                if split_line[8] == "+":
-                    insert.teflon.right_sc_support = True
-                
-                insert.teflon.presence_reads = int(split_line[9])
-                insert.teflon.absence_reads = int(split_line[10])
-                insert.teflon.ambiguous_reads = int(split_line[11])
-                insert.teflon.allele_frequency = float(split_line[12])
+                insert.support_info.support['presence_reads'].value = int(split_line[9])
+                insert.support_info.support['absence_reads'].value = int(split_line[10])
+                insert.support_info.support['ambiguous_reads'].value = int(split_line[11])
+                insert.support_info.support['frequency'].value = float(split_line[12])
 
-                insert.name = split_line[3]+"|"+insert.type+"|"+str(insert.teflon.allele_frequency)+"|"+sample+"|teflon|"
+                insert.name = insert.family+"|"+insert.type+"|"+str(insert.support_info.support['frequency'].value)+"|"+sample+"|teflon|rp|"
 
                 if (
-                    (insert.teflon.presence_reads >= min_presence) 
-                    and (max_absence is None or insert.teflon.absence_reads <= max_absence)
-                    and (insert.teflon.allele_frequency >= min_presence_fraction)
+                    (insert.support_info.support['presence_reads'].value >= min_presence) 
+                    and (max_absence is None or insert.support_info.support['absence_reads'].value <= max_absence)
+                    and (insert.support_info.support['frequency'].value >= min_presence_fraction)
                     and ((tsd or not require_tsd) and (both_ends or not require_both_breakpoints))
                 ):
                     insertions.append(insert)

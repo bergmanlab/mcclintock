@@ -77,7 +77,8 @@ rule telocate_run:
 rule telocate_post:
     input:
         telocate_raw = config['args']['out']+"results/te-locate/unfiltered/te-locate-raw.info",
-        te_gff = config['mcc']['telocate_te_gff']
+        te_gff = config['mcc']['telocate_te_gff'],
+        reference_fasta = config['mcc']['reference']
     
     params:
         out_dir = config['args']['out']+"/results/te-locate/",
@@ -86,7 +87,7 @@ rule telocate_post:
     
     threads: 1
 
-    conda: config['envs']['te-locate']
+    conda: config['envs']['mcc_processing']
 
     output:
         config['out']['te-locate']

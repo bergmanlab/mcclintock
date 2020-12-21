@@ -70,6 +70,7 @@ ESSENTIAL_PATHS = {
                 RESULTS_DIR+"ngs_te_mapper/"+SAMPLE_NAME+"_ngs_te_mapper_nonredundant.bed",
                 RESULTS_DIR+"ngs_te_mapper/"+SAMPLE_NAME+"_ngs_te_mapper_redundant.bed",
                 RESULTS_DIR+"ngs_te_mapper/"+SAMPLE_NAME+"_ngs_te_mapper_malformed.bed",
+                RESULTS_DIR+"ngs_te_mapper/"+SAMPLE_NAME+"_ngs_te_mapper_nonredundant_non-reference.vcf",
                 RESULTS_DIR+"ngs_te_mapper/unfiltered/bed_tsd/"+SAMPLE_NAME+"_insertions.bed"
         ],
 
@@ -77,6 +78,7 @@ ESSENTIAL_PATHS = {
                 RESULTS_DIR+"relocaTE/"+SAMPLE_NAME+"_relocate_nonredundant.bed",
                 RESULTS_DIR+"relocaTE/"+SAMPLE_NAME+"_relocate_redundant.bed",
                 RESULTS_DIR+"relocaTE/"+SAMPLE_NAME+"_relocate_malformed.bed",
+                RESULTS_DIR+"relocaTE/"+SAMPLE_NAME+"_relocate_nonredundant_non-reference.vcf",
                 RESULTS_DIR+"relocaTE/unfiltered/combined.gff"
         ],
 
@@ -85,6 +87,7 @@ ESSENTIAL_PATHS = {
                 RESULTS_DIR+"TEMP/"+SAMPLE_NAME+"_temp_redundant.bed",
                 RESULTS_DIR+"TEMP/"+SAMPLE_NAME+"_temp_malformed.bed",
                 RESULTS_DIR+"TEMP/"+SAMPLE_NAME+".absent.bed",
+                RESULTS_DIR+"TEMP/"+SAMPLE_NAME+"_temp_nonredundant_non-reference.vcf",
                 RESULTS_DIR+"TEMP/unfiltered/"+SAMPLE_NAME+".insertion.refined.bp.summary",
                 RESULTS_DIR+"TEMP/unfiltered/"+SAMPLE_NAME+".absence.refined.bp.summary"
         ],
@@ -93,6 +96,7 @@ ESSENTIAL_PATHS = {
                 RESULTS_DIR+"retroseq/"+SAMPLE_NAME+"_retroseq_nonredundant.bed",
                 RESULTS_DIR+"retroseq/"+SAMPLE_NAME+"_retroseq_redundant.bed",
                 RESULTS_DIR+"retroseq/"+SAMPLE_NAME+"_retroseq_malformed.bed",
+                RESULTS_DIR+"retroseq/"+SAMPLE_NAME+"_retroseq_nonredundant_non-reference.vcf",
                 RESULTS_DIR+"retroseq/unfiltered/"+SAMPLE_NAME+".call"
         ],
 
@@ -100,13 +104,15 @@ ESSENTIAL_PATHS = {
                 RESULTS_DIR+"popoolationTE/"+SAMPLE_NAME+"_popoolationte_nonredundant.bed",
                 RESULTS_DIR+"popoolationTE/"+SAMPLE_NAME+"_popoolationte_redundant.bed",
                 RESULTS_DIR+"popoolationTE/"+SAMPLE_NAME+"_popoolationte_malformed.bed",
+                RESULTS_DIR+"popoolationTE/"+SAMPLE_NAME+"_popoolationte_nonredundant_non-reference.vcf",
                 RESULTS_DIR+"popoolationTE/unfiltered/te-poly-filtered.txt"
         ],
 
         'popoolationte2': [
                 RESULTS_DIR+"popoolationTE2/"+SAMPLE_NAME+"_popoolationte2_nonredundant.bed",
                 RESULTS_DIR+"popoolationTE2/"+SAMPLE_NAME+"_popoolationte2_redundant.bed",
-                RESULTS_DIR+"popoolationTE2/"+SAMPLE_NAME+"_popoolationt2e_malformed.bed",
+                RESULTS_DIR+"popoolationTE2/"+SAMPLE_NAME+"_popoolationte2_malformed.bed",
+                RESULTS_DIR+"popoolationTE2/"+SAMPLE_NAME+"_popoolationte2_nonredundant_non-reference.vcf",
                 RESULTS_DIR+"popoolationTE2/unfiltered/teinsertions.txt"
         ],
 
@@ -114,6 +120,7 @@ ESSENTIAL_PATHS = {
                 RESULTS_DIR+"te-locate/"+SAMPLE_NAME+"_telocate_nonredundant.bed",
                 RESULTS_DIR+"te-locate/"+SAMPLE_NAME+"_telocate_redundant.bed",
                 RESULTS_DIR+"te-locate/"+SAMPLE_NAME+"_telocate_malformed.bed",
+                RESULTS_DIR+"te-locate/"+SAMPLE_NAME+"_telocate_nonredundant_non-reference.vcf",
                 RESULTS_DIR+"te-locate/unfiltered/te-locate-raw.info"
         ],
 
@@ -125,6 +132,7 @@ ESSENTIAL_PATHS = {
                 RESULTS_DIR+"relocaTE2/"+SAMPLE_NAME+"_relocate2_nonredundant.bed",
                 RESULTS_DIR+"relocaTE2/"+SAMPLE_NAME+"_relocate2_redundant.bed",
                 RESULTS_DIR+"relocaTE2/"+SAMPLE_NAME+"_relocate2_malformed.bed",
+                RESULTS_DIR+"relocaTE2/"+SAMPLE_NAME+"_relocate2_nonredundant_non-reference.vcf",
                 RESULTS_DIR+"relocaTE2/unfiltered/repeat/results/ALL.all_nonref_insert.gff",
                 RESULTS_DIR+"relocaTE2/unfiltered/repeat/results/ALL.all_ref_insert.gff"
         ],
@@ -143,6 +151,7 @@ ESSENTIAL_PATHS = {
                 RESULTS_DIR+"teflon/"+SAMPLE_NAME+"_teflon_nonredundant.bed",
                 RESULTS_DIR+"teflon/"+SAMPLE_NAME+"_teflon_redundant.bed",
                 RESULTS_DIR+"teflon/"+SAMPLE_NAME+"_teflon_malformed.bed",
+                RESULTS_DIR+"teflon/"+SAMPLE_NAME+"_teflon_nonredundant_non-reference.vcf",
                 RESULTS_DIR+"teflon/unfiltered/genotypes/sample.genotypes.txt",
                 RESULTS_DIR+"teflon/unfiltered/reference_te.bed"
         ],

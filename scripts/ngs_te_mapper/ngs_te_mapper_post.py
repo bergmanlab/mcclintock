@@ -3,11 +3,13 @@ import sys
 import subprocess
 sys.path.append(snakemake.config['args']['mcc_path'])
 import scripts.mccutils as mccutils
+import scripts.output as output
 import config.ngs_te_mapper.ngs_te_mapper_post as config
 
 
 def main():
     raw_bed = snakemake.input.raw_bed
+    reference_fasta = snakemake.input.reference_fasta
 
     threads = snakemake.threads
     log = snakemake.params.log
@@ -24,8 +26,10 @@ def main():
     insertions = read_insertions(raw_bed, chromosomes, sample_name, out_dir, min_read_cutoff=config.MIN_READ_SUPPORT)
 
     if len(insertions) > 0:
-        insertions = mccutils.make_redundant_bed(insertions, sample_name, out_dir, method="ngs_te_mapper")
-        mccutils.make_nonredundant_bed(insertions, sample_name, out_dir, method="ngs_te_mapper")
+        insertions = output.make_redundant_bed(insertions, sample_name, out_dir, method="ngs_te_mapper")
+        intertions = output.make_nonredundant_bed(insertions, sample_name, out_dir, method="ngs_te_mapper")
+        output.write_vcf(insertions, reference_fasta, sample_name, "ngs_te_mapper", out_dir)
+
     else:
         mccutils.run_command(["touch", out_dir+"/"+sample_name+"_ngs_te_mapper_redundant.bed"])
         mccutils.run_command(["touch", out_dir+"/"+sample_name+"_ngs_te_mapper_nonredundant.bed"])
@@ -36,7 +40,7 @@ def read_insertions(bed, chromosomes, sample_name, out_dir, min_read_cutoff=0):
     insertions = []
     with open(bed,"r") as inbed:
         for line in inbed:
-            insert = mccutils.Insertion()
+            insert = output.Insertion(output.Ngs_te_mapper())
             line = line.replace(";","\t")
             split_line = line.split("\t")
             insert.chromosome = split_line[0]
@@ -45,9 +49,9 @@ def read_insertions(bed, chromosomes, sample_name, out_dir, min_read_cutoff=0):
             insert.type = split_line[8].replace("\n","")
             insert.strand = split_line[4]
             insert.family = split_line[5]
-            insert.name = insert.family+"|"+insert.type+"|"+sample_name+"|ngs_te_mapper|sr|"
-            insert.ngs_te_mapper.support = int(split_line[7])
-            if insert.ngs_te_mapper.support > min_read_cutoff and insert.chromosome in chromosomes:
+            insert.name = insert.family+"|"+insert.type+"|NA|"+sample_name+"|ngs_te_mapper|sr|"
+            insert.support_info.support['supportingreads'].value = int(split_line[7])
+            if insert.support_info.support['supportingreads'].value > min_read_cutoff and insert.chromosome in chromosomes:
                 insertions.append(insert)
 
     return insertions

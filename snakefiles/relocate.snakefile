@@ -64,10 +64,11 @@ rule relocaTE_post:
         config['args']['mcc_path']+"/config/relocate/relocate_post.py",
         relocate_gff = config['args']['out']+"results/relocaTE/unfiltered/combined.gff",
         te_gff = config['mcc']['relocaTE_ref_TEs'],
+        reference_fasta = config['mcc']['reference']
 
     threads: 1
 
-    conda: config['envs']['relocate']
+    conda: config['envs']['mcc_processing']
 
     params:
         raw_fq2 = config['in']['fq2'],
