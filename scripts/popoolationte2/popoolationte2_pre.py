@@ -20,12 +20,14 @@ def main():
     for f in os.listdir(out_dir):
         mccutils.remove(out_dir+"/"+f)
 
+    mccutils.mkdir(out_dir+"/tmp")
     index_fasta(ref_fasta, log=log)
     fq1 = format_fastq(fq1, out_dir+"/reads_1.fastq", log=log)
     fq2 = format_fastq(fq2, out_dir+"/reads_2.fastq", log=log)
     sam1 = map_reads(ref_fasta, fq1, out_dir+"/mapped_1.sam", threads=threads, log=log)
     sam2 = map_reads(ref_fasta, fq2, out_dir+"/mapped_2.sam", threads=threads, log=log)
-    bam = sam_to_bam(jar, fq1, fq2, sam1, sam2, snakemake.output.bam, threads=threads, log=log)
+    bam = sam_to_bam(jar, fq1, fq2, sam1, sam2, snakemake.output.bam, out_dir, threads=threads, log=log)
+    mccutils.remove(out_dir+"/tmp")
 
 
 def index_fasta(fasta, log=None):
@@ -52,9 +54,9 @@ def map_reads(ref, fq, outsam, threads=1, log=None):
     mccutils.run_command_stdout(["bwa","bwasw", "-t", str(threads), ref, fq], outsam, log=log)
     return outsam
 
-def sam_to_bam(jar, fq1, fq2, sam1, sam2, bam, threads=1, log=None):
+def sam_to_bam(jar, fq1, fq2, sam1, sam2, bam, out_dir, threads=1, log=None):
     mccutils.log("popoolationte2","converting SAM to BAM", log=log)
-    mccutils.run_command(["java", "-jar",jar, "se2pe", 
+    mccutils.run_command(["java", "-Djava.io.tmpdir="+out_dir+"/tmp", "-jar",jar, "se2pe", 
                                               "--fastq1", fq1,
                                               "--fastq2", fq2,
                                               "--bam1", sam1,

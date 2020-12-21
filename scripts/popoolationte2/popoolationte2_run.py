@@ -15,6 +15,7 @@ def main():
     sample_name = snakemake.params.sample_name
     log = snakemake.params.log
 
+    mccutils.mkdir(out_dir+"/tmp")
     taxonomy = format_taxonomy(taxonomy, out_dir)
     ppileup = popoolationte2_ppileup(jar, config.ppileup, bam, taxonomy, out_dir, log=log)
     ppileup = popoolationte2_subsample(jar, config.subsampleppileup, ppileup, out_dir, log=log)
@@ -22,6 +23,7 @@ def main():
     signatures = popoolationte2_strand(jar, config.updateStrand, signatures, bam, taxonomy, out_dir, log=log)
     signatures = popoolationte2_frequency(jar, ppileup, signatures, out_dir, log=log)
     te_insertions = popoolationte2_pairup(jar, config.pairupSignatures, signatures, ref_fasta, taxonomy, out_dir, log=log)
+    mccutils.remove(out_dir+"/tmp")
 
 def format_taxonomy(taxon, out):
     out_taxon = out+"/input.taxonomy.txt"
@@ -38,7 +40,7 @@ def format_taxonomy(taxon, out):
 def popoolationte2_ppileup(jar, params, bam, taxon, out, log=None):
     mccutils.log("popoolationte2","making physical pileup file", log=log)
     ppileup = out+"/output.ppileup.gz"
-    mccutils.run_command(['java', "-jar", jar, "ppileup", 
+    mccutils.run_command(['java', "-Djava.io.tmpdir="+out+"/tmp", "-jar", jar, "ppileup", 
                                                "--bam", bam, 
                                                "--hier", taxon, 
                                                "--map-qual", str(params["map-qual"]),
@@ -52,7 +54,7 @@ def popoolationte2_subsample(jar, params, ppileup, out, log=None):
     out_ppileup = out+"/subsampled.ppileup.gz"
     if params["run"]:
         mccutils.log("popoolationte2","subsampling physical pileup file to uniform coverage", log=log)
-        command = ["java","-jar", jar, "subsampleppileup",
+        command = ["java", "-Djava.io.tmpdir="+out+"/tmp", "-jar", jar, "subsampleppileup",
                                        "--ppileup", ppileup, 
                                        "--target-coverage", str(params['target-coverage']),
                                        "--output", out_ppileup]
@@ -69,7 +71,7 @@ def popoolationte2_subsample(jar, params, ppileup, out, log=None):
 def popoolationte2_signatures(jar, params, ppileup, out, log=None):
     mccutils.log("popoolationte2","identifying signatures of TE insertions", log=log)
     signatures = out+"/output.signatures"
-    mccutils.run_command(["java", "-jar", jar, "identifySignatures",
+    mccutils.run_command(["java", "-Djava.io.tmpdir="+out+"/tmp", "-jar", jar, "identifySignatures",
                                                "--ppileup", ppileup,
                                                "--mode", "separate",
                                                "--output", signatures,
@@ -83,7 +85,7 @@ def popoolationte2_signatures(jar, params, ppileup, out, log=None):
 def popoolationte2_strand(jar, params, signatures, bam, taxon, out, log=None):
     mccutils.log("popoolationte2", "estimating strand of TEs", log=log)
     out_sig = out+"/output.stranded.signatures"
-    mccutils.run_command(["java","-jar", jar, "updateStrand",
+    mccutils.run_command(["java", "-Djava.io.tmpdir="+out+"/tmp", "-jar", jar, "updateStrand",
                                               "--signature", signatures,
                                               "--output", out_sig,
                                               "--bam", bam,
@@ -98,7 +100,7 @@ def popoolationte2_strand(jar, params, signatures, bam, taxon, out, log=None):
 def popoolationte2_frequency(jar, ppileup, signatures, out, log=None):
     mccutils.log("popoolationte2","estimating frequencies for signatures of TE insertions", log=log)
     freq_signatures = out+"/output.stranded.signatures.freq"
-    mccutils.run_command(["java", "-jar", jar, "frequency",
+    mccutils.run_command(["java", "-Djava.io.tmpdir="+out+"/tmp", "-jar", jar, "frequency",
                                                "--ppileup", ppileup,
                                                "--signature", signatures,
                                                "--output", freq_signatures], log=log)
@@ -108,7 +110,7 @@ def popoolationte2_frequency(jar, ppileup, signatures, out, log=None):
 def popoolationte2_pairup(jar, params, signatures, ref, taxon, out, log=None):
     mccutils.log("popoolationte2","generating raw TE insertion predictions", log=log)
     te_insertions = out+"/teinsertions.txt"
-    mccutils.run_command(["java","-jar", jar, "pairupSignatures",
+    mccutils.run_command(["java", "-Djava.io.tmpdir="+out+"/tmp", "-jar", jar, "pairupSignatures",
                                               "--signature", signatures,
                                               "--ref-genome", ref,
                                               "--hier", taxon,
