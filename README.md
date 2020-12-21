@@ -168,10 +168,6 @@ python3 mcclintock.py --install
                         stdout
   --make_annotations    This option will only run the pipeline up to the
                         creation of the repeat annotations
-  --replace_invalid_symbols
-                        This option will mask symbols as '_' in the feature
-                        names for your imput files to ensure they do not cause
-                        issues with component methods
 ```
 
 * Available methods to use with `-m/--methods`:
