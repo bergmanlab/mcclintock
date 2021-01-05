@@ -126,7 +126,7 @@ def get_abs_path(in_file, log=None):
 def get_base_name(path):
     no_path = os.path.basename(path)
     if no_path[-3:] == ".gz":
-        no_path = no_path[-3]
+        no_path = no_path[:-3]
     no_ext = ".".join(no_path.split(".")[:-1])
 
     return no_ext
