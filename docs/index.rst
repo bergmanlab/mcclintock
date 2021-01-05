@@ -7,7 +7,14 @@
 McClintock
 ==========
 
-Many methods have been developed to detect transposable element (TE) insertions from whole genome shotgun next-generation sequencing (NGS) data, each of which has different dependencies, run interfaces, and output formats. Here, we have developed a meta-pipeline to install and run multiple methods for detecting TE insertions in NGS data, which generates output in the UCSC Browser extensible data (BED) format. A detailed description of the original McClintock pipeline and evaluation of the original six McClintock component methods on the yeast genome can be found in Nelson, Linheiro and Bergman (2017) G3 7:2763-2778.
+* `McClintock Github Repository <https://github.com/bergmanlab/mcclintock>`_
+
+Many methods have been developed to detect transposable element (TE) insertions from whole genome shotgun next-generation sequencing (NGS) data, each of which has different dependencies, run interfaces, and output formats. Here, we have developed a meta-pipeline to install and run multiple methods for detecting TE insertions in NGS data, which generates output in the UCSC Browser extensible data (BED) format as well as the Variant Call Format (VCF).
+
+.. seealso:: 
+
+   `Nelson, Linheiro and Bergman (2017) G3 7:2763-2778 <http://www.g3journal.org/content/7/8/2763>`_
+      Contains a detailed description of the original McClintock pipeline (v0.1) and evaluation of the original six McClintock component methods on the yeast genome
 
 ---------------------------------
 TE Dectection Software Components
@@ -28,11 +35,83 @@ TE Dectection Software Components
    `TEFLoN <https://github.com/jradrion/TEFLoN>`_, `Adrion et al. (2017) <https://academic.oup.com/gbe/article/9/5/1329/3064433>`_
 
 
+-----------
+Quick Start
+-----------
+
+.. code:: bash
+
+   # INSTALL (Requires Conda)
+   git clone git@github.com:bergmanlab/mcclintock.git
+   cd mcclintock
+   conda env create -f install/envs/mcclintock.yml --name mcclintock
+   conda activate mcclintock
+   python3 mcclintock.py --install
+
+   # DOWNLOAD TEST DATA
+   python3 test/download_test_data.py
+
+   # RUN ON TEST DATA
+   python3 mcclintock.py \
+      -r test/sacCer2.fasta \
+      -c test/sac_cer_TE_seqs.fasta \
+      -g test/reference_TE_locations.gff \
+      -t test/sac_cer_te_families.tsv \
+      -1 test/SRR800842_1.fastq.gz \
+      -2 test/SRR800842_2.fastq.gz \
+      -p 4 \
+      -o /path/to/output/directory
+
+
+
+
+
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
    :caption: Getting Started
    :hidden:
 
    getting_started/install
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Component methods
+   :hidden:
+
+   methods/trimgalore
+   methods/mapreads
+   methods/coverage
+   methods/ngs_te_mapper
+   methods/RelocaTE
+   methods/RelocaTE2
+   methods/TEMP
+   methods/RetroSeq
+   methods/PoPoolationTE
+   methods/PoPoolationTE2
+   methods/TE-locate
+   methods/TEFLoN
+
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Running McClintock
+   :hidden:
+
+   running/usage
+   running/input
+   running/config
+   running/examples
+
+.. toctree::
+   :maxdepth: 2
+   :caption: McClintock Output
+   :hidden:
+
+   output/raw
+   output/formatted
+   output/coverage
+   output/trimgalore
+   output/summary
+   output/report
 
 
