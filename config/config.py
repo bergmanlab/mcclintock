@@ -1,6 +1,6 @@
-ALL_METHODS = ["ngs_te_mapper", "relocate", "relocate2", "temp", "retroseq", "popoolationte", "popoolationte2", "te-locate", "teflon", "coverage", "trimgalore","map_reads"]
-SINGLE_END_METHODS = ["ngs_te_mapper","relocate", "coverage", "trimgalore"] # relocate2 removed due to bugs
-MULTI_THREAD_METHODS = ["coverage", "temp", "relocate2", "ngs_te_mapper", "popoolationte", "teflon", "trimgalore"]
+ALL_METHODS = ["ngs_te_mapper", "ngs_te_mapper2", "relocate", "relocate2", "temp", "retroseq", "popoolationte", "popoolationte2", "te-locate", "teflon", "coverage", "trimgalore","map_reads"]
+SINGLE_END_METHODS = ["ngs_te_mapper", "ngs_te_mapper2", "relocate", "coverage", "trimgalore"] # relocate2 removed due to bugs
+MULTI_THREAD_METHODS = ["coverage", "temp", "relocate2", "ngs_te_mapper", "ngs_te_mapper2", "popoolationte", "teflon", "trimgalore"]
 NO_INSTALL_METHODS = ["trimgalore", "map_reads"]
 
 INPUT_DIR = "{{indir}}"
