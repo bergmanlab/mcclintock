@@ -15,3 +15,4 @@ install/log/*
 config/TEMP/__pycache__/*
 test/SRR800842_1.fastq*
 test/SRR800842_2.fastq*
+docs/_build/
