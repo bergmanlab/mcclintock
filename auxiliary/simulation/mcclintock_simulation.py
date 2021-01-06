@@ -403,7 +403,18 @@ def run_mcclintock(fastq1, fastq2, reference, consensus, locations, taxonomy, re
         os.mkdir(mcc_out)
     
     mcc_path = config['mcclintock']['path']
-    command = ["python3",mcc_path+"/mcclintock.py", "-r", reference, "-c", consensus, "-1", fastq1, "-2", fastq2, "-p", str(threads), "-o", mcc_out, "-g", locations, "-t", taxonomy, "-m", config['mcclintock']['methods'], "--replace_invalid_symbols"]
+    command = [
+        "python3",mcc_path+"/mcclintock.py", 
+            "-r", reference, 
+            "-c", consensus, 
+            "-1", fastq1, 
+            "-2", fastq2, 
+            "-p", str(threads), 
+            "-o", mcc_out, 
+            "-g", locations, 
+            "-t", taxonomy, 
+            "-m", config['mcclintock']['methods']
+    ]
     if 'augment' in config['mcclintock'].keys() and config['mcclintock']['augment'] is not None:
         command += ["-a", config['mcclintock']['augment']]
     print("running mcclintock... output:", mcc_out)
@@ -441,14 +452,14 @@ def get_predicted_insertions(out):
     for d in os.listdir(out):
         rep = d
         rep_num = d.replace("run_","")
-        if os.path.exists(out+"/"+d+"/"+rep_num+"/results/"):
-            for e in os.listdir(out+"/"+d+"/"+rep_num+"/results/"):
+        if os.path.exists(out+"/"+d+"/"+rep_num+".modref_1/results/"):
+            for e in os.listdir(out+"/"+d+"/"+rep_num+".modref_1/results/"):
                 method = e
-                for f in os.listdir(out+"/"+d+"/"+rep_num+"/results/"+e):
+                for f in os.listdir(out+"/"+d+"/"+rep_num+".modref_1/results/"+e):
                     if "nonredundant.bed" in f:
                         if method not in methods:
                             methods.append(method)
-                        with open(out+"/"+d+"/"+rep_num+"/results/"+e+"/"+f, "r") as bed:
+                        with open(out+"/"+d+"/"+rep_num+".modref_1/results/"+e+"/"+f, "r") as bed:
                             if method not in predicted_insertions.keys():
                                 predicted_insertions[method] = {rep: []}
                             elif rep not in predicted_insertions[method].keys():
