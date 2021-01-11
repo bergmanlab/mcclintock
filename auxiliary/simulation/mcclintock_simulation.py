@@ -413,7 +413,8 @@ def run_mcclintock(fastq1, fastq2, reference, consensus, locations, taxonomy, re
             "-o", mcc_out, 
             "-g", locations, 
             "-t", taxonomy, 
-            "-m", config['mcclintock']['methods']
+            "-m", config['mcclintock']['methods'],
+            "--keep_intermediate", "all"
     ]
     if 'augment' in config['mcclintock'].keys() and config['mcclintock']['augment'] is not None:
         command += ["-a", config['mcclintock']['augment']]
