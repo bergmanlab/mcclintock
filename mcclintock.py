@@ -384,6 +384,12 @@ def install(methods, resume=False, debug=False):
                 command.append("--quiet")
             mccutils.run_command(command)
     
+    mccutils.log("install", "Installing conda environment for setup_reads steps")
+    command = ["snakemake","--use-conda", "--conda-frontend","mamba", "--conda-prefix", conda_env_dir, "--configfile", install_config, "--cores", "1", "--nolock", "--conda-create-envs-only", data['output']['setup_reads']]
+    if not debug:
+        command.append("--quiet")
+    mccutils.run_command(command)
+
     mccutils.log("install", "Installing conda environment for processing steps")
     command = ["snakemake","--use-conda", "--conda-frontend","mamba", "--conda-prefix", conda_env_dir, "--configfile", install_config, "--cores", "1", "--nolock", "--conda-create-envs-only", data['output']['processing']]
 
@@ -582,6 +588,7 @@ def run_workflow(args, sample_name, ref_name, run_id, debug=False, annotations_o
 
     # print(" ".join(command))
     try:
+        sys.stdout.flush()
         mccutils.mkdir(sample_dir)
         mccutils.mkdir(sample_dir+"tmp")
         mccutils.run_command(command)

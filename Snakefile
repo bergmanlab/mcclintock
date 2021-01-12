@@ -28,7 +28,7 @@ rule setup_reads:
     
     threads: config['args']['max_threads_per_rule']
 
-    conda: config['envs']['mcc_processing']
+    conda: config['envs']['setup_reads']
         
     script:
         config['args']['mcc_path']+"/scripts/preprocessing/setup_reads.py"

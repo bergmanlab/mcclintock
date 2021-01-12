@@ -8,6 +8,7 @@ try:
     sys.path.append(snakemake.config['args']['mcc_path'])
     import scripts.mccutils as mccutils
     import config.preprocessing.trimgalore as trimgalore
+    from Bio import SeqIO
 except Exception as e:
     track = traceback.format_exc()
     print(track, file=sys.stderr)
@@ -15,6 +16,10 @@ except Exception as e:
     sys.exit(1)
     
 
+class fileFormatError(Exception):
+    def __init__(self, message):
+        self.message = message
+    pass
 
 def main():
     fq1 = snakemake.input.fq1
@@ -26,10 +31,13 @@ def main():
     log = snakemake.params.log
 
     mccutils.log("processing", "prepping reads for McClintock")
+    # trims adaptors of input fastq(s)
+    trimmedfq = fq1
+    trimmedfq2 = fq2
+
     try:
-        # trims adaptors of input fastq(s)
-        trimmedfq = fq1
-        trimmedfq2 = fq2
+        check_fastqs(fq1, fq2, mcc_out, min_length=30, log=log)
+
         if "trimgalore" in methods:
             mccutils.log("processing", "running trim_galore", log=log)
             if fq2 == "None":
@@ -43,19 +51,7 @@ def main():
             
         
         # make unzipped copies in mcc input dir        
-        if "gz" in trimmedfq.split(".")[-1]:
-            mccutils.run_command_stdout(["zcat",trimmedfq], snakemake.output[0])
-        else:
-            mccutils.run_command(["cp", trimmedfq, snakemake.output[0]])
-        
-        if trimmedfq2 == "None":
-            mccutils.run_command(["touch", snakemake.output[1]])
-        
-        elif "gz" in trimmedfq2.split(".")[-1]:
-            mccutils.run_command_stdout(["zcat",trimmedfq2], snakemake.output[1])
-        
-        else:
-            mccutils.run_command(["cp", trimmedfq2, snakemake.output[1]])
+        make_copies(trimmedfq, trimmedfq2, snakemake.output[0], snakemake.output[1])
     
         # removes trimmed read files from trimgalore directory
         if trimmedfq != fq1:
@@ -72,6 +68,65 @@ def main():
         sys.exit(1)
 
     mccutils.log("processing", "read setup complete")
+
+
+def make_copies(fq1, fq2, fq1copy, fq2copy):
+    if "gz" in fq1.split(".")[-1]:
+        mccutils.run_command_stdout(["zcat",fq1], fq1copy)
+    else:
+        mccutils.run_command(["cp", fq1, fq1copy])
+    
+    if fq2 == "None":
+        mccutils.run_command(["touch", fq2copy])
+    
+    elif "gz" in fq2.split(".")[-1]:
+        mccutils.run_command_stdout(["zcat",fq2], fq2copy)
+    
+    else:
+        mccutils.run_command(["cp", fq2, fq2copy])
+    
+    return fq1copy, fq2copy
+
+def has_valid_read_lengths(fq1, fq2, min_length=30, paired=False):
+    if paired:
+        fqs_to_check = [fq1, fq2]
+    else:
+        fqs_to_check = [fq1]
+    
+    for x,fq in enumerate(fqs_to_check):
+        has_valid_reads = False
+        for record in SeqIO.parse(fq, "fastq"):
+            if len(str(record.seq)) >= min_length:
+                has_valid_reads = True
+                break
+            
+        # with open(fq, "r") as fastq:
+        #     for ln,line in enumerate(fastq):
+        #         if (ln+1)%4 == 0:
+        #             line = line.replace("\n","")
+        #             if len(line) >= min_length:
+        #                 has_valid_reads = True
+        
+        if not has_valid_reads:
+            raise fileFormatError("fastq "+str(x+1)+" lacks any reads exceeding the minimum length of:"+str(min_length))
+
+def has_valid_read_ids(fq1, fq2, log=None):
+    mccutils.run_command(["fastq_info", fq1, fq2], log=log)
+
+
+def check_fastqs(fq1, fq2, out, min_length=30, log=None):
+    mccutils.mkdir(out+"/tmp")
+    if fq2 == "None":
+        paired = False
+    else:
+        paired =True
+    
+    fq1, fq2 = make_copies(fq1, fq2, out+"/tmp/fist_fq_1.fq", out+"/tmp/fist_fq_2.fq")
+
+    has_valid_read_lengths(fq1, fq2, min_length=min_length, paired=paired)
+
+    if paired:
+        has_valid_read_ids(fq1, fq2, log=log)
 
 
 def run_trim_galore(fq1, run_id, log, out, fq2=None, cores=1, flags=[]):

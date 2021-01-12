@@ -6,10 +6,16 @@ import hashlib
 import socket
 import shutil
 import errno
+import statistics
 from datetime import date
 
 
 INVALID_SYMBOLS = [";","&","(",")","|","*","?","[","]","~","{","}","<","!","^",'"',"'","\\","$","/","+","-","#"," "]
+
+class insertSizeError(Exception):
+    def __init__(self, message):
+        self.message = message
+    pass
 
 
 class Ngs_te_mapper:
@@ -273,7 +279,24 @@ def get_median_insert_size(infile):
     
     return median_insert_size
 
+def calc_median_insert_size(insam):
+    insert_sizes = []
+    with open(insam,"r") as sam:
+        for line in sam:
+            split_line = line.split("\t")
+            if len(split_line) >= 8:
+                insert_size = int(split_line[8])
+                if insert_size > 0:
+                    insert_sizes.append(insert_size)
+    
+    if len(insert_sizes) < 1:
+        raise insertSizeError("Can't calculate median insert size due to lack of valid insert size values")
+        return 0
 
+    insert_sizes.sort()
+    median = statistics.median(insert_sizes)
+
+    return median
 
 def check_file_exists(infile):
     if os.path.exists(infile):

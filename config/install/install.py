@@ -44,6 +44,7 @@ ENV = {
     "tepid" : ENV_PATH+"mcc_tepid.yml",
     "teflon" : ENV_PATH+"mcc_teflon.yml",
     "jitterbug": ENV_PATH+"mcc_jitterbug.yml",
+    "setup_reads": ENV_PATH+"mcc_setup_reads.yml",
     "mcc_processing":  ENV_PATH+"mcc_processing.yml"
 }
 
@@ -63,5 +64,6 @@ OUTPUT = {
     "tepid" : INSTALL_PATH+"tools/tepid/tepid-map",
     "teflon" : INSTALL_PATH+"tools/teflon/teflon.v0.4.py",
     "jitterbug": INSTALL_PATH+"tools/jitterbug/jitterbug.py",
-    "processing" : INSTALL_PATH+"tools/processing.log"
+    "processing" : INSTALL_PATH+"tools/processing.log",
+    "setup_reads" : INSTALL_PATH+"tools/setup_reads.log"
 }

@@ -8,9 +8,7 @@ dependencies:
   - biopython=1.76
   - repeatmasker=4.0.7
   - samtools=0.1.19
-  - trim-galore=0.6.5
   - ucsc-fatotwobit
   - perl-bioperl-run=1.006900
   - bwa=0.7.4
   - jinja2=2.10.1
-  - multiqc=1.9
