@@ -4,6 +4,7 @@ import os
 import sys
 import subprocess
 import traceback
+from datetime import datetime
 try:
     sys.path.append(snakemake.config['args']['mcc_path'])
     import scripts.mccutils as mccutils
@@ -30,6 +31,8 @@ def main():
     run_id = snakemake.params.run_id
     log = snakemake.params.log
 
+    now = datetime.now()
+    start = now.strftime("%Y-%m-%d %H:%M:%S")
     mccutils.log("processing", "prepping reads for McClintock")
     # trims adaptors of input fastq(s)
     trimmedfq = fq1
@@ -67,6 +70,7 @@ def main():
         mccutils.remove(snakemake.output[1])
         sys.exit(1)
 
+
     mccutils.log("processing", "read setup complete")
 
 
@@ -99,13 +103,6 @@ def has_valid_read_lengths(fq1, fq2, min_length=30, paired=False):
             if len(str(record.seq)) >= min_length:
                 has_valid_reads = True
                 break
-            
-        # with open(fq, "r") as fastq:
-        #     for ln,line in enumerate(fastq):
-        #         if (ln+1)%4 == 0:
-        #             line = line.replace("\n","")
-        #             if len(line) >= min_length:
-        #                 has_valid_reads = True
         
         if not has_valid_reads:
             raise fileFormatError("fastq "+str(x+1)+" lacks any reads exceeding the minimum length of:"+str(min_length))
