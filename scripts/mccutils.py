@@ -143,7 +143,7 @@ def is_empty_file(infile):
     else:
         return False
 
-def run_command_stdout(cmd_list, out_file, log=None):
+def run_command_stdout(cmd_list, out_file, log=None, fatal=True):
     msg = ""
     if log is None:
         try:
@@ -159,7 +159,10 @@ def run_command_stdout(cmd_list, out_file, log=None):
             cmd_string = " ".join(cmd_list)
             msg += msg + cmd_string + "\n"
             sys.stderr.write(msg)
-            sys.exit(1)
+            if fatal:
+                sys.exit(1)
+            else:
+                return False
     
     else:
         try:
@@ -179,10 +182,15 @@ def run_command_stdout(cmd_list, out_file, log=None):
             msg += msg + cmd_string + "\n"
             writelog(log, msg)
             sys.stderr.write(msg)
-            sys.exit(1)
+            if fatal:
+                sys.exit(1)
+            else:
+                return False
+    
+    return True
 
 
-def run_command(cmd_list, log=None):
+def run_command(cmd_list, log=None, fatal=True):
     msg = ""
     if log is None:
         try:
@@ -196,7 +204,10 @@ def run_command(cmd_list, log=None):
             cmd_string = " ".join(cmd_list)
             msg += msg + cmd_string + "\n"
             sys.stderr.write(msg)
-            sys.exit(1)
+            if fatal:
+                sys.exit(1)
+            else:
+                return False
     
     else:
         try:
@@ -214,8 +225,12 @@ def run_command(cmd_list, log=None):
             msg += msg + cmd_string + "\n"
             writelog(log, msg)
             sys.stderr.write(msg)
-            sys.exit(1)
+            if fatal:
+                sys.exit(1)
+            else:
+                return False
     
+    return True
 
 def writelog(log, msg):
     if log is not None:

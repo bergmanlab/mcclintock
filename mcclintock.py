@@ -415,7 +415,9 @@ def make_run_config(args, sample_name, ref_name, full_command, current_directory
     try:
         os.chdir(mcc_path)
         git_commit_file = args.out+"/git-commit.txt"
-        mccutils.run_command_stdout(["git","rev-parse","HEAD"], git_commit_file)
+        passed = mccutils.run_command_stdout(["git","rev-parse","HEAD"], git_commit_file, fatal=False)
+        if not passed:
+            raise Exception("Could not locate git commit hash")
         with open(git_commit_file,"r") as inf:
             for line in inf:
                 git_commit = line.replace("\n","")

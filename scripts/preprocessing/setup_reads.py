@@ -71,6 +71,11 @@ def main():
         sys.exit(1)
 
 
+    now = datetime.now()
+    end = now.strftime("%Y-%m-%d %H:%M:%S")
+    mccutils.log("setup_reads", "start: "+start)
+    mccutils.log("setup_reads", "end: "+end)
+
     mccutils.log("processing", "read setup complete")
 
 
@@ -105,10 +110,13 @@ def has_valid_read_lengths(fq1, fq2, min_length=30, paired=False):
                 break
         
         if not has_valid_reads:
-            raise fileFormatError("fastq "+str(x+1)+" lacks any reads exceeding the minimum length of:"+str(min_length))
+            raise fileFormatError("fastq "+str(x+1)+" lacks any reads >= the minimum length of:"+str(min_length))
 
 def has_valid_read_ids(fq1, fq2, log=None):
-    mccutils.run_command(["fastq_info", fq1, fq2], log=log)
+    passed = mccutils.run_command(["fastq_info", fq1, fq2], log=log, fatal=False)
+    if not passed:
+        raise fileFormatError("Paired fastq files failed validation, see: "+log+" for details")
+
 
 
 def check_fastqs(fq1, fq2, out, min_length=30, log=None):
@@ -118,7 +126,7 @@ def check_fastqs(fq1, fq2, out, min_length=30, log=None):
     else:
         paired =True
     
-    fq1, fq2 = make_copies(fq1, fq2, out+"/tmp/fist_fq_1.fq", out+"/tmp/fist_fq_2.fq")
+    fq1, fq2 = make_copies(fq1, fq2, out+"/tmp/tmp_val_fq_1.fq", out+"/tmp/tmp_val_fq_2.fq")
 
     has_valid_read_lengths(fq1, fq2, min_length=min_length, paired=paired)
 
