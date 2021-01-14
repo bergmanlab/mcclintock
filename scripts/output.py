@@ -33,7 +33,7 @@ class Ngs_te_mapper:
 class Ngs_te_mapper2:
     def __init__(self):
         self.support = {
-            "supportingcov": Info("SUPPORTING_COV", "Average coverage of reads supporting the TE insertion", 0.0, "Float")
+            # "frequency": Info("SUPPORTING_READS", "Estimated allele frequency", 0.0, "Float")
         }
 
 class Temp:
@@ -243,8 +243,7 @@ def make_nonredundant_bed(insertions, sample_name, out_dir, method="popoolationt
                     uniq_inserts[key] = insert
 
             elif method == "ngs_te_mapper2":
-                if insert.support_info.support['supportingcov'].value > uniq_inserts[key].support_info.support['supportingcov'].value:
-                    uniq_inserts[key] = insert
+                uniq_inserts[key] = insert
             
             elif method == "tepid":
                 if insert.tepid.support > uniq_inserts[key].tepid.support:

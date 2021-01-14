@@ -24,7 +24,7 @@ def main():
 
     mccutils.log("ngs_te_mapper2","processing ngs_te_mapper2 results", log=log)
 
-    insertions = read_insertions(ref_bed, nonref_bed, chromosomes, sample_name, out_dir, min_read_cutoff=config.MIN_READ_SUPPORT)
+    insertions = read_insertions(ref_bed, nonref_bed, chromosomes, sample_name, out_dir)
 
     if len(insertions) > 0:
         insertions = output.make_redundant_bed(insertions, sample_name, out_dir, method="ngs_te_mapper2")
@@ -37,7 +37,7 @@ def main():
 
     mccutils.log("ngs_te_mapper","ngs_te_mapper postprocessing complete")
 
-def read_insertions(ref_bed, nonref_bed, chromosomes, sample_name, out_dir, min_read_cutoff=0):
+def read_insertions(ref_bed, nonref_bed, chromosomes, sample_name, out_dir):
     insertions = []
     with open(ref_bed,"r") as inbed:
         for line in inbed:
@@ -66,9 +66,7 @@ def read_insertions(ref_bed, nonref_bed, chromosomes, sample_name, out_dir, min_
             insert.strand = split_line[5]
             insert.family = split_line[3].split("|")[0]
             insert.name = insert.family+"|"+insert.type+"|NA|"+sample_name+"|ngs_te_mapper2|sr|"
-            insert.support_info.support['supportingcov'].value = float(split_line[4])
-            if insert.support_info.support['supportingcov'].value > min_read_cutoff and insert.chromosome in chromosomes:
-                insertions.append(insert)
+            insertions.append(insert)
 
     return insertions
 

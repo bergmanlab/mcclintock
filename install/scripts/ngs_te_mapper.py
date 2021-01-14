@@ -6,6 +6,8 @@ import scripts.mccutils as mccutils
 def main():
     install_path = snakemake.config['paths']['install']+"/tools/"
 
+    raw_name = "ngs_te_mapper-f9f48996ac346ac86d57edbd00534aa1227b753e"
+
     mccutils.remove(snakemake.params.zipfile)
     download_success = mccutils.download(snakemake.params.url, snakemake.params.zipfile, md5=snakemake.params.md5, max_attempts=3)
 
@@ -14,22 +16,22 @@ def main():
         print("try running --install with --clean for clean installation")
         sys.exit(1)
 
-    mccutils.remove(snakemake.config['paths']['install']+"ngs_te_mapper-fb23590200666fe66f1c417c5d5934385cb77ab9")
+    mccutils.remove(snakemake.config['paths']['install']+raw_name)
     command = ["unzip", snakemake.params.zipfile]
     mccutils.run_command(command, log=snakemake.params.log)
 
-    mccutils.remove(install_path+"ngs_te_mapper-fb23590200666fe66f1c417c5d5934385cb77ab9")
-    command = ["mv", snakemake.config['paths']['install']+"ngs_te_mapper-fb23590200666fe66f1c417c5d5934385cb77ab9", install_path]
+    mccutils.remove(install_path+raw_name)
+    command = ["mv", snakemake.config['paths']['install']+raw_name, install_path]
     mccutils.run_command(command, log=snakemake.params.log)
 
     mccutils.remove(install_path+"ngs_te_mapper")
     mccutils.mkdir(install_path+"ngs_te_mapper")
-    for f in os.listdir(install_path+"ngs_te_mapper-fb23590200666fe66f1c417c5d5934385cb77ab9"):
-        command = ["mv", install_path+"ngs_te_mapper-fb23590200666fe66f1c417c5d5934385cb77ab9/"+f, install_path+"ngs_te_mapper"]
+    for f in os.listdir(install_path+raw_name):
+        command = ["mv", install_path+raw_name+"/"+f, install_path+"ngs_te_mapper"]
         mccutils.run_command(command, log=snakemake.params.log)  
 
 
-    mccutils.remove(install_path+"ngs_te_mapper-fb23590200666fe66f1c417c5d5934385cb77ab9")
+    mccutils.remove(install_path+raw_name)
     mccutils.remove(snakemake.params.zipfile)
 
 if __name__ == "__main__":                
