@@ -9,3 +9,4 @@ dependencies:
   - bwa=0.7.17
   - repeatmasker=4.1.0
   - bedtools=2.17.0
+  - gawk=5
