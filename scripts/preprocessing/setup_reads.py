@@ -31,8 +31,8 @@ def main():
     run_id = snakemake.params.run_id
     log = snakemake.params.log
 
-    now = datetime.now()
-    start = now.strftime("%Y-%m-%d %H:%M:%S")
+    # now = datetime.now()
+    # start = now.strftime("%Y-%m-%d %H:%M:%S")
     mccutils.log("processing", "prepping reads for McClintock")
     # trims adaptors of input fastq(s)
     trimmedfq = fq1
@@ -71,10 +71,10 @@ def main():
         sys.exit(1)
 
 
-    now = datetime.now()
-    end = now.strftime("%Y-%m-%d %H:%M:%S")
-    mccutils.log("setup_reads", "start: "+start)
-    mccutils.log("setup_reads", "end: "+end)
+    # now = datetime.now()
+    # end = now.strftime("%Y-%m-%d %H:%M:%S")
+    # mccutils.log("setup_reads", "start: "+start)
+    # mccutils.log("setup_reads", "end: "+end)
 
     mccutils.log("processing", "read setup complete")
 
