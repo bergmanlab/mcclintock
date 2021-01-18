@@ -6,10 +6,16 @@ import hashlib
 import socket
 import shutil
 import errno
+import statistics
 from datetime import date
 
 
 INVALID_SYMBOLS = [";","&","(",")","|","*","?","[","]","~","{","}","<","!","^",'"',"'","\\","$","/","+","-","#"," "]
+
+class insertSizeError(Exception):
+    def __init__(self, message):
+        self.message = message
+    pass
 
 
 class Ngs_te_mapper:
@@ -126,7 +132,7 @@ def get_abs_path(in_file, log=None):
 def get_base_name(path):
     no_path = os.path.basename(path)
     if no_path[-3:] == ".gz":
-        no_path = no_path.replace(".gz","")
+        no_path = no_path[:-3]
     no_ext = ".".join(no_path.split(".")[:-1])
 
     return no_ext
@@ -137,7 +143,7 @@ def is_empty_file(infile):
     else:
         return False
 
-def run_command_stdout(cmd_list, out_file, log=None):
+def run_command_stdout(cmd_list, out_file, log=None, fatal=True):
     msg = ""
     if log is None:
         try:
@@ -153,7 +159,10 @@ def run_command_stdout(cmd_list, out_file, log=None):
             cmd_string = " ".join(cmd_list)
             msg += msg + cmd_string + "\n"
             sys.stderr.write(msg)
-            sys.exit(1)
+            if fatal:
+                sys.exit(1)
+            else:
+                return False
     
     else:
         try:
@@ -173,10 +182,15 @@ def run_command_stdout(cmd_list, out_file, log=None):
             msg += msg + cmd_string + "\n"
             writelog(log, msg)
             sys.stderr.write(msg)
-            sys.exit(1)
+            if fatal:
+                sys.exit(1)
+            else:
+                return False
+    
+    return True
 
 
-def run_command(cmd_list, log=None):
+def run_command(cmd_list, log=None, fatal=True):
     msg = ""
     if log is None:
         try:
@@ -190,7 +204,10 @@ def run_command(cmd_list, log=None):
             cmd_string = " ".join(cmd_list)
             msg += msg + cmd_string + "\n"
             sys.stderr.write(msg)
-            sys.exit(1)
+            if fatal:
+                sys.exit(1)
+            else:
+                return False
     
     else:
         try:
@@ -208,8 +225,12 @@ def run_command(cmd_list, log=None):
             msg += msg + cmd_string + "\n"
             writelog(log, msg)
             sys.stderr.write(msg)
-            sys.exit(1)
+            if fatal:
+                sys.exit(1)
+            else:
+                return False
     
+    return True
 
 def writelog(log, msg):
     if log is not None:
@@ -273,7 +294,24 @@ def get_median_insert_size(infile):
     
     return median_insert_size
 
+def calc_median_insert_size(insam):
+    insert_sizes = []
+    with open(insam,"r") as sam:
+        for line in sam:
+            split_line = line.split("\t")
+            if len(split_line) >= 8:
+                insert_size = int(split_line[8])
+                if insert_size > 0:
+                    insert_sizes.append(insert_size)
+    
+    if len(insert_sizes) < 1:
+        raise insertSizeError("Can't calculate median insert size due to lack of valid insert size values")
+        return 0
 
+    insert_sizes.sort()
+    median = statistics.median(insert_sizes)
+
+    return median
 
 def check_file_exists(infile):
     if os.path.exists(infile):

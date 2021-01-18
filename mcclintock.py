@@ -384,6 +384,12 @@ def install(methods, resume=False, debug=False):
                 command.append("--quiet")
             mccutils.run_command(command)
     
+    mccutils.log("install", "Installing conda environment for setup_reads steps")
+    command = ["snakemake","--use-conda", "--conda-frontend","mamba", "--conda-prefix", conda_env_dir, "--configfile", install_config, "--cores", "1", "--nolock", "--conda-create-envs-only", data['output']['setup_reads']]
+    if not debug:
+        command.append("--quiet")
+    mccutils.run_command(command)
+
     mccutils.log("install", "Installing conda environment for processing steps")
     command = ["snakemake","--use-conda", "--conda-frontend","mamba", "--conda-prefix", conda_env_dir, "--configfile", install_config, "--cores", "1", "--nolock", "--conda-create-envs-only", data['output']['processing']]
 
@@ -409,7 +415,9 @@ def make_run_config(args, sample_name, ref_name, full_command, current_directory
     try:
         os.chdir(mcc_path)
         git_commit_file = args.out+"/git-commit.txt"
-        mccutils.run_command_stdout(["git","rev-parse","HEAD"], git_commit_file)
+        passed = mccutils.run_command_stdout(["git","rev-parse","HEAD"], git_commit_file, fatal=False)
+        if not passed:
+            raise Exception("Could not locate git commit hash")
         with open(git_commit_file,"r") as inf:
             for line in inf:
                 git_commit = line.replace("\n","")
@@ -582,6 +590,7 @@ def run_workflow(args, sample_name, ref_name, run_id, debug=False, annotations_o
 
     # print(" ".join(command))
     try:
+        sys.stdout.flush()
         mccutils.mkdir(sample_dir)
         mccutils.mkdir(sample_dir+"tmp")
         mccutils.run_command(command)

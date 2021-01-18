@@ -1,0 +1,10 @@
+name: mcc_setup_reads
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - biopython=1.76
+  - trim-galore=0.6.5
+  - fastq_utils=0.24.1
+  - multiqc=1.9

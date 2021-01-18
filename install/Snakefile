@@ -84,6 +84,21 @@ rule ngs_te_mapper:
 
     script:
         config['paths']['install']+"scripts/ngs_te_mapper.py"
+
+rule ngs_te_mapper2:
+    params:
+        url = config['URLs']['ngs_te_mapper2'],
+        md5 = config['MD5s']['ngs_te_mapper2'],
+        zipfile = config['paths']['install']+"tools/ngs_te_mapper2/ngs_te_mapper2.zip",
+        log = config['paths']['log_dir']+"install.log"
+    
+    output:
+        config['output']['ngs_te_mapper2']
+    
+    conda: config['ENVs']['ngs_te_mapper2']
+
+    script:
+        config['paths']['install']+"scripts/ngs_te_mapper2.py"
     
 rule popoolationte:
     params:
@@ -146,6 +161,15 @@ rule processing:
     shell:
         "echo 'processing env installed' > {output}"
 
+rule setup_reads:
+    output:
+        config['output']['setup_reads'] 
+    
+    conda: config['ENVs']['setup_reads']
+
+    shell:
+        "echo 'setup_reads env installed' > {output}"
+
 rule teflon:
     params:
         url = config["URLs"]['teflon'],
@@ -191,7 +215,8 @@ rule install_all:
         config['output']['popoolationte'],
         config['output']['popoolationte2'],
         config['output']['coverage'],
-        config['output']['relocate2']
+        config['output']['relocate2'],
+        config['output']['setup_reads']
     
     conda: config['ENVs']['mcc_processing']
 

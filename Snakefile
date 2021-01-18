@@ -5,6 +5,7 @@ include: config['args']['mcc_path']+"/snakefiles/popoolationte.snakefile"
 include: config['args']['mcc_path']+"/snakefiles/popoolationte2.snakefile"
 include: config['args']['mcc_path']+"/snakefiles/telocate.snakefile"
 include: config['args']['mcc_path']+"/snakefiles/ngs_te_mapper.snakefile"
+include: config['args']['mcc_path']+"/snakefiles/ngs_te_mapper2.snakefile"
 include: config['args']['mcc_path']+"/snakefiles/retroseq.snakefile"
 include: config['args']['mcc_path']+"/snakefiles/tepid.snakefile"
 include: config['args']['mcc_path']+"/snakefiles/teflon.snakefile"
@@ -27,7 +28,7 @@ rule setup_reads:
     
     threads: config['args']['max_threads_per_rule']
 
-    conda: config['envs']['mcc_processing']
+    conda: config['envs']['setup_reads']
         
     script:
         config['args']['mcc_path']+"/scripts/preprocessing/setup_reads.py"

@@ -1,6 +1,6 @@
-ALL_METHODS = ["ngs_te_mapper", "relocate", "relocate2", "temp", "retroseq", "popoolationte", "popoolationte2", "te-locate", "teflon", "coverage", "trimgalore","map_reads"]
-SINGLE_END_METHODS = ["ngs_te_mapper","relocate", "coverage", "trimgalore"] # relocate2 removed due to bugs
-MULTI_THREAD_METHODS = ["coverage", "temp", "relocate2", "ngs_te_mapper", "popoolationte", "teflon", "trimgalore"]
+ALL_METHODS = ["ngs_te_mapper", "relocate", "relocate2", "temp", "retroseq", "popoolationte", "popoolationte2", "te-locate", "teflon", "coverage", "trimgalore","map_reads"] #"ngs_te_mapper2",
+SINGLE_END_METHODS = ["ngs_te_mapper", "relocate", "coverage", "trimgalore", "map_reads"] #"ngs_te_mapper2",
+MULTI_THREAD_METHODS = ["coverage", "temp", "relocate2", "ngs_te_mapper", "popoolationte", "teflon", "trimgalore"] #"ngs_te_mapper2",
 NO_INSTALL_METHODS = ["trimgalore", "map_reads"]
 
 INPUT_DIR = "{{indir}}"
@@ -45,6 +45,7 @@ RESULTS_DIR = "{{results}}"
 OUT_PATHS = {
         'coverage': RESULTS_DIR+"coverage/te_depth.csv",
         'ngs_te_mapper': RESULTS_DIR+"ngs_te_mapper/"+SAMPLE_NAME+"_ngs_te_mapper_nonredundant.bed",
+        'ngs_te_mapper2': RESULTS_DIR+"ngs_te_mapper2/"+SAMPLE_NAME+"_ngs_te_mapper2_nonredundant.bed",
         'relocate': RESULTS_DIR+"relocaTE/"+SAMPLE_NAME+"_relocate_nonredundant.bed",
         'temp': RESULTS_DIR+"TEMP/"+SAMPLE_NAME+"_temp_nonredundant.bed",
         'retroseq': RESULTS_DIR+"retroseq/"+SAMPLE_NAME+"_retroseq_nonredundant.bed",
@@ -72,6 +73,15 @@ ESSENTIAL_PATHS = {
                 RESULTS_DIR+"ngs_te_mapper/"+SAMPLE_NAME+"_ngs_te_mapper_malformed.bed",
                 RESULTS_DIR+"ngs_te_mapper/"+SAMPLE_NAME+"_ngs_te_mapper_nonredundant_non-reference.vcf",
                 RESULTS_DIR+"ngs_te_mapper/unfiltered/bed_tsd/"+SAMPLE_NAME+"_insertions.bed"
+        ],
+
+        'ngs_te_mapper2': [
+                RESULTS_DIR+"ngs_te_mapper2/"+SAMPLE_NAME+"_ngs_te_mapper2_nonredundant.bed",
+                RESULTS_DIR+"ngs_te_mapper2/"+SAMPLE_NAME+"_ngs_te_mapper2_redundant.bed",
+                RESULTS_DIR+"ngs_te_mapper2/"+SAMPLE_NAME+"_ngs_te_mapper2_malformed.bed",
+                RESULTS_DIR+"ngs_te_mapper2/"+SAMPLE_NAME+"_ngs_te_mapper2_nonredundant_non-reference.vcf",
+                RESULTS_DIR+"ngs_te_mapper2/unfiltered/"+SAMPLE_NAME+".nonref.bed",
+                RESULTS_DIR+"ngs_te_mapper2/unfiltered/"+SAMPLE_NAME+".ref.bed"
         ],
 
         'relocate': [
