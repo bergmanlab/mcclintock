@@ -35,11 +35,11 @@ def main():
             fastq1 = modified_reference.replace(".fasta", "_1.fastq")
             fastq2 = modified_reference.replace(".fasta", "_2.fastq")
             if not os.path.exists(fastq1) or not os.path.exists(fastq2):
-                num_pairs = calculate_num_pairs(modified_reference)
+                num_pairs = calculate_num_pairs(modified_reference, single=args.single)
                 fastq1, fastq2 = create_synthetic_reads(modified_reference, num_pairs, x, args.out, run_id=args.runid, seed=args.seed)
 
             if not os.path.exists(args.out+"/results/forward/run"+args.runid+"_"+str(x)+"/results/summary/summary_report.txt"):
-                run_mcclintock(fastq1, fastq2, args.reference, args.consensus, args.locations, args.taxonomy, x, args.proc, args.out, args.config, run_id=args.runid)
+                run_mcclintock(fastq1, fastq2, args.reference, args.consensus, args.locations, args.taxonomy, x, args.proc, args.out, args.config, run_id=args.runid, single=args.single)
 
             # reverse
             consensus_seqs = get_seqs(args.consensus)
@@ -52,11 +52,11 @@ def main():
             fastq1 = modified_reference.replace(".fasta", "_1.fastq")
             fastq2 = modified_reference.replace(".fasta", "_2.fastq")
             if not os.path.exists(fastq1) or not os.path.exists(fastq2):
-                num_pairs = calculate_num_pairs(modified_reference)
+                num_pairs = calculate_num_pairs(modified_reference, single=args.single)
                 fastq1, fastq2 = create_synthetic_reads(modified_reference, num_pairs, x, args.out, run_id=args.runid, seed=args.seed)
 
             if not os.path.exists(args.out+"/results/reverse/run"+args.runid+"_"+str(x)+"/results/summary/summary_report.txt"):
-                run_mcclintock(fastq1, fastq2, args.reference, args.consensus, args.locations, args.taxonomy, x, args.proc, args.out, args.config, run_id=args.runid, reverse=True)
+                run_mcclintock(fastq1, fastq2, args.reference, args.consensus, args.locations, args.taxonomy, x, args.proc, args.out, args.config, run_id=args.runid, single=args.single, reverse=True)
 
     elif args.mode == "analysis":
         if not os.path.exists(args.out+"/summary/"):
@@ -88,6 +88,7 @@ def parse_args():
     parser.add_argument("--end", type=int, help="The number of replicates to run. [default = 300]", required=False)
     parser.add_argument("--seed", type=str, help="a seed to the random number generator so runs can be replicated", required=False)
     parser.add_argument("--runid", type=str, help="a string to prepend to output files so that multiple runs can be run at the same time without file name clashes", required=False)
+    parser.add_argument("-s","--single", action="store_true", help="runs the simulation in single ended mode", required=False)
 
     args = parser.parse_args()
 
@@ -140,6 +141,9 @@ def parse_args():
         
         if args.runid is None:
             args.runid = ""
+        
+        if args.single is None:
+            args.single = False
 
     return args
 
@@ -355,7 +359,7 @@ def add_synthetic_insertion(reference_seqs, consensus_seqs, config, rep, out, ru
     return outfasta
 
 
-def calculate_num_pairs(fasta):
+def calculate_num_pairs(fasta, single=False):
     command = ["samtools","faidx", fasta]
     run_command(command)
 
@@ -366,7 +370,11 @@ def calculate_num_pairs(fasta):
             contig_length = int(split_line[1])
             total_length += contig_length
     
-    num_pairs = (total_length * 100)/202
+    if single:
+        num_pairs = (total_length * 100)/202
+    else:
+        num_pairs = (total_length * 100)/101
+
     return num_pairs
 
 def create_synthetic_reads(reference, num_pairs, rep, out, run_id="", seed=None):
@@ -386,7 +394,7 @@ def create_synthetic_reads(reference, num_pairs, rep, out, run_id="", seed=None)
 
     return fastq1, fastq2
 
-def run_mcclintock(fastq1, fastq2, reference, consensus, locations, taxonomy, rep, threads, out, config, run_id="", reverse=False):
+def run_mcclintock(fastq1, fastq2, reference, consensus, locations, taxonomy, rep, threads, out, config, run_id="", reverse=False, single=False):
     if not os.path.exists(out+"/results"):
         os.mkdir(out+"/results")
     
@@ -403,19 +411,34 @@ def run_mcclintock(fastq1, fastq2, reference, consensus, locations, taxonomy, re
         os.mkdir(mcc_out)
     
     mcc_path = config['mcclintock']['path']
-    command = [
-        "python3",mcc_path+"/mcclintock.py", 
-            "-r", reference, 
-            "-c", consensus, 
-            "-1", fastq1, 
-            "-2", fastq2, 
-            "-p", str(threads), 
-            "-o", mcc_out, 
-            "-g", locations, 
-            "-t", taxonomy, 
-            "-m", config['mcclintock']['methods'],
-            "--keep_intermediate", "all"
-    ]
+    if single:
+        command = [
+            "python3",mcc_path+"/mcclintock.py", 
+                "-r", reference, 
+                "-c", consensus, 
+                "-1", fastq1, 
+                "-p", str(threads), 
+                "-o", mcc_out, 
+                "-g", locations, 
+                "-t", taxonomy, 
+                "-m", config['mcclintock']['methods'],
+                "--keep_intermediate", "all"
+        ]
+    else:
+        command = [
+            "python3",mcc_path+"/mcclintock.py", 
+                "-r", reference, 
+                "-c", consensus, 
+                "-1", fastq1, 
+                "-2", fastq2, 
+                "-p", str(threads), 
+                "-o", mcc_out, 
+                "-g", locations, 
+                "-t", taxonomy, 
+                "-m", config['mcclintock']['methods'],
+                "--keep_intermediate", "all"
+        ]
+
     if 'augment' in config['mcclintock'].keys() and config['mcclintock']['augment'] is not None:
         command += ["-a", config['mcclintock']['augment']]
     print("running mcclintock... output:", mcc_out)
