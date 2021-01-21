@@ -33,7 +33,10 @@ class Ngs_te_mapper:
 class Ngs_te_mapper2:
     def __init__(self):
         self.support = {
-            # "frequency": Info("SUPPORTING_READS", "Estimated allele frequency", 0.0, "Float")
+            "frequency": Info("FREQUENCY", "Estimated allele frequency", 0.0, "Float"),
+            "three_prime_support" : Info("THREE_PRIME_SUPPORT", "Number of reads supporting the 3' breakpoint", 0, "Integer"),
+            "five_prime_support" : Info("FIVE_PRIME_SUPPORT", "Number of reads supporting the 5' breakpoint", 0, "Integer"),
+            "reference_reads": Info("REFERENCE_READS", "reads supporting the reference state at this position",0, "Integer")
         }
 
 class Temp:

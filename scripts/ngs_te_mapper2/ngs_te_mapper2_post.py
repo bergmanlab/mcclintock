@@ -65,8 +65,13 @@ def read_insertions(ref_bed, nonref_bed, chromosomes, sample_name, out_dir):
             insert.type = "non-reference"
             insert.strand = split_line[5]
             insert.family = split_line[3].split("|")[0]
-            insert.name = insert.family+"|"+insert.type+"|NA|"+sample_name+"|ngs_te_mapper2|sr|"
-            insertions.append(insert)
+            insert.support_info.support['frequency'].value = float(split_line[3].split("|")[2])
+            insert.support_info.support['three_prime_support'].value = int(split_line[3].split("|")[3])
+            insert.support_info.support['five_prime_support'].value = int(split_line[3].split("|")[4])
+            insert.support_info.support['reference_reads'].value = int(split_line[3].split("|")[5])
+            insert.name = insert.family+"|"+insert.type+"|"+str(insert.support_info.support['frequency'].value)+"|"+sample_name+"|ngs_te_mapper2|sr|"
+            if insert.chromosome in chromosomes:
+                insertions.append(insert)
 
     return insertions
 
