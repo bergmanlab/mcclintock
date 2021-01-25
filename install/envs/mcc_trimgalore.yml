@@ -1,4 +1,4 @@
-name: mcc_setup_reads
+name: trimgalore
 channels:
   - bioconda
   - conda-forge

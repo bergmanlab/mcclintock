@@ -57,5 +57,9 @@ def main():
             
             mccutils.run_command(["mv", install_path+"tmp", install_path+"relocate/scripts/"+f])
 
+    # write version to file
+    with open(snakemake.config['paths']['install']+"/tools/relocate/version.log","w") as version:
+        version.write(snakemake.params.md5)
+
 if __name__ == "__main__":                
     main()

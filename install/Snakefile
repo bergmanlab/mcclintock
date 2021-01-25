@@ -152,23 +152,24 @@ rule tepid:
         "echo 'TEPID env installed' > {output}"
 
 
-rule processing:
+rule map_reads:
     output:
-        config['output']['processing'] 
+        config['output']['map_reads'] 
     
-    conda: config['ENVs']['mcc_processing']
+    conda: config['ENVs']['map_reads']
 
     shell:
         "echo 'processing env installed' > {output}"
 
-rule setup_reads:
+rule trimgalore:
     output:
-        config['output']['setup_reads'] 
+        config['output']['trimgalore'] 
     
-    conda: config['ENVs']['setup_reads']
+    conda: config['ENVs']['trimgalore']
 
     shell:
-        "echo 'setup_reads env installed' > {output}"
+        "echo 'trimgalore env installed' > {output}"
+        
 
 rule teflon:
     params:
@@ -216,9 +217,9 @@ rule install_all:
         config['output']['popoolationte2'],
         config['output']['coverage'],
         config['output']['relocate2'],
-        config['output']['setup_reads']
+        config['output']['trimgalore']
     
-    conda: config['ENVs']['mcc_processing']
+    conda: config['ENVs']['processing']
 
     shell:
         "echo 'install done!'"

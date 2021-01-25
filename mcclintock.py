@@ -29,6 +29,7 @@ def main():
     args = parse_args()
     mccutils.mkdir(args.out+"/logs")
     mccutils.mkdir(args.out+"/tmp")
+    check_installed_modules(args.methods, config.NO_INSTALL_METHODS, config_install.MD5, os.path.dirname(os.path.abspath(__file__))+"/install/")
     check_input_files(args.reference, args.consensus, args.first, fq2=args.second, locations=args.locations, taxonomy=args.taxonomy, coverage_fasta=args.coverage_fasta, augment_fasta=args.augment, annotations_only=args.make_annotations)
     ref_name = mccutils.get_base_name(args.reference)
     run_id = make_run_config(args, args.sample_name, ref_name, full_command, current_directory, debug=args.debug)
@@ -320,6 +321,22 @@ def format_taxonomy(in_taxonomy, gff_ids, consensus_ids, consensus_fasta, locati
                 if masked_te_family not in consensus_ids:
                     sys.exit("TE Family: "+masked_te_family+" not found in sequence names from: "+consensus_fasta+"\nplease make sure each family in: "+in_taxonomy+" is found in: "+consensus_fasta+"\n")
 
+def get_conda_envs(conda_env_dir):
+    existing_envs = {}
+    if os.path.exists(conda_env_dir):
+        for f in os.listdir(conda_env_dir):
+            if ".yaml" in f:
+                yaml = conda_env_dir+"/"+f
+                name = ""
+                with open(yaml,"r") as y:
+                    for line in y:
+                        if "name:" in line:
+                            name = line.split(":")[1].replace("\n","")
+                            name = name.replace(" ","")
+                            existing_envs[name] = yaml
+    
+    return existing_envs
+
 def install(methods, resume=False, debug=False):
 
     mcc_path = os.path.dirname(os.path.abspath(__file__))
@@ -352,14 +369,9 @@ def install(methods, resume=False, debug=False):
         os.remove(install_path+"install.log")
 
 
-    # removes installed tools and conda environments
-    if not resume:
-        mccutils.log("install","Removing all previously installed McClintock conda envs and tools")
-        mccutils.log("install","Use the --resume option if you don't want to perform a clean installation")
-        mccutils.log("install","Removing conda envs from: "+conda_env_dir)
-        mccutils.log("install","Removing installed tools from: "+install_path+"tools")
-        mccutils.remove(conda_env_dir)
-        mccutils.remove(install_path+"/tools")
+    # finding existing conda yamls
+    existing_envs = get_conda_envs(conda_env_dir)
+
 
     mccutils.mkdir(conda_env_dir)
     os.chdir(install_path)
@@ -370,32 +382,59 @@ def install(methods, resume=False, debug=False):
         methods.append("te-locate")
 
     for env in methods:
-        if env not in config.NO_INSTALL_METHODS:
-            mccutils.log("install","Installing conda environment for: "+env)
-            command = ["snakemake","--use-conda", "--conda-frontend","mamba", "--conda-prefix", conda_env_dir, "--configfile", install_config, "--cores", "1", "--nolock", "--conda-create-envs-only", data['output'][env]]
+        if not resume:
+            # remove existing envs
+            if env in existing_envs.keys():
+                mccutils.log("install","Removing existing conda env for: "+env)
+                mccutils.remove(existing_envs[env])
+                mccutils.remove(existing_envs[env].replace(".yaml",""))
 
-            if not debug:
-                command.append("--quiet")
-            mccutils.run_command(command)
+            # remove existing src code
+            if os.path.exists(install_path+"/tools/"+env):
+                mccutils.log("install","Removing existing installation of: "+env)
+                print(install_path+"/tools/"+env)
+                mccutils.remove(install_path+"/tools/"+env)
+        
+        # reinstall src code
+        mccutils.log("install","Installing scripts for:"+env)
+        command = ["snakemake","--use-conda", "--conda-prefix", conda_env_dir, "--configfile", install_config, "--cores", "1", "--nolock", data['output'][env]]
+        if not debug:
+            command.append("--quiet")
+        mccutils.run_command(command)
 
-            mccutils.log("install","Installing scripts for:"+env)
-            command = ["snakemake","--use-conda", "--conda-prefix", conda_env_dir, "--configfile", install_config, "--cores", "1", "--nolock", data['output'][env]]
-            if not debug:
-                command.append("--quiet")
-            mccutils.run_command(command)
+def get_installed_versions(tool_dir):
+    versions = {}
+    for d in os.listdir(tool_dir):
+        version = ""
+        version_file = tool_dir+"/"+d+"/version.log"
+        if os.path.exists(version_file):
+            with open(version_file,"r") as v_file:
+                for line in v_file:
+                    version = line
+        
+        versions[d] = version
     
-    mccutils.log("install", "Installing conda environment for setup_reads steps")
-    command = ["snakemake","--use-conda", "--conda-frontend","mamba", "--conda-prefix", conda_env_dir, "--configfile", install_config, "--cores", "1", "--nolock", "--conda-create-envs-only", data['output']['setup_reads']]
-    if not debug:
-        command.append("--quiet")
-    mccutils.run_command(command)
+    return versions
 
-    mccutils.log("install", "Installing conda environment for processing steps")
-    command = ["snakemake","--use-conda", "--conda-frontend","mamba", "--conda-prefix", conda_env_dir, "--configfile", install_config, "--cores", "1", "--nolock", "--conda-create-envs-only", data['output']['processing']]
 
-    if not debug:
-        command.append("--quiet")
-    mccutils.run_command(command)
+def check_installed_modules(methods, no_install_methods, method_md5s, install_dir):
+    # finding existing conda yamls
+    conda_env_dir = install_dir+"/envs/conda/"
+    existing_envs = get_conda_envs(conda_env_dir)
+    installed_version = get_installed_versions(install_dir+"/tools/")
+
+    for method in methods:
+        if method not in existing_envs.keys():
+            print("ERROR: missing conda env for method:", method, file=sys.stderr)
+            print("please install methods using: python mcclintock.py --install", file=sys.stderr)
+            sys.exit(1)
+        
+        if method not in no_install_methods:
+            if installed_version[method] != method_md5s[method]:
+                print("ERROR: installed version of", method,"(", installed_version[method], ") does not match the expected: ", method_md5s[method])
+                print("please install methods using: python mcclintock.py --install", file=sys.stderr)
+                sys.exit(1)
+
 
 
 def make_run_config(args, sample_name, ref_name, full_command, current_directory, debug=False):
@@ -553,7 +592,8 @@ def run_workflow(args, sample_name, ref_name, run_id, debug=False, annotations_o
     if not debug:
         command.append("--quiet")
     else:
-        command.append("--reason")
+        # command.append("--reason")
+        command.append("--verbose")
     
     command += ["--configfile", args.out+"/snakemake/config/config_"+str(run_id)+".json"]
     command += ["--cores", str(args.proc)]

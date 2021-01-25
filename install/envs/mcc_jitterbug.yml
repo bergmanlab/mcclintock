@@ -1,4 +1,4 @@
-name: mcc_jitterbug
+name: jitterbug
 channels:
   - bioconda
   - conda-forge

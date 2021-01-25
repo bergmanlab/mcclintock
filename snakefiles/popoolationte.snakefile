@@ -13,7 +13,7 @@ rule make_popoolationte_annotations:
 
     threads: 1
 
-    conda: config['envs']['mcc_processing']
+    conda: config['envs']['processing']
 
     output:
         taxonomy = config['mcc']['popoolationTE_taxonomy'],
@@ -34,7 +34,7 @@ rule popoolationTE_ref_fasta:
     params:
         log=config['args']['log_dir']+"processing.log"
 
-    conda: config['envs']['mcc_processing']
+    conda: config['envs']['processing']
 
     output:
         config['mcc']['popoolationTE_ref_fasta']
@@ -98,7 +98,7 @@ rule popoolationTE_post:
     
     threads: 1
 
-    conda: config['envs']['mcc_processing']
+    conda: config['envs']['processing']
 
     params:
         out_dir = config['args']['out']+"/results/popoolationTE/",

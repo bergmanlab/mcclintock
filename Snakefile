@@ -42,7 +42,7 @@ rule make_coverage_fasta:
     
     threads: 1
 
-    conda: config['envs']['mcc_processing']
+    conda: config['envs']['processing']
 
     output:
         coverage_fasta = config['mcc']['coverage_fasta']
@@ -68,7 +68,7 @@ rule make_reference_fasta:
         aug_ref = config['mcc']['reference']
 
     conda: 
-        config['envs']['mcc_processing']
+        config['envs']['processing']
 
     script:
         config['args']['mcc_path']+"/scripts/preprocessing/make_reference_fasta.py"
@@ -84,7 +84,7 @@ rule make_consensus_fasta:
     threads: 1
 
     conda:
-        config['envs']['mcc_processing']
+        config['envs']['processing']
     
     output:
         consensus = config['mcc']['consensus']
@@ -108,7 +108,7 @@ rule make_te_annotations:
     
     threads: config['args']['max_threads_per_rule']
 
-    conda: config['envs']['mcc_processing']
+    conda: config['envs']['processing']
 
     output:
         te_gff = config['mcc']['unaugmented_locations'],
@@ -134,7 +134,7 @@ rule mask_reference_fasta:
     
     threads: 1
 
-    conda: config['envs']['mcc_processing']
+    conda: config['envs']['processing']
 
     output:
         masked_ref = config['mcc']['masked_fasta']
@@ -156,7 +156,7 @@ rule make_ref_te_fasta:
     
     threads: 1
 
-    conda: config['envs']['mcc_processing']
+    conda: config['envs']['processing']
 
     output:
         ref_te_fasta = config['mcc']['ref_te_fasta']
@@ -174,7 +174,7 @@ rule index_reference_genome:
     params:
         log=config['args']['log_dir']+"processing.log"
 
-    conda: config['envs']['mcc_processing']
+    conda: config['envs']['processing']
 
     output:
         config['mcc']['reference']+".fai",
@@ -199,7 +199,7 @@ rule map_reads:
     
     threads: config['args']['max_threads_per_rule']
 
-    conda: config['envs']['mcc_processing']
+    conda: config['envs']['processing']
 
     output: config['mcc']['sam']
 
@@ -216,7 +216,7 @@ rule sam_to_bam:
     
     threads: config['args']['max_threads_per_rule']
 
-    conda: config['envs']['mcc_processing']
+    conda: config['envs']['processing']
 
     output:
         bam = config['mcc']['bam'],
@@ -236,7 +236,7 @@ rule make_ref_te_bed:
     params:
         log=config['args']['log_dir']+"processing.log"
 
-    conda: config['envs']['mcc_processing']
+    conda: config['envs']['processing']
 
     output:
         config['mcc']['ref_tes_bed']
@@ -255,7 +255,7 @@ rule median_insert_size:
         log=config['args']['log_dir']+"processing.log",
         fq2 = config['in']['fq2']
 
-    conda: config['envs']['mcc_processing']
+    conda: config['envs']['processing']
 
     output:
         config['mcc']['median_insert_size']
@@ -272,7 +272,7 @@ rule reference_2bit:
     params:
         log=config['args']['log_dir']+"processing.log"
 
-    conda: config['envs']['mcc_processing']
+    conda: config['envs']['processing']
     
     output:
         config['mcc']['ref_2bit']
@@ -292,7 +292,7 @@ rule repeatmask:
     
     threads: config['args']['max_threads_per_rule']
 
-    conda: config['envs']['mcc_processing']
+    conda: config['envs']['processing']
 
     output:
         rm_out = config['mcc']['repeatmasker_out']
@@ -352,7 +352,7 @@ rule summary_report:
 
     threads: config['args']['max_threads_per_rule']
 
-    conda: config['envs']['mcc_processing']
+    conda: config['envs']['processing']
 
     output:
         summary_report = config['args']['out']+"results/summary/data/run/summary_report.txt",

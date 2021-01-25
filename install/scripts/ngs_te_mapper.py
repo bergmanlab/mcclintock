@@ -34,5 +34,9 @@ def main():
     mccutils.remove(install_path+raw_name)
     mccutils.remove(snakemake.params.zipfile)
 
+    # write version to file
+    with open(install_path+"ngs_te_mapper/version.log","w") as version:
+        version.write(snakemake.params.md5)
+
 if __name__ == "__main__":                
     main()

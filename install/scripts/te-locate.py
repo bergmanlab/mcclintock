@@ -16,5 +16,9 @@ def main():
     command = ["tar", "-xvf", snakemake.params.tar, "-C", snakemake.config['paths']['install']+"/tools/te-locate/"]
     mccutils.run_command(command, log=snakemake.params.log)
 
+    # write version to file
+    with open(snakemake.config['paths']['install']+"/tools/te-locate/version.log","w") as version:
+        version.write(snakemake.params.md5)
+
 if __name__ == "__main__":                
     main()

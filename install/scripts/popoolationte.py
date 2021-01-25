@@ -37,5 +37,9 @@ def main():
     mccutils.remove(snakemake.params.zipfile)
     mccutils.remove(snakemake.config['paths']['install']+"popoolationte")
 
+    # write version to file
+    with open(snakemake.config['paths']['install']+"/tools/popoolationte/version.log","w") as version:
+        version.write(snakemake.params.md5)
+
 if __name__ == "__main__":                
     main()

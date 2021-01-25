@@ -1,4 +1,4 @@
-name: mcc_populationte
+name: populationte
 channels:
   - bioconda
   - conda-forge

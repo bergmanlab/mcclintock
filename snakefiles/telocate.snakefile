@@ -10,7 +10,7 @@ rule telocate_taxonomy:
         log=config['args']['log_dir']+"processing.log",
         tmp_dir=config['args']['out']+"/tmp"
 
-    conda: config['envs']['mcc_processing']
+    conda: config['envs']['processing']
 
     output:
         config['mcc']['telocate_te_gff']
@@ -27,7 +27,7 @@ rule telocate_sam:
     params:
         log=config['args']['log_dir']+"processing.log"
 
-    conda: config['envs']['mcc_processing']
+    conda: config['envs']['processing']
     
     output:
         config['mcc']['telocate_sam']
@@ -44,7 +44,7 @@ rule telocate_ref:
     params:
         log=config['args']['log_dir']+"processing.log"
 
-    conda: config['envs']['mcc_processing']  
+    conda: config['envs']['processing']  
 
     output:
         config['mcc']['telocate_ref_fasta']
@@ -87,7 +87,7 @@ rule telocate_post:
     
     threads: 1
 
-    conda: config['envs']['mcc_processing']
+    conda: config['envs']['processing']
 
     output:
         config['out']['te-locate']
