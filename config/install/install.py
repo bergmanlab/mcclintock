@@ -66,6 +66,6 @@ OUTPUT = {
     "tepid" : INSTALL_PATH+"tools/tepid/tepid-map",
     "teflon" : INSTALL_PATH+"tools/teflon/teflon.v0.4.py",
     "jitterbug": INSTALL_PATH+"tools/jitterbug/jitterbug.py",
-    "map_reads" : INSTALL_PATH+"tools/processing.log",
-    "trimgalore" : INSTALL_PATH+"tools/trimgalore.log"
+    "map_reads" : INSTALL_PATH+"tools/map_reads/map_reads.log",
+    "trimgalore" : INSTALL_PATH+"tools/trimgalore/trimgalore.log"
 }
