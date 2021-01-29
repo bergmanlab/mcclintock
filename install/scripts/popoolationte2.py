@@ -10,5 +10,9 @@ def main():
         print("try running --install with --clean for clean installation")
         sys.exit(1)
 
+    # write version to file
+    with open(snakemake.config['paths']['install']+"/tools/popoolationte2/version.log","w") as version:
+        version.write(snakemake.params.md5)
+
 if __name__ == "__main__":                
     main()

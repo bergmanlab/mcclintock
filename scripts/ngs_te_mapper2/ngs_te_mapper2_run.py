@@ -43,7 +43,7 @@ def main():
             "-o", out_dir, 
             "--keep_files",
             "-p", sample_name,
-            "--af",
+            "--min_af", str(config.MIN_ALLELE_FREQUENCY),
             "-f"
     ]
 

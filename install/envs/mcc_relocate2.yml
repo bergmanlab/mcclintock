@@ -1,4 +1,4 @@
-name: mcc_relocate2
+name: relocate2
 channels:
   - anaconda
   - bioconda

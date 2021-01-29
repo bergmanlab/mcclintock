@@ -1,4 +1,4 @@
-name: mcc_coverage
+name: coverage
 channels:
   - bioconda
   - conda-forge

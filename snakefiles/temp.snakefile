@@ -34,7 +34,7 @@ rule process_temp:
         te_gff = config['mcc']['telocate_te_gff'],
         reference_fasta = config['mcc']['reference']
     
-    conda: config['envs']['mcc_processing']
+    conda: config['envs']['processing']
 
     params:
         log = config['args']['log_dir']+"TEMP.log",

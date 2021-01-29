@@ -1,4 +1,4 @@
-name: mcc_telocate
+name: te-locate
 channels:
   - bioconda
   - conda-forge

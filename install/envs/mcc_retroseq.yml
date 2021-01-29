@@ -1,4 +1,4 @@
-name: mcc_retroseq
+name: retroseq
 channels:
   - bioconda
   - conda-forge

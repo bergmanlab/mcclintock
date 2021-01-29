@@ -40,7 +40,7 @@ rule ngs_te_mapper2_post:
     
     threads: 1
 
-    conda: config['envs']['mcc_processing']
+    conda: config['envs']['processing']
 
     output:
         config['out']['ngs_te_mapper2']

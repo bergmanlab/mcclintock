@@ -87,26 +87,16 @@ If you only want to install specific methods to save space and time, you can spe
 
    python3 mcclintock.py --install -m <method1>,<method2>
 
-If you want to install additional methods to an already existing mcclintock installation, you can use the :code:`--resume` flag
+If you want to install missing methods to an already existing mcclintock installation, you can use the :code:`--resume` flag
 
 .. code:: bash
 
-   python3 mcclintock.py --install -m <method1> --resume
+   python3 mcclintock.py --install --resume
 
 .. note::
 
-   If you do not use the :code:`--resume` flag when installing specific method(s) with `-m`, the installation script will remove all existing method installations and only install what you have specified. For example:
+   If you use the :code:`--resume` flag when installing specific method(s) with `-m`, the installation script will only install this method if it isn't already installed. do not use the :code:`--resume` flag if you want to do a clean installation of a specific method.
 
-   .. code:: bash
 
-      python3 mcclintock.py --install -m relocate
-      python3 mcclintock.py --install -m ngs_te_mapper
-
-   * This command will only leave you with :code:`ngs_te_mapper` installed as :code:`relocate` will be removed during the second installation step. To install :code:`ngs_te_mapper` in addition to :code:`relocate` use:
-
-   .. code:: bash
-
-      python3 mcclintock.py --install -m relocate
-      python3 mcclintock.py --install -m ngs_te_mapper --resume
 
 

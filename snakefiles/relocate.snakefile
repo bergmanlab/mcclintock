@@ -7,7 +7,7 @@ rule relocaTE_consensus:
     params:
         log=config['args']['log_dir']+"processing.log"
 
-    conda: config['envs']['mcc_processing']
+    conda: config['envs']['processing']
 
     output:
         config['mcc']['relocaTE_consensus']
@@ -25,7 +25,7 @@ rule relocaTE_ref_gff:
     params:
         log=config['args']['log_dir']+"processing.log"
 
-    conda: config['envs']['mcc_processing']
+    conda: config['envs']['processing']
 
     output:
         config['mcc']['relocaTE_ref_TEs']
@@ -68,7 +68,7 @@ rule relocaTE_post:
 
     threads: 1
 
-    conda: config['envs']['mcc_processing']
+    conda: config['envs']['processing']
 
     params:
         raw_fq2 = config['in']['fq2'],

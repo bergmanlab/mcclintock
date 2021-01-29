@@ -30,7 +30,7 @@ rule retroseq_post:
 
     threads: 1
 
-    conda: config['envs']['mcc_processing']
+    conda: config['envs']['processing']
 
     params:
         out_dir = config['args']['out']+"/results/retroseq/",

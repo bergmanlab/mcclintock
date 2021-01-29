@@ -1,4 +1,4 @@
-name: mcc_relocate
+name: relocate
 channels:
   - bioconda
   - conda-forge

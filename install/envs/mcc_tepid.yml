@@ -1,4 +1,4 @@
-name: mcc_tepid
+name: tepid
 channels:
   - bioconda
   - conda-forge
