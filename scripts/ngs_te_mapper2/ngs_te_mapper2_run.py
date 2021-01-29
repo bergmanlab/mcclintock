@@ -35,7 +35,7 @@ def main():
         is_paired = False
     
     command = [
-        'python', script_dir+"/ngs_te_mapper.py", 
+        'python', script_dir+"/ngs_te_mapper2.py", 
             "-r", reference_fasta, 
             "-l", consensus_fasta, 
             "--tsd_max", str(config.MAX_TSD), 
