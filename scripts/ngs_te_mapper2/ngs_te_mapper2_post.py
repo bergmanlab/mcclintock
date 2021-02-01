@@ -32,8 +32,8 @@ def main():
         output.write_vcf(insertions, reference_fasta, sample_name, "ngs_te_mapper2", out_dir)
 
     else:
-        mccutils.run_command(["touch", out_dir+"/"+sample_name+"_ngs_te_mapper_redundant.bed"])
-        mccutils.run_command(["touch", out_dir+"/"+sample_name+"_ngs_te_mapper_nonredundant.bed"])
+        mccutils.run_command(["touch", out_dir+"/"+sample_name+"_ngs_te_mapper2_redundant.bed"])
+        mccutils.run_command(["touch", out_dir+"/"+sample_name+"_ngs_te_mapper2_nonredundant.bed"])
 
     mccutils.log("ngs_te_mapper","ngs_te_mapper postprocessing complete")
 
