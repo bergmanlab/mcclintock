@@ -1,6 +1,6 @@
-ALL_METHODS = ["ngs_te_mapper", "ngs_te_mapper2", "relocate", "relocate2", "temp", "retroseq", "popoolationte", "popoolationte2", "te-locate", "teflon", "coverage", "trimgalore","map_reads"] #"ngs_te_mapper2",
+ALL_METHODS = ["ngs_te_mapper", "ngs_te_mapper2", "relocate", "relocate2", "temp", "temp2", "retroseq", "popoolationte", "popoolationte2", "te-locate", "teflon", "coverage", "trimgalore","map_reads"] #"ngs_te_mapper2",
 SINGLE_END_METHODS = ["ngs_te_mapper", "ngs_te_mapper2", "relocate", "coverage", "trimgalore", "map_reads"] #"ngs_te_mapper2",
-MULTI_THREAD_METHODS = ["coverage", "temp", "relocate2", "ngs_te_mapper", "ngs_te_mapper2", "popoolationte", "teflon", "trimgalore"] #"ngs_te_mapper2",
+MULTI_THREAD_METHODS = ["coverage", "temp", "temp2", "relocate2", "ngs_te_mapper", "ngs_te_mapper2", "popoolationte", "teflon", "trimgalore"] #"ngs_te_mapper2",
 NO_INSTALL_METHODS = ["trimgalore", "map_reads", "coverage", "relocate2"] # no source code to install for these methods, just envs
 
 INPUT_DIR = "{{indir}}"

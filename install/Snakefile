@@ -45,6 +45,21 @@ rule temp:
     script:
         config['paths']['install']+"scripts/temp.py"
 
+rule temp2:
+    params:
+        url = config['URLs']['temp2'],
+        md5 = config['MD5s']['temp2'],
+        zipfile = config['paths']['install']+"tools/temp2/temp2.zip",
+        log = config['paths']['log_dir']+"install.log",
+
+    output:
+        config['output']['temp2']
+    
+    conda: config['ENVs']['temp2']
+
+    script:
+        config['paths']['install']+"scripts/temp2.py"
+
 rule relocate:
     params:
         url = config['URLs']['relocate'],
