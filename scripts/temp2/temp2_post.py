@@ -17,7 +17,7 @@ def main():
     chromosomes = snakemake.params.chromosomes.split(",")
     out_dir = snakemake.params.out_dir
 
-    insertions = read_insertions(insert_bed, sample_name, chromosomes)
+    insertions = read_insertions(insert_bed, sample_name, chromosomes, config)
     absence_bed = make_absence_bed(absence_summary, sample_name, out_dir)
     non_absent_ref_insertions = get_non_absent_ref_tes(te_gff, absence_bed, sample_name, out_dir, log)
     insertions += non_absent_ref_insertions
@@ -33,7 +33,7 @@ def main():
     mccutils.log("temp2","TEMP2 postprocessing complete")
 
 
-def read_insertions(insert_bed, sample_name, chromosomes):
+def read_insertions(insert_bed, sample_name, chromosomes, config):
     insertions = []
     with open(insert_bed, "r") as inf:
         for x,line in enumerate(inf):
@@ -53,13 +53,17 @@ def read_insertions(insert_bed, sample_name, chromosomes):
                     insert.support_info.support["referencereads"].value = float(split_line[8])
                     insert.support_info.support["fiveprimesupport"].value = float(split_line[9])
                     insert.support_info.support["threeprimesupport"].value = float(split_line[10])
-                    insert.support_info.support["reliability"].value = float(split_line[12])
+                    insert.support_info.support["reliability"].value = float(split_line[12].replace("%","")) # rare enties have a % sign for some reason
                     insert.support_info.support["fiveprimejunctionsupport"].value = float(split_line[13])
                     insert.support_info.support["threeprimejunctionsupport"].value = float(split_line[14])
 
                     insert.name = insert.family+"|non-reference|"+str(insert.support_info.support['frequency'].value)+"|"+sample_name+"|temp2|"
 
-                    if insert.chromosome in chromosomes:
+                    if (
+                        insert.chromosome in chromosomes and
+                        insert.support_info.support["frequency"].value >= config.FREQUENCY_THRESHOLD and 
+                        insert.support_info.support["class"].value in config.ACCEPTABLE_INSERTION_SUPPORT_CLASSES
+                    ):
                         insertions.append(insert)
     
     return insertions

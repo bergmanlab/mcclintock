@@ -260,6 +260,10 @@ def make_nonredundant_bed(insertions, sample_name, out_dir, method="popoolationt
                 if insert.support_info.support['variantsupport'].value > uniq_inserts[key].support_info.support['variantsupport'].value:
                     uniq_inserts[key] = insert
             
+            elif method == "temp2":
+                if insert.support_info.support['supportreads'].value > uniq_inserts[key].support_info.support['supportreads'].value:
+                    uniq_inserts[key] = insert
+            
             elif method == "ngs_te_mapper":
                 if insert.support_info.support['supportingreads'].value > uniq_inserts[key].support_info.support['supportingreads'].value:
                     uniq_inserts[key] = insert

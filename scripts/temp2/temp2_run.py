@@ -37,9 +37,9 @@ def main():
 
     median_insert_size = get_median_insert_size(median_insert_size_file)
 
-    run_temp2_insertion(fq1, fq2, bam, reference, script_dir, consensus, ref_te_bed, threads, out_dir, log)
+    run_temp2_insertion(fq1, fq2, bam, median_insert_size, reference, script_dir, consensus, ref_te_bed, threads, out_dir, config, log)
 
-    run_temp2_absence(script_dir, bam, twobit, ref_te_bed, median_insert_size, threads, out_dir+"/absence", log)
+    run_temp2_absence(script_dir, bam, twobit, ref_te_bed, median_insert_size, threads, out_dir+"/absence", config, log)
 
     mccutils.run_command(["cp", out_dir+'/absence/'+sample_name+".absence.refined.bp.summary", out_dir], log=log)
 
@@ -56,7 +56,7 @@ def get_median_insert_size(infile):
     
     return median_insert_size
 
-def run_temp2_insertion(fq1, fq2, bam, reference, scripts, consensus, te_bed, threads, out, log):
+def run_temp2_insertion(fq1, fq2, bam, insert_size, reference, scripts, consensus, te_bed, threads, out, config, log):
     mccutils.log("temp2","running TEMP2 non-reference insertion prediction", log=log)
     command = [
         "bash", scripts+"/TEMP2", "insertion", 
@@ -67,12 +67,26 @@ def run_temp2_insertion(fq1, fq2, bam, reference, scripts, consensus, te_bed, th
             "-R", consensus,
             "-t", te_bed,
             "-c", str(threads),
-            "-o", out
+            "-f", str(insert_size),
+            "-o", out,
+            "-M", str(config.GENOME_MISMATCH_PCT),
+            "-m", str(config.TE_MISMATCH_PCT),
+            "-U", str(config.RATIO),
+            "-N", str(config.FILTER_WINDOW),
     ]
+    
+    if config.TRUNCATED:
+        command.append("-T")
+    
+    if config.LOOSE_FILTER:
+        command.append("-L")
+    
+    if config.SKIP_INS_LEN_CHECK:
+        command.append("-S")
 
     mccutils.run_command(command, log=log)
 
-def run_temp2_absence(scripts, bam, reference_2bit, te_bed, insert_size, threads, out, log):
+def run_temp2_absence(scripts, bam, reference_2bit, te_bed, insert_size, threads, out, config, log):
     mccutils.log("temp2","running TEMP2 non-reference absence prediction", log=log)
     command = [
         "bash", scripts+"/TEMP2", "absence", 
@@ -81,7 +95,8 @@ def run_temp2_absence(scripts, bam, reference_2bit, te_bed, insert_size, threads
             "-t", reference_2bit,
             "-f", str(insert_size),
             "-c", str(threads),
-            "-o", out
+            "-o", out,
+            "-x", str(config.UNIQ_MAP_SCORE)
     ]
 
     mccutils.run_command(command, log=log)
