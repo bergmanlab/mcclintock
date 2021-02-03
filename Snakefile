@@ -1,4 +1,5 @@
 include: config['args']['mcc_path']+"/snakefiles/temp.snakefile"
+include: config['args']['mcc_path']+"/snakefiles/temp2.snakefile"
 include: config['args']['mcc_path']+"/snakefiles/relocate.snakefile"
 include: config['args']['mcc_path']+"/snakefiles/relocate2.snakefile"
 include: config['args']['mcc_path']+"/snakefiles/popoolationte.snakefile"

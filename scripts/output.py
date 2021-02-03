@@ -58,6 +58,25 @@ class Temp:
             "threeprimesupport" : Info("THREE_PRIME_SUPPORT", "The number of reads supporting the detected insertion at the 3’ end of the TE (not including junction spanning reads)", 0, "Integer")
         }
 
+class Temp2:
+    def __init__(self):
+        self.support = {
+            "class": Info(
+                "CLASS", 
+                "The class of the insertion. '1p1' means that the detected insertion is supported by reads at both sides. '2p' means the detected insertion is supported by more than 1 read at only 1 side. 'singleton' means the detected insertion is supported by only 1 read at 1 side", 
+                "",
+                "String"
+            ),
+            "frequency": Info("FREQUENCY", "Frequency of the inserted transposon. It generally means what fraction of sequenced genome present this insertion", 0.0, "Float"),
+            "supportreads": Info("SUPPORT_READS", "Number of reads supporting this insertion", 0.0, "Float"),
+            "referencereads": Info("REF_READS", "Number of reads that do not support this insertion, AKA reference reads", 0.0, "Float"),
+            "fiveprimesupport": Info("FIVE_PRIME_SUPPORT", "Number of supporting reads at 5'end of the insertion", 0.0, 'Float'),
+            "threeprimesupport": Info("THREE_PRIME_SUPPORT", "Number of supporting reads at 3'end of the insertion", 0.0, "Float"),
+            "reliability": Info("RELIABILITY", "Reliability of this insertion (0–100). 100 for 2p and 1p1 insertions. For singleton insertions, TEMP2 already filtered out most of the false positives but not all of them. The reliability is a percentage stand for how many singleton insertions of a specific transposon is", 0.0, "Float"),
+            "fiveprimejunctionsupport": Info("FIVE_PRIME_JUNCTION_SUPPORT", "Number of supporting reads at 5'end of the insertion junction", 0.0, "Float"),
+            "threeprimejunctionsupport": Info("THREE_PRIME_JUNCTION_SUPPORT", "Number of supporting reads at 3'end of the insertion junction", 0.0, "Float")
+        }
+
 class Telocate:
     def __init__(self):
         self.support = {

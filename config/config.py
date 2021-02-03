@@ -48,6 +48,7 @@ OUT_PATHS = {
         'ngs_te_mapper2': RESULTS_DIR+"ngs_te_mapper2/"+SAMPLE_NAME+"_ngs_te_mapper2_nonredundant.bed",
         'relocate': RESULTS_DIR+"relocaTE/"+SAMPLE_NAME+"_relocate_nonredundant.bed",
         'temp': RESULTS_DIR+"TEMP/"+SAMPLE_NAME+"_temp_nonredundant.bed",
+        'temp2': RESULTS_DIR+"temp2/"+SAMPLE_NAME+"_temp2_nonredundant.bed",
         'retroseq': RESULTS_DIR+"retroseq/"+SAMPLE_NAME+"_retroseq_nonredundant.bed",
         'popoolationte': RESULTS_DIR+"popoolationTE/"+SAMPLE_NAME+"_popoolationte_nonredundant.bed",
         'popoolationte2': RESULTS_DIR+"popoolationTE2/"+SAMPLE_NAME+"_popoolationte2_nonredundant.bed",
@@ -100,6 +101,16 @@ ESSENTIAL_PATHS = {
                 RESULTS_DIR+"TEMP/"+SAMPLE_NAME+"_temp_nonredundant_non-reference.vcf",
                 RESULTS_DIR+"TEMP/unfiltered/"+SAMPLE_NAME+".insertion.refined.bp.summary",
                 RESULTS_DIR+"TEMP/unfiltered/"+SAMPLE_NAME+".absence.refined.bp.summary"
+        ],
+
+        'temp2': [
+                RESULTS_DIR+"temp2/"+SAMPLE_NAME+"_temp2_nonredundant.bed",
+                RESULTS_DIR+"temp2/"+SAMPLE_NAME+"_temp2_redundant.bed",
+                RESULTS_DIR+"temp2/"+SAMPLE_NAME+"_temp2_malformed.bed",
+                RESULTS_DIR+"temp2/"+SAMPLE_NAME+".absent.bed",
+                RESULTS_DIR+"temp2/"+SAMPLE_NAME+"_temp2_nonredundant_non-reference.vcf",
+                RESULTS_DIR+"temp2/unfiltered/"+SAMPLE_NAME+".insertion.bed",
+                RESULTS_DIR+"temp2/unfiltered/"+SAMPLE_NAME+".absence.refined.bp.summary"
         ],
 
         'retroseq': [
