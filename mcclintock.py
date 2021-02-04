@@ -77,11 +77,21 @@ def parse_args():
     else:
         valid_methods = config.ALL_METHODS #from config.py
     
+    # used to preserve trimgalore and mapped reads output if they are explicitly called by the user
+    trimgalore_called = False
+    map_reads_called = False
+
     if args.methods is None:
         args.methods = valid_methods
     
     else:
         args.methods = args.methods.split(",")
+        if "trimgalore" in args.methods:
+            trimgalore_called = True
+        
+        if "map_reads" in args.methods:
+            map_reads_called = True
+            
         for x,method in enumerate(args.methods):
             args.methods[x] = method.lower()
             if args.methods[x] not in valid_methods:
@@ -169,13 +179,10 @@ def parse_args():
                 sys.stderr.write("keep_intermediate option: "+option+" is not valid. Valid options: "+" ".join(keep_intermediate_options)+"\nExample:(--keep_intermediate general,methods)\n")
                 sys.exit(1)
 
-    if len(args.methods) == 1:
-        if "trimgalore" in args.methods:
-            args.keep_intermediate.append("trimgalore")
-        elif "map_reads" in args.methods:
-            args.keep_intermediate.append("map_reads")
-    if len(args.methods) == 2 and "trimgalore" in args.methods and "map_reads" in args.methods:
+    if trimgalore_called:
         args.keep_intermediate.append("trimgalore")
+    
+    if map_reads_called:
         args.keep_intermediate.append("map_reads")
 
     return args
@@ -754,6 +761,7 @@ def calculate_max_threads(avail_procs, methods_used, multithread_methods, slow=F
 
 
 def remove_intermediate_files(options, run_config_file, methods, ref_name, sample_name, outdir):
+    print(options)
     if "all" in options:
         return
 
