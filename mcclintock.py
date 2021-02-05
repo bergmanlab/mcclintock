@@ -761,7 +761,6 @@ def calculate_max_threads(avail_procs, methods_used, multithread_methods, slow=F
 
 
 def remove_intermediate_files(options, run_config_file, methods, ref_name, sample_name, outdir):
-    print(options)
     if "all" in options:
         return
 
