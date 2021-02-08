@@ -42,7 +42,7 @@ def read_insertions(insert_bed, sample_name, chromosomes, config):
                 split_line = line.split("\t")
                 if len(split_line) == 15:
                     insert.chromosome = split_line[0]
-                    insert.start = int(split_line[1])
+                    insert.start = int(split_line[1])+1
                     insert.end = int(split_line[2])
                     insert.family = split_line[3].split(":")[0]
                     insert.type = "non-reference"
