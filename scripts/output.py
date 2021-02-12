@@ -24,11 +24,31 @@ class Info:
         self.value = value
         self.type = info_type
 
+# used in redundancy filtering to determine which prediction to keep (which has most support)
+class RedundancyFilter:
+    def __init__(self, keys, operation):
+        self.keys = keys
+        self.operation = operation
+    
+    def get_value(self, support_info):
+        value = 0
+        if self.operation == "value":
+            value = support_info[self.keys[0]].value
+        
+        elif self.operation == "sum":
+            for key in self.keys:
+                value += support_info[key].value
+        
+        return value
+
+
 class Ngs_te_mapper:
     def __init__(self):
         self.support = {
             "supportingreads": Info("SUPPORTING_READS", "Total number of reads supporting the start and end positions", 0, "Integer")
         }
+
+        self.redundancy_filter = RedundancyFilter(["supportingreads"], "value")
 
 class Ngs_te_mapper2:
     def __init__(self):
@@ -38,6 +58,8 @@ class Ngs_te_mapper2:
             "five_prime_support" : Info("FIVE_PRIME_SUPPORT", "Number of reads supporting the 5' breakpoint", 0, "Integer"),
             "reference_reads": Info("REFERENCE_READS", "reads supporting the reference state at this position",0, "Integer")
         }
+
+        self.redundancy_filter = RedundancyFilter(["three_prime_support", "five_prime_support"], "sum")
 
 class Temp:
     def __init__(self):
@@ -58,11 +80,36 @@ class Temp:
             "threeprimesupport" : Info("THREE_PRIME_SUPPORT", "The number of reads supporting the detected insertion at the 3’ end of the TE (not including junction spanning reads)", 0, "Integer")
         }
 
+        self.redundancy_filter = RedundancyFilter(["variantsupport"], "value")
+
+class Temp2:
+    def __init__(self):
+        self.support = {
+            "class": Info(
+                "CLASS", 
+                "The class of the insertion. '1p1' means that the detected insertion is supported by reads at both sides. '2p' means the detected insertion is supported by more than 1 read at only 1 side. 'singleton' means the detected insertion is supported by only 1 read at 1 side", 
+                "",
+                "String"
+            ),
+            "frequency": Info("FREQUENCY", "Frequency of the inserted transposon. It generally means what fraction of sequenced genome present this insertion", 0.0, "Float"),
+            "supportreads": Info("SUPPORT_READS", "Number of reads supporting this insertion", 0.0, "Float"),
+            "referencereads": Info("REF_READS", "Number of reads that do not support this insertion, AKA reference reads", 0.0, "Float"),
+            "fiveprimesupport": Info("FIVE_PRIME_SUPPORT", "Number of supporting reads at 5'end of the insertion", 0.0, 'Float'),
+            "threeprimesupport": Info("THREE_PRIME_SUPPORT", "Number of supporting reads at 3'end of the insertion", 0.0, "Float"),
+            "reliability": Info("RELIABILITY", "Reliability of this insertion (0–100). 100 for 2p and 1p1 insertions. For singleton insertions, TEMP2 already filtered out most of the false positives but not all of them. The reliability is a percentage stand for how many singleton insertions of a specific transposon is", 0.0, "Float"),
+            "fiveprimejunctionsupport": Info("FIVE_PRIME_JUNCTION_SUPPORT", "Number of supporting reads at 5'end of the insertion junction", 0.0, "Float"),
+            "threeprimejunctionsupport": Info("THREE_PRIME_JUNCTION_SUPPORT", "Number of supporting reads at 3'end of the insertion junction", 0.0, "Float")
+        }
+
+        self.redundancy_filter = RedundancyFilter(["supportreads"], "value")
+
 class Telocate:
     def __init__(self):
         self.support = {
             "read_pair_support" : Info("RP_SUPPORT", "The total number of all supporting read pairs", 0, "Integer")
         }
+
+        self.redundancy_filter = RedundancyFilter(["read_pair_support"], "value")
 
 class Retroseq:
     def __init__(self):
@@ -77,6 +124,8 @@ class Retroseq:
             )
         }
 
+        self.redundancy_filter = RedundancyFilter(["read_pair_support"], "value")
+
 class Relocate2:
     def __init__(self):
         self.support = {
@@ -86,12 +135,16 @@ class Relocate2:
             "left_support_reads" : Info("LEFT_SUPPORT_READS", "Number of reads not covering the junction of TE insertion, but supporting TE insertion by paired-end reads on left side/downstream", 0, "Integer")
         }
 
+        self.redundancy_filter = RedundancyFilter(["left_support_reads", "right_support_reads"], "sum")
+
 class Relocate:
     def __init__(self):
         self.support = {
             "right_flanking_reads" : Info("RIGHT_FLANKING_READS", "Number of reads that cover the right junction of the insertion site", 0, "Integer"),
             "left_flanking_reads" : Info("LEFT_FLANKING_READS", "Number of reads that cover the left junction of the insertion site", 0, "Integer")
         }
+
+        self.redundancy_filter = RedundancyFilter(["left_flanking_reads", "right_flanking_reads"], "sum")
 
 class Popoolationte:
     def __init__(self):
@@ -112,6 +165,8 @@ class Popoolationte:
             "reverse_absence_reads" : Info("REVERSE_ABSENCE_READS", "TE-absence reads of the reverse insertion", 0, "Integer")
         }
 
+        self.redundancy_filter = RedundancyFilter(["forward_presence_reads", "reverse_presence_reads"], "sum")
+
 class Popoolationte2:
     def __init__(self):
         self.support = {
@@ -119,6 +174,8 @@ class Popoolationte2:
             "frequency" : Info("FREQUENCY", "the population frequency of the TE insertions", 0.0, "Float")
         }
         self.added = False
+
+        self.redundancy_filter = RedundancyFilter(["frequency"], "value")
 
 class Teflon:
     def __init__(self):
@@ -130,6 +187,8 @@ class Teflon:
             "ambiguous_reads" : Info("AMBIGUOUS_READS", "read count for ambiguous reads", 0, "Integer"),
             "frequency" : Info("FREQUENCY", "allele frequency", 0.0, "Float")
         }
+
+        self.redundancy_filter = RedundancyFilter(["presence_reads"], "value")
 
 #################################################
 ## TODO convert to proper format for VCF creation
@@ -213,52 +272,9 @@ def make_nonredundant_bed(insertions, sample_name, out_dir, method="popoolationt
             uniq_inserts[key] = insert
         else:
             ## method specific way to determine which duplicate to keep
-            if method == "popoolationte":
-                if (insert.support_info.support["forward_presence_reads"].value + insert.support_info.support["reverse_presence_reads"].value) > (uniq_inserts[key].support_info.support["forward_presence_reads"].value + uniq_inserts[key].support_info.support["reverse_presence_reads"].value):
-                    uniq_inserts[key] = insert
-            
-            elif method == "popoolationte2":
-                if (insert.support_info.support['frequency'].value) > (uniq_inserts[key].support_info.support['frequency'].value):
-                    uniq_inserts[key] = insert
-            
-            elif method == "relocate":
-                if (insert.support_info.support['left_flanking_reads'].value + insert.support_info.support['right_flanking_reads'].value) > (uniq_inserts[key].support_info.support['left_flanking_reads'].value + uniq_inserts[key].support_info.support['right_flanking_reads'].value):
-                    uniq_inserts[key] = insert
-            
-            elif method == "relocate2":
-                if (insert.support_info.support['left_support_reads'].value + insert.support_info.support['right_support_reads'].value) > (uniq_inserts[key].support_info.support['left_support_reads'].value + uniq_inserts[key].support_info.support['right_support_reads'].value):
-                    uniq_inserts[key] = insert
-            
-            elif method == "retroseq":
-                if insert.support_info.support['read_pair_support'].value > uniq_inserts[key].support_info.support['read_pair_support'].value:
-                    uniq_inserts[key] = insert
-            
-            elif method == "te-locate":
-                if insert.support_info.support['read_pair_support'].value > uniq_inserts[key].support_info.support['read_pair_support'].value:
-                    uniq_inserts[key] = insert
-            
-            elif method == "temp":
-                if insert.support_info.support['variantsupport'].value > uniq_inserts[key].support_info.support['variantsupport'].value:
-                    uniq_inserts[key] = insert
-            
-            elif method == "ngs_te_mapper":
-                if insert.support_info.support['supportingreads'].value > uniq_inserts[key].support_info.support['supportingreads'].value:
-                    uniq_inserts[key] = insert
-
-            elif method == "ngs_te_mapper2":
+            if (insert.support_info.redundancy_filter.get_value(insert.support_info.support) > uniq_inserts[key].support_info.redundancy_filter.get_value(uniq_inserts[key].support_info.support)):
                 uniq_inserts[key] = insert
-            
-            elif method == "tepid":
-                if insert.tepid.support > uniq_inserts[key].tepid.support:
-                    uniq_inserts[key] = insert
-            
-            elif method == "teflon":
-                if insert.support_info.support['presence_reads'].value > uniq_inserts[key].support_info.support['presence_reads'].value:
-                    uniq_inserts[key] = insert
-            
-            elif method == "jitterbug":
-                if insert.jitterbug.split_read_support > uniq_inserts[key].jitterbug.split_read_support:
-                    uniq_inserts[key] = insert
+
     
     tmp_bed = out_dir+"/tmp.bed"
     with open(tmp_bed, "w") as outbed:

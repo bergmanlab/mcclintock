@@ -1,0 +1,16 @@
+name: temp2
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - bwa=0.7.17
+  - samtools=1.11
+  - bedtools=2.30.0
+  - bedops=2.4.39
+  - trinity=2.9.1
+  - R=4.0
+  - ucsc-bedtobigbed=377
+  - perl-bioperl-run=1.007002
+  - ucsc-twobittofa=377
+  - ucsc-fatotwobit=377
