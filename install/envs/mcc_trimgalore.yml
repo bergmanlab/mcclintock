@@ -4,6 +4,7 @@ channels:
   - conda-forge
   - defaults
 dependencies:
+  - python=3.8
   - biopython=1.76
   - trim-galore=0.6.5
   - fastq_utils=0.24.1
