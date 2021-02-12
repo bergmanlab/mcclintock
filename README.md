@@ -44,9 +44,11 @@ The complete pipeline requires a fasta reference genome, a fasta consensus set o
 
 ## <a name="methods"></a> McClintock Software Components for Detecting TE Insertions in NGS Data
  * [ngs_te_mapper](https://github.com/bergmanlab/ngs_te_mapper) - [Linheiro and Bergman (2012)](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0030008)
+ * [ngs_te_mapper2](https://github.com/bergmanlab/ngs_te_mapper2)
  * [RelocaTE](https://github.com/srobb1/RelocaTE) - [Robb *et al.* (2013)](http://www.g3journal.org/content/3/6/949.long)
  * [RelocaTE2](https://github.com/stajichlab/RelocaTE2) - [Chen *et al.* (2017)](https://peerj.com/articles/2942/)
  * [TEMP](https://github.com/JialiUMassWengLab/TEMP) - [Zhuang *et al.* (2014)](http://nar.oxfordjournals.org/content/42/11/6826.full)
+ * [TEMP2](https://github.com/weng-lab/TEMP2) - [Yu *et al.* (2021)](https://academic.oup.com/nar/advance-article/doi/10.1093/nar/gkab010/6123378)
  * [RetroSeq](https://github.com/tk2/RetroSeq) - [Keane *et al.* (2012)](http://bioinformatics.oxfordjournals.org/content/29/3/389.long)
  * [PoPoolationTE](https://sourceforge.net/projects/popoolationte/) - [Kofler *et al.* (2012)](https://journals.plos.org/plosgenetics/article?id=10.1371/journal.pgen.1002487)
  * [PoPoolationTE2](https://sourceforge.net/p/popoolation-te2/wiki/Home) - [Kofler *et al.* (2016)](https://academic.oup.com/mbe/article/33/10/2759/2925581)
@@ -175,9 +177,11 @@ python3 mcclintock.py --install
   * `coverage` : Estimates copy number based on normalized coverage and creates coverage plots for each TE in the fasta provided by `-c/--consensus` or `-s/coverage_fasta` if provided
   * `map_reads` : Maps the reads to the reference genome. This is useful to ensure the BAM alignment file is produced regardless if another method requires it as input
   * `ngs_te_mapper` : Runs the [ngs_te_mapper](https://github.com/bergmanlab/ngs_te_mapper) component method
+  * `ngs_te_mapper2`: Runs the [ngs_te_mapper2](https://github.com/bergmanlab/ngs_te_mapper2) component method
   * `relocate` : Runs the [RelocaTE](https://github.com/srobb1/RelocaTE) component method
   * `relocate2` : Runs the [RelocaTE2](https://github.com/stajichlab/RelocaTE2) component method
   * `temp` : Runs the [TEMP](https://github.com/JialiUMassWengLab/TEMP) component method (Paired-End Only)
+  * `temp2` : Runs the [TEMP2](https://github.com/weng-lab/TEMP2) component method (Paired-End Only)
   * `retroseq` : Runs the [RetroSeq](https://github.com/tk2/RetroSeq) component method (Paired-End Only)
   * `popoolationte` : Runs the [PoPoolation TE](https://sourceforge.net/p/popoolationte/wiki/Main) component method (Paired-End Only)
   * `popoolationte2` : Runs the [PoPoolation TE2](https://sourceforge.net/p/popoolation-te2/wiki/Home) component method (Paired-End Only)
@@ -248,6 +252,11 @@ The results of McClintock component methods are output to the directory `<output
 * `unfiltered/<reference>_insertions.bed` : BED file containing raw 0-based intervals corresponding to TSDs for non-reference predictions and 0-based intervals corresponding to the reference TEs. Reference TE intervals are inferred from the data, not from the reference TE annotations. Strand information is present for both non-reference and reference TEs.
 * `<reference>_ngs_te_mapper_nonredundant.bed` : BED file containing 0-based intervals corresponding to TSDs for non-reference predictions and 0-based intervals corresponding to the reference TEs. This file contains the same predictions from `unfiltered/<reference>_insertions.bed` with the bed line name adjusted to match the standard McClintock naming convention. By default, no filtering is performed on the raw `ngs_te_mapper` predictions aside from removing redundant predictions. However, the config file: (`/path/to/mcclintock/config/ngs_te_mapper/ngs_te_mapper_post.py`) can be modified to increase the minimum read support threshold if desired.
 
+#### ngs_te_mapper2 : `<output>/<sample>/results/ngs_te_mapper2/`
+* `unfiltered/<sample>.nonref.bed`: BED file containing raw 0-based intervals corresponding to the 5' and 3' breakpoints for non-reference predictions.
+* `unfiltered/<sample>.ref.bed`: BED file containing raw 0-based intervals corresponding to the reference TE annotations predicted by ngs_te_mapper2
+* `<reference>_ngs_te_mapper2_nonredundant.bed`: BED file containing predictions from `unfiltered/<reference>.nonref.bed` and `unfiltered/<reference>.ref.bed` with bed line names matching the standard McClintock naming convention. 
+
 #### RelocaTE : `<output>/<sample>/results/relocaTE/`
 * `unfiltered/combined.gff` : GFF containing 1-based TSDs for non-reference predictions and 1-based intervals for reference TEs. The reference intervals are based on the reference TE annotations.
 * `<reference>_relocate_nonredundant.bed` : BED file containing predictions from `unfiltered/combined.gff` converted into 0-based intervals with bed line names matching the standard McClintock naming convention. By default, no filtering is performed on the raw predictions aside from removing redundant predictions. However, the config file: (`/path/to/mcclintock/config/relocate/relocate_post.py`) can be modified to increase the minimum left and right prediction support thresholds for both reference and non-reference predictions.
@@ -261,6 +270,11 @@ The results of McClintock component methods are output to the directory `<output
 * `unfiltered/<reference>.absence.refined.bp.summary` : Tab-delimited table containing reference TEs that are predicted to be absent from the short read data. Position intervals are 1-based.
 * `unfiltered/<reference>.insertion.refined.bp.summary` : Tab-delimited table containing non-reference TE predictions. Position intervals are 1-based.
 * `<reference>_temp_nonredundant.bed` : BED file containing all reference TEs not reported as absent by TEMP in the `unfiltered/<reference>.absence.refined.bp.summary` file. Also contains non-reference TE predictions `unfiltered/<reference>.insertion.refined.bp.summary` formatted as a bed line using the McClintock naming convention. Positions for both reference and non-reference predictions are 0-based. Non-reference predictions from `unfiltered/<reference>.insertion.refined.bp.summary` are only added to this file if the prediction has read support on both ends ("1p1") and has a sample frequency of > 10%. These filtering restrictions can be modified in the config file: (`/path/to/mcclintock/config/TEMP/temp_post.py`). Non-reference TEs with split-read support at both ends are marked in the bed line name with "_sr_" and the `Junction1` and `Junction2` columns from `unfiltered/<reference>.insertion.refined.bp.summary` are used as the start and end positions of the TSD in this file (converted to 0-based positions). If the non-reference TE prediction does not have split-read support on both ends of the insertions, the designation "_rp_" is added to the bed line name and the `Start` and `End` columns from `unfiltered/<reference>.insertion.refined.bp.summary` are used as the start and end positions of the TSD in this file (converted to 0-based). Note: TEMP reference insertions are labeled `nonab` in the bed line name since they are inferred by no evidence of absence to contrast them from reference insertions detected by other components that are inferred from evidence of their presence.
+
+#### TEMP2 : `<output>/<sample>/results/temp2/`
+* `unfiltered/<sample>.absence.refined.bp.summary` : Tab-delimited table containing reference TEs that are predicted to be absent from the short read data. Position intervals are 1-based.
+* `unfiltered/<sample>.insertion.bed`: BED file containing 0-based coordinates of the non-reference predictions.
+* `<reference>_temp_nonredundant.bed`: BED file containing all reference TEs not reported in the `unfiltered/<sample>.absence.refined.bp.summary`. Also contains non-reference TE predictions from `unfiltered/<sample>.insertion.bed`. Non-reference predictions from `unfiltered/<sample>.insertion.bed` are only added to this file if the prediction has read support on both ends ("1p1") and has a sample frequency of > 10%. These filtering restrictions can be modified in the config file: (`/path/to/mcclintock/config/temp2/temp2_post.py`).
 
 #### RetroSeq : `<output>/<sample>/results/retroseq/`
 * `unfiltered/<reference>.call.PE.vcf` : VCF file containing non-reference TE predictions. Non-reference TEs are annotated as 1-based intervals in the POS column and two consecutive coordinates in the INFO field. No predictions are made for reference TEs. Strand information is not provided.
