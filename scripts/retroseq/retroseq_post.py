@@ -54,14 +54,15 @@ def read_insertions(retroseq_vcf, sample_name, chromosomes, support_threshold=0,
                 for x,key in enumerate(format_keys):
                     form[key] = format_vals[x]
                 
-                insert.support_info.support['read_pair_support'].value = int(form['SP'])
+                insert.support_info.support['spanning_pairs'].value = int(form['SP'])
+                insert.support_info.support['supporting_reads'].value = int(form['GQ'])
                 insert.support_info.support['clip3'].value = int(form['CLIP3'])
                 insert.support_info.support['clip5'].value = int(form['CLIP5'])
                 insert.support_info.support['call_status'].value = int(form['FL'])
                 insert.type = "non-reference"
                 insert.name = insert.family+"|non-reference|NA|"+sample_name+"|retroseq|rp|"
 
-                if insert.support_info.support['read_pair_support'].value >= support_threshold and insert.support_info.support['call_status'].value >= breakpoint_threshold and insert.chromosome in chromosomes:
+                if insert.support_info.support['supporting_reads'].value >= support_threshold and insert.support_info.support['call_status'].value >= breakpoint_threshold and insert.chromosome in chromosomes:
                     insertions.append(insert)
     
     return insertions

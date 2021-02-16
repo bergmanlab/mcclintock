@@ -114,7 +114,8 @@ class Telocate:
 class Retroseq:
     def __init__(self):
         self.support = {
-            "read_pair_support" : Info("RP_SUPPORT", "Number of correctly mapped read pairs spanning breakpoint", 0, "Integer"),
+            "supporting_reads" : Info("SUPPORTING_READS", "number of reads supporting the prediction", 0, "Integer"),
+            "spanning_pairs" : Info("SPANNING_PAIRs", "Number of correctly mapped read pairs spanning breakpoint", 0, "Integer"),
             "clip3" : Info("CLIP3", "Number of soft clipped reads downstream of the breakpoint", 0, "Integer"),
             "clip5" : Info("CLIP5", "Number of soft clipped reads upstream of the breakpoint", 0, "Integer"),
             "call_status" : Info(
@@ -124,7 +125,7 @@ class Retroseq:
             )
         }
 
-        self.redundancy_filter = RedundancyFilter(["read_pair_support"], "value")
+        self.redundancy_filter = RedundancyFilter(["supporting_reads"], "value")
 
 class Relocate2:
     def __init__(self):
