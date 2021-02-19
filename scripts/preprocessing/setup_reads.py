@@ -140,7 +140,7 @@ def run_trim_galore(fq1, run_id, log, out, fq2=None, cores=1, flags=[]):
     if fq2 is None:
         command.append(fq1)
     else:
-        command += [fq1, fq2]
+        command += ["--paired", fq1, fq2]
     
     mccutils.run_command(command, log=log)
 
