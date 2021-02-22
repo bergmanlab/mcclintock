@@ -86,21 +86,21 @@ ESSENTIAL_PATHS = {
         ],
 
         'relocate': [
-                RESULTS_DIR+"relocaTE/"+SAMPLE_NAME+"_relocate_nonredundant.bed",
-                RESULTS_DIR+"relocaTE/"+SAMPLE_NAME+"_relocate_redundant.bed",
-                RESULTS_DIR+"relocaTE/"+SAMPLE_NAME+"_relocate_malformed.bed",
-                RESULTS_DIR+"relocaTE/"+SAMPLE_NAME+"_relocate_nonredundant_non-reference.vcf",
-                RESULTS_DIR+"relocaTE/unfiltered/combined.gff"
+                RESULTS_DIR+"relocate/"+SAMPLE_NAME+"_relocate_nonredundant.bed",
+                RESULTS_DIR+"relocate/"+SAMPLE_NAME+"_relocate_redundant.bed",
+                RESULTS_DIR+"relocate/"+SAMPLE_NAME+"_relocate_malformed.bed",
+                RESULTS_DIR+"relocate/"+SAMPLE_NAME+"_relocate_nonredundant_non-reference.vcf",
+                RESULTS_DIR+"relocate/unfiltered/combined.gff"
         ],
 
         'temp': [
-                RESULTS_DIR+"TEMP/"+SAMPLE_NAME+"_temp_nonredundant.bed",
-                RESULTS_DIR+"TEMP/"+SAMPLE_NAME+"_temp_redundant.bed",
-                RESULTS_DIR+"TEMP/"+SAMPLE_NAME+"_temp_malformed.bed",
-                RESULTS_DIR+"TEMP/"+SAMPLE_NAME+".absent.bed",
-                RESULTS_DIR+"TEMP/"+SAMPLE_NAME+"_temp_nonredundant_non-reference.vcf",
-                RESULTS_DIR+"TEMP/unfiltered/"+SAMPLE_NAME+".insertion.refined.bp.summary",
-                RESULTS_DIR+"TEMP/unfiltered/"+SAMPLE_NAME+".absence.refined.bp.summary"
+                RESULTS_DIR+"temp/"+SAMPLE_NAME+"_temp_nonredundant.bed",
+                RESULTS_DIR+"temp/"+SAMPLE_NAME+"_temp_redundant.bed",
+                RESULTS_DIR+"temp/"+SAMPLE_NAME+"_temp_malformed.bed",
+                RESULTS_DIR+"temp/"+SAMPLE_NAME+".absent.bed",
+                RESULTS_DIR+"temp/"+SAMPLE_NAME+"_temp_nonredundant_non-reference.vcf",
+                RESULTS_DIR+"temp/unfiltered/"+SAMPLE_NAME+".insertion.refined.bp.summary",
+                RESULTS_DIR+"temp/unfiltered/"+SAMPLE_NAME+".absence.refined.bp.summary"
         ],
 
         'temp2': [
@@ -122,19 +122,19 @@ ESSENTIAL_PATHS = {
         ],
 
         'popoolationte': [
-                RESULTS_DIR+"popoolationTE/"+SAMPLE_NAME+"_popoolationte_nonredundant.bed",
-                RESULTS_DIR+"popoolationTE/"+SAMPLE_NAME+"_popoolationte_redundant.bed",
-                RESULTS_DIR+"popoolationTE/"+SAMPLE_NAME+"_popoolationte_malformed.bed",
-                RESULTS_DIR+"popoolationTE/"+SAMPLE_NAME+"_popoolationte_nonredundant_non-reference.vcf",
+                RESULTS_DIR+"popoolationte/"+SAMPLE_NAME+"_popoolationte_nonredundant.bed",
+                RESULTS_DIR+"popoolationte/"+SAMPLE_NAME+"_popoolationte_redundant.bed",
+                RESULTS_DIR+"popoolationte/"+SAMPLE_NAME+"_popoolationte_malformed.bed",
+                RESULTS_DIR+"popoolationte/"+SAMPLE_NAME+"_popoolationte_nonredundant_non-reference.vcf",
                 RESULTS_DIR+"popoolationTE/unfiltered/te-poly-filtered.txt"
         ],
 
         'popoolationte2': [
-                RESULTS_DIR+"popoolationTE2/"+SAMPLE_NAME+"_popoolationte2_nonredundant.bed",
-                RESULTS_DIR+"popoolationTE2/"+SAMPLE_NAME+"_popoolationte2_redundant.bed",
-                RESULTS_DIR+"popoolationTE2/"+SAMPLE_NAME+"_popoolationte2_malformed.bed",
-                RESULTS_DIR+"popoolationTE2/"+SAMPLE_NAME+"_popoolationte2_nonredundant_non-reference.vcf",
-                RESULTS_DIR+"popoolationTE2/unfiltered/teinsertions.txt"
+                RESULTS_DIR+"popoolationte2/"+SAMPLE_NAME+"_popoolationte2_nonredundant.bed",
+                RESULTS_DIR+"popoolationte2/"+SAMPLE_NAME+"_popoolationte2_redundant.bed",
+                RESULTS_DIR+"popoolationte2/"+SAMPLE_NAME+"_popoolationte2_malformed.bed",
+                RESULTS_DIR+"popoolationte2/"+SAMPLE_NAME+"_popoolationte2_nonredundant_non-reference.vcf",
+                RESULTS_DIR+"popoolationte2/unfiltered/teinsertions.txt"
         ],
 
         'te-locate': [
@@ -150,12 +150,12 @@ ESSENTIAL_PATHS = {
         'map_reads': [],
 
         'relocate2': [
-                RESULTS_DIR+"relocaTE2/"+SAMPLE_NAME+"_relocate2_nonredundant.bed",
-                RESULTS_DIR+"relocaTE2/"+SAMPLE_NAME+"_relocate2_redundant.bed",
-                RESULTS_DIR+"relocaTE2/"+SAMPLE_NAME+"_relocate2_malformed.bed",
-                RESULTS_DIR+"relocaTE2/"+SAMPLE_NAME+"_relocate2_nonredundant_non-reference.vcf",
-                RESULTS_DIR+"relocaTE2/unfiltered/repeat/results/ALL.all_nonref_insert.gff",
-                RESULTS_DIR+"relocaTE2/unfiltered/repeat/results/ALL.all_ref_insert.gff"
+                RESULTS_DIR+"relocate2/"+SAMPLE_NAME+"_relocate2_nonredundant.bed",
+                RESULTS_DIR+"relocate2/"+SAMPLE_NAME+"_relocate2_redundant.bed",
+                RESULTS_DIR+"relocate2/"+SAMPLE_NAME+"_relocate2_malformed.bed",
+                RESULTS_DIR+"relocate2/"+SAMPLE_NAME+"_relocate2_nonredundant_non-reference.vcf",
+                RESULTS_DIR+"relocate2/unfiltered/repeat/results/ALL.all_nonref_insert.gff",
+                RESULTS_DIR+"relocate2/unfiltered/repeat/results/ALL.all_ref_insert.gff"
         ],
 
         'tepid': [

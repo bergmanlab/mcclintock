@@ -354,7 +354,7 @@ def write_vcf(inserts, genome_fasta, sample_name, method, out_dir):
             if insert.type == "non-reference":
                 ref = contigs[insert.chromosome][insert.start-1]
                 te_id = insert.family+"_"+insert.name.split("|")[-1]
-                vals = [insert.chromosome, str(insert.start), te_id, ref, "<INS:ME>", ".", "PASS"]
+                vals = [insert.chromosome, str(insert.start), te_id, ref.upper(), "<INS:ME>", ".", "PASS"]
                 info = ["END="+str(insert.end),"SVTYPE=INS", "STRAND="+insert.strand, "FAMILY="+insert.family]
                 for key,value in insert.support_info.support.items():
                     info.append(value.tag+"="+str(value.value))

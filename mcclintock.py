@@ -12,7 +12,7 @@ import traceback
 try:
     sys.path.append(os.path.dirname(os.path.abspath(__file__)))
     import scripts.mccutils as mccutils
-    import config.config as config
+    import config._internal.config as config
     import config.install.install as config_install
     from Bio import SeqIO
 except ImportError as e:

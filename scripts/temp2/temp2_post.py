@@ -59,6 +59,11 @@ def read_insertions(insert_bed, sample_name, chromosomes, config):
 
                     insert.name = insert.family+"|non-reference|"+str(insert.support_info.support['frequency'].value)+"|"+sample_name+"|temp2|"
 
+                    if insert.support_info.support["fiveprimejunctionsupport"].value > 0 and insert.support_info.support["threeprimejunctionsupport"].value > 0:
+                        insert.name += "sr|"
+                    else:
+                        insert.name += "rp|"
+
                     if (
                         insert.chromosome in chromosomes and
                         insert.support_info.support["frequency"].value >= config.FREQUENCY_THRESHOLD and 
