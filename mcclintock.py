@@ -465,13 +465,14 @@ def check_installed_modules(methods, no_install_methods, method_md5s, install_di
 
 
 # stores config file info and hashes so that future runs can determine if config files have changed
-def setup_config_info(config_dir, method_to_config):
+def setup_config_info(config_dir, method_to_config, config_rules):
     out_dict = {}
     out_dict["path"] = config_dir
     for method in method_to_config.keys():
         out_dict[method] = {}
         out_dict[method]["files"] = []
         out_dict[method]["MD5s"] = []
+        out_dict[method]['rules'] = config_rules[method]
         for f in method_to_config[method]:
             config_file = config_dir+f
             with open(config_file,"rb") as cf:
@@ -564,7 +565,7 @@ def make_run_config(args, sample_name, ref_name, full_command, current_directory
         "debug": str(debug)
     }
 
-    data["config"] = setup_config_info(args.config, config.CONFIGS)
+    data["config"] = setup_config_info(args.config, config.CONFIGS, config.CONFIG_RULES)
 
     # input paths for files
     data["in"] = {
@@ -657,15 +658,23 @@ def run_workflow(args, sample_name, ref_name, run_id, config, debug=False, annot
     else:
         mccutils.log("setup","Checking config files to ensure previous intermediate files are compatible with this run")
         config_found = False
+        previous_config_md5s = {}
         for prev_config in os.listdir(input_dir+"/snakemake/config/"):
             if prev_config != "config_"+str(run_id)+".json":
                 config_found = True
                 config_compatible = config_compatibility(input_dir+"/snakemake/config/config_"+str(run_id)+".json", args.out+"/snakemake/config/"+prev_config)
+                previous_config_md5s = get_recent_config_md5s(args.out+"/snakemake/config/"+prev_config, previous_config_md5s)
                 if not config_compatible:
                     sys.exit(1)
         
         if not config_found:
             sys.exit("ERROR: Unable to resume run. No config files from previous runs found in:"+input_dir+"/snakemake/config/ Remove --resume for clean run\n")
+
+        rules_to_rerun = get_rules_to_rerun(input_dir+"/snakemake/config/config_"+str(run_id)+".json", previous_config_md5s)
+        if len(rules_to_rerun) > 0:
+            for rule in rules_to_rerun:
+                command.append("-R")
+                command.append(rule)
     
     if not annotations_only:
         for method in args.methods:
@@ -689,6 +698,36 @@ def run_workflow(args, sample_name, ref_name, run_id, config, debug=False, annot
         sys.exit(1)
     mccutils.remove(sample_dir+"tmp")
     remove_intermediate_files(args.keep_intermediate, args.out+"/snakemake/config/config_"+str(run_id)+".json", args.methods, ref_name, sample_name, args.out)
+
+def get_recent_config_md5s(prev_config, config_md5s):
+    with open(prev_config) as f:
+        prev_config_data = json.load(f)
+    
+    run_methods = prev_config_data['args']['methods']
+    start_time = datetime.strptime(prev_config_data['args']['time'], '%Y-%m-%d %H:%M:%S')
+
+    for config in prev_config_data['config'].keys():
+        if config in run_methods:
+            if config not in config_md5s.keys():
+                config_md5s[config] = [prev_config_data['config'][config]['MD5s'], start_time]
+            else:
+                if config_md5s[config][1] < start_time:
+                    config_md5s[config] = [prev_config_data['config'][config]['MD5s'], start_time]
+    
+    return config_md5s
+
+def get_rules_to_rerun(run_config, prev_md5s):
+    rules_to_rerun = []
+    with open(run_config) as f:
+        run_config_data = json.load(f)
+    
+    for config in run_config_data['config'].keys():
+        if config in prev_md5s.keys():
+            for x,md5 in enumerate(prev_md5s[config][0]):
+                if md5 != run_config_data['config'][config]["MD5s"][x]:
+                    rules_to_rerun.append(run_config_data['config'][config]['rules'][x])
+
+    return rules_to_rerun
 
 def config_compatibility(run_config, prev_config):
     with open(run_config) as f:

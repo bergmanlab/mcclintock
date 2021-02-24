@@ -30,6 +30,8 @@ CONFIGS = {
 
 # rules to re-run if specific config files change
 CONFIG_RULES = {
+        "internal" : [],
+        "install" : [],
         "coverage" : ["coverage"],
         "trimgalore" : ["setup_reads"],
         "ngs_te_mapper": ["ngs_te_mapper_run","ngs_te_mapper_post"],
