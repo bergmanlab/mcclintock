@@ -35,7 +35,6 @@ rule relocaTE_ref_gff:
 
 rule relocaTE_run:
     input:
-        config['args']['mcc_path']+"/config/relocate/relocate_run.py",
         consensus_fasta = config['mcc']['relocaTE_consensus'],
         te_gff = config['mcc']['relocaTE_ref_TEs'],
         reference_fasta = config['mcc']['reference'],
@@ -62,7 +61,6 @@ rule relocaTE_run:
 
 rule relocaTE_post:
     input:
-        config['args']['mcc_path']+"/config/relocate/relocate_post.py",
         relocate_gff = config['args']['out']+"results/relocaTE/unfiltered/combined.gff",
         te_gff = config['mcc']['relocaTE_ref_TEs'],
         reference_fasta = config['mcc']['reference']

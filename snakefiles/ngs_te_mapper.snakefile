@@ -1,6 +1,5 @@
 rule ngs_te_mapper_run:
     input:
-        config = config['args']['mcc_path']+"/config/ngs_te_mapper/ngs_te_mapper_run.py",
         consensus_fasta = config['mcc']['consensus'],
         reference_fasta = config['mcc']['reference'],
         fastq1 = config['mcc']['fq1'],
@@ -26,7 +25,6 @@ rule ngs_te_mapper_run:
 
 rule ngs_te_mapper_post:
     input:
-        config = config['args']['mcc_path']+"/config/ngs_te_mapper/ngs_te_mapper_post.py",
         raw_bed = config['args']['out']+"results/ngs_te_mapper/unfiltered/bed_tsd/"+config['args']['sample_name']+"_insertions.bed",
         reference_fasta = config['mcc']['reference']
 

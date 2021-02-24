@@ -1,6 +1,5 @@
 rule relocaTE2_run:
     input:
-        config['args']['mcc_path']+"/config/relocate2/relocate2_run.py",
         reference = config['mcc']['reference'],
         te_seqs = config['mcc']['consensus'],
         rm_out = config['mcc']['repeatmasker_out'],
@@ -31,7 +30,6 @@ rule relocaTE2_run:
 
 rule relocaTE2_post:
     input:
-        config['args']['mcc_path']+"/config/relocate2/relocate2_post.py",
         rm_out = config['mcc']['repeatmasker_out'],
         nonref_gff = config['args']['out']+"results/relocaTE2/unfiltered/repeat/results/ALL.all_nonref_insert.gff",
         ref_gff = config['args']['out']+"results/relocaTE2/unfiltered/repeat/results/ALL.all_ref_insert.gff",
