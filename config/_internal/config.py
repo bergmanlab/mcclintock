@@ -9,6 +9,43 @@ SAM_DIR = "{{samdir}}"
 REF_NAME = "{{refname}}"
 SAMPLE_NAME = "{{samplename}}"
 
+
+CONFIGS = {
+        "internal" : ["_internal/config.py"],
+        "coverage" : ["coverage/coverage.py"],
+        "install" : ["install/install.py"],
+        "trimgalore" : ["trimgalore/trimgalore.py"],
+        "ngs_te_mapper": ["ngs_te_mapper/ngs_te_mapper_run.py","ngs_te_mapper/ngs_te_mapper_post.py"],
+        "ngs_te_mapper2":  ["ngs_te_mapper2/ngs_te_mapper2_run.py","ngs_te_mapper2/ngs_te_mapper2_post.py"],
+        "popoolationte": ["popoolationte/popoolationte_run.py", "popoolationte/popoolationte_post.py"],
+        "popoolationte2": ["popoolationte2/popoolationte2_run.py", "popoolationte2/popoolationte2_post.py"],
+        "relocate": ["relocate/relocate_run.py", "relocate/relocate_post.py"],
+        "relocate2": ["relocate2/relocate2_run.py", "relocate2/relocate2_post.py"],
+        "retroseq": ["retroseq/retroseq_run.py", "retroseq/retroseq_post.py"],
+        "teflon": ["teflon/teflon_run.py", "teflon/teflon_post.py"],
+        "te-locate": ["telocate/telocate_run.py", "telocate/telocate_post.py"],
+        "temp": ["temp/temp_run.py", "temp/temp_post.py"],
+        "temp2": ["temp2/temp2_run.py", "temp2/temp2_post.py"]
+}
+
+# rules to re-run if specific config files change
+CONFIG_RULES = {
+        "coverage" : ["coverage"],
+        "trimgalore" : ["setup_reads"],
+        "ngs_te_mapper": ["ngs_te_mapper_run","ngs_te_mapper_post"],
+        "ngs_te_mapper2":  ["ngs_te_mapper2_run","ngs_te_mapper2_post"],
+        "popoolationte": ["popoolationTE_run", "popoolationTE_post"],
+        "popoolationte2": ["popoolationTE2_run", "popoolationTE2_post"],
+        "relocate": ["relocaTE_run", "relocaTE_post"],
+        "relocate2": ["relocaTE2_run", "relocaTE2_post"],
+        "retroseq": ["retroseq_run", "retroseq_post"],
+        "teflon": ["teflon_run", "teflon_post"],
+        "te-locate": ["telocate_run", "telocate_post"],
+        "temp": ["run_temp", "process_temp"],
+        "temp2": ["run_temp2", "process_temp2"]
+}
+
+
 INTERMEDIATE_PATHS = {
         'mcc_files' : REF_DIR,
         'reference' : REF_DIR+"genome_fasta/"+REF_NAME+".fasta",

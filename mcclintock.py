@@ -6,14 +6,14 @@ import sys
 import json
 import random
 import gzip
+import hashlib
 from datetime import datetime
 import traceback
 
 try:
     sys.path.append(os.path.dirname(os.path.abspath(__file__)))
     import scripts.mccutils as mccutils
-    import config._internal.config as config
-    import config.install.install as config_install
+    import config._internal.config as internal_config
     from Bio import SeqIO
 except ImportError as e:
     print(e)
@@ -26,17 +26,23 @@ except ImportError as e:
 def main():
     full_command = " ".join(["python3"] + sys.argv)
     current_directory = os.getcwd()
-    args = parse_args()
+
+    expected_configs = internal_config.CONFIGS
+    args = parse_args(expected_configs)
+    sys.path = [args.config] + sys.path
+    import _internal.config as config
+    import install.install as config_install
+
     mccutils.mkdir(args.out+"/logs")
     mccutils.mkdir(args.out+"/tmp")
     check_installed_modules(args.methods, config.NO_INSTALL_METHODS, config_install.MD5, os.path.dirname(os.path.abspath(__file__))+"/install/")
     check_input_files(args.reference, args.consensus, args.first, fq2=args.second, locations=args.locations, taxonomy=args.taxonomy, coverage_fasta=args.coverage_fasta, augment_fasta=args.augment, annotations_only=args.make_annotations)
     ref_name = mccutils.get_base_name(args.reference)
-    run_id = make_run_config(args, args.sample_name, ref_name, full_command, current_directory, debug=args.debug)
-    run_workflow(args, args.sample_name, ref_name, run_id, debug=args.debug, annotations_only=args.make_annotations)
+    run_id = make_run_config(args, args.sample_name, ref_name, full_command, current_directory, config, config_install, debug=args.debug)
+    run_workflow(args, args.sample_name, ref_name, run_id, config, debug=args.debug, annotations_only=args.make_annotations)
     mccutils.remove(args.out+"/tmp")
 
-def parse_args():
+def parse_args(expected_configs):
     parser = argparse.ArgumentParser(prog='McClintock', description="Meta-pipeline to identify transposable element insertions using next generation sequencing data")
 
     ## required ##
@@ -64,8 +70,23 @@ def parse_args():
     parser.add_argument("--slow", action="store_true", help="This option runs without attempting to optimize thread usage to run rules concurrently. Each multithread rule will use the max processors designated by -p/--proc", required=False)
     parser.add_argument("--make_annotations", action="store_true", help="This option will only run the pipeline up to the creation of the repeat annotations", required=False)
     parser.add_argument("-k","--keep_intermediate", type=str, help="This option determines which intermediate files are preserved after McClintock completes [default: general][options: minimal, general, methods, <list,of,methods>, all]", required=False)
+    parser.add_argument("--config", type=str, help="This option determines which config files to use for your mcclintock run [default: config in McClintock Repository]", required=False)
 
     args = parser.parse_args()
+
+    if args.config is None:
+        args.config = os.path.dirname(os.path.abspath(__file__)) + "/config/"
+    else:
+        args.config = os.path.abspath(args.config)+"/"
+
+    for key in expected_configs.keys():
+        for config_file in expected_configs[key]:
+            if not os.path.exists(args.config+"/"+config_file):
+                sys.exit("Error: can't find config file: "+args.config+"/"+config_file+"\n Check that --config is set correctly...exiting...\n")
+
+    sys.path = [args.config] + sys.path
+    import _internal.config as config
+    import install.install as config_install
 
     if args.debug is None:
         args.debug = False
@@ -443,8 +464,26 @@ def check_installed_modules(methods, no_install_methods, method_md5s, install_di
                 sys.exit(1)
 
 
+# stores config file info and hashes so that future runs can determine if config files have changed
+def setup_config_info(config_dir, method_to_config):
+    out_dict = {}
+    out_dict["path"] = config_dir
+    for method in method_to_config.keys():
+        out_dict[method] = {}
+        out_dict[method]["files"] = []
+        out_dict[method]["MD5s"] = []
+        for f in method_to_config[method]:
+            config_file = config_dir+f
+            with open(config_file,"rb") as cf:
+                data = cf.read()
+                md5 = hashlib.md5(data).hexdigest()
 
-def make_run_config(args, sample_name, ref_name, full_command, current_directory, debug=False):
+            out_dict[method]["files"].append(config_file)
+            out_dict[method]["MD5s"].append(md5)
+    
+    return out_dict
+
+def make_run_config(args, sample_name, ref_name, full_command, current_directory, config, config_install, debug=False):
     run_id = random.randint(1000000,9999999)
     mccutils.mkdir(args.out+"/snakemake")
     mccutils.mkdir(args.out+"/snakemake/config")
@@ -525,6 +564,8 @@ def make_run_config(args, sample_name, ref_name, full_command, current_directory
         "debug": str(debug)
     }
 
+    data["config"] = setup_config_info(args.config, config.CONFIGS)
+
     # input paths for files
     data["in"] = {
         'reference' : str(args.reference),
@@ -573,7 +614,7 @@ def make_run_config(args, sample_name, ref_name, full_command, current_directory
     return run_id
 
 
-def run_workflow(args, sample_name, ref_name, run_id, debug=False, annotations_only=False):
+def run_workflow(args, sample_name, ref_name, run_id, config, debug=False, annotations_only=False):
     log = args.out+"/mcclintock."+str(run_id)+".log"
 
     input_dir = args.out

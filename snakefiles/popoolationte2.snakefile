@@ -36,7 +36,8 @@ rule popoolationTE2_run:
         out_dir = config['args']['out']+"/results/popoolationTE2/unfiltered/",
         sample_name=config['args']['sample_name'],
         log = config['args']['log_dir']+"popoolationTE2.log",
-        jar = config['args']['mcc_path']+"/install/tools/popoolationte2/popte2-v1.10.03.jar"
+        jar = config['args']['mcc_path']+"/install/tools/popoolationte2/popte2-v1.10.03.jar",
+        config = config['config']['popoolationte2']['files'][0]
 
     output:
         config['args']['out']+"results/popoolationTE2/unfiltered/teinsertions.txt"
@@ -60,7 +61,8 @@ rule popoolationTE2_post:
         out_dir = config['args']['out']+"/results/popoolationTE2/",
         sample_name=config['args']['sample_name'],
         chromosomes = config['args']['chromosomes'],
-        log = config['args']['log_dir']+"popoolationTE2.log"
+        log = config['args']['log_dir']+"popoolationTE2.log",
+        config = config['config']['popoolationte2']['files'][1]
 
     output:
         config['out']['popoolationte2']

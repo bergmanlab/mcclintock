@@ -21,7 +21,8 @@ rule setup_reads:
         methods = config['args']['methods'],
         out = config['args']['out'],
         run_id = config['args']['run_id'],
-        log = config['args']['log_dir']+"trimgalore.log"
+        log = config['args']['log_dir']+"trimgalore.log",
+        config = config['config']['trimgalore']['files'][0]
 
     output:
         config['mcc']['fq1'],
@@ -312,7 +313,8 @@ rule coverage:
     
     params: 
         sample=config['args']['sample_name'],
-        log=config['args']['log_dir']+"coverage.log"
+        log=config['args']['log_dir']+"coverage.log",
+        config = config['config']['coverage']['files'][0]
 
     threads: config['args']['max_threads_per_rule']
 

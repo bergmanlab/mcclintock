@@ -16,7 +16,8 @@ rule relocaTE2_run:
         raw_fq2 = config['in']['fq2'],
         out_dir = config['args']['out']+"/results/relocaTE2/unfiltered/",
         log = config['args']['log_dir']+"relocaTE2.log",
-        sample_name = config['args']['sample_name']
+        sample_name = config['args']['sample_name'],
+        config = config['config']['relocate2']['files'][0]
         
     
     output:
@@ -44,7 +45,8 @@ rule relocaTE2_post:
         out_dir = config['args']['out']+"/results/relocaTE2/",
         log = config['args']['log_dir']+"relocaTE2.log",
         sample_name = config['args']['sample_name'],
-        chromosomes = config['args']['chromosomes']
+        chromosomes = config['args']['chromosomes'],
+        config = config['config']['relocate2']['files'][1]
     
     output:
         config['out']['relocate2']

@@ -1,9 +1,14 @@
 import os
 import sys
 import subprocess
+import importlib
+spec = importlib.util.spec_from_file_location("config", snakemake.params.config)
+config = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = config
+spec.loader.exec_module(config)
 sys.path.append(snakemake.config['args']['mcc_path'])
 import scripts.mccutils as mccutils
-import config.temp2.temp2_run as config
+
 
 def main():
     fq1 = snakemake.input.fq1

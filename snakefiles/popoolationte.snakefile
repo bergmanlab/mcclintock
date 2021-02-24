@@ -83,7 +83,8 @@ rule popoolationTE_run:
         out_dir = config['args']['out']+"results/popoolationTE/unfiltered/",
         sample_name=config['args']['sample_name'],
         log = config['args']['log_dir']+"popoolationTE.log",
-        script_dir = config['args']['mcc_path']+"/install/tools/popoolationte/"
+        script_dir = config['args']['mcc_path']+"/install/tools/popoolationte/",
+        config = config['config']['popoolationte']['files'][0]
 
     output:
         config['args']['out']+"results/popoolationTE/unfiltered/te-poly-filtered.txt"
@@ -104,7 +105,8 @@ rule popoolationTE_post:
         out_dir = config['args']['out']+"/results/popoolationTE/",
         sample_name=config['args']['sample_name'],
         chromosomes = config['args']['chromosomes'],
-        log = config['args']['log_dir']+"popoolationTE.log"
+        log = config['args']['log_dir']+"popoolationTE.log",
+        config = config['config']['popoolationte']['files'][1]
 
     output:
         config['out']['popoolationte']

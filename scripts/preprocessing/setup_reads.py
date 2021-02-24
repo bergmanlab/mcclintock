@@ -6,9 +6,13 @@ import subprocess
 import traceback
 from datetime import datetime
 try:
+    import importlib
+    spec = importlib.util.spec_from_file_location("config", snakemake.params.config)
+    trimgalore = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = trimgalore
+    spec.loader.exec_module(trimgalore)
     sys.path.append(snakemake.config['args']['mcc_path'])
     import scripts.mccutils as mccutils
-    import config.preprocessing.trimgalore as trimgalore
     from Bio import SeqIO
 except Exception as e:
     track = traceback.format_exc()

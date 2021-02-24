@@ -1,10 +1,16 @@
 import os
 import sys
 import subprocess
+import statistics
+import importlib
+spec = importlib.util.spec_from_file_location("config", snakemake.params.config)
+config = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = config
+spec.loader.exec_module(config)
 sys.path.append(snakemake.config['args']['mcc_path'])
 import scripts.mccutils as mccutils
-import config.popoolationte.popoolationte_run as config
-import statistics
+
+
 
 
 

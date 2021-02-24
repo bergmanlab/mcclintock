@@ -62,7 +62,8 @@ rule telocate_run:
     params:
         run_script = config['args']['mcc_path']+"/install/tools/te-locate/TE_locate.pl",
         out_dir = config['args']['out']+"/results/te-locate/unfiltered/",
-        log = config['args']['log_dir']+"te-locate.log"
+        log = config['args']['log_dir']+"te-locate.log",
+        config = config['config']['te-locate']['files'][0]
     
     threads: 1
 
@@ -83,7 +84,8 @@ rule telocate_post:
     params:
         out_dir = config['args']['out']+"/results/te-locate/",
         sample_name = config['args']['sample_name'],
-        chromosomes = config['args']['chromosomes']
+        chromosomes = config['args']['chromosomes'],
+        config = config['config']['te-locate']['files'][1]
     
     threads: 1
 
