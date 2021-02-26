@@ -122,7 +122,7 @@ def parse_args(expected_configs):
     if args.install:
         mccutils.log("install","installing dependencies")
         mccutils.log("install","WARNING: this could take awhile")
-        install(args.methods, resume=args.resume, debug=args.debug)
+        install(args.methods, config_install, resume=args.resume, debug=args.debug)
         sys.exit(0)
 
     #check -r
@@ -365,7 +365,7 @@ def get_conda_envs(conda_env_dir):
     
     return existing_envs
 
-def install(methods, resume=False, debug=False):
+def install(methods, config_install, resume=False, debug=False):
 
     mcc_path = os.path.dirname(os.path.abspath(__file__))
     install_path = mcc_path+"/install/"

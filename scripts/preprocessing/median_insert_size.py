@@ -21,7 +21,7 @@ def main():
     
     else:
         with open(snakemake.output[0],"w") as out:
-            out.write("median_insert_size=500\n")
+            out.write("median_insert_size=0\n")
         
 
 if __name__ == "__main__":                
