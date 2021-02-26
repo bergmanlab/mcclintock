@@ -231,15 +231,21 @@ def make_run_summary(out_file_map, commit, methods, fq1, fq2, ref, bam, flagstat
         
         with open(flagstat,"r") as stat:
             for line in stat:
-                if "read1" in line:
+                if paired:
+                    if "read1" in line:
+                        reads = line.split("+")[0].replace(" ","")
+                        mapping_info['read1_reads'] = str(reads)
+                        out_lines.append(pad("read1 reads:",24) + str(reads) + "\n")
+
+                    if "read2" in line:
+                        reads = line.split("+")[0].replace(" ","")
+                        mapping_info['read2_reads'] = str(reads)
+                        out_lines.append(pad("read2 reads:",24) + str(reads) + "\n")
+                        
+                elif "mapped (" in line:
                     reads = line.split("+")[0].replace(" ","")
                     mapping_info['read1_reads'] = str(reads)
                     out_lines.append(pad("read1 reads:",24) + str(reads) + "\n")
-                
-                if paired and "read2" in line:
-                    reads = line.split("+")[0].replace(" ","")
-                    mapping_info['read2_reads'] = str(reads)
-                    out_lines.append(pad("read2 reads:",24) + str(reads) + "\n")
 
             
         with open(median_insert_size,"r") as median_insert:
