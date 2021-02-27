@@ -350,7 +350,8 @@ rule summary_report:
         raw_fq2 = config['in']['fq2'],
         chromosomes = config['args']['chromosomes'],
         out_dir = config['args']['out']+"/results/summary/",
-        coverage_fa = config['in']['coverage_fasta']
+        coverage_fa = config['in']['coverage_fasta'],
+        run_config = config['args']['run_config']
 
 
     threads: config['args']['max_threads_per_rule']

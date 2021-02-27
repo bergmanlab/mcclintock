@@ -81,107 +81,130 @@ INTERMEDIATE_PATHS = {
 
 
 RESULTS_DIR = "{{results}}"
+
+
+OUT_DIRS = {
+        'coverage': RESULTS_DIR+"coverage/",
+        'ngs_te_mapper': RESULTS_DIR+"ngs_te_mapper/",
+        'ngs_te_mapper2': RESULTS_DIR+"ngs_te_mapper2/",
+        'relocate': RESULTS_DIR+"relocate/",
+        'temp': RESULTS_DIR+"temp/",
+        'temp2': RESULTS_DIR+"temp2/",
+        'retroseq': RESULTS_DIR+"retroseq/",
+        'popoolationte': RESULTS_DIR+"popoolationte/",
+        'popoolationte2': RESULTS_DIR+"popoolationte2/",
+        'te-locate': RESULTS_DIR+"te-locate/",
+        'trimgalore': SAM_DIR+"intermediate/fastq/",
+        'map_reads': SAM_DIR+"intermediate/mapped_reads/",
+        'relocate2': RESULTS_DIR+"relocate2/",
+        'tepid': RESULTS_DIR+"tepid/",
+        'teflon': RESULTS_DIR+"teflon/",
+        'jitterbug': RESULTS_DIR+"jitterbug/"
+}
+
+METHOD_DIR = "{{method}}"
+
 OUT_PATHS = {
-        'coverage': RESULTS_DIR+"coverage/te_depth.csv",
-        'ngs_te_mapper': RESULTS_DIR+"ngs_te_mapper/"+SAMPLE_NAME+"_ngs_te_mapper_nonredundant.bed",
-        'ngs_te_mapper2': RESULTS_DIR+"ngs_te_mapper2/"+SAMPLE_NAME+"_ngs_te_mapper2_nonredundant.bed",
-        'relocate': RESULTS_DIR+"relocaTE/"+SAMPLE_NAME+"_relocate_nonredundant.bed",
-        'temp': RESULTS_DIR+"TEMP/"+SAMPLE_NAME+"_temp_nonredundant.bed",
-        'temp2': RESULTS_DIR+"temp2/"+SAMPLE_NAME+"_temp2_nonredundant.bed",
-        'retroseq': RESULTS_DIR+"retroseq/"+SAMPLE_NAME+"_retroseq_nonredundant.bed",
-        'popoolationte': RESULTS_DIR+"popoolationTE/"+SAMPLE_NAME+"_popoolationte_nonredundant.bed",
-        'popoolationte2': RESULTS_DIR+"popoolationTE2/"+SAMPLE_NAME+"_popoolationte2_nonredundant.bed",
-        'te-locate': RESULTS_DIR+"te-locate/"+SAMPLE_NAME+"_telocate_nonredundant.bed",
-        'trimgalore': SAM_DIR+"intermediate/fastq/"+SAMPLE_NAME+"_1.fq",
-        'map_reads': SAM_DIR+"intermediate/mapped_reads/median_insert.size",
-        'relocate2': RESULTS_DIR+"relocaTE2/"+SAMPLE_NAME+"_relocate2_nonredundant.bed",
-        'tepid': RESULTS_DIR+"tepid/"+SAMPLE_NAME+"_tepid_nonredundant.bed",
-        'teflon': RESULTS_DIR+"teflon/"+SAMPLE_NAME+"_teflon_nonredundant.bed",
-        'jitterbug': RESULTS_DIR+"jitterbug/"+SAMPLE_NAME+"_jitterbug_nonredundant.bed"
+        'coverage': METHOD_DIR+"te_depth.csv",
+        'ngs_te_mapper': METHOD_DIR+SAMPLE_NAME+"_ngs_te_mapper_nonredundant.bed",
+        'ngs_te_mapper2': METHOD_DIR+SAMPLE_NAME+"_ngs_te_mapper2_nonredundant.bed",
+        'relocate': METHOD_DIR+SAMPLE_NAME+"_relocate_nonredundant.bed",
+        'temp': METHOD_DIR+SAMPLE_NAME+"_temp_nonredundant.bed",
+        'temp2': METHOD_DIR+SAMPLE_NAME+"_temp2_nonredundant.bed",
+        'retroseq': METHOD_DIR+SAMPLE_NAME+"_retroseq_nonredundant.bed",
+        'popoolationte': METHOD_DIR+SAMPLE_NAME+"_popoolationte_nonredundant.bed",
+        'popoolationte2': METHOD_DIR+SAMPLE_NAME+"_popoolationte2_nonredundant.bed",
+        'te-locate': METHOD_DIR+SAMPLE_NAME+"_telocate_nonredundant.bed",
+        'trimgalore': METHOD_DIR+SAMPLE_NAME+"_1.fq",
+        'map_reads': METHOD_DIR+"median_insert.size",
+        'relocate2': METHOD_DIR+SAMPLE_NAME+"_relocate2_nonredundant.bed",
+        'tepid': METHOD_DIR+SAMPLE_NAME+"_tepid_nonredundant.bed",
+        'teflon': METHOD_DIR+SAMPLE_NAME+"_teflon_nonredundant.bed",
+        'jitterbug': METHOD_DIR+SAMPLE_NAME+"_jitterbug_nonredundant.bed"
 }
 
 ESSENTIAL_PATHS = {
         'coverage': [
-                RESULTS_DIR+"coverage/te_depth.csv",
-                RESULTS_DIR+"coverage/plots/",
-                RESULTS_DIR+"coverage/te-depth-files/"
+                METHOD_DIR+"te_depth.csv",
+                METHOD_DIR+"plots/",
+                METHOD_DIR+"te-depth-files/"
         ],
 
         'ngs_te_mapper': [
-                RESULTS_DIR+"ngs_te_mapper/"+SAMPLE_NAME+"_ngs_te_mapper_nonredundant.bed",
-                RESULTS_DIR+"ngs_te_mapper/"+SAMPLE_NAME+"_ngs_te_mapper_redundant.bed",
-                RESULTS_DIR+"ngs_te_mapper/"+SAMPLE_NAME+"_ngs_te_mapper_malformed.bed",
-                RESULTS_DIR+"ngs_te_mapper/"+SAMPLE_NAME+"_ngs_te_mapper_nonredundant_non-reference.vcf",
-                RESULTS_DIR+"ngs_te_mapper/unfiltered/bed_tsd/"+SAMPLE_NAME+"_insertions.bed"
+                METHOD_DIR+SAMPLE_NAME+"_ngs_te_mapper_nonredundant.bed",
+                METHOD_DIR+SAMPLE_NAME+"_ngs_te_mapper_redundant.bed",
+                METHOD_DIR+SAMPLE_NAME+"_ngs_te_mapper_malformed.bed",
+                METHOD_DIR+SAMPLE_NAME+"_ngs_te_mapper_nonredundant_non-reference.vcf",
+                METHOD_DIR+"unfiltered/bed_tsd/"+SAMPLE_NAME+"_insertions.bed"
         ],
 
         'ngs_te_mapper2': [
-                RESULTS_DIR+"ngs_te_mapper2/"+SAMPLE_NAME+"_ngs_te_mapper2_nonredundant.bed",
-                RESULTS_DIR+"ngs_te_mapper2/"+SAMPLE_NAME+"_ngs_te_mapper2_redundant.bed",
-                RESULTS_DIR+"ngs_te_mapper2/"+SAMPLE_NAME+"_ngs_te_mapper2_malformed.bed",
-                RESULTS_DIR+"ngs_te_mapper2/"+SAMPLE_NAME+"_ngs_te_mapper2_nonredundant_non-reference.vcf",
-                RESULTS_DIR+"ngs_te_mapper2/unfiltered/"+SAMPLE_NAME+".nonref.bed",
-                RESULTS_DIR+"ngs_te_mapper2/unfiltered/"+SAMPLE_NAME+".ref.bed"
+                METHOD_DIR+SAMPLE_NAME+"_ngs_te_mapper2_nonredundant.bed",
+                METHOD_DIR+SAMPLE_NAME+"_ngs_te_mapper2_redundant.bed",
+                METHOD_DIR+SAMPLE_NAME+"_ngs_te_mapper2_malformed.bed",
+                METHOD_DIR+SAMPLE_NAME+"_ngs_te_mapper2_nonredundant_non-reference.vcf",
+                METHOD_DIR+"unfiltered/"+SAMPLE_NAME+".nonref.bed",
+                METHOD_DIR+"unfiltered/"+SAMPLE_NAME+".ref.bed"
         ],
 
         'relocate': [
-                RESULTS_DIR+"relocate/"+SAMPLE_NAME+"_relocate_nonredundant.bed",
-                RESULTS_DIR+"relocate/"+SAMPLE_NAME+"_relocate_redundant.bed",
-                RESULTS_DIR+"relocate/"+SAMPLE_NAME+"_relocate_malformed.bed",
-                RESULTS_DIR+"relocate/"+SAMPLE_NAME+"_relocate_nonredundant_non-reference.vcf",
-                RESULTS_DIR+"relocate/unfiltered/combined.gff"
+                METHOD_DIR+SAMPLE_NAME+"_relocate_nonredundant.bed",
+                METHOD_DIR+SAMPLE_NAME+"_relocate_redundant.bed",
+                METHOD_DIR+SAMPLE_NAME+"_relocate_malformed.bed",
+                METHOD_DIR+SAMPLE_NAME+"_relocate_nonredundant_non-reference.vcf",
+                METHOD_DIR+"unfiltered/combined.gff"
         ],
 
         'temp': [
-                RESULTS_DIR+"temp/"+SAMPLE_NAME+"_temp_nonredundant.bed",
-                RESULTS_DIR+"temp/"+SAMPLE_NAME+"_temp_redundant.bed",
-                RESULTS_DIR+"temp/"+SAMPLE_NAME+"_temp_malformed.bed",
-                RESULTS_DIR+"temp/"+SAMPLE_NAME+".absent.bed",
-                RESULTS_DIR+"temp/"+SAMPLE_NAME+"_temp_nonredundant_non-reference.vcf",
-                RESULTS_DIR+"temp/unfiltered/"+SAMPLE_NAME+".insertion.refined.bp.summary",
-                RESULTS_DIR+"temp/unfiltered/"+SAMPLE_NAME+".absence.refined.bp.summary"
+                METHOD_DIR+SAMPLE_NAME+"_temp_nonredundant.bed",
+                METHOD_DIR+SAMPLE_NAME+"_temp_redundant.bed",
+                METHOD_DIR+SAMPLE_NAME+"_temp_malformed.bed",
+                METHOD_DIR+SAMPLE_NAME+".absent.bed",
+                METHOD_DIR+SAMPLE_NAME+"_temp_nonredundant_non-reference.vcf",
+                METHOD_DIR+"unfiltered/"+SAMPLE_NAME+".insertion.refined.bp.summary",
+                METHOD_DIR+"unfiltered/"+SAMPLE_NAME+".absence.refined.bp.summary"
         ],
 
         'temp2': [
-                RESULTS_DIR+"temp2/"+SAMPLE_NAME+"_temp2_nonredundant.bed",
-                RESULTS_DIR+"temp2/"+SAMPLE_NAME+"_temp2_redundant.bed",
-                RESULTS_DIR+"temp2/"+SAMPLE_NAME+"_temp2_malformed.bed",
-                RESULTS_DIR+"temp2/"+SAMPLE_NAME+".absent.bed",
-                RESULTS_DIR+"temp2/"+SAMPLE_NAME+"_temp2_nonredundant_non-reference.vcf",
-                RESULTS_DIR+"temp2/unfiltered/"+SAMPLE_NAME+".insertion.bed",
-                RESULTS_DIR+"temp2/unfiltered/"+SAMPLE_NAME+".absence.refined.bp.summary"
+                METHOD_DIR+SAMPLE_NAME+"_temp2_nonredundant.bed",
+                METHOD_DIR+SAMPLE_NAME+"_temp2_redundant.bed",
+                METHOD_DIR+SAMPLE_NAME+"_temp2_malformed.bed",
+                METHOD_DIR+SAMPLE_NAME+".absent.bed",
+                METHOD_DIR+SAMPLE_NAME+"_temp2_nonredundant_non-reference.vcf",
+                METHOD_DIR+"unfiltered/"+SAMPLE_NAME+".insertion.bed",
+                METHOD_DIR+"unfiltered/"+SAMPLE_NAME+".absence.refined.bp.summary"
         ],
 
         'retroseq': [
-                RESULTS_DIR+"retroseq/"+SAMPLE_NAME+"_retroseq_nonredundant.bed",
-                RESULTS_DIR+"retroseq/"+SAMPLE_NAME+"_retroseq_redundant.bed",
-                RESULTS_DIR+"retroseq/"+SAMPLE_NAME+"_retroseq_malformed.bed",
-                RESULTS_DIR+"retroseq/"+SAMPLE_NAME+"_retroseq_nonredundant_non-reference.vcf",
-                RESULTS_DIR+"retroseq/unfiltered/"+SAMPLE_NAME+".call"
+                METHOD_DIR+SAMPLE_NAME+"_retroseq_nonredundant.bed",
+                METHOD_DIR+SAMPLE_NAME+"_retroseq_redundant.bed",
+                METHOD_DIR+SAMPLE_NAME+"_retroseq_malformed.bed",
+                METHOD_DIR+SAMPLE_NAME+"_retroseq_nonredundant_non-reference.vcf",
+                METHOD_DIR+"unfiltered/"+SAMPLE_NAME+".call"
         ],
 
         'popoolationte': [
-                RESULTS_DIR+"popoolationte/"+SAMPLE_NAME+"_popoolationte_nonredundant.bed",
-                RESULTS_DIR+"popoolationte/"+SAMPLE_NAME+"_popoolationte_redundant.bed",
-                RESULTS_DIR+"popoolationte/"+SAMPLE_NAME+"_popoolationte_malformed.bed",
-                RESULTS_DIR+"popoolationte/"+SAMPLE_NAME+"_popoolationte_nonredundant_non-reference.vcf",
-                RESULTS_DIR+"popoolationTE/unfiltered/te-poly-filtered.txt"
+                METHOD_DIR+SAMPLE_NAME+"_popoolationte_nonredundant.bed",
+                METHOD_DIR+SAMPLE_NAME+"_popoolationte_redundant.bed",
+                METHOD_DIR+SAMPLE_NAME+"_popoolationte_malformed.bed",
+                METHOD_DIR+SAMPLE_NAME+"_popoolationte_nonredundant_non-reference.vcf",
+                METHOD_DIR+"unfiltered/te-poly-filtered.txt"
         ],
 
         'popoolationte2': [
-                RESULTS_DIR+"popoolationte2/"+SAMPLE_NAME+"_popoolationte2_nonredundant.bed",
-                RESULTS_DIR+"popoolationte2/"+SAMPLE_NAME+"_popoolationte2_redundant.bed",
-                RESULTS_DIR+"popoolationte2/"+SAMPLE_NAME+"_popoolationte2_malformed.bed",
-                RESULTS_DIR+"popoolationte2/"+SAMPLE_NAME+"_popoolationte2_nonredundant_non-reference.vcf",
-                RESULTS_DIR+"popoolationte2/unfiltered/teinsertions.txt"
+                METHOD_DIR+SAMPLE_NAME+"_popoolationte2_nonredundant.bed",
+                METHOD_DIR+SAMPLE_NAME+"_popoolationte2_redundant.bed",
+                METHOD_DIR+SAMPLE_NAME+"_popoolationte2_malformed.bed",
+                METHOD_DIR+SAMPLE_NAME+"_popoolationte2_nonredundant_non-reference.vcf",
+                METHOD_DIR+"unfiltered/teinsertions.txt"
         ],
 
         'te-locate': [
-                RESULTS_DIR+"te-locate/"+SAMPLE_NAME+"_telocate_nonredundant.bed",
-                RESULTS_DIR+"te-locate/"+SAMPLE_NAME+"_telocate_redundant.bed",
-                RESULTS_DIR+"te-locate/"+SAMPLE_NAME+"_telocate_malformed.bed",
-                RESULTS_DIR+"te-locate/"+SAMPLE_NAME+"_telocate_nonredundant_non-reference.vcf",
-                RESULTS_DIR+"te-locate/unfiltered/te-locate-raw.info"
+                METHOD_DIR+SAMPLE_NAME+"_telocate_nonredundant.bed",
+                METHOD_DIR+SAMPLE_NAME+"_telocate_redundant.bed",
+                METHOD_DIR+SAMPLE_NAME+"_telocate_malformed.bed",
+                METHOD_DIR+SAMPLE_NAME+"_telocate_nonredundant_non-reference.vcf",
+                METHOD_DIR+"unfiltered/te-locate-raw.info"
         ],
 
         'trimgalore': [],
@@ -189,37 +212,37 @@ ESSENTIAL_PATHS = {
         'map_reads': [],
 
         'relocate2': [
-                RESULTS_DIR+"relocate2/"+SAMPLE_NAME+"_relocate2_nonredundant.bed",
-                RESULTS_DIR+"relocate2/"+SAMPLE_NAME+"_relocate2_redundant.bed",
-                RESULTS_DIR+"relocate2/"+SAMPLE_NAME+"_relocate2_malformed.bed",
-                RESULTS_DIR+"relocate2/"+SAMPLE_NAME+"_relocate2_nonredundant_non-reference.vcf",
-                RESULTS_DIR+"relocate2/unfiltered/repeat/results/ALL.all_nonref_insert.gff",
-                RESULTS_DIR+"relocate2/unfiltered/repeat/results/ALL.all_ref_insert.gff"
+                METHOD_DIR+SAMPLE_NAME+"_relocate2_nonredundant.bed",
+                METHOD_DIR+SAMPLE_NAME+"_relocate2_redundant.bed",
+                METHOD_DIR+SAMPLE_NAME+"_relocate2_malformed.bed",
+                METHOD_DIR+SAMPLE_NAME+"_relocate2_nonredundant_non-reference.vcf",
+                METHOD_DIR+"unfiltered/repeat/results/ALL.all_nonref_insert.gff",
+                METHOD_DIR+"unfiltered/repeat/results/ALL.all_ref_insert.gff"
         ],
 
         'tepid': [
-                RESULTS_DIR+"tepid/"+SAMPLE_NAME+"_tepid_nonredundant.bed",
-                RESULTS_DIR+"tepid/"+SAMPLE_NAME+"_tepid_redundant.bed",
-                RESULTS_DIR+"tepid/"+SAMPLE_NAME+"_tepid_malformed.bed",
-                RESULTS_DIR+"tepid/unfiltered/insertions_"+REF_NAME+".bed",
-                RESULTS_DIR+"tepid/unfiltered/deletions_"+REF_NAME+".bed",
-                RESULTS_DIR+"tepid/unfiltered/insertion_reads_"+REF_NAME+".txt",
-                RESULTS_DIR+"tepid/unfiltered/deletion_reads_"+REF_NAME+".txt"
+                METHOD_DIR+SAMPLE_NAME+"_tepid_nonredundant.bed",
+                METHOD_DIR+SAMPLE_NAME+"_tepid_redundant.bed",
+                METHOD_DIR+SAMPLE_NAME+"_tepid_malformed.bed",
+                METHOD_DIR+"unfiltered/insertions_"+REF_NAME+".bed",
+                METHOD_DIR+"unfiltered/deletions_"+REF_NAME+".bed",
+                METHOD_DIR+"unfiltered/insertion_reads_"+REF_NAME+".txt",
+                METHOD_DIR+"unfiltered/deletion_reads_"+REF_NAME+".txt"
         ],
 
         'teflon': [
-                RESULTS_DIR+"teflon/"+SAMPLE_NAME+"_teflon_nonredundant.bed",
-                RESULTS_DIR+"teflon/"+SAMPLE_NAME+"_teflon_redundant.bed",
-                RESULTS_DIR+"teflon/"+SAMPLE_NAME+"_teflon_malformed.bed",
-                RESULTS_DIR+"teflon/"+SAMPLE_NAME+"_teflon_nonredundant_non-reference.vcf",
-                RESULTS_DIR+"teflon/unfiltered/genotypes/sample.genotypes.txt",
-                RESULTS_DIR+"teflon/unfiltered/reference_te.bed"
+                METHOD_DIR+SAMPLE_NAME+"_teflon_nonredundant.bed",
+                METHOD_DIR+SAMPLE_NAME+"_teflon_redundant.bed",
+                METHOD_DIR+SAMPLE_NAME+"_teflon_malformed.bed",
+                METHOD_DIR+SAMPLE_NAME+"_teflon_nonredundant_non-reference.vcf",
+                METHOD_DIR+"unfiltered/genotypes/sample.genotypes.txt",
+                METHOD_DIR+"unfiltered/reference_te.bed"
         ],
 
         'jitterbug': [
-                RESULTS_DIR+"jitterbug/"+SAMPLE_NAME+"_jitterbug_nonredundant.bed",
-                RESULTS_DIR+"jitterbug/"+SAMPLE_NAME+"_jitterbug_redundant.bed",
-                RESULTS_DIR+"jitterbug/"+SAMPLE_NAME+"_jitterbug_malformed.bed",
-                RESULTS_DIR+"jitterbug/unfiltered/"+SAMPLE_NAME+".TE_insertions_paired_clusters.filtered.gff3"
+                METHOD_DIR+SAMPLE_NAME+"_jitterbug_nonredundant.bed",
+                METHOD_DIR+SAMPLE_NAME+"_jitterbug_redundant.bed",
+                METHOD_DIR+SAMPLE_NAME+"_jitterbug_malformed.bed",
+                METHOD_DIR+"unfiltered/"+SAMPLE_NAME+".TE_insertions_paired_clusters.filtered.gff3"
         ]
 }

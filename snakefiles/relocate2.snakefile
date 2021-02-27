@@ -13,15 +13,15 @@ rule relocaTE2_run:
 
     params:
         raw_fq2 = config['in']['fq2'],
-        out_dir = config['args']['out']+"/results/relocaTE2/unfiltered/",
+        out_dir = config['outdir']['relocate2']+"unfiltered/",
         log = config['args']['log_dir']+"relocaTE2.log",
         sample_name = config['args']['sample_name'],
         config = config['config']['relocate2']['files'][0]
         
     
     output:
-        config['args']['out']+"results/relocaTE2/unfiltered/repeat/results/ALL.all_nonref_insert.gff",
-        config['args']['out']+"results/relocaTE2/unfiltered/repeat/results/ALL.all_ref_insert.gff"
+        config['outdir']['relocate2']+"unfiltered/repeat/results/ALL.all_nonref_insert.gff",
+        config['outdir']['relocate2']+"unfiltered/repeat/results/ALL.all_ref_insert.gff"
     
     script:
         config['args']['mcc_path']+"/scripts/relocaTE2/relocate2_run.py"
@@ -31,8 +31,8 @@ rule relocaTE2_run:
 rule relocaTE2_post:
     input:
         rm_out = config['mcc']['repeatmasker_out'],
-        nonref_gff = config['args']['out']+"results/relocaTE2/unfiltered/repeat/results/ALL.all_nonref_insert.gff",
-        ref_gff = config['args']['out']+"results/relocaTE2/unfiltered/repeat/results/ALL.all_ref_insert.gff",
+        nonref_gff = config['outdir']['relocate2']+"unfiltered/repeat/results/ALL.all_nonref_insert.gff",
+        ref_gff = config['outdir']['relocate2']+"unfiltered/repeat/results/ALL.all_ref_insert.gff",
         reference_fasta = config['mcc']['reference']
 
     threads: 1
@@ -40,7 +40,7 @@ rule relocaTE2_post:
     conda: config['envs']['processing']
 
     params:
-        out_dir = config['args']['out']+"/results/relocaTE2/",
+        out_dir = config['outdir']['relocate2'],
         log = config['args']['log_dir']+"relocaTE2.log",
         sample_name = config['args']['sample_name'],
         chromosomes = config['args']['chromosomes'],

@@ -12,14 +12,14 @@ rule teflon_preprocessing:
     conda: config['envs']['teflon']
 
     params:
-        out_dir = config['args']['out']+"results/teflon/unfiltered/",
+        out_dir = config['outdir']['teflon']+"unfiltered/",
         script_dir = config['args']['mcc_path']+"/install/tools/teflon/",
         log=config['args']['log_dir']+"teflon.log"
 
     output:
-        ref_bed = config['args']['out']+"results/teflon/unfiltered/reference_te.bed",
-        teflon_taxonomy = config['args']['out']+"results/teflon/unfiltered/teflon_taxonomy.tsv",
-        bam = config['args']['out']+"results/teflon/unfiltered/teflon.sorted.bam"
+        ref_bed = config['outdir']['teflon']+"unfiltered/reference_te.bed",
+        teflon_taxonomy = config['outdir']['teflon']+"unfiltered/teflon_taxonomy.tsv",
+        bam = config['outdir']['teflon']+"unfiltered/teflon.sorted.bam"
 
     script:
         config['args']['mcc_path']+"/scripts/teflon/teflon_pre.py"
@@ -29,22 +29,22 @@ rule teflon_run:
     input:
         consensus = config['mcc']['consensus'],
         reference_genome = config['mcc']['reference'],
-        ref_bed = config['args']['out']+"results/teflon/unfiltered/reference_te.bed",
-        teflon_taxonomy = config['args']['out']+"results/teflon/unfiltered/teflon_taxonomy.tsv",
-        bam = config['args']['out']+"results/teflon/unfiltered/teflon.sorted.bam"
+        ref_bed = config['outdir']['teflon']+"unfiltered/reference_te.bed",
+        teflon_taxonomy = config['outdir']['teflon']+"unfiltered/teflon_taxonomy.tsv",
+        bam = config['outdir']['teflon']+"unfiltered/teflon.sorted.bam"
 
     threads: config['args']['max_threads_per_rule']
 
     conda: config['envs']['teflon']
 
     params:
-        out_dir = config['args']['out']+"results/teflon/unfiltered/",
+        out_dir = config['outdir']['teflon']+"unfiltered/",
         script_dir = config['args']['mcc_path']+"/install/tools/teflon/",
         log=config['args']['log_dir']+"teflon.log",
         config = config['config']['teflon']['files'][0]
     
     output:
-        config['args']['out']+"results/teflon/unfiltered/genotypes/sample.genotypes.txt"
+        config['outdir']['teflon']+"unfiltered/genotypes/sample.genotypes.txt"
     
     script:
         config['args']['mcc_path']+"/scripts/teflon/teflon_run.py"
@@ -52,8 +52,8 @@ rule teflon_run:
 
 rule teflon_post:
     input:
-        teflon_out = config['args']['out']+"results/teflon/unfiltered/genotypes/sample.genotypes.txt",
-        ref_bed = config['args']['out']+"results/teflon/unfiltered/reference_te.bed",
+        teflon_out = config['outdir']['teflon']+"unfiltered/genotypes/sample.genotypes.txt",
+        ref_bed = config['outdir']['teflon']+"unfiltered/reference_te.bed",
         reference_fasta = config['mcc']['reference']
 
     threads: 1
@@ -61,7 +61,7 @@ rule teflon_post:
     conda: config['envs']['processing']
 
     params:
-        out_dir = config['args']['out']+"results/teflon/",
+        out_dir = config['outdir']['teflon'],
         log=config['args']['log_dir']+"teflon.log",
         sample_name = config['args']['sample_name'],
         chromosomes = config['args']['chromosomes'],

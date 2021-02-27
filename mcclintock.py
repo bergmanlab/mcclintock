@@ -38,8 +38,8 @@ def main():
     check_installed_modules(args.methods, config.NO_INSTALL_METHODS, config_install.MD5, os.path.dirname(os.path.abspath(__file__))+"/install/")
     check_input_files(args.reference, args.consensus, args.first, fq2=args.second, locations=args.locations, taxonomy=args.taxonomy, coverage_fasta=args.coverage_fasta, augment_fasta=args.augment, annotations_only=args.make_annotations)
     ref_name = mccutils.get_base_name(args.reference)
-    run_id = make_run_config(args, args.sample_name, ref_name, full_command, current_directory, config, config_install, debug=args.debug)
-    run_workflow(args, args.sample_name, ref_name, run_id, config, debug=args.debug, annotations_only=args.make_annotations)
+    run_id, out_files = make_run_config(args, args.sample_name, ref_name, full_command, current_directory, config, config_install, debug=args.debug)
+    run_workflow(args, args.sample_name, ref_name, run_id, config, out_files, debug=args.debug, annotations_only=args.make_annotations)
     mccutils.remove(args.out+"/tmp")
 
 def parse_args(expected_configs):
@@ -518,13 +518,15 @@ def make_run_config(args, sample_name, ref_name, full_command, current_directory
 
     mccutils.log("SETUP","McClintock Version: "+git_commit)
 
+    method_paths = config.OUT_DIRS
+    for method in method_paths.keys():
+        method_paths[method] = method_paths[method].replace(config.RESULTS_DIR, results_dir)
+        method_paths[method] = method_paths[method].replace(config.SAM_DIR, sample_dir)
+
     out_files_to_make = []
     out_files = config.OUT_PATHS
     for key in out_files.keys():
-        out_files[key] = out_files[key].replace(config.INPUT_DIR, input_dir)
-        out_files[key] = out_files[key].replace(config.REF_DIR, reference_dir)
-        out_files[key] = out_files[key].replace(config.SAM_DIR, sample_dir)
-        out_files[key] = out_files[key].replace(config.RESULTS_DIR, results_dir)
+        out_files[key] = out_files[key].replace(config.METHOD_DIR, method_paths[key])
         out_files[key] = out_files[key].replace(config.SAMPLE_NAME, sample_name)   
     
     for method in args.methods:
@@ -554,6 +556,7 @@ def make_run_config(args, sample_name, ref_name, full_command, current_directory
         'sample_name': sample_name,
         'ref_name': ref_name,
         'run_id' : str(run_id),
+        'run_config': run_config,
         'methods' : ",".join(args.methods),
         'out_files': ",".join(out_files_to_make),
         'save_comments' : str(args.comments),
@@ -588,18 +591,14 @@ def make_run_config(args, sample_name, ref_name, full_command, current_directory
         data["mcc"][key] = data["mcc"][key].replace(config.REF_NAME, ref_name)
         data["mcc"][key] = data["mcc"][key].replace(config.SAMPLE_NAME, sample_name)
     
-    data["out"] = config.OUT_PATHS
-    for key in data["mcc"].keys():
-        data["mcc"][key] = data["mcc"][key].replace(config.INPUT_DIR, input_dir)
-        data["mcc"][key] = data["mcc"][key].replace(config.REF_DIR, reference_dir)
-        data["mcc"][key] = data["mcc"][key].replace(config.SAM_DIR, sample_dir)
-        data["mcc"][key] = data["mcc"][key].replace(config.REF_NAME, ref_name)
-        data["mcc"][key] = data["mcc"][key].replace(config.SAMPLE_NAME, sample_name)
+    data["out"] = out_files
+
+    data['outdir'] = method_paths
     
     data["essential"] = config.ESSENTIAL_PATHS
     for key in data["essential"].keys():
         for x,val in enumerate(data["essential"][key]):
-            data["essential"][key][x] = val.replace(config.RESULTS_DIR, results_dir)
+            data["essential"][key][x] = val.replace(config.METHOD_DIR, method_paths[key])
             data["essential"][key][x] = data["essential"][key][x].replace(config.SAMPLE_NAME, sample_name)
             data["essential"][key][x] = data["essential"][key][x].replace(config.REF_NAME, ref_name)
 
@@ -612,24 +611,16 @@ def make_run_config(args, sample_name, ref_name, full_command, current_directory
     with open(run_config,"w") as conf:
         json.dump(data, conf, indent=4)
     
-    return run_id
+    return run_id, out_files
 
 
-def run_workflow(args, sample_name, ref_name, run_id, config, debug=False, annotations_only=False):
+def run_workflow(args, sample_name, ref_name, run_id, config, out_files, debug=False, annotations_only=False):
     log = args.out+"/mcclintock."+str(run_id)+".log"
 
     input_dir = args.out
     reference_dir = args.out+"/"+ref_name+"/"
     sample_dir = args.out+"/"+sample_name+"/"
-    results_dir = args.out+"/"+sample_name+"/results/"
-
-    out_files = config.OUT_PATHS
-    for key in out_files.keys():
-        out_files[key] = out_files[key].replace(config.INPUT_DIR, input_dir)
-        out_files[key] = out_files[key].replace(config.REF_DIR, reference_dir)
-        out_files[key] = out_files[key].replace(config.SAM_DIR, sample_dir)
-        out_files[key] = out_files[key].replace(config.RESULTS_DIR, results_dir)
-        out_files[key] = out_files[key].replace(config.SAMPLE_NAME, sample_name)    
+    results_dir = args.out+"/"+sample_name+"/results/" 
 
     path=os.path.dirname(os.path.abspath(__file__))
     mccutils.mkdir(args.out+"/snakemake")

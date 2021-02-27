@@ -47,21 +47,21 @@ rule relocaTE_run:
 
     params:
         raw_fq2 = config['in']['fq2'],
-        out_dir = config['args']['out']+"/results/relocaTE/unfiltered/",
+        out_dir = config['outdir']['relocate']+"unfiltered/",
         log = config['args']['log_dir']+"relocaTE.log",
         script_dir = config['args']['mcc_path']+"/install/tools/relocate/scripts/",
         sample_name = config['args']['sample_name'],
         config = config['config']['relocate']['files'][0]
 
     output:
-        config['args']['out']+"results/relocaTE/unfiltered/combined.gff"
+        config['outdir']['relocate']+"unfiltered/combined.gff"
     
     script:
         config['args']['mcc_path']+"/scripts/relocaTE/relocate_run.py"
 
 rule relocaTE_post:
     input:
-        relocate_gff = config['args']['out']+"results/relocaTE/unfiltered/combined.gff",
+        relocate_gff = config['outdir']['relocate']+"unfiltered/combined.gff",
         te_gff = config['mcc']['relocaTE_ref_TEs'],
         reference_fasta = config['mcc']['reference']
 
@@ -71,7 +71,7 @@ rule relocaTE_post:
 
     params:
         raw_fq2 = config['in']['fq2'],
-        out_dir = config['args']['out']+"/results/relocaTE/",
+        out_dir = config['outdir']['relocate'],
         log = config['args']['log_dir']+"relocaTE.log",
         sample_name = config['args']['sample_name'],
         chromosomes = config['args']['chromosomes'],

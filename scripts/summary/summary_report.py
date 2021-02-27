@@ -8,6 +8,7 @@ import config._internal.config as config
 from datetime import datetime
 from jinja2 import Environment, FileSystemLoader
 import traceback
+import json
 
 templateLoader = FileSystemLoader(searchpath=snakemake.config['args']['mcc_path']+"/templates/html/")
 env = Environment(loader=templateLoader)
@@ -62,6 +63,7 @@ def main():
     raw_fq2 = snakemake.params.raw_fq2
     chromosomes = snakemake.params.chromosomes.split(",")
     out_dir = snakemake.params.out_dir
+    run_config = snakemake.params.run_config
 
     tmp = []
     for method in methods:
@@ -77,11 +79,10 @@ def main():
     if raw_fq2 == "None":
         paired = False
 
-    out_file_map = {}
-    for method in config.OUT_PATHS.keys():
-        out_file_map[method] = config.OUT_PATHS[method]
-        out_file_map[method] = out_file_map[method].replace("{{results}}", results_dir)
-        out_file_map[method] = out_file_map[method].replace("{{samplename}}", sample_name)
+    
+    with open(run_config, "r") as config_json:
+        data = json.load(config_json)
+        out_file_map = data['out']
     
     try:
         if os.path.exists(taxonomy):

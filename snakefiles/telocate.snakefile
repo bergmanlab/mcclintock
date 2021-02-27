@@ -61,7 +61,7 @@ rule telocate_run:
     
     params:
         run_script = config['args']['mcc_path']+"/install/tools/te-locate/TE_locate.pl",
-        out_dir = config['args']['out']+"/results/te-locate/unfiltered/",
+        out_dir = config['outdir']['te-locate']+"unfiltered/",
         log = config['args']['log_dir']+"te-locate.log",
         config = config['config']['te-locate']['files'][0]
     
@@ -70,19 +70,19 @@ rule telocate_run:
     conda: config['envs']['te-locate']
 
     output:
-        config['args']['out']+"results/te-locate/unfiltered/te-locate-raw.info"
+        config['outdir']['te-locate']+"unfiltered/te-locate-raw.info"
     
     script:
         config['args']['mcc_path']+"/scripts/telocate/telocate_run.py"
 
 rule telocate_post:
     input:
-        telocate_raw = config['args']['out']+"results/te-locate/unfiltered/te-locate-raw.info",
+        telocate_raw = config['outdir']['te-locate']+"unfiltered/te-locate-raw.info",
         te_gff = config['mcc']['telocate_te_gff'],
         reference_fasta = config['mcc']['reference']
     
     params:
-        out_dir = config['args']['out']+"/results/te-locate/",
+        out_dir = config['outdir']['te-locate'],
         sample_name = config['args']['sample_name'],
         chromosomes = config['args']['chromosomes'],
         config = config['config']['te-locate']['files'][1]

@@ -13,23 +13,23 @@ rule run_temp:
     params:
         log = config['args']['log_dir']+"TEMP.log",
         scripts_dir = config['args']['mcc_path']+"/install/tools/temp/scripts/",
-        out_dir = config['args']['out']+"/results/TEMP/unfiltered/",
+        out_dir = config['outdir']['temp']+"unfiltered/",
         sample_name = config['args']['sample_name'],
         config = config['config']['temp']['files'][0]
 
     threads: config['args']['max_threads_per_rule']
 
     output:
-        config['args']['out']+"results/TEMP/unfiltered/"+config['args']['sample_name']+".insertion.refined.bp.summary",
-        config['args']['out']+"results/TEMP/unfiltered/"+config['args']['sample_name']+".absence.refined.bp.summary"
+        config['outdir']['temp']+"unfiltered/"+config['args']['sample_name']+".insertion.refined.bp.summary",
+        config['outdir']['temp']+"unfiltered/"+config['args']['sample_name']+".absence.refined.bp.summary"
     
     script:
         config['args']['mcc_path']+"/scripts/TEMP/temp_run.py"
 
 rule process_temp:
     input:
-        insert_summary = config['args']['out']+"results/TEMP/unfiltered/"+config['args']['sample_name']+".insertion.refined.bp.summary",
-        absence_summary = config['args']['out']+"results/TEMP/unfiltered/"+config['args']['sample_name']+".absence.refined.bp.summary",
+        insert_summary = config['outdir']['temp']+"unfiltered/"+config['args']['sample_name']+".insertion.refined.bp.summary",
+        absence_summary = config['outdir']['temp']+"unfiltered/"+config['args']['sample_name']+".absence.refined.bp.summary",
         te_gff = config['mcc']['telocate_te_gff'],
         reference_fasta = config['mcc']['reference']
     
@@ -37,7 +37,7 @@ rule process_temp:
 
     params:
         log = config['args']['log_dir']+"TEMP.log",
-        out_dir = config['args']['out']+"/results/TEMP/",
+        out_dir = config['outdir']['temp'],
         sample_name = config['args']['sample_name'],
         chromosomes = config['args']['chromosomes'],
         config = config['config']['temp']['files'][1]

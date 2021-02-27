@@ -12,21 +12,21 @@ rule retroseq_run:
 
     params:
         script_dir = config['args']['mcc_path']+"/install/tools/retroseq/bin/",
-        out_dir = config['args']['out']+"/results/retroseq/unfiltered/",
+        out_dir = config['outdir']['retroseq']+"unfiltered/",
         ref_name=config['args']['ref_name'],
         sample_name=config['args']['sample_name'],
         log = config['args']['log_dir']+"retroseq.log",
         config = config['config']['retroseq']['files'][0]
     
     output:
-        config['args']['out']+"results/retroseq/unfiltered/"+config['args']['sample_name']+".call"
+        config['outdir']['retroseq']+"unfiltered/"+config['args']['sample_name']+".call"
     
     script:
         config['args']['mcc_path']+"/scripts/retroseq/retroseq_run.py"
 
 rule retroseq_post:
     input:
-        retroseq_out = config['args']['out']+"results/retroseq/unfiltered/"+config['args']['sample_name']+".call",
+        retroseq_out = config['outdir']['retroseq']+"unfiltered/"+config['args']['sample_name']+".call",
         reference_fasta = config['mcc']['reference']
 
     threads: 1
@@ -34,7 +34,7 @@ rule retroseq_post:
     conda: config['envs']['processing']
 
     params:
-        out_dir = config['args']['out']+"/results/retroseq/",
+        out_dir = config['outdir']['retroseq'],
         ref_name=config['args']['ref_name'],
         sample_name=config['args']['sample_name'],
         chromosomes = config['args']['chromosomes'],

@@ -16,23 +16,23 @@ rule run_temp2:
     params:
         log = config['args']['log_dir']+"temp2.log",
         script_dir = config['args']['mcc_path']+"/install/tools/temp2/",
-        out_dir = config['args']['out']+"/results/temp2/unfiltered/",
+        out_dir = config['outdir']['temp2']+"unfiltered/",
         sample_name = config['args']['sample_name'],
         config = config['config']['temp2']['files'][0]
 
     threads: config['args']['max_threads_per_rule']
 
     output:
-        config['args']['out']+"results/temp2/unfiltered/"+config['args']['sample_name']+".insertion.bed",
-        config['args']['out']+"results/temp2/unfiltered/"+config['args']['sample_name']+".absence.refined.bp.summary"
+        config['outdir']['temp2']+"unfiltered/"+config['args']['sample_name']+".insertion.bed",
+        config['outdir']['temp2']+"unfiltered/"+config['args']['sample_name']+".absence.refined.bp.summary"
     
     script:
         config['args']['mcc_path']+"/scripts/temp2/temp2_run.py"
 
 rule process_temp2:
     input:
-        insert_bed = config['args']['out']+"results/temp2/unfiltered/"+config['args']['sample_name']+".insertion.bed",
-        absence_summary = config['args']['out']+"results/temp2/unfiltered/"+config['args']['sample_name']+".absence.refined.bp.summary",
+        insert_bed = config['outdir']['temp2']+"unfiltered/"+config['args']['sample_name']+".insertion.bed",
+        absence_summary = config['outdir']['temp2']+"unfiltered/"+config['args']['sample_name']+".absence.refined.bp.summary",
         te_gff = config['mcc']['telocate_te_gff'],
         reference_fasta = config['mcc']['reference']
     
@@ -40,7 +40,7 @@ rule process_temp2:
 
     params:
         log = config['args']['log_dir']+"temp2.log",
-        out_dir = config['args']['out']+"/results/temp2/",
+        out_dir = config['outdir']['temp2'],
         sample_name = config['args']['sample_name'],
         chromosomes = config['args']['chromosomes'],
         config = config['config']['temp2']['files'][1]

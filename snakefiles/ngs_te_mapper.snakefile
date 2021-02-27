@@ -7,7 +7,7 @@ rule ngs_te_mapper_run:
 
     params:
         raw_fq2 = config['in']['fq2'],
-        out_dir = config['args']['out']+"/results/ngs_te_mapper/unfiltered/",
+        out_dir = config['outdir']['ngs_te_mapper']+"/unfiltered/",
         script_dir = config['args']['mcc_path']+"/install/tools/ngs_te_mapper/sourceCode/",
         log = config['args']['log_dir']+"ngs_te_mapper.log",
         sample_name = config['args']['sample_name'],
@@ -18,18 +18,18 @@ rule ngs_te_mapper_run:
     conda: config['envs']['ngs_te_mapper']
 
     output:
-        config['args']['out']+"results/ngs_te_mapper/unfiltered/bed_tsd/"+config['args']['sample_name']+"_insertions.bed"
+        config['outdir']['ngs_te_mapper']+"unfiltered/bed_tsd/"+config['args']['sample_name']+"_insertions.bed"
     
     script:
         config['args']['mcc_path']+"/scripts/ngs_te_mapper/ngs_te_mapper_run.py"
 
 rule ngs_te_mapper_post:
     input:
-        raw_bed = config['args']['out']+"results/ngs_te_mapper/unfiltered/bed_tsd/"+config['args']['sample_name']+"_insertions.bed",
+        raw_bed = config['outdir']['ngs_te_mapper']+"unfiltered/bed_tsd/"+config['args']['sample_name']+"_insertions.bed",
         reference_fasta = config['mcc']['reference']
 
     params:
-        out_dir = config['args']['out']+"/results/ngs_te_mapper/",
+        out_dir = config['outdir']['ngs_te_mapper'],
         log = config['args']['log_dir']+"ngs_te_mapper.log",
         sample_name = config['args']['sample_name'],
         chromosomes = config['args']['chromosomes'],
