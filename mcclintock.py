@@ -632,7 +632,7 @@ def run_workflow(args, sample_name, ref_name, run_id, config, out_files, debug=F
     if not debug:
         command.append("--quiet")
     else:
-        # command.append("--reason")
+        command.append("--reason")
         command.append("--verbose")
     
     config_json = args.out+"/snakemake/config/config_"+str(run_id)+".json"
