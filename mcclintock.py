@@ -635,13 +635,16 @@ def run_workflow(args, sample_name, ref_name, run_id, config, out_files, debug=F
         # command.append("--reason")
         command.append("--verbose")
     
-    command += ["--configfile", args.out+"/snakemake/config/config_"+str(run_id)+".json"]
+    config_json = args.out+"/snakemake/config/config_"+str(run_id)+".json"
+    command += ["--configfile", config_json]
     command += ["--cores", str(args.proc)]
 
     if not args.resume:
         if os.path.exists(reference_dir) and len(os.listdir(reference_dir)) > 0:
+            mccutils.remove(config_json)
             sys.exit("ERROR: output directory:"+reference_dir+" is not empty. If wanting to resume a previous run, use --resume, otherwise please delete this directory or change your -o/--output\n")
         if os.path.exists(sample_dir) and len(os.listdir(sample_dir)) > 0:
+            mccutils.remove(config_json)
             sys.exit("ERROR: output directory:"+sample_dir+" is not empty. If wanting to resume a previous run, use --resume, otherwise please delete this directory or change your -o/--output or --sample_name\n")
 
     
@@ -656,9 +659,11 @@ def run_workflow(args, sample_name, ref_name, run_id, config, out_files, debug=F
                 config_compatible = config_compatibility(input_dir+"/snakemake/config/config_"+str(run_id)+".json", args.out+"/snakemake/config/"+prev_config)
                 previous_config_md5s = get_recent_config_md5s(args.out+"/snakemake/config/"+prev_config, previous_config_md5s)
                 if not config_compatible:
+                    mccutils.remove(config_json)
                     sys.exit(1)
         
         if not config_found:
+            mccutils.remove(config_json)
             sys.exit("ERROR: Unable to resume run. No config files from previous runs found in:"+input_dir+"/snakemake/config/ Remove --resume for clean run\n")
 
         rules_to_rerun = get_rules_to_rerun(input_dir+"/snakemake/config/config_"+str(run_id)+".json", previous_config_md5s)
@@ -688,7 +693,7 @@ def run_workflow(args, sample_name, ref_name, run_id, config, out_files, debug=F
         print("McClintock Pipeline Failed... please open an issue at https://github.com/bergmanlab/mcclintock/issues if you are having trouble using McClintock", file=sys.stderr)
         sys.exit(1)
     mccutils.remove(sample_dir+"tmp")
-    remove_intermediate_files(args.keep_intermediate, args.out+"/snakemake/config/config_"+str(run_id)+".json", args.methods, ref_name, sample_name, args.out)
+    remove_intermediate_files(args.keep_intermediate, config_json, args.methods, ref_name, sample_name, args.out)
 
 def get_recent_config_md5s(prev_config, config_md5s):
     with open(prev_config) as f:
