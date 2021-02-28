@@ -629,12 +629,7 @@ def run_workflow(args, sample_name, ref_name, run_id, config, out_files, debug=F
     mccutils.run_command(["cp", path+"/Snakefile", snakemake_path])
     os.chdir(snakemake_path)
     command = ["snakemake","--use-conda", "--conda-prefix", path+"/install/envs/conda"]
-    if not debug:
-        command.append("--quiet")
-    else:
-        command.append("--reason")
-        command.append("--verbose")
-    
+
     config_json = args.out+"/snakemake/config/config_"+str(run_id)+".json"
     command += ["--configfile", config_json]
     command += ["--cores", str(args.proc)]
@@ -667,11 +662,17 @@ def run_workflow(args, sample_name, ref_name, run_id, config, out_files, debug=F
             sys.exit("ERROR: Unable to resume run. No config files from previous runs found in:"+input_dir+"/snakemake/config/ Remove --resume for clean run\n")
 
         rules_to_rerun = get_rules_to_rerun(input_dir+"/snakemake/config/config_"+str(run_id)+".json", previous_config_md5s)
+        command.append("-R")
         if len(rules_to_rerun) > 0:
             for rule in rules_to_rerun:
-                command.append("-R")
                 command.append(rule)
-    
+
+    if not debug:
+        command.append("--quiet")
+    else:
+        command.append("--reason")
+        command.append("--verbose")
+
     if not annotations_only:
         for method in args.methods:
             command.append(out_files[method])
@@ -686,6 +687,8 @@ def run_workflow(args, sample_name, ref_name, run_id, config, out_files, debug=F
         sys.stdout.flush()
         mccutils.mkdir(sample_dir)
         mccutils.mkdir(sample_dir+"tmp")
+        if debug:
+            print(" ".join(command))
         mccutils.run_command(command)
     except Exception as e:
         track = traceback.format_exc()
