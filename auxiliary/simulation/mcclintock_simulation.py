@@ -35,11 +35,11 @@ def main():
             fastq1 = modified_reference.replace(".fasta", "_1.fastq")
             fastq2 = modified_reference.replace(".fasta", "_2.fastq")
             if not os.path.exists(fastq1) or not os.path.exists(fastq2):
-                num_pairs = calculate_num_pairs(modified_reference, single=args.single)
-                fastq1, fastq2 = create_synthetic_reads(modified_reference, num_pairs, x, args.out, run_id=args.runid, seed=args.seed)
+                num_pairs = calculate_num_pairs(modified_reference, args.coverage, args.length, single=args.single)
+                fastq1, fastq2 = create_synthetic_reads(modified_reference, num_pairs, args.length, args.insert, args.error, x, args.out, run_id=args.runid, seed=args.seed)
 
             if not os.path.exists(args.out+"/results/forward/run"+args.runid+"_"+str(x)+"/results/summary/summary_report.txt"):
-                run_mcclintock(fastq1, fastq2, args.reference, args.consensus, args.locations, args.taxonomy, x, args.proc, args.out, args.config, run_id=args.runid, single=args.single)
+                run_mcclintock(fastq1, fastq2, args.reference, args.consensus, args.locations, args.taxonomy, x, args.proc, args.out, args.config, args.keep_intermediate, run_id=args.runid, single=args.single)
 
             # reverse
             consensus_seqs = get_seqs(args.consensus)
@@ -52,11 +52,11 @@ def main():
             fastq1 = modified_reference.replace(".fasta", "_1.fastq")
             fastq2 = modified_reference.replace(".fasta", "_2.fastq")
             if not os.path.exists(fastq1) or not os.path.exists(fastq2):
-                num_pairs = calculate_num_pairs(modified_reference, single=args.single)
-                fastq1, fastq2 = create_synthetic_reads(modified_reference, num_pairs, x, args.out, run_id=args.runid, seed=args.seed)
+                num_pairs = calculate_num_pairs(modified_reference, args.coverage, args.length, single=args.single)
+                fastq1, fastq2 = create_synthetic_reads(modified_reference, num_pairs, args.length, args.insert, args.error, x, args.out, run_id=args.runid, seed=args.seed)
 
             if not os.path.exists(args.out+"/results/reverse/run"+args.runid+"_"+str(x)+"/results/summary/summary_report.txt"):
-                run_mcclintock(fastq1, fastq2, args.reference, args.consensus, args.locations, args.taxonomy, x, args.proc, args.out, args.config, run_id=args.runid, single=args.single, reverse=True)
+                run_mcclintock(fastq1, fastq2, args.reference, args.consensus, args.locations, args.taxonomy, x, args.proc, args.out, args.config, args.keep_intermediate, run_id=args.runid, single=args.single, reverse=True)
 
     elif args.mode == "analysis":
         if not os.path.exists(args.out+"/summary/"):
@@ -84,6 +84,11 @@ def parse_args():
     ## optional ##
     parser.add_argument("-p", "--proc", type=int, help="The number of processors to use for parallel stages of the pipeline [default = 1]", required=False)
     parser.add_argument("-o", "--out", type=str, help="An output folder for the run. [default = '.']", required='run' not in sys.argv)
+    parser.add_argument("-C","--coverage", type=int, help="The target genome coverage for the simulated reads [default = 100]", required=False)
+    parser.add_argument("-l","--length", type=int, help="The read length of the simulated reads [default = 101]", required=False)
+    parser.add_argument("-i","--insert", type=int, help="The median insert size of the simulated reads [default = 300]", required=False)
+    parser.add_argument("-e","--error", type=float, help="The base error rate for the simulated reads [default = 0.01]", required=False)
+    parser.add_argument("-k","--keep_intermediate", type=str, help="This option determines which intermediate files are preserved after McClintock completes [default: general][options: minimal, general, methods, <list,of,methods>, all]", required=False)
     parser.add_argument("--start", type=int, help="The number of replicates to run. [default = 1]", required=False)
     parser.add_argument("--end", type=int, help="The number of replicates to run. [default = 300]", required=False)
     parser.add_argument("--seed", type=str, help="a seed to the random number generator so runs can be replicated", required=False)
@@ -144,6 +149,18 @@ def parse_args():
         
         if args.single is None:
             args.single = False
+        
+        if args.coverage is None:
+            args.coverage = 100
+        
+        if args.length is None:
+            args.length = 101
+
+        if args.insert is None:
+            args.insert = 300
+        
+        if args.error is None:
+            args.error = 0.01
 
     return args
 
@@ -359,7 +376,7 @@ def add_synthetic_insertion(reference_seqs, consensus_seqs, config, rep, out, ru
     return outfasta
 
 
-def calculate_num_pairs(fasta, single=False):
+def calculate_num_pairs(fasta, coverage, length, single=False):
     command = ["samtools","faidx", fasta]
     run_command(command)
 
@@ -371,13 +388,13 @@ def calculate_num_pairs(fasta, single=False):
             total_length += contig_length
     
     if single:
-        num_pairs = (total_length * 100)/202
+        num_pairs = (total_length * coverage)/(2*length)
     else:
-        num_pairs = (total_length * 100)/101
+        num_pairs = (total_length * coverage)/length
 
     return num_pairs
 
-def create_synthetic_reads(reference, num_pairs, rep, out, run_id="", seed=None):
+def create_synthetic_reads(reference, num_pairs, length, insert, error, rep, out, run_id="", seed=None):
     if seed is not None:
         random.seed(seed+"create_synthetic_reads"+str(rep))
     else:
@@ -389,12 +406,12 @@ def create_synthetic_reads(reference, num_pairs, rep, out, run_id="", seed=None)
     fastq2 = reference.replace(".fasta", "_2.fastq")
     report = reference.replace(".fasta", "_wgsim_report.txt")
 
-    command = ["wgsim", "-1", "101", "-2", "101", "-d", "300", "-N", str(num_pairs), "-S", str(seed_for_wgsim), "-e", "0.01", "-h", reference, fastq1, fastq2]
+    command = ["wgsim", "-1", str(length), "-2", str(length), "-d", str(insert), "-N", str(num_pairs), "-S", str(seed_for_wgsim), "-e", str(error), "-h", reference, fastq1, fastq2]
     run_command_stdout(command, report)
 
     return fastq1, fastq2
 
-def run_mcclintock(fastq1, fastq2, reference, consensus, locations, taxonomy, rep, threads, out, config, run_id="", reverse=False, single=False):
+def run_mcclintock(fastq1, fastq2, reference, consensus, locations, taxonomy, rep, threads, out, config, keep_intermediate, run_id="", reverse=False, single=False):
     if not os.path.exists(out+"/results"):
         os.mkdir(out+"/results")
     
@@ -422,7 +439,7 @@ def run_mcclintock(fastq1, fastq2, reference, consensus, locations, taxonomy, re
                 "-g", locations, 
                 "-t", taxonomy, 
                 "-m", config['mcclintock']['methods'],
-                "--keep_intermediate", "all"
+                "--keep_intermediate", keep_intermediate
         ]
     else:
         command = [
@@ -436,7 +453,7 @@ def run_mcclintock(fastq1, fastq2, reference, consensus, locations, taxonomy, re
                 "-g", locations, 
                 "-t", taxonomy, 
                 "-m", config['mcclintock']['methods'],
-                "--keep_intermediate", "all"
+                "--keep_intermediate", keep_intermediate
         ]
 
     if 'augment' in config['mcclintock'].keys() and config['mcclintock']['augment'] is not None:
