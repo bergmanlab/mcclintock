@@ -11,9 +11,7 @@ SAMPLE_NAME = "{{samplename}}"
 
 
 CONFIGS = {
-        "internal" : ["_internal/config.py"],
         "coverage" : ["coverage/coverage.py"],
-        "install" : ["install/install.py"],
         "trimgalore" : ["trimgalore/trimgalore.py"],
         "ngs_te_mapper": ["ngs_te_mapper/ngs_te_mapper_run.py","ngs_te_mapper/ngs_te_mapper_post.py"],
         "ngs_te_mapper2":  ["ngs_te_mapper2/ngs_te_mapper2_run.py","ngs_te_mapper2/ngs_te_mapper2_post.py"],
@@ -30,8 +28,6 @@ CONFIGS = {
 
 # rules to re-run if specific config files change
 CONFIG_RULES = {
-        "internal" : [],
-        "install" : [],
         "coverage" : ["coverage"],
         "trimgalore" : ["setup_reads"],
         "ngs_te_mapper": ["ngs_te_mapper_run","ngs_te_mapper_post"],

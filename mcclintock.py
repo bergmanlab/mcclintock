@@ -13,7 +13,8 @@ import traceback
 try:
     sys.path.append(os.path.dirname(os.path.abspath(__file__)))
     import scripts.mccutils as mccutils
-    import config._internal.config as internal_config
+    import internal.sysconfig as sysconfig
+    import internal.install as config_install
     from Bio import SeqIO
 except ImportError as e:
     print(e)
@@ -27,19 +28,17 @@ def main():
     full_command = " ".join(["python3"] + sys.argv)
     current_directory = os.getcwd()
 
-    expected_configs = internal_config.CONFIGS
+    expected_configs = sysconfig.CONFIGS
     args = parse_args(expected_configs)
     sys.path = [args.config] + sys.path
-    import _internal.config as config
-    import install.install as config_install
 
     mccutils.mkdir(args.out+"/logs")
     mccutils.mkdir(args.out+"/tmp")
-    check_installed_modules(args.methods, config.NO_INSTALL_METHODS, config_install.MD5, os.path.dirname(os.path.abspath(__file__))+"/install/")
+    check_installed_modules(args.methods, sysconfig.NO_INSTALL_METHODS, config_install.MD5, os.path.dirname(os.path.abspath(__file__))+"/install/")
     check_input_files(args.reference, args.consensus, args.first, fq2=args.second, locations=args.locations, taxonomy=args.taxonomy, coverage_fasta=args.coverage_fasta, augment_fasta=args.augment, annotations_only=args.make_annotations)
     ref_name = mccutils.get_base_name(args.reference)
-    run_id, out_files = make_run_config(args, args.sample_name, ref_name, full_command, current_directory, config, config_install, debug=args.debug)
-    run_workflow(args, args.sample_name, ref_name, run_id, config, out_files, debug=args.debug, annotations_only=args.make_annotations)
+    run_id, out_files = make_run_config(args, args.sample_name, ref_name, full_command, current_directory, debug=args.debug)
+    run_workflow(args, args.sample_name, ref_name, run_id, out_files, debug=args.debug, annotations_only=args.make_annotations)
     mccutils.remove(args.out+"/tmp")
 
 def parse_args(expected_configs):
@@ -84,19 +83,15 @@ def parse_args(expected_configs):
             if not os.path.exists(args.config+"/"+config_file):
                 sys.exit("Error: can't find config file: "+args.config+"/"+config_file+"\n Check that --config is set correctly...exiting...\n")
 
-    sys.path = [args.config] + sys.path
-    import _internal.config as config
-    import install.install as config_install
-
     if args.debug is None:
         args.debug = False
 
     #check -m
     # If only one fastq has been supplied assume this is single ended data and launch only ngs_te_mapper and RelocaTE
     if args.second is None and not args.install:
-        valid_methods = config.SINGLE_END_METHODS #from config.py
+        valid_methods = sysconfig.SINGLE_END_METHODS #from config.py
     else:
-        valid_methods = config.ALL_METHODS #from config.py
+        valid_methods = sysconfig.ALL_METHODS #from config.py
     
     # used to preserve trimgalore and mapped reads output if they are explicitly called by the user
     trimgalore_called = False
@@ -122,7 +117,7 @@ def parse_args(expected_configs):
     if args.install:
         mccutils.log("install","installing dependencies")
         mccutils.log("install","WARNING: this could take awhile")
-        install(args.methods, config_install, resume=args.resume, debug=args.debug)
+        install(args.methods, resume=args.resume, debug=args.debug)
         sys.exit(0)
 
     #check -r
@@ -365,7 +360,7 @@ def get_conda_envs(conda_env_dir):
     
     return existing_envs
 
-def install(methods, config_install, resume=False, debug=False):
+def install(methods, resume=False, debug=False):
 
     mcc_path = os.path.dirname(os.path.abspath(__file__))
     install_path = mcc_path+"/install/"
@@ -484,7 +479,7 @@ def setup_config_info(config_dir, method_to_config, config_rules):
     
     return out_dict
 
-def make_run_config(args, sample_name, ref_name, full_command, current_directory, config, config_install, debug=False):
+def make_run_config(args, sample_name, ref_name, full_command, current_directory, debug=False):
     run_id = random.randint(1000000,9999999)
     mccutils.mkdir(args.out+"/snakemake")
     mccutils.mkdir(args.out+"/snakemake/config")
@@ -518,16 +513,16 @@ def make_run_config(args, sample_name, ref_name, full_command, current_directory
 
     mccutils.log("SETUP","McClintock Version: "+git_commit)
 
-    method_paths = config.OUT_DIRS
+    method_paths = sysconfig.OUT_DIRS
     for method in method_paths.keys():
-        method_paths[method] = method_paths[method].replace(config.RESULTS_DIR, results_dir)
-        method_paths[method] = method_paths[method].replace(config.SAM_DIR, sample_dir)
+        method_paths[method] = method_paths[method].replace(sysconfig.RESULTS_DIR, results_dir)
+        method_paths[method] = method_paths[method].replace(sysconfig.SAM_DIR, sample_dir)
 
     out_files_to_make = []
-    out_files = config.OUT_PATHS
+    out_files = sysconfig.OUT_PATHS
     for key in out_files.keys():
-        out_files[key] = out_files[key].replace(config.METHOD_DIR, method_paths[key])
-        out_files[key] = out_files[key].replace(config.SAMPLE_NAME, sample_name)   
+        out_files[key] = out_files[key].replace(sysconfig.METHOD_DIR, method_paths[key])
+        out_files[key] = out_files[key].replace(sysconfig.SAMPLE_NAME, sample_name)   
     
     for method in args.methods:
         out_files_to_make.append(out_files[method])
@@ -560,7 +555,7 @@ def make_run_config(args, sample_name, ref_name, full_command, current_directory
         'methods' : ",".join(args.methods),
         'out_files': ",".join(out_files_to_make),
         'save_comments' : str(args.comments),
-        'max_threads_per_rule' : max(1, calculate_max_threads(args.proc, args.methods, config.MULTI_THREAD_METHODS, slow=args.slow)),
+        'max_threads_per_rule' : max(1, calculate_max_threads(args.proc, args.methods, sysconfig.MULTI_THREAD_METHODS, slow=args.slow)),
         'full_command' : full_command,
         'call_directory': current_directory,
         'time': now.strftime("%Y-%m-%d %H:%M:%S"),
@@ -568,7 +563,7 @@ def make_run_config(args, sample_name, ref_name, full_command, current_directory
         "debug": str(debug)
     }
 
-    data["config"] = setup_config_info(args.config, config.CONFIGS, config.CONFIG_RULES)
+    data["config"] = setup_config_info(args.config, sysconfig.CONFIGS, sysconfig.CONFIG_RULES)
 
     # input paths for files
     data["in"] = {
@@ -583,24 +578,24 @@ def make_run_config(args, sample_name, ref_name, full_command, current_directory
 
     # where mcc copies will be stored
     
-    data["mcc"] = config.INTERMEDIATE_PATHS
+    data["mcc"] = sysconfig.INTERMEDIATE_PATHS
     for key in data["mcc"].keys():
-        data["mcc"][key] = data["mcc"][key].replace(config.INPUT_DIR, input_dir)
-        data["mcc"][key] = data["mcc"][key].replace(config.REF_DIR, reference_dir)
-        data["mcc"][key] = data["mcc"][key].replace(config.SAM_DIR, sample_dir)
-        data["mcc"][key] = data["mcc"][key].replace(config.REF_NAME, ref_name)
-        data["mcc"][key] = data["mcc"][key].replace(config.SAMPLE_NAME, sample_name)
+        data["mcc"][key] = data["mcc"][key].replace(sysconfig.INPUT_DIR, input_dir)
+        data["mcc"][key] = data["mcc"][key].replace(sysconfig.REF_DIR, reference_dir)
+        data["mcc"][key] = data["mcc"][key].replace(sysconfig.SAM_DIR, sample_dir)
+        data["mcc"][key] = data["mcc"][key].replace(sysconfig.REF_NAME, ref_name)
+        data["mcc"][key] = data["mcc"][key].replace(sysconfig.SAMPLE_NAME, sample_name)
     
     data["out"] = out_files
 
     data['outdir'] = method_paths
     
-    data["essential"] = config.ESSENTIAL_PATHS
+    data["essential"] = sysconfig.ESSENTIAL_PATHS
     for key in data["essential"].keys():
         for x,val in enumerate(data["essential"][key]):
-            data["essential"][key][x] = val.replace(config.METHOD_DIR, method_paths[key])
-            data["essential"][key][x] = data["essential"][key][x].replace(config.SAMPLE_NAME, sample_name)
-            data["essential"][key][x] = data["essential"][key][x].replace(config.REF_NAME, ref_name)
+            data["essential"][key][x] = val.replace(sysconfig.METHOD_DIR, method_paths[key])
+            data["essential"][key][x] = data["essential"][key][x].replace(sysconfig.SAMPLE_NAME, sample_name)
+            data["essential"][key][x] = data["essential"][key][x].replace(sysconfig.REF_NAME, ref_name)
 
     env_path = os.path.dirname(os.path.abspath(__file__))+"/install/envs/"
     data["envs"] = config_install.ENV
@@ -614,7 +609,7 @@ def make_run_config(args, sample_name, ref_name, full_command, current_directory
     return run_id, out_files
 
 
-def run_workflow(args, sample_name, ref_name, run_id, config, out_files, debug=False, annotations_only=False):
+def run_workflow(args, sample_name, ref_name, run_id, out_files, debug=False, annotations_only=False):
     log = args.out+"/mcclintock."+str(run_id)+".log"
 
     input_dir = args.out

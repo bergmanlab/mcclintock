@@ -4,7 +4,7 @@ import subprocess
 from Bio import SeqIO
 sys.path.append(snakemake.config['args']['mcc_path'])
 import scripts.mccutils as mccutils
-import config._internal.config as config
+import internal.sysconfig as config
 from datetime import datetime
 from jinja2 import Environment, FileSystemLoader
 import traceback
