@@ -64,6 +64,7 @@ def main():
     chromosomes = snakemake.params.chromosomes.split(",")
     out_dir = snakemake.params.out_dir
     run_config = snakemake.params.run_config
+    log_dir = snakemake.params.log_dir
 
     tmp = []
     for method in methods:
@@ -84,11 +85,20 @@ def main():
         data = json.load(config_json)
         out_file_map = data['out']
     
+    status_files = data['status']
+
     try:
         if os.path.exists(taxonomy):
             make_te_csv(methods, out_file_map, taxonomy, out_dir+"te_summary.csv")
         
-        mapping_info,end_time = make_run_summary(out_file_map, commit, methods, fq1, fq2, ref, bam, flagstat, median_insert_size, command, execution_dir, start_time, out_dir, snakemake.output.summary_report, paired=paired)
+        failed_runs = get_failed_runs(methods, status_files)
+        tmp = []
+        for method in methods:
+            if method not in failed_runs:
+                tmp.append(method)
+        methods = tmp
+
+        mapping_info,end_time = make_run_summary(out_file_map, commit, methods, failed_runs, fq1, fq2, ref, bam, flagstat, median_insert_size, command, execution_dir, start_time, log_dir, out_dir, snakemake.output.summary_report, paired=paired)
         make_local_css_js_copies(snakemake.config['args']['mcc_path']+"/templates/css/", snakemake.config['args']['mcc_path']+"/templates/js/", snakemake.params.out_dir)
         make_data_copies(methods, snakemake.params.results_dir, snakemake.params.out_dir)
         make_summary_page(env, methods, sample_name, commit, start_time, end_time, out_dir, execution_dir, command, snakemake.params.raw_fq1, snakemake.params.raw_fq2, mapping_info, out_file_map, paired, snakemake.output.html_summary_report)
@@ -101,6 +111,16 @@ def main():
         print(track, file=sys.stderr)
         print("Failed to generate the McClintock Summary Report", file=sys.stderr)
         sys.exit(1)
+
+def get_failed_runs(methods, status_files):
+    failed_runs = []
+    for method in methods:
+        if method in status_files.keys():
+            succeeded = mccutils.check_status_file(status_files[method])
+            if not succeeded:
+                failed_runs.append(method)
+    
+    return failed_runs
 
 def get_te_counts(bed):
     all_te = 0
@@ -199,7 +219,7 @@ def make_te_csv(methods, out_file_map, taxonomy, out_csv):
             out.write(",".join(line)+"\n")
     
 
-def make_run_summary(out_file_map, commit, methods, fq1, fq2, ref, bam, flagstat, median_insert_size, command, execution_dir, start_time, out_dir, out_file, paired=False):
+def make_run_summary(out_file_map, commit, methods, failed_methods, fq1, fq2, ref, bam, flagstat, median_insert_size, command, execution_dir, start_time, log_dir, out_dir, out_file, paired=False):
     out_lines = ["\n"]
     out_lines.append(("-"*34)+"\n")
     out_lines.append("MCCLINTOCK SUMMARY REPORT\n")
@@ -213,7 +233,7 @@ def make_run_summary(out_file_map, commit, methods, fq1, fq2, ref, bam, flagstat
     out_lines.append("Command:\n"+command+"\n")
     out_lines.append("\nrun from directory: "+execution_dir+"\n")
     out_lines.append(pad("Started:",12)+start_time+"\n")
-    out_lines.append(pad("Completed:",12)+"{{END_TIME}}"+"\n\n")
+    out_lines.append(pad("Completed:",12)+"{{END_TIME}}"+"\n")
 
     mapping_info = None
     if os.path.exists(bam) and os.path.exists(flagstat) and os.path.exists(median_insert_size) and os.path.exists(ref):
@@ -287,7 +307,21 @@ def make_run_summary(out_file_map, commit, methods, fq1, fq2, ref, bam, flagstat
 
     out_lines.append("-"*(width1) + "-"*width2 + "-"*width3 + "-"*width4 + "\n")
 
-        
+    if len(failed_methods) > 0:
+        out_lines.append("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
+        out_lines.append("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
+        out_lines.append("!! SOME METHODS FAILED TO COMPLETE\n")
+        out_lines.append("!! FAILED METHODS: "+" ".join(failed_methods)+"\n")
+        out_lines.append("!!\n")
+        out_lines.append("!! Please check the associated logs:\n")
+        out_lines.append("!!     "+log_dir+"\n")
+        out_lines.append("!!\n")
+        out_lines.append("!! Errors can be reported to:\n")
+        out_lines.append("!!     https://github.com/bergmanlab/mcclintock/issues \n")
+        out_lines.append("!!\n")
+        out_lines.append("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
+        out_lines.append("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n")
+
     with open(out_file,"w") as out:
         for line in out_lines:
             if "{{END_TIME}}" in line:

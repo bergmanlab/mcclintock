@@ -21,16 +21,23 @@ def main():
     sample_name = snakemake.params.sample_name
     chromosomes = snakemake.params.chromosomes.split(",")
     out_dir = snakemake.params.out_dir
+    status_log = snakemake.params.status_log
 
-    insertions = read_insertions(insert_bed, sample_name, chromosomes, config)
-    absence_bed = make_absence_bed(absence_summary, sample_name, out_dir)
-    non_absent_ref_insertions = get_non_absent_ref_tes(te_gff, absence_bed, sample_name, out_dir, log)
-    insertions += non_absent_ref_insertions
+    prev_steps_succeeded = mccutils.check_status_file(status_log)
 
-    if len(insertions) > 0:
-        insertions = output.make_redundant_bed(insertions, sample_name, out_dir, method="temp2")
-        insertions = output.make_nonredundant_bed(insertions, sample_name, out_dir, method="temp2")
-        output.write_vcf(insertions, reference_fasta, sample_name, "temp2", out_dir)
+    if prev_steps_succeeded:
+        insertions = read_insertions(insert_bed, sample_name, chromosomes, config)
+        absence_bed = make_absence_bed(absence_summary, sample_name, out_dir)
+        non_absent_ref_insertions = get_non_absent_ref_tes(te_gff, absence_bed, sample_name, out_dir, log)
+        insertions += non_absent_ref_insertions
+
+        if len(insertions) > 0:
+            insertions = output.make_redundant_bed(insertions, sample_name, out_dir, method="temp2")
+            insertions = output.make_nonredundant_bed(insertions, sample_name, out_dir, method="temp2")
+            output.write_vcf(insertions, reference_fasta, sample_name, "temp2", out_dir)
+        else:
+            mccutils.run_command(["touch", out_dir+"/"+sample_name+"_temp2_redundant.bed"])
+            mccutils.run_command(["touch", out_dir+"/"+sample_name+"_temp2_nonredundant.bed"])
     else:
         mccutils.run_command(["touch", out_dir+"/"+sample_name+"_temp2_redundant.bed"])
         mccutils.run_command(["touch", out_dir+"/"+sample_name+"_temp2_nonredundant.bed"])

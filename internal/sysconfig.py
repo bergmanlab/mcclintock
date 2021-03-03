@@ -43,6 +43,22 @@ CONFIG_RULES = {
         "temp2": ["run_temp2", "process_temp2"]
 }
 
+LOG_DIR = "{{logdir}}"
+STATUS_FILES ={
+        "coverage" : LOG_DIR+"status/coverage.status",
+        "ngs_te_mapper": LOG_DIR+"status/ngs_te_mapper.status",
+        "ngs_te_mapper2":  LOG_DIR+"status/ngs_te_mapper2.status",
+        "popoolationte": LOG_DIR+"status/popoolationte.status",
+        "popoolationte2": LOG_DIR+"status/popoolationte2.status",
+        "relocate": LOG_DIR+"status/relocate.status",
+        "relocate2": LOG_DIR+"status/relocate2.status",
+        "retroseq": LOG_DIR+"status/retroseq.status",
+        "teflon": LOG_DIR+"status/teflon.status",
+        "te-locate": LOG_DIR+"status/telocate.status",
+        "temp": LOG_DIR+"status/temp.status",
+        "temp2": LOG_DIR+"status/temp2.status",
+}
+
 
 INTERMEDIATE_PATHS = {
         'mcc_files' : REF_DIR,

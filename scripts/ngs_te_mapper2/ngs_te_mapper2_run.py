@@ -1,6 +1,7 @@
 import os
 import sys
 import subprocess
+import traceback
 import importlib.util as il
 spec = il.spec_from_file_location("config", snakemake.params.config)
 config = il.module_from_spec(spec)
@@ -29,40 +30,63 @@ def main():
     sample_name = snakemake.params.sample_name
     script_dir = snakemake.params.script_dir
     out_dir = snakemake.params.out_dir
-    out_bed = snakemake.output[0]
+    status_log = snakemake.params.status_log
+    out_bed_nonref = snakemake.output[0]
+    out_bed_ref = snakemake.output[1]
 
-    # ensures intermediate files from previous runs are removed
-    for f in os.listdir(out_dir):
-        mccutils.remove(out_dir+"/"+f)
 
-    is_paired = True
-    if snakemake.params.raw_fq2 == "None":
-        is_paired = False
+    try:
+        # ensures intermediate files from previous runs are removed
+        for f in os.listdir(out_dir):
+            mccutils.remove(out_dir+"/"+f)
+
+        is_paired = True
+        if snakemake.params.raw_fq2 == "None":
+            is_paired = False
+        
+        command = [
+            'python', script_dir+"/ngs_te_mapper2.py", 
+                "-r", reference_fasta, 
+                "-l", consensus_fasta, 
+                "--tsd_max", str(config.MAX_TSD), 
+                "-t", str(threads), 
+                "-o", out_dir, 
+                "--keep_files",
+                "-p", sample_name,
+                "--min_af", str(config.MIN_ALLELE_FREQUENCY),
+                "-f"
+        ]
+
+        if is_paired:
+            command.append(fastq1+","+fastq2)
+        else:
+            command.append(fastq1)
+        
+        mccutils.log("ngs_te_mapper2","running ngs_te_mapper2", log=log)
+        mccutils.run_command(command, log=log)
+        mccutils.check_file_exists(out_bed_ref)
+        mccutils.check_file_exists(out_bed_nonref)
+        with open(status_log,"w") as l:
+            l.write("COMPLETED\n")
+
+        mccutils.log("ngs_te_mapper2","ngs_te_mapper2 run complete", log=log)
+        mccutils.log("ngs_te_mapper2","ngs_te_mapper2 run complete")
     
-    command = [
-        'python', script_dir+"/ngs_te_mapper2.py", 
-            "-r", reference_fasta, 
-            "-l", consensus_fasta, 
-            "--tsd_max", str(config.MAX_TSD), 
-            "-t", str(threads), 
-            "-o", out_dir, 
-            "--keep_files",
-            "-p", sample_name,
-            "--min_af", str(config.MIN_ALLELE_FREQUENCY),
-            "-f"
-    ]
+    except Exception as e:
+        mccutils.log("ngs_te_mapper2","ngs_te_mapper2 run failed", log=log)
+        mccutils.log("ngs_te_mapper2","ngs_te_mapper2 run failed")
 
-    if is_paired:
-        command.append(fastq1+","+fastq2)
-    else:
-        command.append(fastq1)
-    
-    mccutils.log("ngs_te_mapper2","running ngs_te_mapper2", log=log)
-    mccutils.run_command(command, log=log)
-    mccutils.log("ngs_te_mapper2","ngs_te_mapper2 run complete", log=log)
+        track = traceback.format_exc()
+        print(track, file=sys.stderr)
+        with open(log,"a") as l:
+            print(track, file=l)
 
+        with open(status_log,"w") as l:
+            l.write("FAILED\n")
 
-    mccutils.log("ngs_te_mapper2","ngs_te_mapper2 run complete")
+        mccutils.run_command(["touch", out_bed_ref])
+        mccutils.run_command(["touch", out_bed_nonref])
+
 
     
 

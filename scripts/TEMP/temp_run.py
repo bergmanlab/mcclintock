@@ -1,6 +1,7 @@
 import os
 import sys
 import subprocess
+import traceback
 import importlib.util as il
 spec = il.spec_from_file_location("config", snakemake.params.config)
 config = il.module_from_spec(spec)
@@ -33,17 +34,35 @@ def main():
     out_dir = snakemake.params.out_dir
     scripts_dir = snakemake.params.scripts_dir
     sample_name = snakemake.params.sample_name
+    status_log = snakemake.params.status_log
 
-    # ensures intermediate files from previous runs are removed
-    for f in os.listdir(out_dir):
-        mccutils.remove(out_dir+"/"+f)
+    try:
+        # ensures intermediate files from previous runs are removed
+        for f in os.listdir(out_dir):
+            mccutils.remove(out_dir+"/"+f)
 
-    mccutils.log("temp","running TEMP Module")
-    median_insert_size = get_median_insert_size(median_insert_size_file)
+        mccutils.log("temp","running TEMP Module")
+        median_insert_size = get_median_insert_size(median_insert_size_file)
+        run_temp_insertion(bam, scripts_dir, consensus, ref_te_bed, taxonomy, median_insert_size, threads, out_dir, log)
+        run_temp_absence(bam, scripts_dir, consensus, ref_te_bed, twobit, taxonomy, median_insert_size, threads, out_dir, log)
+        mccutils.check_file_exists(snakemake.output[0])
+        mccutils.check_file_exists(snakemake.output[1])
+        with open(status_log,"w") as l:
+            l.write("COMPLETED\n")
+        
+        mccutils.log("temp","TEMP run complete")
+    
+    except Exception as e:
+        track = traceback.format_exc()
+        print(track, file=sys.stderr)
+        with open(log,"a") as l:
+            print(track, file=l)
+        mccutils.log("temp","TEMP run failed")
+        with open(status_log,"w") as l:
+            l.write("FAILED\n")
 
-    run_temp_insertion(bam, scripts_dir, consensus, ref_te_bed, taxonomy, median_insert_size, threads, out_dir, log)
-
-    run_temp_absence(bam, scripts_dir, consensus, ref_te_bed, twobit, taxonomy, median_insert_size, threads, out_dir, log)
+        mccutils.run_command(["touch", snakemake.output[0]])
+        mccutils.run_command(["touch", snakemake.output[1]])
 
 
 

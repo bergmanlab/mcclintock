@@ -16,7 +16,8 @@ rule retroseq_run:
         ref_name=config['args']['ref_name'],
         sample_name=config['args']['sample_name'],
         log = config['args']['log_dir']+"retroseq.log",
-        config = config['config']['retroseq']['files'][0]
+        config = config['config']['retroseq']['files'][0],
+        status_log = config['status']['retroseq']
     
     output:
         config['outdir']['retroseq']+"unfiltered/"+config['args']['sample_name']+".call"
@@ -38,7 +39,8 @@ rule retroseq_post:
         ref_name=config['args']['ref_name'],
         sample_name=config['args']['sample_name'],
         chromosomes = config['args']['chromosomes'],
-        config = config['config']['retroseq']['files'][1]
+        config = config['config']['retroseq']['files'][1],
+        status_log = config['status']['retroseq']
     
     output:
         config['out']['retroseq']

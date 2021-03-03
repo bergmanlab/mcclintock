@@ -531,6 +531,11 @@ def make_run_config(args, sample_name, ref_name, full_command, current_directory
     now_str = now.strftime("%Y%m%d.%H%M%S")
     log_dir = args.out+"/logs/"+now_str+"."+str(run_id)+"/"
     mccutils.mkdir(log_dir)
+    mccutils.mkdir(log_dir+"/status/")
+
+    status_files = sysconfig.STATUS_FILES
+    for key in status_files.keys():
+        status_files[key] = status_files[key].replace(sysconfig.LOG_DIR, log_dir)
 
 
     chromosomes = []
@@ -586,6 +591,8 @@ def make_run_config(args, sample_name, ref_name, full_command, current_directory
         data["mcc"][key] = data["mcc"][key].replace(sysconfig.REF_NAME, ref_name)
         data["mcc"][key] = data["mcc"][key].replace(sysconfig.SAMPLE_NAME, sample_name)
     
+    data['status'] = status_files
+
     data["out"] = out_files
 
     data['outdir'] = method_paths

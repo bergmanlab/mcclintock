@@ -11,7 +11,8 @@ rule ngs_te_mapper_run:
         script_dir = config['args']['mcc_path']+"/install/tools/ngs_te_mapper/sourceCode/",
         log = config['args']['log_dir']+"ngs_te_mapper.log",
         sample_name = config['args']['sample_name'],
-        config = config['config']['ngs_te_mapper']['files'][0]
+        config = config['config']['ngs_te_mapper']['files'][0],
+        status_log = config['status']['ngs_te_mapper']
     
     threads: config['args']['max_threads_per_rule']
 
@@ -33,7 +34,8 @@ rule ngs_te_mapper_post:
         log = config['args']['log_dir']+"ngs_te_mapper.log",
         sample_name = config['args']['sample_name'],
         chromosomes = config['args']['chromosomes'],
-        config = config['config']['ngs_te_mapper']['files'][1]
+        config = config['config']['ngs_te_mapper']['files'][1],
+        status_log = config['status']['ngs_te_mapper']
     
     threads: 1
 

@@ -22,38 +22,45 @@ def main():
     out_dir = snakemake.params.out_dir
     sample_name = snakemake.params.sample_name
     chromosomes = snakemake.params.chromosomes.split(",")
+    status_log = snakemake.params.status_log
+    
+    prev_steps_succeeded = mccutils.check_status_file(status_log)
     
     mccutils.log("relocate2", "processing RelocaTE2 results")
 
-    ref_insertions = get_insertions(ref_gff, 
-                                    sample_name,
-                                    chromosomes, 
-                                    insert_type="ref", 
-                                    l_support_threshold=config.REF_LEFT_SUPPORT_THRESHOLD, 
-                                    r_support_threshold=config.REF_RIGHT_SUPPORT_THRESHOLD,
-                                    l_junction_threshold=config.REF_LEFT_JUNCTION_THRESHOLD,
-                                    r_junction_threshold=config.REF_RIGHT_JUNCTION_THRESHOLD)
+    if prev_steps_succeeded:
+        ref_insertions = get_insertions(ref_gff, 
+                                        sample_name,
+                                        chromosomes, 
+                                        insert_type="ref", 
+                                        l_support_threshold=config.REF_LEFT_SUPPORT_THRESHOLD, 
+                                        r_support_threshold=config.REF_RIGHT_SUPPORT_THRESHOLD,
+                                        l_junction_threshold=config.REF_LEFT_JUNCTION_THRESHOLD,
+                                        r_junction_threshold=config.REF_RIGHT_JUNCTION_THRESHOLD)
 
-    nonref_insertions = get_insertions(nonref_gff, 
-                                    sample_name,
-                                    chromosomes, 
-                                    insert_type="nonref", 
-                                    l_support_threshold=config.NONREF_LEFT_SUPPORT_THRESHOLD, 
-                                    r_support_threshold=config.NONREF_RIGHT_SUPPORT_THRESHOLD,
-                                    l_junction_threshold=config.NONREF_LEFT_JUNCTION_THRESHOLD,
-                                    r_junction_threshold=config.NONREF_RIGHT_JUNCTION_THRESHOLD)
+        nonref_insertions = get_insertions(nonref_gff, 
+                                        sample_name,
+                                        chromosomes, 
+                                        insert_type="nonref", 
+                                        l_support_threshold=config.NONREF_LEFT_SUPPORT_THRESHOLD, 
+                                        r_support_threshold=config.NONREF_RIGHT_SUPPORT_THRESHOLD,
+                                        l_junction_threshold=config.NONREF_LEFT_JUNCTION_THRESHOLD,
+                                        r_junction_threshold=config.NONREF_RIGHT_JUNCTION_THRESHOLD)
 
-    ref_insertions = fix_ref_te_names(ref_insertions, rm_out, sample_name)
+        ref_insertions = fix_ref_te_names(ref_insertions, rm_out, sample_name)
 
-    all_insertions = ref_insertions + nonref_insertions
+        all_insertions = ref_insertions + nonref_insertions
 
-    if len(all_insertions) >= 1:
-        all_insertions = output.make_redundant_bed(all_insertions, sample_name, out_dir, method="relocate2")
-        insertions = output.make_nonredundant_bed(all_insertions, sample_name, out_dir, method="relocate2")
-        output.write_vcf(insertions, reference_fasta, sample_name, "relocate2", out_dir)
+        if len(all_insertions) >= 1:
+            all_insertions = output.make_redundant_bed(all_insertions, sample_name, out_dir, method="relocate2")
+            insertions = output.make_nonredundant_bed(all_insertions, sample_name, out_dir, method="relocate2")
+            output.write_vcf(insertions, reference_fasta, sample_name, "relocate2", out_dir)
+        else:
+            mccutils.run_command(["touch", out_dir+"/"+sample_name+"_relocate2_redundant.bed"])
+            mccutils.run_command(["touch", out_dir+"/"+sample_name+"_relocate2_nonredundant.bed"])
     else:
-        mccutils.run_command(["touch", out_dir+"/"+sample_name+"_relocate2_redundant.bed"])
-        mccutils.run_command(["touch", out_dir+"/"+sample_name+"_relocate2_nonredundant.bed"])
+            mccutils.run_command(["touch", out_dir+"/"+sample_name+"_relocate2_redundant.bed"])
+            mccutils.run_command(["touch", out_dir+"/"+sample_name+"_relocate2_nonredundant.bed"])
 
     mccutils.log("relocate2", "RelocaTE2 postprocessing complete")
 

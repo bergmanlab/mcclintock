@@ -1,6 +1,7 @@
 import os
 import sys
 import subprocess
+import traceback
 import importlib.util as il
 spec = il.spec_from_file_location("config", snakemake.params.config)
 config = il.module_from_spec(spec)
@@ -23,24 +24,45 @@ def main():
     out_dir = snakemake.params.out_dir
     script_dir = snakemake.params.script_dir
     log = snakemake.params.log
+    status_log = snakemake.params.status_log
 
-    sample_table = make_sample_table(out_dir, bam)
+    prev_steps_succeeded = mccutils.check_status_file(status_log)
 
-    run_teflon(
-        script_dir, 
-        out_dir, 
-        sample_table, 
-        threads=threads, 
-        log=log, 
-        quality_threshold=config.PARAMETERS['q'],
-        stdev=config.PARAMETERS['sd'],
-        cov=config.PARAMETERS['cov'],
-        te_support1=config.PARAMETERS['n1'],
-        te_support2=config.PARAMETERS['n2'],
-        read_count_lower_threshold=config.PARAMETERS['lt'],
-        read_count_higher_threshold=config.PARAMETERS['ht']
-    )
+    if prev_steps_succeeded:
+        try:
+            sample_table = make_sample_table(out_dir, bam)
+            run_teflon(
+                script_dir, 
+                out_dir, 
+                sample_table, 
+                threads=threads, 
+                log=log, 
+                quality_threshold=config.PARAMETERS['q'],
+                stdev=config.PARAMETERS['sd'],
+                cov=config.PARAMETERS['cov'],
+                te_support1=config.PARAMETERS['n1'],
+                te_support2=config.PARAMETERS['n2'],
+                read_count_lower_threshold=config.PARAMETERS['lt'],
+                read_count_higher_threshold=config.PARAMETERS['ht']
+            )
 
+            mccutils.check_file_exists(snakemake.output[0])
+            with open(status_log,"w") as l:
+                l.write("COMPLETED\n")
+
+        except Exception as e:
+            track = traceback.format_exc()
+            print(track, file=sys.stderr)
+            with open(log,"a") as l:
+                print(track, file=l)
+            mccutils.log("teflon","teflon run failed")
+            with open(status_log,"w") as l:
+                l.write("FAILED\n")
+
+            mccutils.run_command(["touch", snakemake.output[0]])
+    
+    else:
+        mccutils.run_command(["touch", snakemake.output[0]])
 
 def make_sample_table(out_dir, bam):
     with open(out_dir+"samples.tsv", "w") as samples:

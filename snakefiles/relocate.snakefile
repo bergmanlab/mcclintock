@@ -51,7 +51,8 @@ rule relocaTE_run:
         log = config['args']['log_dir']+"relocaTE.log",
         script_dir = config['args']['mcc_path']+"/install/tools/relocate/scripts/",
         sample_name = config['args']['sample_name'],
-        config = config['config']['relocate']['files'][0]
+        config = config['config']['relocate']['files'][0],
+        status_log = config['status']['relocate']
 
     output:
         config['outdir']['relocate']+"unfiltered/combined.gff"
@@ -75,7 +76,8 @@ rule relocaTE_post:
         log = config['args']['log_dir']+"relocaTE.log",
         sample_name = config['args']['sample_name'],
         chromosomes = config['args']['chromosomes'],
-        config = config['config']['relocate']['files'][1]
+        config = config['config']['relocate']['files'][1],
+        status_log = config['status']['relocate']
 
     output:
         config['out']['relocate']

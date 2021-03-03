@@ -1,6 +1,7 @@
 import os
 import sys
 import subprocess
+import traceback
 sys.path.append(snakemake.config['args']['mcc_path'])
 import scripts.mccutils as mccutils
 
@@ -15,19 +16,39 @@ def main():
     log = snakemake.params.log
     out_dir = snakemake.params.out_dir
     threads = snakemake.threads
+    status_log = snakemake.params.status_log
 
-    # ensures intermediate files from previous runs are removed
-    for f in os.listdir(out_dir):
-        mccutils.remove(out_dir+"/"+f)
 
-    mccutils.mkdir(out_dir+"/tmp")
-    index_fasta(ref_fasta, log=log)
-    fq1 = format_fastq(fq1, out_dir+"/reads_1.fastq", log=log)
-    fq2 = format_fastq(fq2, out_dir+"/reads_2.fastq", log=log)
-    sam1 = map_reads(ref_fasta, fq1, out_dir+"/mapped_1.sam", threads=threads, log=log)
-    sam2 = map_reads(ref_fasta, fq2, out_dir+"/mapped_2.sam", threads=threads, log=log)
-    bam = sam_to_bam(jar, fq1, fq2, sam1, sam2, snakemake.output.bam, out_dir, threads=threads, log=log)
-    mccutils.remove(out_dir+"/tmp")
+    try:
+        # ensures intermediate files from previous runs are removed
+        for f in os.listdir(out_dir):
+            mccutils.remove(out_dir+"/"+f)
+
+        mccutils.mkdir(out_dir+"/tmp")
+        index_fasta(ref_fasta, log=log)
+        fq1 = format_fastq(fq1, out_dir+"/reads_1.fastq", log=log)
+        fq2 = format_fastq(fq2, out_dir+"/reads_2.fastq", log=log)
+        sam1 = map_reads(ref_fasta, fq1, out_dir+"/mapped_1.sam", threads=threads, log=log)
+        sam2 = map_reads(ref_fasta, fq2, out_dir+"/mapped_2.sam", threads=threads, log=log)
+        bam = sam_to_bam(jar, fq1, fq2, sam1, sam2, snakemake.output.bam, out_dir, threads=threads, log=log)
+        mccutils.remove(out_dir+"/tmp")
+
+        mccutils.check_file_exists(snakemake.output.bam)
+        with open(status_log,"w") as l:
+            l.write("COMPLETED\n")
+
+        mccutils.log("popoolationte2","PopoolationTE2 preprocessing complete")
+
+    except Exception as e:
+        track = traceback.format_exc()
+        print(track, file=sys.stderr)
+        with open(log,"a") as l:
+            print(track, file=l)
+        mccutils.log("popoolationte2","popoolationte2 preprocessing failed")
+        with open(status_log,"w") as l:
+            l.write("FAILED\n")
+        
+        mccutils.run_command(["touch", snakemake.output.bam])
 
 
 def index_fasta(fasta, log=None):

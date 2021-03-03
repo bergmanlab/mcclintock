@@ -1,6 +1,7 @@
 import os
 import sys
 import subprocess
+import traceback
 sys.path.append(snakemake.config['args']['mcc_path'])
 import scripts.mccutils as mccutils
 
@@ -16,29 +17,46 @@ def main():
     sample_name = snakemake.params.sample_name
     log = snakemake.params.log
     script_dir = snakemake.params.script_dir
-
+    status_log = snakemake.params.status_log
     threads = snakemake.threads
 
-    # ensures intermediate files from previous runs are removed
-    for f in os.listdir(out_dir):
-        mccutils.remove(out_dir+"/"+f)
 
-    mccutils.log("popoolationte","formatting read names")
-    fq1,fq2 = format_read_names(fq1, fq2, sample_name, out_dir)
-    mccutils.log("popoolationte","indexing popoolationTE reference fasta", log=log)
-    index_fasta(ref_fasta, log=log)
-    mccutils.log("popoolationte","mapping fastq1 reads", log=log)
-    sam1 = map_reads(fq1, ref_fasta, threads=threads, log=log)
-    mccutils.log("popoolationte","mapping fastq2 reads", log=log)
-    sam2 = map_reads(fq2, ref_fasta, threads=threads, log=log)
-    mccutils.log("popoolationte","combining alignments", log=log)
-    combined_sam = combine_alignments(sam1, sam2, fq1, fq2, script_dir, out_dir, log=log)
-    mccutils.log("popoolationte","sorting sam file", log=log)
-    bam = sam_to_bam(combined_sam, threads=threads, log=log)
-    sorted_bam = sort_bam(bam, threads=threads, log=log)
-    sorted_sam = bam_to_sam(sorted_bam, threads=threads, log=log)
+    try:
+        # ensures intermediate files from previous runs are removed
+        for f in os.listdir(out_dir):
+            mccutils.remove(out_dir+"/"+f)
 
-    mccutils.log("popoolationte","PopoolationTE preprocessing complete")
+        mccutils.log("popoolationte","formatting read names")
+        fq1,fq2 = format_read_names(fq1, fq2, sample_name, out_dir)
+        mccutils.log("popoolationte","indexing popoolationTE reference fasta", log=log)
+        index_fasta(ref_fasta, log=log)
+        mccutils.log("popoolationte","mapping fastq1 reads", log=log)
+        sam1 = map_reads(fq1, ref_fasta, threads=threads, log=log)
+        mccutils.log("popoolationte","mapping fastq2 reads", log=log)
+        sam2 = map_reads(fq2, ref_fasta, threads=threads, log=log)
+        mccutils.log("popoolationte","combining alignments", log=log)
+        combined_sam = combine_alignments(sam1, sam2, fq1, fq2, script_dir, out_dir, log=log)
+        mccutils.log("popoolationte","sorting sam file", log=log)
+        bam = sam_to_bam(combined_sam, threads=threads, log=log)
+        sorted_bam = sort_bam(bam, threads=threads, log=log)
+        sorted_sam = bam_to_sam(sorted_bam, threads=threads, log=log)
+        
+        with open(status_log,"w") as l:
+            l.write("COMPLETED\n")
+
+        mccutils.log("popoolationte","PopoolationTE preprocessing complete")
+    
+    except Exception as e:
+        track = traceback.format_exc()
+        print(track, file=sys.stderr)
+        with open(log,"a") as l:
+            print(track, file=l)
+        with open(status_log,"w") as l:
+                l.write("FAILED\n")
+
+        mccutils.run_command(["touch", snakemake.output[0]])
+        mccutils.run_command(["touch", snakemake.output[1]])
+        mccutils.run_command(["touch", snakemake.output[2]])
 
 def format_read_names(fq1, fq2, sample_name, out_dir):
     outfq1 = out_dir+"reads1.fastq"

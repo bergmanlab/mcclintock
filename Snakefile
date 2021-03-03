@@ -351,7 +351,8 @@ rule summary_report:
         chromosomes = config['args']['chromosomes'],
         out_dir = config['args']['out']+"/results/summary/",
         coverage_fa = config['in']['coverage_fasta'],
-        run_config = config['args']['run_config']
+        run_config = config['args']['run_config'],
+        log_dir = config['args']['log_dir']
 
 
     threads: config['args']['max_threads_per_rule']

@@ -57,6 +57,7 @@ rule popoolationTE_preprocessing:
         sample_name=config['args']['sample_name'],
         log = config['args']['log_dir']+"popoolationTE.log",
         script_dir = config['args']['mcc_path']+"/install/tools/popoolationte/",
+        status_log = config['status']['popoolationte']
 
     output:
         config['outdir']['popoolationte']+"unfiltered/reads1.fastq",
@@ -84,7 +85,8 @@ rule popoolationTE_run:
         sample_name=config['args']['sample_name'],
         log = config['args']['log_dir']+"popoolationTE.log",
         script_dir = config['args']['mcc_path']+"/install/tools/popoolationte/",
-        config = config['config']['popoolationte']['files'][0]
+        config = config['config']['popoolationte']['files'][0],
+        status_log = config['status']['popoolationte']
 
     output:
         config['outdir']['popoolationte']+"unfiltered/te-poly-filtered.txt"
@@ -106,7 +108,8 @@ rule popoolationTE_post:
         sample_name=config['args']['sample_name'],
         chromosomes = config['args']['chromosomes'],
         log = config['args']['log_dir']+"popoolationTE.log",
-        config = config['config']['popoolationte']['files'][1]
+        config = config['config']['popoolationte']['files'][1],
+        status_log = config['status']['popoolationte']
 
     output:
         config['out']['popoolationte']

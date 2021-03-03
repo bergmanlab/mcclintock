@@ -22,25 +22,30 @@ def main():
     sample_name = snakemake.params.sample_name
     out_dir = snakemake.params.out_dir
     chromosomes = snakemake.params.chromosomes.split(",")
+    status_log = snakemake.params.status_log
 
     out_bed = snakemake.output[0]
 
-    
 
-    mccutils.log("ngs_te_mapper2","processing ngs_te_mapper2 results", log=log)
+    succeeded = mccutils.check_status_file(status_log)
+    if succeeded:
+        mccutils.log("ngs_te_mapper2","processing ngs_te_mapper2 results", log=log)
+        insertions = read_insertions(ref_bed, nonref_bed, chromosomes, sample_name, out_dir)
+        if len(insertions) > 0:
+            insertions = output.make_redundant_bed(insertions, sample_name, out_dir, method="ngs_te_mapper2")
+            intertions = output.make_nonredundant_bed(insertions, sample_name, out_dir, method="ngs_te_mapper2")
+            output.write_vcf(insertions, reference_fasta, sample_name, "ngs_te_mapper2", out_dir)
 
-    insertions = read_insertions(ref_bed, nonref_bed, chromosomes, sample_name, out_dir)
-
-    if len(insertions) > 0:
-        insertions = output.make_redundant_bed(insertions, sample_name, out_dir, method="ngs_te_mapper2")
-        intertions = output.make_nonredundant_bed(insertions, sample_name, out_dir, method="ngs_te_mapper2")
-        output.write_vcf(insertions, reference_fasta, sample_name, "ngs_te_mapper2", out_dir)
-
+        else:
+            mccutils.run_command(["touch", out_dir+"/"+sample_name+"_ngs_te_mapper2_redundant.bed"])
+            mccutils.run_command(["touch", out_dir+"/"+sample_name+"_ngs_te_mapper2_nonredundant.bed"])
+        
+        mccutils.log("ngs_te_mapper2","ngs_te_mapper2 postprocessing complete")
     else:
         mccutils.run_command(["touch", out_dir+"/"+sample_name+"_ngs_te_mapper2_redundant.bed"])
         mccutils.run_command(["touch", out_dir+"/"+sample_name+"_ngs_te_mapper2_nonredundant.bed"])
 
-    mccutils.log("ngs_te_mapper","ngs_te_mapper postprocessing complete")
+    
 
 def read_insertions(ref_bed, nonref_bed, chromosomes, sample_name, out_dir):
     insertions = []

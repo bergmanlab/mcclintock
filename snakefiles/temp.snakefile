@@ -15,7 +15,8 @@ rule run_temp:
         scripts_dir = config['args']['mcc_path']+"/install/tools/temp/scripts/",
         out_dir = config['outdir']['temp']+"unfiltered/",
         sample_name = config['args']['sample_name'],
-        config = config['config']['temp']['files'][0]
+        config = config['config']['temp']['files'][0],
+        status_log = config['status']['temp']
 
     threads: config['args']['max_threads_per_rule']
 
@@ -40,7 +41,8 @@ rule process_temp:
         out_dir = config['outdir']['temp'],
         sample_name = config['args']['sample_name'],
         chromosomes = config['args']['chromosomes'],
-        config = config['config']['temp']['files'][1]
+        config = config['config']['temp']['files'][1],
+        status_log = config['status']['temp']
 
     threads: 1
 

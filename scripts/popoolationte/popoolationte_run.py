@@ -2,6 +2,7 @@ import os
 import sys
 import subprocess
 import statistics
+import traceback
 import importlib.util as il
 spec = il.spec_from_file_location("config", snakemake.params.config)
 config = il.module_from_spec(spec)
@@ -23,6 +24,7 @@ def main():
     fq2 = snakemake.input.fq2
     sam = snakemake.input.sam
     log = snakemake.params.log
+    status_log = snakemake.params.status_log
 
     with open(log,"a") as l:
         l.write("reference fasta: "+ref_fasta+"\n")
@@ -36,32 +38,51 @@ def main():
     sample_name = snakemake.params.sample_name
     script_dir = snakemake.params.script_dir
 
-    mccutils.log("popoolationte","getting read length")
-    read_length = get_read_length(fq1, fq2)
-    mccutils.log("popoolationte","calculating median insert size")
-    median_insert_size = get_median_insert_size(sam)
-    max_dist = int(median_insert_size * 3) +read_length
-    mccutils.log("popoolationte","converting TE gff to PoPoolationTE known TE file")
-    known_inserts = make_known_insert_file(te_gff, out_dir)
-    mccutils.log("popoolationte","running the PoPoolationTE workflow scripts")
-    run_popoolationte(sam, 
-                      ref_fasta, 
-                      taxonomy, 
-                      read_length, 
-                      median_insert_size, 
-                      max_dist, 
-                      known_inserts, 
-                      script_dir, 
-                      out_dir, 
-                      log=log, 
-                      identify_min_count=config.IDENTIFY_TE_INSERTSITES["min-count"],
-                      identify_min_qual=config.IDENTIFY_TE_INSERTSITES["min-map-qual"],
-                      crosslink_site_shift=config.CROSSLINK_TE_SITES['single-site-shift'],
-                      update_te_inserts_site_shift=config.UPDATE_TEINSERTS_WITH_KNOWNTES['single-site-shift'],
-                      estimate_polymorphism_min_qual=config.ESTIMATE_POLYMORPHISM['min-map-qual'],
-                      filter_min_count=config.FILTER['min-count'])
+    prev_step_succeeded = mccutils.check_status_file(status_log)
+    if prev_step_succeeded:
+        try:
+            mccutils.log("popoolationte","getting read length")
+            read_length = get_read_length(fq1, fq2)
+            mccutils.log("popoolationte","calculating median insert size")
+            median_insert_size = get_median_insert_size(sam)
+            max_dist = int(median_insert_size * 3) +read_length
+            mccutils.log("popoolationte","converting TE gff to PoPoolationTE known TE file")
+            known_inserts = make_known_insert_file(te_gff, out_dir)
+            mccutils.log("popoolationte","running the PoPoolationTE workflow scripts")
+            run_popoolationte(sam, 
+                            ref_fasta, 
+                            taxonomy, 
+                            read_length, 
+                            median_insert_size, 
+                            max_dist, 
+                            known_inserts, 
+                            script_dir, 
+                            out_dir, 
+                            log=log, 
+                            identify_min_count=config.IDENTIFY_TE_INSERTSITES["min-count"],
+                            identify_min_qual=config.IDENTIFY_TE_INSERTSITES["min-map-qual"],
+                            crosslink_site_shift=config.CROSSLINK_TE_SITES['single-site-shift'],
+                            update_te_inserts_site_shift=config.UPDATE_TEINSERTS_WITH_KNOWNTES['single-site-shift'],
+                            estimate_polymorphism_min_qual=config.ESTIMATE_POLYMORPHISM['min-map-qual'],
+                            filter_min_count=config.FILTER['min-count'])
 
-    mccutils.run_command(["touch", snakemake.output[0]])
+            mccutils.check_file_exists(snakemake.output[0])
+
+            with open(status_log,"w") as l:
+                    l.write("COMPLETED\n")
+            mccutils.log("popoolationte","popoolationte run complete")
+
+        except Exception as e:
+            track = traceback.format_exc()
+            print(track, file=sys.stderr)
+            with open(log,"a") as l:
+                print(track, file=l)
+            with open(status_log,"w") as l:
+                    l.write("FAILED\n")
+
+            mccutils.run_command(["touch", snakemake.output[0]])
+    else:
+        mccutils.run_command(["touch", snakemake.output[0]])
 
 
 def get_read_length(fq1, fq2):

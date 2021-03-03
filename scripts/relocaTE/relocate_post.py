@@ -21,21 +21,27 @@ def main():
     log = snakemake.params.log
     sample_name = snakemake.params.sample_name
     chromosomes = snakemake.params.chromosomes.split(",")
+    status_log = snakemake.params.status_log
 
     mccutils.log("relocate","processing RelocaTE results")
 
-    insertions = get_insertions(relocate_gff, sample_name, chromosomes, ref_l_threshold=config.REF_LEFT_THRESHOLD, ref_r_threshold=config.REF_RIGHT_THRESHOLD, nonref_l_threshold=config.NONREF_LEFT_THRESHOLD, nonref_r_threshold=config.NONREF_RIGHT_THRESHOLD)
+    prev_step_succeeded = mccutils.check_status_file(status_log)
 
-    insertions = set_ref_orientations(insertions, te_gff)
+    if prev_step_succeeded:
+        insertions = get_insertions(relocate_gff, sample_name, chromosomes, ref_l_threshold=config.REF_LEFT_THRESHOLD, ref_r_threshold=config.REF_RIGHT_THRESHOLD, nonref_l_threshold=config.NONREF_LEFT_THRESHOLD, nonref_r_threshold=config.NONREF_RIGHT_THRESHOLD)
+        insertions = set_ref_orientations(insertions, te_gff)
 
-    if len(insertions) >= 1:
-        insertions = output.make_redundant_bed(insertions, sample_name, out_dir, method="relocate")
-        insertions = output.make_nonredundant_bed(insertions, sample_name, out_dir, method="relocate")
-        output.write_vcf(insertions, reference_fasta, sample_name, "relocate", out_dir)
+        if len(insertions) >= 1:
+            insertions = output.make_redundant_bed(insertions, sample_name, out_dir, method="relocate")
+            insertions = output.make_nonredundant_bed(insertions, sample_name, out_dir, method="relocate")
+            output.write_vcf(insertions, reference_fasta, sample_name, "relocate", out_dir)
+        else:
+            mccutils.run_command(["touch",out_dir+"/"+sample_name+"_relocate_redundant.bed"])
+            mccutils.run_command(["touch",out_dir+"/"+sample_name+"_relocate_nonredundant.bed"])
+
     else:
-        mccutils.run_command(["touch",out_dir+"/"+sample_name+"_relocate_redundant.bed"])
-        mccutils.run_command(["touch",out_dir+"/"+sample_name+"_relocate_nonredundant.bed"])
-
+            mccutils.run_command(["touch",out_dir+"/"+sample_name+"_relocate_redundant.bed"])
+            mccutils.run_command(["touch",out_dir+"/"+sample_name+"_relocate_nonredundant.bed"])
     mccutils.log("relocate","RelocaTE postprocessing complete")
 
 

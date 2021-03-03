@@ -21,15 +21,23 @@ def main():
     ref_name = snakemake.params.ref_name
     sample_name = snakemake.params.sample_name
     chromosomes = snakemake.params.chromosomes.split(",")
+    status_log = snakemake.params.status_log
 
-    insertions = read_insertions(retroseq_out, sample_name, chromosomes, support_threshold=config.READ_SUPPORT_THRESHOLD, breakpoint_threshold=config.BREAKPOINT_CONFIDENCE_THRESHOLD)
-    if len(insertions) >= 1:
-        insertions = output.make_redundant_bed(insertions, sample_name, out_dir, method="retroseq")
-        insertions = output.make_nonredundant_bed(insertions, sample_name, out_dir, method="retroseq")
-        output.write_vcf(insertions, reference_fasta, sample_name, "retroseq", out_dir)
+    prev_steps_succeeded = mccutils.check_status_file(status_log)
+
+    if prev_steps_succeeded:
+        insertions = read_insertions(retroseq_out, sample_name, chromosomes, support_threshold=config.READ_SUPPORT_THRESHOLD, breakpoint_threshold=config.BREAKPOINT_CONFIDENCE_THRESHOLD)
+        if len(insertions) >= 1:
+            insertions = output.make_redundant_bed(insertions, sample_name, out_dir, method="retroseq")
+            insertions = output.make_nonredundant_bed(insertions, sample_name, out_dir, method="retroseq")
+            output.write_vcf(insertions, reference_fasta, sample_name, "retroseq", out_dir)
+        else:
+            mccutils.run_command(["touch",out_dir+"/"+sample_name+"_retroseq_redundant.bed"])
+            mccutils.run_command(["touch",out_dir+"/"+sample_name+"_retroseq_nonredundant.bed"])
     else:
-        mccutils.run_command(["touch",out_dir+"/"+sample_name+"_retroseq_redundant.bed"])
-        mccutils.run_command(["touch",out_dir+"/"+sample_name+"_retroseq_nonredundant.bed"])
+            mccutils.run_command(["touch",out_dir+"/"+sample_name+"_retroseq_redundant.bed"])
+            mccutils.run_command(["touch",out_dir+"/"+sample_name+"_retroseq_nonredundant.bed"])
+    
     mccutils.log("retroseq","RetroSeq post processing complete")
 
 def read_insertions(retroseq_vcf, sample_name, chromosomes, support_threshold=0, breakpoint_threshold=6):

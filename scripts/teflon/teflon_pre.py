@@ -1,6 +1,7 @@
 import os
 import sys
 import subprocess
+import traceback
 sys.path.append(snakemake.config['args']['mcc_path'])
 import scripts.mccutils as mccutils
 
@@ -21,16 +22,33 @@ def main():
 
     ref_bed = snakemake.output.ref_bed
     teflon_taxonomy = snakemake.output.teflon_taxonomy
+    status_log = snakemake.params.status_log
 
-    make_reference_bed(te_gff, ref_bed)
+    try:
+        make_reference_bed(te_gff, ref_bed)
+        make_taxonomy_file(taxonomy, teflon_taxonomy)
+        prep_annotations(script_dir, out_dir, ref_bed, teflon_taxonomy, consensus, reference_genome, log=log)
+        map_reads(out_dir, fq1, fq2, threads=threads, log=log)
+        mccutils.check_file_exists(snakemake.output[0])
+        with open(status_log,"w") as l:
+            l.write("COMPLETED\n")
+        
+        mccutils.log("teflon","setup for TEFLoN complete")
 
-    make_taxonomy_file(taxonomy, teflon_taxonomy)
+    except Exception as e:
+        track = traceback.format_exc()
+        print(track, file=sys.stderr)
+        with open(log,"a") as l:
+            print(track, file=l)
+        mccutils.log("teflon","teflon preprocessing failed")
+        with open(status_log,"w") as l:
+            l.write("FAILED\n")
+        
+        mccutils.run_command(["touch", snakemake.output[0]])
+        mccutils.run_command(["touch", snakemake.output[1]])
+        mccutils.run_command(["touch", snakemake.output[2]])
 
-    prep_annotations(script_dir, out_dir, ref_bed, teflon_taxonomy, consensus, reference_genome, log=log)
-
-    map_reads(out_dir, fq1, fq2, threads=threads, log=log)
-
-    mccutils.log("teflon","setup for TEFLoN complete")
+   
 
 
 

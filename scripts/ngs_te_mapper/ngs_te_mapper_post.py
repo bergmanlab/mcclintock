@@ -21,25 +21,30 @@ def main():
     sample_name = snakemake.params.sample_name
     out_dir = snakemake.params.out_dir
     chromosomes = snakemake.params.chromosomes.split(",")
+    status_log = snakemake.params.status_log
 
     out_bed = snakemake.output[0]
 
-    
+    succeeded = mccutils.check_status_file(status_log)
+    if succeeded:
+        mccutils.log("ngs_te_mapper","processing ngs_te_mapper results", log=log)
+        insertions = read_insertions(raw_bed, chromosomes, sample_name, out_dir, min_read_cutoff=config.MIN_READ_SUPPORT)
 
-    mccutils.log("ngs_te_mapper","processing ngs_te_mapper results", log=log)
+        if len(insertions) > 0:
+            insertions = output.make_redundant_bed(insertions, sample_name, out_dir, method="ngs_te_mapper")
+            intertions = output.make_nonredundant_bed(insertions, sample_name, out_dir, method="ngs_te_mapper")
+            output.write_vcf(insertions, reference_fasta, sample_name, "ngs_te_mapper", out_dir)
 
-    insertions = read_insertions(raw_bed, chromosomes, sample_name, out_dir, min_read_cutoff=config.MIN_READ_SUPPORT)
-
-    if len(insertions) > 0:
-        insertions = output.make_redundant_bed(insertions, sample_name, out_dir, method="ngs_te_mapper")
-        intertions = output.make_nonredundant_bed(insertions, sample_name, out_dir, method="ngs_te_mapper")
-        output.write_vcf(insertions, reference_fasta, sample_name, "ngs_te_mapper", out_dir)
-
+        else:
+            mccutils.run_command(["touch", out_dir+"/"+sample_name+"_ngs_te_mapper_redundant.bed"])
+            mccutils.run_command(["touch", out_dir+"/"+sample_name+"_ngs_te_mapper_nonredundant.bed"])
+        
+        mccutils.log("ngs_te_mapper","ngs_te_mapper postprocessing complete")
     else:
         mccutils.run_command(["touch", out_dir+"/"+sample_name+"_ngs_te_mapper_redundant.bed"])
         mccutils.run_command(["touch", out_dir+"/"+sample_name+"_ngs_te_mapper_nonredundant.bed"])
 
-    mccutils.log("ngs_te_mapper","ngs_te_mapper postprocessing complete")
+    
 
 def read_insertions(bed, chromosomes, sample_name, out_dir, min_read_cutoff=0):
     insertions = []

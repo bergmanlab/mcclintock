@@ -14,7 +14,8 @@ rule teflon_preprocessing:
     params:
         out_dir = config['outdir']['teflon']+"unfiltered/",
         script_dir = config['args']['mcc_path']+"/install/tools/teflon/",
-        log=config['args']['log_dir']+"teflon.log"
+        log=config['args']['log_dir']+"teflon.log",
+        status_log = config['status']['teflon']
 
     output:
         ref_bed = config['outdir']['teflon']+"unfiltered/reference_te.bed",
@@ -41,7 +42,8 @@ rule teflon_run:
         out_dir = config['outdir']['teflon']+"unfiltered/",
         script_dir = config['args']['mcc_path']+"/install/tools/teflon/",
         log=config['args']['log_dir']+"teflon.log",
-        config = config['config']['teflon']['files'][0]
+        config = config['config']['teflon']['files'][0],
+        status_log = config['status']['teflon']
     
     output:
         config['outdir']['teflon']+"unfiltered/genotypes/sample.genotypes.txt"
@@ -65,7 +67,8 @@ rule teflon_post:
         log=config['args']['log_dir']+"teflon.log",
         sample_name = config['args']['sample_name'],
         chromosomes = config['args']['chromosomes'],
-        config = config['config']['teflon']['files'][1]
+        config = config['config']['teflon']['files'][1],
+        status_log = config['status']['teflon']
     
     output:
         out = config['out']['teflon']
