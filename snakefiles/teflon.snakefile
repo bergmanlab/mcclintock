@@ -1,9 +1,9 @@
 rule teflon_preprocessing:
     input:
-        te_gff = config['mcc']['locations'],
-        taxonomy = config['mcc']['taxonomy'],
+        te_gff = config['mcc']['unaugmented_locations'],
+        taxonomy = config['mcc']['unaugmented_taxonomy'],
         consensus = config['mcc']['consensus'],
-        reference_genome = config['mcc']['reference'],
+        reference_genome = config['mcc']['unaugmented_reference'],
         fq1 = config['mcc']['fq1'],
         fq2 = config['mcc']['fq2']
     
@@ -29,7 +29,7 @@ rule teflon_preprocessing:
 rule teflon_run:
     input:
         consensus = config['mcc']['consensus'],
-        reference_genome = config['mcc']['reference'],
+        reference_genome = config['mcc']['unaugmented_reference'],
         ref_bed = config['outdir']['teflon']+"unfiltered/reference_te.bed",
         teflon_taxonomy = config['outdir']['teflon']+"unfiltered/teflon_taxonomy.tsv",
         bam = config['outdir']['teflon']+"unfiltered/teflon.sorted.bam"
@@ -56,7 +56,7 @@ rule teflon_post:
     input:
         teflon_out = config['outdir']['teflon']+"unfiltered/genotypes/sample.genotypes.txt",
         ref_bed = config['outdir']['teflon']+"unfiltered/reference_te.bed",
-        reference_fasta = config['mcc']['reference']
+        reference_fasta = config['mcc']['unaugmented_reference']
 
     threads: 1
 
