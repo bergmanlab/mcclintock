@@ -75,6 +75,7 @@ INTERMEDIATE_PATHS = {
         'telocate_te_gff' : SAM_DIR+"intermediate/reference_te_locations/inrefTEs_HL.gff",
         'ref_tes_bed' : SAM_DIR+"intermediate/reference_te_locations/"+REF_NAME+".ref.TEs.bed",
         'relocaTE_ref_TEs' : SAM_DIR+"intermediate/reference_te_locations/"+REF_NAME+".ref.TEs.relocaTE.gff",
+        'ngs_te_mapper2_ref_TEs' : SAM_DIR+"intermediate/reference_te_locations/"+REF_NAME+".ref.TEs.ngs_te_mapper2.gff",
         'popoolationTE_gff' : SAM_DIR+"intermediate/reference_te_locations/"+REF_NAME+".ref.TEs.popoolationTE.gff",
         'taxonomy' : REF_DIR+"te_taxonomy/taxonomy.tsv",
         'unaugmented_taxonomy' : REF_DIR+"te_taxonomy/unaugmented_taxonomy.tsv",

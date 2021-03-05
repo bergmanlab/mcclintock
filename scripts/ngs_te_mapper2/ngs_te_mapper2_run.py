@@ -17,6 +17,7 @@ def main():
     reference_fasta = snakemake.input.reference_fasta
     fastq1 = snakemake.input.fastq1
     fastq2 = snakemake.input.fastq2
+    locations = snakemake.input.locations
 
     log = snakemake.params.log
     with open(log,"a") as l:
@@ -53,6 +54,7 @@ def main():
                 "-o", out_dir, 
                 "--keep_files",
                 "-p", sample_name,
+                "-a", locations,
                 "--min_af", str(config.MIN_ALLELE_FREQUENCY),
                 "-f"
         ]

@@ -1,9 +1,25 @@
+rule ngs_te_mapper2_pre:
+    input:
+        locations = config['mcc']['locations'],
+        taxonomy = config['mcc']['taxonomy']
+    
+    threads: config['args']['max_threads_per_rule']
+
+    conda: config['envs']['ngs_te_mapper2']
+
+    output:
+        config['mcc']['ngs_te_mapper2_ref_TEs']
+    
+    script:
+        config['args']['mcc_path']+"/scripts/ngs_te_mapper2/ngs_te_mapper2_pre.py"
+
 rule ngs_te_mapper2_run:
     input:
         consensus_fasta = config['mcc']['consensus'],
         reference_fasta = config['mcc']['reference'],
         fastq1 = config['mcc']['fq1'],
-        fastq2 = config['mcc']['fq2']
+        fastq2 = config['mcc']['fq2'],
+        locations = config['mcc']['ngs_te_mapper2_ref_TEs']
 
     params:
         raw_fq2 = config['in']['fq2'],
