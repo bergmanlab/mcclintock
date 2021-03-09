@@ -115,9 +115,10 @@ class Retroseq:
     def __init__(self):
         self.support = {
             "supporting_reads" : Info("SUPPORTING_READS", "number of reads supporting the prediction", 0, "Integer"),
-            "spanning_pairs" : Info("SPANNING_PAIRs", "Number of correctly mapped read pairs spanning breakpoint", 0, "Integer"),
+            "spanning_pairs" : Info("SPANNING_PAIRS", "Number of correctly mapped read pairs spanning breakpoint", 0, "Integer"),
             "clip3" : Info("CLIP3", "Number of soft clipped reads downstream of the breakpoint", 0, "Integer"),
             "clip5" : Info("CLIP5", "Number of soft clipped reads upstream of the breakpoint", 0, "Integer"),
+            "frequency" : Info("FREQUENCY", "Frequency of the insertion. supporting_reads / (2 x spanning_pairs + supporting_reads)", 0.0, "Float"),
             "call_status" : Info(
                 "CALL_STATUS", "Call Status - for reference calls a flag to say if the call failed a particular filter. Filters are ordered by priority in calling (higher number indicates closer to being called). 1 - depth too high in region, 2 - not enough reads in cluster, 3 - not enough total flanking reads, 4 - not enough inconsistently mapped reads, 5 - neither side passes ratio test, 6 - one side passes ratio test, 7 - distance too large at breakpoint, 8 - PASSED all filters",
                 0,
