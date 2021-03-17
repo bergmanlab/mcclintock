@@ -161,6 +161,9 @@ def parse_args():
         
         if args.error is None:
             args.error = 0.01
+        
+        if args.keep_intermediate is None:
+            args.keep_intermediate = "general"
 
     return args
 
@@ -388,9 +391,9 @@ def calculate_num_pairs(fasta, coverage, length, single=False):
             total_length += contig_length
     
     if single:
-        num_pairs = (total_length * coverage)/(2*length)
+        num_pairs = (total_length * coverage)/(length)
     else:
-        num_pairs = (total_length * coverage)/length
+        num_pairs = (total_length * coverage)/(2*length)
 
     return num_pairs
 
@@ -459,6 +462,7 @@ def run_mcclintock(fastq1, fastq2, reference, consensus, locations, taxonomy, re
     if 'augment' in config['mcclintock'].keys() and config['mcclintock']['augment'] is not None:
         command += ["-a", config['mcclintock']['augment']]
     print("running mcclintock... output:", mcc_out)
+    print(command)
     run_command_stdout(command, mcc_out+"/run.stdout", log=mcc_out+"/run.stderr")
     if not os.path.exists(mcc_out+"/results/summary/summary_report.txt"):
         sys.stderr.write("run at: "+mcc_out+" failed...")
