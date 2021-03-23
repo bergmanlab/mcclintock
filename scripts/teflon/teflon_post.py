@@ -1,10 +1,15 @@
 import os
 import sys
 import subprocess
+import importlib.util as il
+spec = il.spec_from_file_location("config", snakemake.params.config)
+config = il.module_from_spec(spec)
+sys.modules[spec.name] = config
+spec.loader.exec_module(config)
 sys.path.append(snakemake.config['args']['mcc_path'])
 import scripts.mccutils as mccutils
 import scripts.output as output
-import config.teflon.teflon_post as config
+
 
 def main():
     mccutils.log("teflon","TEFLoN postprocessing")
@@ -16,24 +21,32 @@ def main():
     out_dir = snakemake.params.out_dir
     sample_name = snakemake.params.sample_name
     chromosomes = snakemake.params.chromosomes.split(",")
+    status_log = snakemake.params.status_log
+
     out = snakemake.output.out
 
-    ref_tes = get_ref_tes(ref_te_bed)
-    insertions = read_insertions(
-        teflon_raw, 
-        chromosomes, 
-        sample_name, 
-        ref_tes,
-        min_presence=config.PARAMETERS['min_presence_reads'], 
-        max_absence=config.PARAMETERS['max_absence_reads'],
-        min_presence_fraction=config.PARAMETERS['min_presence_fraction'],
-        require_tsd=config.PARAMETERS['require_tsd'],
-        require_both_breakpoints=config.PARAMETERS['require_both_breakpoints']
-    )
-    if len(insertions) >= 1:
-        insertions = output.make_redundant_bed(insertions, sample_name, out_dir, method="teflon")
-        insertions = output.make_nonredundant_bed(insertions, sample_name, out_dir, method="teflon")
-        output.write_vcf(insertions, reference_fasta, sample_name, "teflon", out_dir)
+    prev_steps_succeeded = mccutils.check_status_file(status_log)
+
+    if prev_steps_succeeded:
+        ref_tes = get_ref_tes(ref_te_bed)
+        insertions = read_insertions(
+            teflon_raw, 
+            chromosomes, 
+            sample_name, 
+            ref_tes,
+            min_presence=config.PARAMETERS['min_presence_reads'], 
+            max_absence=config.PARAMETERS['max_absence_reads'],
+            min_presence_fraction=config.PARAMETERS['min_presence_fraction'],
+            require_tsd=config.PARAMETERS['require_tsd'],
+            require_both_breakpoints=config.PARAMETERS['require_both_breakpoints']
+        )
+        if len(insertions) >= 1:
+            insertions = output.make_redundant_bed(insertions, sample_name, out_dir, method="teflon")
+            insertions = output.make_nonredundant_bed(insertions, sample_name, out_dir, method="teflon")
+            output.write_vcf(insertions, reference_fasta, sample_name, "teflon", out_dir)
+        else:
+            mccutils.run_command(["touch", out_dir+"/"+sample_name+"_teflon_redundant.bed"])
+            mccutils.run_command(["touch", out_dir+"/"+sample_name+"_teflon_nonredundant.bed"])
     else:
         mccutils.run_command(["touch", out_dir+"/"+sample_name+"_teflon_redundant.bed"])
         mccutils.run_command(["touch", out_dir+"/"+sample_name+"_teflon_nonredundant.bed"])

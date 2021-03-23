@@ -20,6 +20,6 @@
 
     "mcclintock": {
         "path" : "/home/pjb68507/git//mcclintock/",
-        "methods" : "ngs_te_mapper,relocate,temp,retroseq,popoolationte,te-locate,relocaTE2,popoolationte2,teflon"
+        "methods" : "ngs_te_mapper,ngs_te_mapper2,relocate,relocate2,temp,temp2,retroseq,popoolationte,popoolationte2,te-locate,teflon"
     }
 }

@@ -35,7 +35,6 @@ rule relocaTE_ref_gff:
 
 rule relocaTE_run:
     input:
-        config['args']['mcc_path']+"/config/relocate/relocate_run.py",
         consensus_fasta = config['mcc']['relocaTE_consensus'],
         te_gff = config['mcc']['relocaTE_ref_TEs'],
         reference_fasta = config['mcc']['reference'],
@@ -48,21 +47,22 @@ rule relocaTE_run:
 
     params:
         raw_fq2 = config['in']['fq2'],
-        out_dir = config['args']['out']+"/results/relocaTE/unfiltered/",
+        out_dir = config['outdir']['relocate']+"unfiltered/",
         log = config['args']['log_dir']+"relocaTE.log",
         script_dir = config['args']['mcc_path']+"/install/tools/relocate/scripts/",
-        sample_name = config['args']['sample_name']
+        sample_name = config['args']['sample_name'],
+        config = config['config']['relocate']['files'][0],
+        status_log = config['status']['relocate']
 
     output:
-        config['args']['out']+"results/relocaTE/unfiltered/combined.gff"
+        config['outdir']['relocate']+"unfiltered/combined.gff"
     
     script:
         config['args']['mcc_path']+"/scripts/relocaTE/relocate_run.py"
 
 rule relocaTE_post:
     input:
-        config['args']['mcc_path']+"/config/relocate/relocate_post.py",
-        relocate_gff = config['args']['out']+"results/relocaTE/unfiltered/combined.gff",
+        relocate_gff = config['outdir']['relocate']+"unfiltered/combined.gff",
         te_gff = config['mcc']['relocaTE_ref_TEs'],
         reference_fasta = config['mcc']['reference']
 
@@ -72,10 +72,12 @@ rule relocaTE_post:
 
     params:
         raw_fq2 = config['in']['fq2'],
-        out_dir = config['args']['out']+"/results/relocaTE/",
+        out_dir = config['outdir']['relocate'],
         log = config['args']['log_dir']+"relocaTE.log",
         sample_name = config['args']['sample_name'],
-        chromosomes = config['args']['chromosomes']
+        chromosomes = config['args']['chromosomes'],
+        config = config['config']['relocate']['files'][1],
+        status_log = config['status']['relocate']
 
     output:
         config['out']['relocate']

@@ -35,11 +35,11 @@ def main():
             fastq1 = modified_reference.replace(".fasta", "_1.fastq")
             fastq2 = modified_reference.replace(".fasta", "_2.fastq")
             if not os.path.exists(fastq1) or not os.path.exists(fastq2):
-                num_pairs = calculate_num_pairs(modified_reference, single=args.single)
-                fastq1, fastq2 = create_synthetic_reads(modified_reference, num_pairs, x, args.out, run_id=args.runid, seed=args.seed)
+                num_pairs = calculate_num_pairs(modified_reference, args.coverage, args.length, single=args.single)
+                fastq1, fastq2 = create_synthetic_reads(modified_reference, num_pairs, args.length, args.insert, args.error, x, args.out, run_id=args.runid, seed=args.seed)
 
             if not os.path.exists(args.out+"/results/forward/run"+args.runid+"_"+str(x)+"/results/summary/summary_report.txt"):
-                run_mcclintock(fastq1, fastq2, args.reference, args.consensus, args.locations, args.taxonomy, x, args.proc, args.out, args.config, run_id=args.runid, single=args.single)
+                run_mcclintock(fastq1, fastq2, args.reference, args.consensus, args.locations, args.taxonomy, x, args.proc, args.out, args.config, args.keep_intermediate, run_id=args.runid, single=args.single)
 
             # reverse
             consensus_seqs = get_seqs(args.consensus)
@@ -52,11 +52,11 @@ def main():
             fastq1 = modified_reference.replace(".fasta", "_1.fastq")
             fastq2 = modified_reference.replace(".fasta", "_2.fastq")
             if not os.path.exists(fastq1) or not os.path.exists(fastq2):
-                num_pairs = calculate_num_pairs(modified_reference, single=args.single)
-                fastq1, fastq2 = create_synthetic_reads(modified_reference, num_pairs, x, args.out, run_id=args.runid, seed=args.seed)
+                num_pairs = calculate_num_pairs(modified_reference, args.coverage, args.length, single=args.single)
+                fastq1, fastq2 = create_synthetic_reads(modified_reference, num_pairs, args.length, args.insert, args.error, x, args.out, run_id=args.runid, seed=args.seed)
 
             if not os.path.exists(args.out+"/results/reverse/run"+args.runid+"_"+str(x)+"/results/summary/summary_report.txt"):
-                run_mcclintock(fastq1, fastq2, args.reference, args.consensus, args.locations, args.taxonomy, x, args.proc, args.out, args.config, run_id=args.runid, single=args.single, reverse=True)
+                run_mcclintock(fastq1, fastq2, args.reference, args.consensus, args.locations, args.taxonomy, x, args.proc, args.out, args.config, args.keep_intermediate, run_id=args.runid, single=args.single, reverse=True)
 
     elif args.mode == "analysis":
         if not os.path.exists(args.out+"/summary/"):
@@ -64,11 +64,11 @@ def main():
 
         actual_insertions = get_actual_insertions(args.out+"/data/forward/")
         predicted_insertions, methods = get_predicted_insertions(args.out+"/results/forward/")
-        make_out_table(actual_insertions, predicted_insertions, methods, args.out+"/summary/forward_summary.csv")
+        make_out_table(actual_insertions, predicted_insertions, methods, args.out+"/summary/forward_summary.csv", args.out+"/summary/forward_metrics.csv")
 
         actual_insertions = get_actual_insertions(args.out+"/data/reverse/")
         predicted_insertions, methods = get_predicted_insertions(args.out+"/results/reverse/")
-        make_out_table(actual_insertions, predicted_insertions, methods, args.out+"/summary/reverse_summary.csv")
+        make_out_table(actual_insertions, predicted_insertions, methods, args.out+"/summary/reverse_summary.csv", args.out+"/summary/reverse_metrics.csv")
 
 
 def parse_args():
@@ -84,6 +84,11 @@ def parse_args():
     ## optional ##
     parser.add_argument("-p", "--proc", type=int, help="The number of processors to use for parallel stages of the pipeline [default = 1]", required=False)
     parser.add_argument("-o", "--out", type=str, help="An output folder for the run. [default = '.']", required='run' not in sys.argv)
+    parser.add_argument("-C","--coverage", type=int, help="The target genome coverage for the simulated reads [default = 100]", required=False)
+    parser.add_argument("-l","--length", type=int, help="The read length of the simulated reads [default = 101]", required=False)
+    parser.add_argument("-i","--insert", type=int, help="The median insert size of the simulated reads [default = 300]", required=False)
+    parser.add_argument("-e","--error", type=float, help="The base error rate for the simulated reads [default = 0.01]", required=False)
+    parser.add_argument("-k","--keep_intermediate", type=str, help="This option determines which intermediate files are preserved after McClintock completes [default: general][options: minimal, general, methods, <list,of,methods>, all]", required=False)
     parser.add_argument("--start", type=int, help="The number of replicates to run. [default = 1]", required=False)
     parser.add_argument("--end", type=int, help="The number of replicates to run. [default = 300]", required=False)
     parser.add_argument("--seed", type=str, help="a seed to the random number generator so runs can be replicated", required=False)
@@ -144,6 +149,21 @@ def parse_args():
         
         if args.single is None:
             args.single = False
+        
+        if args.coverage is None:
+            args.coverage = 100
+        
+        if args.length is None:
+            args.length = 101
+
+        if args.insert is None:
+            args.insert = 300
+        
+        if args.error is None:
+            args.error = 0.01
+        
+        if args.keep_intermediate is None:
+            args.keep_intermediate = "general"
 
     return args
 
@@ -359,7 +379,7 @@ def add_synthetic_insertion(reference_seqs, consensus_seqs, config, rep, out, ru
     return outfasta
 
 
-def calculate_num_pairs(fasta, single=False):
+def calculate_num_pairs(fasta, coverage, length, single=False):
     command = ["samtools","faidx", fasta]
     run_command(command)
 
@@ -371,13 +391,13 @@ def calculate_num_pairs(fasta, single=False):
             total_length += contig_length
     
     if single:
-        num_pairs = (total_length * 100)/202
+        num_pairs = (total_length * coverage)/(length)
     else:
-        num_pairs = (total_length * 100)/101
+        num_pairs = (total_length * coverage)/(2*length)
 
     return num_pairs
 
-def create_synthetic_reads(reference, num_pairs, rep, out, run_id="", seed=None):
+def create_synthetic_reads(reference, num_pairs, length, insert, error, rep, out, run_id="", seed=None):
     if seed is not None:
         random.seed(seed+"create_synthetic_reads"+str(rep))
     else:
@@ -389,12 +409,12 @@ def create_synthetic_reads(reference, num_pairs, rep, out, run_id="", seed=None)
     fastq2 = reference.replace(".fasta", "_2.fastq")
     report = reference.replace(".fasta", "_wgsim_report.txt")
 
-    command = ["wgsim", "-1", "101", "-2", "101", "-d", "300", "-N", str(num_pairs), "-S", str(seed_for_wgsim), "-e", "0.01", "-h", reference, fastq1, fastq2]
+    command = ["wgsim", "-1", str(length), "-2", str(length), "-d", str(insert), "-N", str(num_pairs), "-S", str(seed_for_wgsim), "-e", str(error), "-h", reference, fastq1, fastq2]
     run_command_stdout(command, report)
 
     return fastq1, fastq2
 
-def run_mcclintock(fastq1, fastq2, reference, consensus, locations, taxonomy, rep, threads, out, config, run_id="", reverse=False, single=False):
+def run_mcclintock(fastq1, fastq2, reference, consensus, locations, taxonomy, rep, threads, out, config, keep_intermediate, run_id="", reverse=False, single=False):
     if not os.path.exists(out+"/results"):
         os.mkdir(out+"/results")
     
@@ -422,7 +442,7 @@ def run_mcclintock(fastq1, fastq2, reference, consensus, locations, taxonomy, re
                 "-g", locations, 
                 "-t", taxonomy, 
                 "-m", config['mcclintock']['methods'],
-                "--keep_intermediate", "all"
+                "--keep_intermediate", keep_intermediate
         ]
     else:
         command = [
@@ -436,12 +456,13 @@ def run_mcclintock(fastq1, fastq2, reference, consensus, locations, taxonomy, re
                 "-g", locations, 
                 "-t", taxonomy, 
                 "-m", config['mcclintock']['methods'],
-                "--keep_intermediate", "all"
+                "--keep_intermediate", keep_intermediate
         ]
 
     if 'augment' in config['mcclintock'].keys() and config['mcclintock']['augment'] is not None:
         command += ["-a", config['mcclintock']['augment']]
     print("running mcclintock... output:", mcc_out)
+    print(command)
     run_command_stdout(command, mcc_out+"/run.stdout", log=mcc_out+"/run.stderr")
     if not os.path.exists(mcc_out+"/results/summary/summary_report.txt"):
         sys.stderr.write("run at: "+mcc_out+" failed...")
@@ -513,8 +534,9 @@ def get_predicted_insertions(out):
     
     return predicted_insertions, methods
 
-def make_out_table(actual_insertions, predicted_insertions, methods, out_csv):
+def make_out_table(actual_insertions, predicted_insertions, methods, out_csv, out_metrics):
     columns = [["Method","Reference","Nonreference", "Exact", "Within-5", "Within-100", "Within-300", "Within-500"]]
+    rows = [["Method", "TP", "FP","FN", "Precision", "Recall"]]
     for method in methods:
         ref_counts = []
         nonref_counts = []
@@ -523,6 +545,10 @@ def make_out_table(actual_insertions, predicted_insertions, methods, out_csv):
         within_100s = []
         within_300s = []
         within_500s = []
+        all_pred = 0
+        true_pos = 0
+        false_pos = 0
+        false_neg = 0
         for rep in predicted_insertions[method].keys():
             ref_count = 0
             nonref_count = 0
@@ -568,6 +594,13 @@ def make_out_table(actual_insertions, predicted_insertions, methods, out_csv):
             within_300s.append(within_300)
             within_500s.append(within_500)
         
+            all_pred += nonref_count
+            if within_5 > 0:
+                true_pos += 1
+            else:
+                false_neg += 1
+            
+
 
         ref_mean = statistics.mean(ref_counts)
         nonref_mean = statistics.mean(nonref_counts)
@@ -577,6 +610,17 @@ def make_out_table(actual_insertions, predicted_insertions, methods, out_csv):
         mean_300 = statistics.mean(within_300s)
         mean_500 = statistics.mean(within_500s)
         columns.append([method, str(ref_mean), str(nonref_mean), str(exact_mean), str(mean_5), str(mean_100), str(mean_300), str(mean_500)])
+
+        false_pos = all_pred-true_pos
+        if (true_pos+false_pos) > 0:
+            precision = true_pos/(true_pos+false_pos)
+        else:
+            precision = "NaN"
+        if (true_pos+false_neg) > 0:
+            recall = true_pos/(true_pos+false_neg)
+        else:
+            recall = "NaN"
+        rows.append([method, str(true_pos), str(false_pos), str(false_neg), str(precision), str(recall)])
     
     with open(out_csv, "w") as csv:
         for y in range(0, len(columns[0])):
@@ -585,6 +629,10 @@ def make_out_table(actual_insertions, predicted_insertions, methods, out_csv):
                 line.append(columns[x][y])
             line = ",".join(line)
             csv.write(line+"\n")
+    
+    with open(out_metrics, "w") as csv:
+        for row in rows:
+            csv.write(",".join(row) + "\n")
 
 
 if __name__ == "__main__":                

@@ -1,9 +1,15 @@
 import os
 import sys
 import subprocess
+import traceback
+import importlib.util as il
+spec = il.spec_from_file_location("config", snakemake.params.config)
+config = il.module_from_spec(spec)
+sys.modules[spec.name] = config
+spec.loader.exec_module(config)
 sys.path.append(snakemake.config['args']['mcc_path'])
 import scripts.mccutils as mccutils
-import config.temp2.temp2_run as config
+
 
 def main():
     fq1 = snakemake.input.fq1
@@ -28,6 +34,7 @@ def main():
     out_dir = snakemake.params.out_dir
     script_dir = snakemake.params.script_dir
     sample_name = snakemake.params.sample_name
+    status_log = snakemake.params.status_log
 
     # ensures intermediate files from previous runs are removed
     for f in os.listdir(out_dir):
@@ -35,15 +42,29 @@ def main():
     
     mccutils.log("temp2","running TEMP2 Module")
 
-    median_insert_size = get_median_insert_size(median_insert_size_file)
+    try:
+        median_insert_size = get_median_insert_size(median_insert_size_file)
+        run_temp2_insertion(fq1, fq2, bam, median_insert_size, reference, script_dir, consensus, ref_te_bed, threads, out_dir, config, log)
+        run_temp2_absence(script_dir, bam, twobit, ref_te_bed, median_insert_size, threads, out_dir+"/absence", config, log)
+        mccutils.run_command(["cp", out_dir+'/absence/'+sample_name+".absence.refined.bp.summary", out_dir], log=log)
 
-    run_temp2_insertion(fq1, fq2, bam, median_insert_size, reference, script_dir, consensus, ref_te_bed, threads, out_dir, config, log)
+        mccutils.check_file_exists(snakemake.output[0])
+        mccutils.check_file_exists(snakemake.output[1])
+        with open(status_log,"w") as l:
+            l.write("COMPLETED\n")
+        mccutils.log("temp2","TEMP2 run complete")
+    
+    except Exception as e:
+        track = traceback.format_exc()
+        print(track, file=sys.stderr)
+        with open(log,"a") as l:
+            print(track, file=l)
+        mccutils.log("temp2","TEMP2 run failed")
+        with open(status_log,"w") as l:
+            l.write("FAILED\n")
 
-    run_temp2_absence(script_dir, bam, twobit, ref_te_bed, median_insert_size, threads, out_dir+"/absence", config, log)
-
-    mccutils.run_command(["cp", out_dir+'/absence/'+sample_name+".absence.refined.bp.summary", out_dir], log=log)
-
-    mccutils.log("temp2","TEMP2 run complete")
+        mccutils.run_command(["touch", snakemake.output[0]])
+        mccutils.run_command(["touch", snakemake.output[1]])
 
 
 def get_median_insert_size(infile):

@@ -1,10 +1,14 @@
 import os
 import sys
 import subprocess
+import importlib.util as il
+spec = il.spec_from_file_location("config", snakemake.params.config)
+config = il.module_from_spec(spec)
+sys.modules[spec.name] = config
+spec.loader.exec_module(config)
 sys.path.append(snakemake.config['args']['mcc_path'])
 import scripts.mccutils as mccutils
 import scripts.output as output
-import config.telocate.telocate_post as config
 
 
 def main():
@@ -16,13 +20,20 @@ def main():
     out_dir = snakemake.params.out_dir
     sample_name = snakemake.params.sample_name
     chromosomes = snakemake.params.chromosomes.split(",")
+    status_log = snakemake.params.status_log
 
-    insertions = read_insertions(telocate_raw, sample_name, chromosomes, rp_threshold=config.READ_PAIR_SUPPORT_THRESHOLD)
-    insertions = filter_by_reference(insertions, te_gff)
-    if len(insertions) > 0:
-        insertions = output.make_redundant_bed(insertions, sample_name, out_dir, method="telocate")
-        intertions = output.make_nonredundant_bed(insertions, sample_name, out_dir,method="telocate")
-        output.write_vcf(insertions, reference_fasta, sample_name, "telocate", out_dir)
+    prev_steps_succeeded = mccutils.check_status_file(status_log)
+
+    if prev_steps_succeeded:
+        insertions = read_insertions(telocate_raw, sample_name, chromosomes, rp_threshold=config.READ_PAIR_SUPPORT_THRESHOLD)
+        insertions = filter_by_reference(insertions, te_gff)
+        if len(insertions) > 0:
+            insertions = output.make_redundant_bed(insertions, sample_name, out_dir, method="telocate")
+            intertions = output.make_nonredundant_bed(insertions, sample_name, out_dir,method="telocate")
+            output.write_vcf(insertions, reference_fasta, sample_name, "telocate", out_dir)
+        else:
+            mccutils.run_command(["touch", out_dir+"/"+sample_name+"_telocate_redundant.bed"])
+            mccutils.run_command(["touch", out_dir+"/"+sample_name+"_telocate_nonredundant.bed"])
     else:
         mccutils.run_command(["touch", out_dir+"/"+sample_name+"_telocate_redundant.bed"])
         mccutils.run_command(["touch", out_dir+"/"+sample_name+"_telocate_nonredundant.bed"])

@@ -1,10 +1,15 @@
 import os
 import sys
 import subprocess
+import importlib.util as il
+spec = il.spec_from_file_location("config", snakemake.params.config)
+config = il.module_from_spec(spec)
+sys.modules[spec.name] = config
+spec.loader.exec_module(config)
 sys.path.append(snakemake.config['args']['mcc_path'])
 import scripts.mccutils as mccutils
 import scripts.output as output
-import config.temp2.temp2_post as config
+
 
 def main():
     mccutils.log("temp2","running TEMP2 post processing")
@@ -16,16 +21,23 @@ def main():
     sample_name = snakemake.params.sample_name
     chromosomes = snakemake.params.chromosomes.split(",")
     out_dir = snakemake.params.out_dir
+    status_log = snakemake.params.status_log
 
-    insertions = read_insertions(insert_bed, sample_name, chromosomes, config)
-    absence_bed = make_absence_bed(absence_summary, sample_name, out_dir)
-    non_absent_ref_insertions = get_non_absent_ref_tes(te_gff, absence_bed, sample_name, out_dir, log)
-    insertions += non_absent_ref_insertions
+    prev_steps_succeeded = mccutils.check_status_file(status_log)
 
-    if len(insertions) > 0:
-        insertions = output.make_redundant_bed(insertions, sample_name, out_dir, method="temp2")
-        insertions = output.make_nonredundant_bed(insertions, sample_name, out_dir, method="temp2")
-        output.write_vcf(insertions, reference_fasta, sample_name, "temp2", out_dir)
+    if prev_steps_succeeded:
+        insertions = read_insertions(insert_bed, sample_name, chromosomes, config)
+        absence_bed = make_absence_bed(absence_summary, sample_name, out_dir)
+        non_absent_ref_insertions = get_non_absent_ref_tes(te_gff, absence_bed, sample_name, out_dir, log)
+        insertions += non_absent_ref_insertions
+
+        if len(insertions) > 0:
+            insertions = output.make_redundant_bed(insertions, sample_name, out_dir, method="temp2")
+            insertions = output.make_nonredundant_bed(insertions, sample_name, out_dir, method="temp2")
+            output.write_vcf(insertions, reference_fasta, sample_name, "temp2", out_dir)
+        else:
+            mccutils.run_command(["touch", out_dir+"/"+sample_name+"_temp2_redundant.bed"])
+            mccutils.run_command(["touch", out_dir+"/"+sample_name+"_temp2_nonredundant.bed"])
     else:
         mccutils.run_command(["touch", out_dir+"/"+sample_name+"_temp2_redundant.bed"])
         mccutils.run_command(["touch", out_dir+"/"+sample_name+"_temp2_nonredundant.bed"])

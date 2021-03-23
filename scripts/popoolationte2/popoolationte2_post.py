@@ -1,10 +1,15 @@
 import os
 import sys
 import subprocess
+import importlib.util as il
+spec = il.spec_from_file_location("config", snakemake.params.config)
+config = il.module_from_spec(spec)
+sys.modules[spec.name] = config
+spec.loader.exec_module(config)
 sys.path.append(snakemake.config['args']['mcc_path'])
 import scripts.mccutils as mccutils
 import scripts.output as output
-import config.popoolationte2.popoolationte2_post as config
+
 
 def main():
     mccutils.log("popoolationte2","processing PopoolationTE2 results")
@@ -18,15 +23,23 @@ def main():
     chromosomes = snakemake.params.chromosomes.split(",")
     log = snakemake.params.log
 
-    ref_tes = get_ref_tes(te_gff, taxonomy, chromosomes)
-    insertions = read_insertions(te_predictions, ref_tes, chromosomes, sample_name, both_end_support_needed=config.REQUIRE_BOTH_END_SUPPORT, support_threshold=config.FREQUENCY_THRESHOLD)
-    if len(insertions) >= 1:
-        insertions = output.make_redundant_bed(insertions, sample_name, out_dir, method="popoolationte2")
-        insertions = output.make_nonredundant_bed(insertions, sample_name, out_dir, method="popoolationte2")
-        output.write_vcf(insertions,reference_fasta,sample_name,"popoolationte2", out_dir)
+    status_log = snakemake.params.status_log
+
+    prev_step_succeeded = mccutils.check_status_file(status_log)
+
+    if prev_step_succeeded:
+        ref_tes = get_ref_tes(te_gff, taxonomy, chromosomes)
+        insertions = read_insertions(te_predictions, ref_tes, chromosomes, sample_name, both_end_support_needed=config.REQUIRE_BOTH_END_SUPPORT, support_threshold=config.FREQUENCY_THRESHOLD)
+        if len(insertions) >= 1:
+            insertions = output.make_redundant_bed(insertions, sample_name, out_dir, method="popoolationte2")
+            insertions = output.make_nonredundant_bed(insertions, sample_name, out_dir, method="popoolationte2")
+            output.write_vcf(insertions,reference_fasta,sample_name,"popoolationte2", out_dir)
+        else:
+            mccutils.run_command(["touch", out_dir+"/"+sample_name+"_popoolationte2_redundant.bed"])
+            mccutils.run_command(["touch", out_dir+"/"+sample_name+"_popoolationte2_nonredundant.bed"])
     else:
-        mccutils.run_command(["touch", out_dir+"/"+sample_name+"_popoolationte2_redundant.bed"])
-        mccutils.run_command(["touch", out_dir+"/"+sample_name+"_popoolationte2_nonredundant.bed"])
+            mccutils.run_command(["touch", out_dir+"/"+sample_name+"_popoolationte2_redundant.bed"])
+            mccutils.run_command(["touch", out_dir+"/"+sample_name+"_popoolationte2_nonredundant.bed"])
     
     mccutils.log("popoolationte2","PopoolationTE2 postprocessing complete")
 

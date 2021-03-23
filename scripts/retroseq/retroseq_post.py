@@ -1,10 +1,15 @@
 import os
 import sys
 import subprocess
+import importlib.util as il
+spec = il.spec_from_file_location("config", snakemake.params.config)
+config = il.module_from_spec(spec)
+sys.modules[spec.name] = config
+spec.loader.exec_module(config)
 sys.path.append(snakemake.config['args']['mcc_path'])
 import scripts.mccutils as mccutils
 import scripts.output as output
-import config.retroseq.retroseq_post as config
+
 
 
 def main():
@@ -16,15 +21,23 @@ def main():
     ref_name = snakemake.params.ref_name
     sample_name = snakemake.params.sample_name
     chromosomes = snakemake.params.chromosomes.split(",")
+    status_log = snakemake.params.status_log
 
-    insertions = read_insertions(retroseq_out, sample_name, chromosomes, support_threshold=config.READ_SUPPORT_THRESHOLD, breakpoint_threshold=config.BREAKPOINT_CONFIDENCE_THRESHOLD)
-    if len(insertions) >= 1:
-        insertions = output.make_redundant_bed(insertions, sample_name, out_dir, method="retroseq")
-        insertions = output.make_nonredundant_bed(insertions, sample_name, out_dir, method="retroseq")
-        output.write_vcf(insertions, reference_fasta, sample_name, "retroseq", out_dir)
+    prev_steps_succeeded = mccutils.check_status_file(status_log)
+
+    if prev_steps_succeeded:
+        insertions = read_insertions(retroseq_out, sample_name, chromosomes, support_threshold=config.READ_SUPPORT_THRESHOLD, breakpoint_threshold=config.BREAKPOINT_CONFIDENCE_THRESHOLD)
+        if len(insertions) >= 1:
+            insertions = output.make_redundant_bed(insertions, sample_name, out_dir, method="retroseq")
+            insertions = output.make_nonredundant_bed(insertions, sample_name, out_dir, method="retroseq")
+            output.write_vcf(insertions, reference_fasta, sample_name, "retroseq", out_dir)
+        else:
+            mccutils.run_command(["touch",out_dir+"/"+sample_name+"_retroseq_redundant.bed"])
+            mccutils.run_command(["touch",out_dir+"/"+sample_name+"_retroseq_nonredundant.bed"])
     else:
-        mccutils.run_command(["touch",out_dir+"/"+sample_name+"_retroseq_redundant.bed"])
-        mccutils.run_command(["touch",out_dir+"/"+sample_name+"_retroseq_nonredundant.bed"])
+            mccutils.run_command(["touch",out_dir+"/"+sample_name+"_retroseq_redundant.bed"])
+            mccutils.run_command(["touch",out_dir+"/"+sample_name+"_retroseq_nonredundant.bed"])
+    
     mccutils.log("retroseq","RetroSeq post processing complete")
 
 def read_insertions(retroseq_vcf, sample_name, chromosomes, support_threshold=0, breakpoint_threshold=6):
@@ -59,8 +72,9 @@ def read_insertions(retroseq_vcf, sample_name, chromosomes, support_threshold=0,
                 insert.support_info.support['clip3'].value = int(form['CLIP3'])
                 insert.support_info.support['clip5'].value = int(form['CLIP5'])
                 insert.support_info.support['call_status'].value = int(form['FL'])
+                insert.support_info.support['frequency'].value = round(int(form['GQ'])/((2 * int(form['SP'])) + int(form['GQ'])),2)
                 insert.type = "non-reference"
-                insert.name = insert.family+"|non-reference|NA|"+sample_name+"|retroseq|rp|"
+                insert.name = insert.family+"|non-reference|"+str(insert.support_info.support['frequency'].value)+"|"+sample_name+"|retroseq|rp|"
 
                 if insert.support_info.support['supporting_reads'].value >= support_threshold and insert.support_info.support['call_status'].value >= breakpoint_threshold and insert.chromosome in chromosomes:
                     insertions.append(insert)

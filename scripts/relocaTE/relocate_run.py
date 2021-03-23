@@ -1,9 +1,15 @@
 import os
 import sys
 import subprocess
+import traceback
+import importlib.util as il
+spec = il.spec_from_file_location("config", snakemake.params.config)
+config = il.module_from_spec(spec)
+sys.modules[spec.name] = config
+spec.loader.exec_module(config)
 sys.path.append(snakemake.config['args']['mcc_path'])
 import scripts.mccutils as mccutils
-import config.relocate.relocate_run as config
+
 import random
 
 def main():
@@ -18,74 +24,87 @@ def main():
 
     script_dir = snakemake.params.script_dir
     out_dir = snakemake.params.out_dir
+    status_log = snakemake.params.status_log
     out_gff = snakemake.output[0]
 
-    # ensures intermediate files from previous runs are removed
-    for f in os.listdir(out_dir):
-        mccutils.remove(out_dir+"/"+f)
 
-    mccutils.log("relocate","running RelocaTE", log=log)
+    try: 
+        # ensures intermediate files from previous runs are removed
+        for f in os.listdir(out_dir):
+            mccutils.remove(out_dir+"/"+f)
 
-    input_dir = snakemake.params.out_dir+"/input/"
-    mccutils.remove(input_dir)
-    mccutils.mkdir(input_dir)
-    fq_dir = input_dir+"fastq/"
-    mccutils.mkdir(fq_dir)
+        mccutils.log("relocate","running RelocaTE", log=log)
+        input_dir = snakemake.params.out_dir+"/input/"
+        mccutils.remove(input_dir)
+        mccutils.mkdir(input_dir)
+        fq_dir = input_dir+"fastq/"
+        mccutils.mkdir(fq_dir)
 
-    consensus_fasta = input_dir+"consensus.fasta"
-    te_gff = input_dir+"te.gff"
-    reference_fasta = input_dir+"reference.fasta"
+        consensus_fasta = input_dir+"consensus.fasta"
+        te_gff = input_dir+"te.gff"
+        reference_fasta = input_dir+"reference.fasta"
 
-    uniq_id = str(random.randint(10000,99999))
-    while uniq_id in fq_dir:
-        mccutils.log("relocate","unique id: "+uniq_id+" occurs in file path... selecting a new one...", log=log)
         uniq_id = str(random.randint(10000,99999))
+        while uniq_id in fq_dir:
+            mccutils.log("relocate","unique id: "+uniq_id+" occurs in file path... selecting a new one...", log=log)
+            uniq_id = str(random.randint(10000,99999))
 
-    fq1_uniq_id = uniq_id+"_mcc_relocate_1"
-    fq2_uniq_id = uniq_id+"_mcc_relocate_2"
-    unpaired_id = uniq_id+"_unPaired"
+        fq1_uniq_id = uniq_id+"_mcc_relocate_1"
+        fq2_uniq_id = uniq_id+"_mcc_relocate_2"
+        unpaired_id = uniq_id+"_unPaired"
 
-    os.symlink(snakemake.input.consensus_fasta, consensus_fasta)
-    os.symlink(snakemake.input.te_gff, te_gff)
-    os.symlink(snakemake.input.reference_fasta, reference_fasta)
-    if is_paired:
-        os.symlink(snakemake.input.fq1, fq_dir+sample_name+"."+fq1_uniq_id+".fq")
-        os.symlink(snakemake.input.fq2, fq_dir+sample_name+"."+fq2_uniq_id+".fq")
-    else:
-        os.symlink(snakemake.input.fq1, fq_dir+sample_name+"."+unpaired_id+".fq")
-
-
-
-
-    annotation = make_annotation_file(te_gff, out_dir)
-    os.chdir(out_dir)
-
-    command = ["perl", script_dir+"/relocaTE.pl", 
-                    "-t", consensus_fasta, 
-                    "-d", fq_dir, 
-                    "-g", reference_fasta, 
-                    "-o", ".", 
-                    "-r", annotation,
-                    "-l", str(config.RELOCATE['l']),
-                    "-m", str(config.RELOCATE['m']),
-                    "-bm", str(config.RELOCATE['bm']),
-                    "-bt", str(config.RELOCATE['bt']),
-                    "-f", str(config.RELOCATE['f'])]
+        os.symlink(snakemake.input.consensus_fasta, consensus_fasta)
+        os.symlink(snakemake.input.te_gff, te_gff)
+        os.symlink(snakemake.input.reference_fasta, reference_fasta)
+        if is_paired:
+            os.symlink(snakemake.input.fq1, fq_dir+sample_name+"."+fq1_uniq_id+".fq")
+            os.symlink(snakemake.input.fq2, fq_dir+sample_name+"."+fq2_uniq_id+".fq")
+        else:
+            os.symlink(snakemake.input.fq1, fq_dir+sample_name+"."+unpaired_id+".fq")
 
 
-    if is_paired:
-        command += ["-1", fq1_uniq_id, "-2", fq2_uniq_id]
-    else:
-        command += ["-u", unpaired_id]
-    
-    
-    mccutils.run_command(command, log=log)
-    combine_gffs(out_dir, out_gff)
+
+
+        annotation = make_annotation_file(te_gff, out_dir)
+        os.chdir(out_dir)
+
+        command = ["perl", script_dir+"/relocaTE.pl", 
+                        "-t", consensus_fasta, 
+                        "-d", fq_dir, 
+                        "-g", reference_fasta, 
+                        "-o", ".", 
+                        "-r", annotation,
+                        "-l", str(config.RELOCATE['l']),
+                        "-m", str(config.RELOCATE['m']),
+                        "-bm", str(config.RELOCATE['bm']),
+                        "-bt", str(config.RELOCATE['bt']),
+                        "-f", str(config.RELOCATE['f'])]
+
+
+        if is_paired:
+            command += ["-1", fq1_uniq_id, "-2", fq2_uniq_id]
+        else:
+            command += ["-u", unpaired_id]
+        
+        
+        mccutils.run_command(command, log=log)
+        combine_gffs(out_dir, out_gff)
+                
+        mccutils.check_file_exists(out_gff)
+        mccutils.log("relocate","RelocaTE run complete")
+        with open(status_log,"w") as l:
+            l.write("COMPLETED\n")
             
-    mccutils.log("relocate","RelocaTE run complete")
+    except Exception as e:
+        track = traceback.format_exc()
+        print(track, file=sys.stderr)
+        with open(log,"a") as l:
+            print(track, file=l)
+        mccutils.log("relocate","RelocaTE run failed")
+        with open(status_log,"w") as l:
+            l.write("FAILED\n")
 
-
-
+        mccutils.run_command(["touch", snakemake.output[0]])
 
 def make_annotation_file(te_gff, out_dir):
     annotation_file = out_dir+"/annotation.tsv"

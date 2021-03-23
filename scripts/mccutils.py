@@ -143,7 +143,7 @@ def is_empty_file(infile):
     else:
         return False
 
-def run_command_stdout(cmd_list, out_file, log=None, fatal=True):
+def run_command_stdout(cmd_list, out_file, log=None, fatal=False):
     msg = ""
     if log is None:
         try:
@@ -190,7 +190,7 @@ def run_command_stdout(cmd_list, out_file, log=None, fatal=True):
     return True
 
 
-def run_command(cmd_list, log=None, fatal=True):
+def run_command(cmd_list, log=None, fatal=False):
     msg = ""
     if log is None:
         try:
@@ -319,6 +319,15 @@ def check_file_exists(infile):
     else:
         raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), infile)
 
+def check_status_file(infile):
+    succeeded = True
+    if os.path.exists(infile):
+        with open(infile,"r") as inf:
+            for line in inf:
+                if "FAILED" in line:
+                    succeeded = False
+    
+    return succeeded
 
 def replace_special_chars(string, encode="_"):
     for char in INVALID_SYMBOLS:

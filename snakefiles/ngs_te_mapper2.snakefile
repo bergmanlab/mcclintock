@@ -1,25 +1,42 @@
-rule ngs_te_mapper2_run:
+rule ngs_te_mapper2_pre:
     input:
-        config = config['args']['mcc_path']+"/config/ngs_te_mapper2/ngs_te_mapper2_run.py",
-        consensus_fasta = config['mcc']['consensus'],
-        reference_fasta = config['mcc']['reference'],
-        fastq1 = config['mcc']['fq1'],
-        fastq2 = config['mcc']['fq2']
-
-    params:
-        raw_fq2 = config['in']['fq2'],
-        out_dir = config['args']['out']+"/results/ngs_te_mapper2/unfiltered/",
-        script_dir = config['args']['mcc_path']+"/install/tools/ngs_te_mapper2/sourceCode/",
-        log = config['args']['log_dir']+"ngs_te_mapper2.log",
-        sample_name = config['args']['sample_name']
+        locations = config['mcc']['locations'],
+        taxonomy = config['mcc']['taxonomy']
     
     threads: config['args']['max_threads_per_rule']
 
     conda: config['envs']['ngs_te_mapper2']
 
     output:
-        config['args']['out']+"results/ngs_te_mapper2/unfiltered/"+config['args']['sample_name']+".nonref.bed",
-        config['args']['out']+"results/ngs_te_mapper2/unfiltered/"+config['args']['sample_name']+".ref.bed"
+        config['mcc']['ngs_te_mapper2_ref_TEs']
+    
+    script:
+        config['args']['mcc_path']+"/scripts/ngs_te_mapper2/ngs_te_mapper2_pre.py"
+
+rule ngs_te_mapper2_run:
+    input:
+        consensus_fasta = config['mcc']['consensus'],
+        reference_fasta = config['mcc']['reference'],
+        fastq1 = config['mcc']['fq1'],
+        fastq2 = config['mcc']['fq2'],
+        locations = config['mcc']['ngs_te_mapper2_ref_TEs']
+
+    params:
+        raw_fq2 = config['in']['fq2'],
+        out_dir = config['outdir']['ngs_te_mapper2']+"unfiltered/",
+        script_dir = config['args']['mcc_path']+"/install/tools/ngs_te_mapper2/sourceCode/",
+        log = config['args']['log_dir']+"ngs_te_mapper2.log",
+        sample_name = config['args']['sample_name'],
+        config = config['config']['ngs_te_mapper2']['files'][0],
+        status_log = config['status']['ngs_te_mapper2']
+    
+    threads: config['args']['max_threads_per_rule']
+
+    conda: config['envs']['ngs_te_mapper2']
+
+    output:
+        config['outdir']['ngs_te_mapper2']+"unfiltered/"+config['args']['sample_name']+".nonref.bed",
+        config['outdir']['ngs_te_mapper2']+"unfiltered/"+config['args']['sample_name']+".ref.bed"
     
     script:
         config['args']['mcc_path']+"/scripts/ngs_te_mapper2/ngs_te_mapper2_run.py"
@@ -27,16 +44,17 @@ rule ngs_te_mapper2_run:
 
 rule ngs_te_mapper2_post:
     input:
-        config = config['args']['mcc_path']+"/config/ngs_te_mapper2/ngs_te_mapper2_post.py",
-        ref_bed = config['args']['out']+"results/ngs_te_mapper2/unfiltered/"+config['args']['sample_name']+".ref.bed",
-        nonref_bed = config['args']['out']+"results/ngs_te_mapper2/unfiltered/"+config['args']['sample_name']+".nonref.bed",
+        ref_bed = config['outdir']['ngs_te_mapper2']+"unfiltered/"+config['args']['sample_name']+".ref.bed",
+        nonref_bed = config['outdir']['ngs_te_mapper2']+"unfiltered/"+config['args']['sample_name']+".nonref.bed",
         reference_fasta = config['mcc']['reference']
 
     params:
-        out_dir = config['args']['out']+"/results/ngs_te_mapper2/",
+        out_dir = config['outdir']['ngs_te_mapper2'],
         log = config['args']['log_dir']+"ngs_te_mapper2.log",
         sample_name = config['args']['sample_name'],
-        chromosomes = config['args']['chromosomes']
+        chromosomes = config['args']['chromosomes'],
+        config = config['config']['ngs_te_mapper2']['files'][1],
+        status_log = config['status']['ngs_te_mapper2']
     
     threads: 1
 

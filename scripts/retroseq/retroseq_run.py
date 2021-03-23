@@ -1,9 +1,15 @@
 import os
 import sys
 import subprocess
+import traceback
+import importlib.util as il
+spec = il.spec_from_file_location("config", snakemake.params.config)
+config = il.module_from_spec(spec)
+sys.modules[spec.name] = config
+spec.loader.exec_module(config)
 sys.path.append(snakemake.config['args']['mcc_path'])
 import scripts.mccutils as mccutils
-import config.retroseq.retroseq_run as config
+
 import scripts.fix_fasta as fix_fasta
 from Bio import SeqIO
 
@@ -15,31 +21,48 @@ def main():
     ref_te_bed = snakemake.input.ref_te_bed
     taxonomy = snakemake.input.taxonomy
     log = snakemake.params.log
+    status_log = snakemake.params.status_log
 
-    with open(log,"a") as l:
-        l.write("consensus fasta: "+consensus_fasta+"\n")
-        l.write("BAM: "+bam+"\n")
-        l.write("reference fasta: "+ref_fasta+"\n")
-        l.write("taxonomy TSV: "+ taxonomy+"\n")
+    try:
+        with open(log,"a") as l:
+            l.write("consensus fasta: "+consensus_fasta+"\n")
+            l.write("BAM: "+bam+"\n")
+            l.write("reference fasta: "+ref_fasta+"\n")
+            l.write("taxonomy TSV: "+ taxonomy+"\n")
+            
+
+        script_dir = snakemake.params.script_dir
+        out_dir = snakemake.params.out_dir
+        ref_name = snakemake.params.ref_name
+        sample_name = snakemake.params.sample_name
+
+        # ensures intermediate files from previous runs are removed
+        for f in os.listdir(out_dir):
+            mccutils.remove(out_dir+"/"+f)
+
+        mccutils.log("retroseq","running RetroSeq", log=log)    
+
+        elements = split_consensus_fasta(consensus_fasta, ref_name, out_dir)
+
+        bed_location_file = make_consensus_beds(elements, ref_name, ref_te_bed, taxonomy, out_dir)
+
+        run_retroseq(bam, bed_location_file, ref_fasta, script_dir, sample_name, out_dir, config.PARAMETERS, log=log)
+
+        with open(status_log,"w") as l:
+            l.write("COMPLETED\n")
+
+        mccutils.log("retroseq","RetroSeq complete")
+    
+    except Exception as e:
+        track = traceback.format_exc()
+        print(track, file=sys.stderr)
+        with open(log,"a") as l:
+            print(track, file=l)
+        mccutils.log("retroseq","RetroSeq run failed")
+        with open(status_log,"w") as l:
+            l.write("FAILED\n")
         
-
-    script_dir = snakemake.params.script_dir
-    out_dir = snakemake.params.out_dir
-    ref_name = snakemake.params.ref_name
-    sample_name = snakemake.params.sample_name
-
-    # ensures intermediate files from previous runs are removed
-    for f in os.listdir(out_dir):
-        mccutils.remove(out_dir+"/"+f)
-
-    mccutils.log("retroseq","running RetroSeq", log=log)    
-
-    elements = split_consensus_fasta(consensus_fasta, ref_name, out_dir)
-
-    bed_location_file = make_consensus_beds(elements, ref_name, ref_te_bed, taxonomy, out_dir)
-
-    run_retroseq(bam, bed_location_file, ref_fasta, script_dir, sample_name, out_dir, config.PARAMETERS, log=log)
-    mccutils.log("retroseq","RetroSeq complete")
+        mccutils.run_command(["touch", snakemake.output[0]])
 
 
 

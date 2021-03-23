@@ -1,9 +1,15 @@
 import os
 import sys
 import subprocess
+import importlib.util as il
+import traceback
+spec = il.spec_from_file_location("config", snakemake.params.config)
+config = il.module_from_spec(spec)
+sys.modules[spec.name] = config
+spec.loader.exec_module(config)
 sys.path.append(snakemake.config['args']['mcc_path'])
 import scripts.mccutils as mccutils
-import config.popoolationte2.popoolationte2_run as config
+
 
 def main():
     mccutils.log("popoolationte2","running PopoolationTE2")
@@ -14,16 +20,40 @@ def main():
     out_dir = snakemake.params.out_dir
     sample_name = snakemake.params.sample_name
     log = snakemake.params.log
+    status_log = snakemake.params.status_log
 
-    mccutils.mkdir(out_dir+"/tmp")
-    taxonomy = format_taxonomy(taxonomy, out_dir)
-    ppileup = popoolationte2_ppileup(jar, config.ppileup, bam, taxonomy, out_dir, log=log)
-    ppileup = popoolationte2_subsample(jar, config.subsampleppileup, ppileup, out_dir, log=log)
-    signatures = popoolationte2_signatures(jar, config.identifySignatures, ppileup, out_dir, log=log)
-    signatures = popoolationte2_strand(jar, config.updateStrand, signatures, bam, taxonomy, out_dir, log=log)
-    signatures = popoolationte2_frequency(jar, ppileup, signatures, out_dir, log=log)
-    te_insertions = popoolationte2_pairup(jar, config.pairupSignatures, signatures, ref_fasta, taxonomy, out_dir, log=log)
-    mccutils.remove(out_dir+"/tmp")
+    prev_step_succeeded = mccutils.check_status_file(status_log)
+
+    if prev_step_succeeded:
+        try:
+            mccutils.mkdir(out_dir+"/tmp")
+            taxonomy = format_taxonomy(taxonomy, out_dir)
+            ppileup = popoolationte2_ppileup(jar, config.ppileup, bam, taxonomy, out_dir, log=log)
+            ppileup = popoolationte2_subsample(jar, config.subsampleppileup, ppileup, out_dir, log=log)
+            signatures = popoolationte2_signatures(jar, config.identifySignatures, ppileup, out_dir, log=log)
+            signatures = popoolationte2_strand(jar, config.updateStrand, signatures, bam, taxonomy, out_dir, log=log)
+            signatures = popoolationte2_frequency(jar, ppileup, signatures, out_dir, log=log)
+            te_insertions = popoolationte2_pairup(jar, config.pairupSignatures, signatures, ref_fasta, taxonomy, out_dir, log=log)
+            mccutils.remove(out_dir+"/tmp")
+            mccutils.check_file_exists(snakemake.output[0])
+
+            with open(status_log,"w") as l:
+                l.write("COMPLETED\n")
+            mccutils.log("popoolationte2","popoolationte2 run complete")
+        
+        except Exception as e:
+            track = traceback.format_exc()
+            print(track, file=sys.stderr)
+            with open(log,"a") as l:
+                print(track, file=l)
+            mccutils.log("popoolationte2","popoolationte2 run failed")
+            with open(status_log,"w") as l:
+                l.write("FAILED\n")
+            
+            mccutils.run_command(["touch", snakemake.output[0]])
+    
+    else:
+        mccutils.run_command(["touch", snakemake.output[0]])
 
 def format_taxonomy(taxon, out):
     out_taxon = out+"/input.taxonomy.txt"

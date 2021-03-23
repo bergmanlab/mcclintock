@@ -6,14 +6,15 @@ import sys
 import json
 import random
 import gzip
+import hashlib
 from datetime import datetime
 import traceback
 
 try:
     sys.path.append(os.path.dirname(os.path.abspath(__file__)))
     import scripts.mccutils as mccutils
-    import config._internal.config as config
-    import config.install.install as config_install
+    import internal.sysconfig as sysconfig
+    import internal.install as config_install
     from Bio import SeqIO
 except ImportError as e:
     print(e)
@@ -26,17 +27,21 @@ except ImportError as e:
 def main():
     full_command = " ".join(["python3"] + sys.argv)
     current_directory = os.getcwd()
-    args = parse_args()
+
+    expected_configs = sysconfig.CONFIGS
+    args = parse_args(expected_configs)
+    sys.path = [args.config] + sys.path
+
     mccutils.mkdir(args.out+"/logs")
     mccutils.mkdir(args.out+"/tmp")
-    check_installed_modules(args.methods, config.NO_INSTALL_METHODS, config_install.MD5, os.path.dirname(os.path.abspath(__file__))+"/install/")
+    check_installed_modules(args.methods, sysconfig.NO_INSTALL_METHODS, config_install.MD5, os.path.dirname(os.path.abspath(__file__))+"/install/")
     check_input_files(args.reference, args.consensus, args.first, fq2=args.second, locations=args.locations, taxonomy=args.taxonomy, coverage_fasta=args.coverage_fasta, augment_fasta=args.augment, annotations_only=args.make_annotations)
     ref_name = mccutils.get_base_name(args.reference)
-    run_id = make_run_config(args, args.sample_name, ref_name, full_command, current_directory, debug=args.debug)
-    run_workflow(args, args.sample_name, ref_name, run_id, debug=args.debug, annotations_only=args.make_annotations)
+    run_id, out_files = make_run_config(args, args.sample_name, ref_name, full_command, current_directory, debug=args.debug)
+    run_workflow(args, args.sample_name, ref_name, run_id, out_files, debug=args.debug, annotations_only=args.make_annotations)
     mccutils.remove(args.out+"/tmp")
 
-def parse_args():
+def parse_args(expected_configs):
     parser = argparse.ArgumentParser(prog='McClintock', description="Meta-pipeline to identify transposable element insertions using next generation sequencing data")
 
     ## required ##
@@ -64,8 +69,19 @@ def parse_args():
     parser.add_argument("--slow", action="store_true", help="This option runs without attempting to optimize thread usage to run rules concurrently. Each multithread rule will use the max processors designated by -p/--proc", required=False)
     parser.add_argument("--make_annotations", action="store_true", help="This option will only run the pipeline up to the creation of the repeat annotations", required=False)
     parser.add_argument("-k","--keep_intermediate", type=str, help="This option determines which intermediate files are preserved after McClintock completes [default: general][options: minimal, general, methods, <list,of,methods>, all]", required=False)
+    parser.add_argument("--config", type=str, help="This option determines which config files to use for your mcclintock run [default: config in McClintock Repository]", required=False)
 
     args = parser.parse_args()
+
+    if args.config is None:
+        args.config = os.path.dirname(os.path.abspath(__file__)) + "/config/"
+    else:
+        args.config = os.path.abspath(args.config)+"/"
+
+    for key in expected_configs.keys():
+        for config_file in expected_configs[key]:
+            if not os.path.exists(args.config+"/"+config_file):
+                sys.exit("Error: can't find config file: "+args.config+"/"+config_file+"\n Check that --config is set correctly...exiting...\n")
 
     if args.debug is None:
         args.debug = False
@@ -73,9 +89,9 @@ def parse_args():
     #check -m
     # If only one fastq has been supplied assume this is single ended data and launch only ngs_te_mapper and RelocaTE
     if args.second is None and not args.install:
-        valid_methods = config.SINGLE_END_METHODS #from config.py
+        valid_methods = sysconfig.SINGLE_END_METHODS #from config.py
     else:
-        valid_methods = config.ALL_METHODS #from config.py
+        valid_methods = sysconfig.ALL_METHODS #from config.py
     
     # used to preserve trimgalore and mapped reads output if they are explicitly called by the user
     trimgalore_called = False
@@ -443,6 +459,25 @@ def check_installed_modules(methods, no_install_methods, method_md5s, install_di
                 sys.exit(1)
 
 
+# stores config file info and hashes so that future runs can determine if config files have changed
+def setup_config_info(config_dir, method_to_config, config_rules):
+    out_dict = {}
+    out_dict["path"] = config_dir
+    for method in method_to_config.keys():
+        out_dict[method] = {}
+        out_dict[method]["files"] = []
+        out_dict[method]["MD5s"] = []
+        out_dict[method]['rules'] = config_rules[method]
+        for f in method_to_config[method]:
+            config_file = config_dir+f
+            with open(config_file,"rb") as cf:
+                data = cf.read()
+                md5 = hashlib.md5(data).hexdigest()
+
+            out_dict[method]["files"].append(config_file)
+            out_dict[method]["MD5s"].append(md5)
+    
+    return out_dict
 
 def make_run_config(args, sample_name, ref_name, full_command, current_directory, debug=False):
     run_id = random.randint(1000000,9999999)
@@ -478,14 +513,16 @@ def make_run_config(args, sample_name, ref_name, full_command, current_directory
 
     mccutils.log("SETUP","McClintock Version: "+git_commit)
 
+    method_paths = sysconfig.OUT_DIRS
+    for method in method_paths.keys():
+        method_paths[method] = method_paths[method].replace(sysconfig.RESULTS_DIR, results_dir)
+        method_paths[method] = method_paths[method].replace(sysconfig.SAM_DIR, sample_dir)
+
     out_files_to_make = []
-    out_files = config.OUT_PATHS
+    out_files = sysconfig.OUT_PATHS
     for key in out_files.keys():
-        out_files[key] = out_files[key].replace(config.INPUT_DIR, input_dir)
-        out_files[key] = out_files[key].replace(config.REF_DIR, reference_dir)
-        out_files[key] = out_files[key].replace(config.SAM_DIR, sample_dir)
-        out_files[key] = out_files[key].replace(config.RESULTS_DIR, results_dir)
-        out_files[key] = out_files[key].replace(config.SAMPLE_NAME, sample_name)   
+        out_files[key] = out_files[key].replace(sysconfig.METHOD_DIR, method_paths[key])
+        out_files[key] = out_files[key].replace(sysconfig.SAMPLE_NAME, sample_name)   
     
     for method in args.methods:
         out_files_to_make.append(out_files[method])
@@ -494,6 +531,11 @@ def make_run_config(args, sample_name, ref_name, full_command, current_directory
     now_str = now.strftime("%Y%m%d.%H%M%S")
     log_dir = args.out+"/logs/"+now_str+"."+str(run_id)+"/"
     mccutils.mkdir(log_dir)
+    mccutils.mkdir(log_dir+"/status/")
+
+    status_files = sysconfig.STATUS_FILES
+    for key in status_files.keys():
+        status_files[key] = status_files[key].replace(sysconfig.LOG_DIR, log_dir)
 
 
     chromosomes = []
@@ -514,16 +556,19 @@ def make_run_config(args, sample_name, ref_name, full_command, current_directory
         'sample_name': sample_name,
         'ref_name': ref_name,
         'run_id' : str(run_id),
+        'run_config': run_config,
         'methods' : ",".join(args.methods),
         'out_files': ",".join(out_files_to_make),
         'save_comments' : str(args.comments),
-        'max_threads_per_rule' : max(1, calculate_max_threads(args.proc, args.methods, config.MULTI_THREAD_METHODS, slow=args.slow)),
+        'max_threads_per_rule' : max(1, calculate_max_threads(args.proc, args.methods, sysconfig.MULTI_THREAD_METHODS, slow=args.slow)),
         'full_command' : full_command,
         'call_directory': current_directory,
         'time': now.strftime("%Y-%m-%d %H:%M:%S"),
         "chromosomes" : ",".join(chromosomes),
         "debug": str(debug)
     }
+
+    data["config"] = setup_config_info(args.config, sysconfig.CONFIGS, sysconfig.CONFIG_RULES)
 
     # input paths for files
     data["in"] = {
@@ -538,28 +583,26 @@ def make_run_config(args, sample_name, ref_name, full_command, current_directory
 
     # where mcc copies will be stored
     
-    data["mcc"] = config.INTERMEDIATE_PATHS
+    data["mcc"] = sysconfig.INTERMEDIATE_PATHS
     for key in data["mcc"].keys():
-        data["mcc"][key] = data["mcc"][key].replace(config.INPUT_DIR, input_dir)
-        data["mcc"][key] = data["mcc"][key].replace(config.REF_DIR, reference_dir)
-        data["mcc"][key] = data["mcc"][key].replace(config.SAM_DIR, sample_dir)
-        data["mcc"][key] = data["mcc"][key].replace(config.REF_NAME, ref_name)
-        data["mcc"][key] = data["mcc"][key].replace(config.SAMPLE_NAME, sample_name)
+        data["mcc"][key] = data["mcc"][key].replace(sysconfig.INPUT_DIR, input_dir)
+        data["mcc"][key] = data["mcc"][key].replace(sysconfig.REF_DIR, reference_dir)
+        data["mcc"][key] = data["mcc"][key].replace(sysconfig.SAM_DIR, sample_dir)
+        data["mcc"][key] = data["mcc"][key].replace(sysconfig.REF_NAME, ref_name)
+        data["mcc"][key] = data["mcc"][key].replace(sysconfig.SAMPLE_NAME, sample_name)
     
-    data["out"] = config.OUT_PATHS
-    for key in data["mcc"].keys():
-        data["mcc"][key] = data["mcc"][key].replace(config.INPUT_DIR, input_dir)
-        data["mcc"][key] = data["mcc"][key].replace(config.REF_DIR, reference_dir)
-        data["mcc"][key] = data["mcc"][key].replace(config.SAM_DIR, sample_dir)
-        data["mcc"][key] = data["mcc"][key].replace(config.REF_NAME, ref_name)
-        data["mcc"][key] = data["mcc"][key].replace(config.SAMPLE_NAME, sample_name)
+    data['status'] = status_files
+
+    data["out"] = out_files
+
+    data['outdir'] = method_paths
     
-    data["essential"] = config.ESSENTIAL_PATHS
+    data["essential"] = sysconfig.ESSENTIAL_PATHS
     for key in data["essential"].keys():
         for x,val in enumerate(data["essential"][key]):
-            data["essential"][key][x] = val.replace(config.RESULTS_DIR, results_dir)
-            data["essential"][key][x] = data["essential"][key][x].replace(config.SAMPLE_NAME, sample_name)
-            data["essential"][key][x] = data["essential"][key][x].replace(config.REF_NAME, ref_name)
+            data["essential"][key][x] = val.replace(sysconfig.METHOD_DIR, method_paths[key])
+            data["essential"][key][x] = data["essential"][key][x].replace(sysconfig.SAMPLE_NAME, sample_name)
+            data["essential"][key][x] = data["essential"][key][x].replace(sysconfig.REF_NAME, ref_name)
 
     env_path = os.path.dirname(os.path.abspath(__file__))+"/install/envs/"
     data["envs"] = config_install.ENV
@@ -570,24 +613,16 @@ def make_run_config(args, sample_name, ref_name, full_command, current_directory
     with open(run_config,"w") as conf:
         json.dump(data, conf, indent=4)
     
-    return run_id
+    return run_id, out_files
 
 
-def run_workflow(args, sample_name, ref_name, run_id, debug=False, annotations_only=False):
+def run_workflow(args, sample_name, ref_name, run_id, out_files, debug=False, annotations_only=False):
     log = args.out+"/mcclintock."+str(run_id)+".log"
 
     input_dir = args.out
     reference_dir = args.out+"/"+ref_name+"/"
     sample_dir = args.out+"/"+sample_name+"/"
-    results_dir = args.out+"/"+sample_name+"/results/"
-
-    out_files = config.OUT_PATHS
-    for key in out_files.keys():
-        out_files[key] = out_files[key].replace(config.INPUT_DIR, input_dir)
-        out_files[key] = out_files[key].replace(config.REF_DIR, reference_dir)
-        out_files[key] = out_files[key].replace(config.SAM_DIR, sample_dir)
-        out_files[key] = out_files[key].replace(config.RESULTS_DIR, results_dir)
-        out_files[key] = out_files[key].replace(config.SAMPLE_NAME, sample_name)    
+    results_dir = args.out+"/"+sample_name+"/results/" 
 
     path=os.path.dirname(os.path.abspath(__file__))
     mccutils.mkdir(args.out+"/snakemake")
@@ -596,19 +631,17 @@ def run_workflow(args, sample_name, ref_name, run_id, debug=False, annotations_o
     mccutils.run_command(["cp", path+"/Snakefile", snakemake_path])
     os.chdir(snakemake_path)
     command = ["snakemake","--use-conda", "--conda-prefix", path+"/install/envs/conda"]
-    if not debug:
-        command.append("--quiet")
-    else:
-        # command.append("--reason")
-        command.append("--verbose")
-    
-    command += ["--configfile", args.out+"/snakemake/config/config_"+str(run_id)+".json"]
+
+    config_json = args.out+"/snakemake/config/config_"+str(run_id)+".json"
+    command += ["--configfile", config_json]
     command += ["--cores", str(args.proc)]
 
     if not args.resume:
         if os.path.exists(reference_dir) and len(os.listdir(reference_dir)) > 0:
+            mccutils.remove(config_json)
             sys.exit("ERROR: output directory:"+reference_dir+" is not empty. If wanting to resume a previous run, use --resume, otherwise please delete this directory or change your -o/--output\n")
         if os.path.exists(sample_dir) and len(os.listdir(sample_dir)) > 0:
+            mccutils.remove(config_json)
             sys.exit("ERROR: output directory:"+sample_dir+" is not empty. If wanting to resume a previous run, use --resume, otherwise please delete this directory or change your -o/--output or --sample_name\n")
 
     
@@ -616,16 +649,32 @@ def run_workflow(args, sample_name, ref_name, run_id, debug=False, annotations_o
     else:
         mccutils.log("setup","Checking config files to ensure previous intermediate files are compatible with this run")
         config_found = False
+        previous_config_md5s = {}
         for prev_config in os.listdir(input_dir+"/snakemake/config/"):
             if prev_config != "config_"+str(run_id)+".json":
                 config_found = True
                 config_compatible = config_compatibility(input_dir+"/snakemake/config/config_"+str(run_id)+".json", args.out+"/snakemake/config/"+prev_config)
+                previous_config_md5s = get_recent_config_md5s(args.out+"/snakemake/config/"+prev_config, previous_config_md5s)
                 if not config_compatible:
+                    mccutils.remove(config_json)
                     sys.exit(1)
         
         if not config_found:
+            mccutils.remove(config_json)
             sys.exit("ERROR: Unable to resume run. No config files from previous runs found in:"+input_dir+"/snakemake/config/ Remove --resume for clean run\n")
-    
+
+        rules_to_rerun = get_rules_to_rerun(input_dir+"/snakemake/config/config_"+str(run_id)+".json", previous_config_md5s)
+        command.append("-R")
+        if len(rules_to_rerun) > 0:
+            for rule in rules_to_rerun:
+                command.append(rule)
+
+    if not debug:
+        command.append("--quiet")
+    else:
+        command.append("--reason")
+        command.append("--verbose")
+
     if not annotations_only:
         for method in args.methods:
             command.append(out_files[method])
@@ -640,6 +689,8 @@ def run_workflow(args, sample_name, ref_name, run_id, debug=False, annotations_o
         sys.stdout.flush()
         mccutils.mkdir(sample_dir)
         mccutils.mkdir(sample_dir+"tmp")
+        if debug:
+            print(" ".join(command))
         mccutils.run_command(command)
     except Exception as e:
         track = traceback.format_exc()
@@ -647,7 +698,37 @@ def run_workflow(args, sample_name, ref_name, run_id, debug=False, annotations_o
         print("McClintock Pipeline Failed... please open an issue at https://github.com/bergmanlab/mcclintock/issues if you are having trouble using McClintock", file=sys.stderr)
         sys.exit(1)
     mccutils.remove(sample_dir+"tmp")
-    remove_intermediate_files(args.keep_intermediate, args.out+"/snakemake/config/config_"+str(run_id)+".json", args.methods, ref_name, sample_name, args.out)
+    remove_intermediate_files(args.keep_intermediate, config_json, args.methods, ref_name, sample_name, args.out)
+
+def get_recent_config_md5s(prev_config, config_md5s):
+    with open(prev_config) as f:
+        prev_config_data = json.load(f)
+    
+    run_methods = prev_config_data['args']['methods']
+    start_time = datetime.strptime(prev_config_data['args']['time'], '%Y-%m-%d %H:%M:%S')
+
+    for config in prev_config_data['config'].keys():
+        if config in run_methods:
+            if config not in config_md5s.keys():
+                config_md5s[config] = [prev_config_data['config'][config]['MD5s'], start_time]
+            else:
+                if config_md5s[config][1] < start_time:
+                    config_md5s[config] = [prev_config_data['config'][config]['MD5s'], start_time]
+    
+    return config_md5s
+
+def get_rules_to_rerun(run_config, prev_md5s):
+    rules_to_rerun = []
+    with open(run_config) as f:
+        run_config_data = json.load(f)
+    
+    for config in run_config_data['config'].keys():
+        if config in prev_md5s.keys():
+            for x,md5 in enumerate(prev_md5s[config][0]):
+                if md5 != run_config_data['config'][config]["MD5s"][x]:
+                    rules_to_rerun.append(run_config_data['config'][config]['rules'][x])
+
+    return rules_to_rerun
 
 def config_compatibility(run_config, prev_config):
     with open(run_config) as f:
