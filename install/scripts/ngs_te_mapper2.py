@@ -6,7 +6,7 @@ import scripts.mccutils as mccutils
 def main():
     install_path = snakemake.config['paths']['install']+"/tools/"
 
-    raw_name="ngs_te_mapper2-7e830c95b2d95a9ee75411f63b389a033a4b0fa8"
+    raw_name="ngs_te_mapper2-1.01"
     method_name = "ngs_te_mapper2"
 
     mccutils.remove(snakemake.params.zipfile)
