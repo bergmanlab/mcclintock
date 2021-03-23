@@ -64,11 +64,11 @@ def main():
 
         actual_insertions = get_actual_insertions(args.out+"/data/forward/")
         predicted_insertions, methods = get_predicted_insertions(args.out+"/results/forward/")
-        make_out_table(actual_insertions, predicted_insertions, methods, args.out+"/summary/forward_summary.csv")
+        make_out_table(actual_insertions, predicted_insertions, methods, args.out+"/summary/forward_summary.csv", args.out+"/summary/forward_metrics.csv")
 
         actual_insertions = get_actual_insertions(args.out+"/data/reverse/")
         predicted_insertions, methods = get_predicted_insertions(args.out+"/results/reverse/")
-        make_out_table(actual_insertions, predicted_insertions, methods, args.out+"/summary/reverse_summary.csv")
+        make_out_table(actual_insertions, predicted_insertions, methods, args.out+"/summary/reverse_summary.csv", args.out+"/summary/reverse_metrics.csv")
 
 
 def parse_args():
@@ -534,8 +534,9 @@ def get_predicted_insertions(out):
     
     return predicted_insertions, methods
 
-def make_out_table(actual_insertions, predicted_insertions, methods, out_csv):
+def make_out_table(actual_insertions, predicted_insertions, methods, out_csv, out_metrics):
     columns = [["Method","Reference","Nonreference", "Exact", "Within-5", "Within-100", "Within-300", "Within-500"]]
+    rows = [["Method", "TP", "FP","FN", "Precision", "Recall"]]
     for method in methods:
         ref_counts = []
         nonref_counts = []
@@ -544,6 +545,10 @@ def make_out_table(actual_insertions, predicted_insertions, methods, out_csv):
         within_100s = []
         within_300s = []
         within_500s = []
+        all_pred = 0
+        true_pos = 0
+        false_pos = 0
+        false_neg = 0
         for rep in predicted_insertions[method].keys():
             ref_count = 0
             nonref_count = 0
@@ -589,6 +594,13 @@ def make_out_table(actual_insertions, predicted_insertions, methods, out_csv):
             within_300s.append(within_300)
             within_500s.append(within_500)
         
+            all_pred += nonref_count
+            if within_5 > 0:
+                true_pos += 1
+            else:
+                false_neg += 1
+            
+
 
         ref_mean = statistics.mean(ref_counts)
         nonref_mean = statistics.mean(nonref_counts)
@@ -598,6 +610,17 @@ def make_out_table(actual_insertions, predicted_insertions, methods, out_csv):
         mean_300 = statistics.mean(within_300s)
         mean_500 = statistics.mean(within_500s)
         columns.append([method, str(ref_mean), str(nonref_mean), str(exact_mean), str(mean_5), str(mean_100), str(mean_300), str(mean_500)])
+
+        false_pos = all_pred-true_pos
+        if (true_pos+false_pos) > 0:
+            precision = true_pos/(true_pos+false_pos)
+        else:
+            precision = "NaN"
+        if (true_pos+false_neg) > 0:
+            recall = true_pos/(true_pos+false_neg)
+        else:
+            recall = "NaN"
+        rows.append([method, str(true_pos), str(false_pos), str(false_neg), str(precision), str(recall)])
     
     with open(out_csv, "w") as csv:
         for y in range(0, len(columns[0])):
@@ -606,6 +629,10 @@ def make_out_table(actual_insertions, predicted_insertions, methods, out_csv):
                 line.append(columns[x][y])
             line = ",".join(line)
             csv.write(line+"\n")
+    
+    with open(out_metrics, "w") as csv:
+        for row in rows:
+            csv.write(",".join(row) + "\n")
 
 
 if __name__ == "__main__":                
