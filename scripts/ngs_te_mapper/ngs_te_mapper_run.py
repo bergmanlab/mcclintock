@@ -75,6 +75,7 @@ def main():
         with open(status_log,"w") as l:
             l.write("FAILED\n")
         
+        mccutils.mkdir(out_dir+"/bed_tsd/")
         mccutils.run_command(["touch", out_bed])
 
 

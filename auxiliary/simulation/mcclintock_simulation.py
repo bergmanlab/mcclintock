@@ -28,9 +28,17 @@ def main():
             consensus_seqs = get_seqs(args.consensus)
             reference_seqs = get_seqs(args.reference)
             
-            modified_reference = args.out+"/data/forward/"+str(args.runid)+str(x)+".modref.fasta"
+            if args.strand == "plus":
+                reverse = False
+                modified_reference = args.out+"/data/forward/"+str(args.runid)+str(x)+".modref.fasta"
+                summary_report = args.out+"/results/forward/run"+args.runid+"_"+str(x)+"/results/summary/summary_report.txt"
+            else:
+                reverse = True
+                modified_reference = args.out+"/data/reverse/"+str(args.runid)+str(x)+".modref.fasta"
+                summary_report = args.out+"/results/reverse/run"+args.runid+"_"+str(x)+"/results/summary/summary_report.txt"
+
             if not os.path.exists(modified_reference):
-                modified_reference = add_synthetic_insertion(reference_seqs, consensus_seqs, args.config, x, args.out, run_id=args.runid, seed=args.seed)
+                modified_reference = add_synthetic_insertion(reference_seqs, consensus_seqs, args.config, x, args.out, run_id=args.runid, seed=args.seed, reverse=reverse)
             
             fastq1 = modified_reference.replace(".fasta", "_1.fastq")
             fastq2 = modified_reference.replace(".fasta", "_2.fastq")
@@ -38,25 +46,8 @@ def main():
                 num_pairs = calculate_num_pairs(modified_reference, args.coverage, args.length, single=args.single)
                 fastq1, fastq2 = create_synthetic_reads(modified_reference, num_pairs, args.length, args.insert, args.error, x, args.out, run_id=args.runid, seed=args.seed)
 
-            if not os.path.exists(args.out+"/results/forward/run"+args.runid+"_"+str(x)+"/results/summary/summary_report.txt"):
-                run_mcclintock(fastq1, fastq2, args.reference, args.consensus, args.locations, args.taxonomy, x, args.proc, args.out, args.config, args.keep_intermediate, run_id=args.runid, single=args.single)
-
-            # reverse
-            consensus_seqs = get_seqs(args.consensus)
-            reference_seqs = get_seqs(args.reference)
-
-            modified_reference = args.out+"/data/reverse/"+str(args.runid)+str(x)+".modref.fasta"
-            if not os.path.exists(modified_reference):
-                modified_reference = add_synthetic_insertion(reference_seqs, consensus_seqs, args.config, x, args.out, run_id=args.runid, seed=args.seed, reverse=True)
-            
-            fastq1 = modified_reference.replace(".fasta", "_1.fastq")
-            fastq2 = modified_reference.replace(".fasta", "_2.fastq")
-            if not os.path.exists(fastq1) or not os.path.exists(fastq2):
-                num_pairs = calculate_num_pairs(modified_reference, args.coverage, args.length, single=args.single)
-                fastq1, fastq2 = create_synthetic_reads(modified_reference, num_pairs, args.length, args.insert, args.error, x, args.out, run_id=args.runid, seed=args.seed)
-
-            if not os.path.exists(args.out+"/results/reverse/run"+args.runid+"_"+str(x)+"/results/summary/summary_report.txt"):
-                run_mcclintock(fastq1, fastq2, args.reference, args.consensus, args.locations, args.taxonomy, x, args.proc, args.out, args.config, args.keep_intermediate, run_id=args.runid, single=args.single, reverse=True)
+            if not os.path.exists(summary_report):
+                run_mcclintock(fastq1, fastq2, args.reference, args.consensus, args.locations, args.taxonomy, x, args.proc, args.out, args.config, args.keep_intermediate, run_id=args.runid, single=args.single, reverse=reverse)
 
     elif args.mode == "analysis":
         if not os.path.exists(args.out+"/summary/"):
@@ -89,6 +80,7 @@ def parse_args():
     parser.add_argument("-i","--insert", type=int, help="The median insert size of the simulated reads [default = 300]", required=False)
     parser.add_argument("-e","--error", type=float, help="The base error rate for the simulated reads [default = 0.01]", required=False)
     parser.add_argument("-k","--keep_intermediate", type=str, help="This option determines which intermediate files are preserved after McClintock completes [default: general][options: minimal, general, methods, <list,of,methods>, all]", required=False)
+    parser.add_argument("--strand", type=str, help="The strand to insert the TE into [options=plus,minus][default = plus]", required=False)
     parser.add_argument("--start", type=int, help="The number of replicates to run. [default = 1]", required=False)
     parser.add_argument("--end", type=int, help="The number of replicates to run. [default = 300]", required=False)
     parser.add_argument("--seed", type=str, help="a seed to the random number generator so runs can be replicated", required=False)
@@ -164,6 +156,11 @@ def parse_args():
         
         if args.keep_intermediate is None:
             args.keep_intermediate = "general"
+
+        if args.strand is None:
+            args.strand = "plus"
+        elif args.strand != "plus" and args.strand != "minus":
+            sys.exit("ERROR: --strand must be plus or minus \n")
 
     return args
 
