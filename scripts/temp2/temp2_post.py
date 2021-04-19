@@ -28,7 +28,7 @@ def main():
     if prev_steps_succeeded:
         insertions = read_insertions(insert_bed, sample_name, chromosomes, config)
         absence_bed = make_absence_bed(absence_summary, sample_name, out_dir)
-        non_absent_ref_insertions = get_non_absent_ref_tes(te_gff, absence_bed, sample_name, out_dir, log)
+        non_absent_ref_insertions = get_non_absent_ref_tes(te_gff, absence_bed, sample_name, chromosomes, out_dir, log)
         insertions += non_absent_ref_insertions
 
         if len(insertions) > 0:
@@ -105,7 +105,7 @@ def make_absence_bed(summary_file, sample, out):
     
     return out_bed
 
-def get_non_absent_ref_tes(te_gff, absence_bed, sample, out, log):
+def get_non_absent_ref_tes(te_gff, absence_bed, sample, chromosomes, out, log):
     insertions = []
     tmp_gff = out+"/tmp.ref_nonabs.gff"
     command = ["bedtools", "subtract", "-A", "-a", te_gff, "-b", absence_bed]
@@ -124,7 +124,8 @@ def get_non_absent_ref_tes(te_gff, absence_bed, sample, out, log):
                 insert.strand = split_line[6]
                 insert.type = "reference"
                 
-                insertions.append(insert)
+                if insert.chromosome in chromosomes:
+                    insertions.append(insert)
     
     mccutils.remove(tmp_gff)
 
