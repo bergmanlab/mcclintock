@@ -1,6 +1,6 @@
-ALL_METHODS = ["ngs_te_mapper", "ngs_te_mapper2", "relocate", "relocate2", "temp", "temp2", "retroseq", "popoolationte", "popoolationte2", "te-locate", "teflon", "coverage", "trimgalore","map_reads"] #"ngs_te_mapper2",
-SINGLE_END_METHODS = ["ngs_te_mapper", "ngs_te_mapper2", "relocate", "coverage", "trimgalore", "map_reads"] #"ngs_te_mapper2",
-MULTI_THREAD_METHODS = ["coverage", "temp", "temp2", "relocate2", "ngs_te_mapper", "ngs_te_mapper2", "popoolationte", "teflon", "trimgalore"] #"ngs_te_mapper2",
+ALL_METHODS = ["ngs_te_mapper", "ngs_te_mapper2", "relocate", "relocate2", "temp", "temp2", "retroseq", "popoolationte", "popoolationte2", "te-locate", "teflon", "coverage", "trimgalore","map_reads", "tebreak"]
+SINGLE_END_METHODS = ["ngs_te_mapper", "ngs_te_mapper2", "relocate", "coverage", "trimgalore", "map_reads", "tebreak"]
+MULTI_THREAD_METHODS = ["coverage", "temp", "temp2", "relocate2", "ngs_te_mapper", "ngs_te_mapper2", "popoolationte", "teflon", "trimgalore", "tebreak"]
 NO_INSTALL_METHODS = ["trimgalore", "map_reads", "coverage", "relocate2"] # no source code to install for these methods, just envs
 
 INPUT_DIR = "{{indir}}"
@@ -23,7 +23,8 @@ CONFIGS = {
         "teflon": ["teflon/teflon_run.py", "teflon/teflon_post.py"],
         "te-locate": ["telocate/telocate_run.py", "telocate/telocate_post.py"],
         "temp": ["temp/temp_run.py", "temp/temp_post.py"],
-        "temp2": ["temp2/temp2_run.py", "temp2/temp2_post.py"]
+        "temp2": ["temp2/temp2_run.py", "temp2/temp2_post.py"],
+        "tebreak": ["tebreak/tebreak_run.py", "tebreak/tebreak_post.py"]
 }
 
 # rules to re-run if specific config files change
@@ -40,7 +41,8 @@ CONFIG_RULES = {
         "teflon": ["teflon_run", "teflon_post"],
         "te-locate": ["telocate_run", "telocate_post"],
         "temp": ["run_temp", "process_temp"],
-        "temp2": ["run_temp2", "process_temp2"]
+        "temp2": ["run_temp2", "process_temp2"],
+        "tebreak": ["tebreak_run", "tebreak_post"]
 }
 
 LOG_DIR = "{{logdir}}"
@@ -57,6 +59,7 @@ STATUS_FILES ={
         "te-locate": LOG_DIR+"status/telocate.status",
         "temp": LOG_DIR+"status/temp.status",
         "temp2": LOG_DIR+"status/temp2.status",
+        "tebreak": LOG_DIR+"status/tebreak.status"
 }
 
 
@@ -86,6 +89,7 @@ INTERMEDIATE_PATHS = {
         'fq2' : SAM_DIR+"intermediate/fastq/"+SAMPLE_NAME+"_2.fq",
         'sam' : SAM_DIR+"intermediate/mapped_reads/"+SAMPLE_NAME+".sam",
         'bam' : SAM_DIR+"intermediate/mapped_reads/"+SAMPLE_NAME+".sorted.bam",
+        'duplicate_maked_bam' : SAM_DIR+"intermediate/mapped_reads/"+SAMPLE_NAME+".sorted.duplicate_marked.bam",
         'telocate_sam' : SAM_DIR+"intermediate/mapped_reads/"+SAMPLE_NAME+".telocate.sam",
         'flagstat' : SAM_DIR+"intermediate/mapped_reads/"+SAMPLE_NAME+".bam.flagstat",
         'median_insert_size' : SAM_DIR+"intermediate/mapped_reads/median_insert.size",
@@ -112,7 +116,8 @@ OUT_DIRS = {
         'relocate2': RESULTS_DIR+"relocate2/",
         'tepid': RESULTS_DIR+"tepid/",
         'teflon': RESULTS_DIR+"teflon/",
-        'jitterbug': RESULTS_DIR+"jitterbug/"
+        'jitterbug': RESULTS_DIR+"jitterbug/",
+        'tebreak': RESULTS_DIR+"tebreak/"
 }
 
 METHOD_DIR = "{{method}}"
@@ -133,7 +138,8 @@ OUT_PATHS = {
         'relocate2': METHOD_DIR+SAMPLE_NAME+"_relocate2_nonredundant.bed",
         'tepid': METHOD_DIR+SAMPLE_NAME+"_tepid_nonredundant.bed",
         'teflon': METHOD_DIR+SAMPLE_NAME+"_teflon_nonredundant.bed",
-        'jitterbug': METHOD_DIR+SAMPLE_NAME+"_jitterbug_nonredundant.bed"
+        'jitterbug': METHOD_DIR+SAMPLE_NAME+"_jitterbug_nonredundant.bed",
+        'tebreak': METHOD_DIR+SAMPLE_NAME+"_tebreak_nonredundant.bed"
 }
 
 ESSENTIAL_PATHS = {
@@ -257,5 +263,11 @@ ESSENTIAL_PATHS = {
                 METHOD_DIR+SAMPLE_NAME+"_jitterbug_redundant.bed",
                 METHOD_DIR+SAMPLE_NAME+"_jitterbug_malformed.bed",
                 METHOD_DIR+"unfiltered/"+SAMPLE_NAME+".TE_insertions_paired_clusters.filtered.gff3"
+        ],
+
+        'tebreak': [
+                METHOD_DIR+SAMPLE_NAME+"_tebreak_nonredundant.bed",
+                METHOD_DIR+SAMPLE_NAME+"_tebreak_redundant.bed",
+                METHOD_DIR+"unfiltered/"+SAMPLE_NAME+".tebreak.table.txt"
         ]
 }

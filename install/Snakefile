@@ -221,6 +221,21 @@ rule jitterbug:
     script:
         config['paths']['install']+"scripts/jitterbug.py"
 
+rule tebreak:
+    params:
+        url = config['URLs']['tebreak'],
+        md5 = config['MD5s']['tebreak'],
+        zipfile = config['paths']['install']+"tools/tebreak/tebreak.zip",
+        log = config['paths']['log_dir']+"install.log",
+
+    output:
+        config['output']['tebreak']
+    
+    conda: config['ENVs']['tebreak']
+
+    script:
+        config['paths']['install']+"scripts/tebreak.py"
+
 rule install_all:
     input:
         config['output']['te-locate'],

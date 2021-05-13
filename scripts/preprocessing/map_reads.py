@@ -20,7 +20,7 @@ def main():
         if eval(snakemake.config['args']['save_comments']):
             command.append("-C")
         
-        command += ["-t", str(snakemake.threads), "-R", "@RG\\tID:"+snakemake.params.sample+"\\tSM:"+snakemake.params.sample, snakemake.input.ref, snakemake.input.fq1]
+        command += ["-t", str(snakemake.threads), "-M", "-R", "@RG\\tID:"+snakemake.params.sample+"\\tSM:"+snakemake.params.sample, snakemake.input.ref, snakemake.input.fq1]
 
         if snakemake.config['in']['fq2'] != "None":
             command.append(snakemake.input.fq2)

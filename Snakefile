@@ -11,6 +11,7 @@ include: config['args']['mcc_path']+"/snakefiles/retroseq.snakefile"
 include: config['args']['mcc_path']+"/snakefiles/tepid.snakefile"
 include: config['args']['mcc_path']+"/snakefiles/teflon.snakefile"
 include: config['args']['mcc_path']+"/snakefiles/jitterbug.snakefile"
+include: config['args']['mcc_path']+"/snakefiles/tebreak.snakefile"
 
 rule setup_reads:
     input:
@@ -223,7 +224,9 @@ rule sam_to_bam:
     output:
         bam = config['mcc']['bam'],
         flagstat = config['mcc']['flagstat'],
-        tmp_bam = temp(config['mcc']['mcc_files']+config['args']['run_id']+".tmp.bam")
+        metrics = config['mcc']['mcc_files']+config['args']['run_id']+".metrics",
+        tmp_bam = temp(config['mcc']['mcc_files']+config['args']['run_id']+".tmp.bam"),
+        tmp2_bam = temp(config['mcc']['mcc_files']+config['args']['run_id']+".tmp2.bam")
     
     script:
         config['args']['mcc_path']+"/scripts/preprocessing/sam_to_bam.py"

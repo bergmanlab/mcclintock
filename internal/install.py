@@ -11,7 +11,8 @@ URL = {
     "relocate2" : "https://github.com/stajichlab/RelocaTE2/archive/v2.0.1.zip",
     "tepid" : "https://github.com/ListerLab/TEPID/archive/ad46d65b5c41bf8a9171215d49b3ffaecdceaab0.zip",
     "teflon": "https://github.com/jradrion/TEFLoN/archive/3e2d67886b70644fd1f7d79263b3c8dbed639e46.zip",
-    "jitterbug": "https://github.com/elzbth/jitterbug/archive/b6b3f9c7ee4af042d4410137269f174a1399b752.zip"
+    "jitterbug": "https://github.com/elzbth/jitterbug/archive/b6b3f9c7ee4af042d4410137269f174a1399b752.zip",
+    "tebreak": "https://github.com/adamewing/tebreak/archive/3f00badda822dcb6390bbea5a6a1e233cff3e99c.zip"
 }
 
 MD5 = {
@@ -27,7 +28,8 @@ MD5 = {
     "relocate2" : "63eb7dbc09ffeb4063aef4857d198b06",
     "tepid" : "51f61acf138b07842074f054aba780d5",
     "teflon" : "a29d2e7411fd06778186ba322f51fdc9",
-    "jitterbug": "05f165fb6a79a7a611d09981a355d27e"
+    "jitterbug": "05f165fb6a79a7a611d09981a355d27e",
+    "tebreak": "ac475d3cc4b0435f0a333c8d86f57d3f"
 }
 
 
@@ -50,7 +52,8 @@ ENV = {
     "setup_reads": ENV_PATH+"mcc_trimgalore.yml",
     "processing":  ENV_PATH+"mcc_map_reads.yml",
     "map_reads": ENV_PATH+"mcc_map_reads.yml",
-    "trimgalore": ENV_PATH+"mcc_trimgalore.yml"
+    "trimgalore": ENV_PATH+"mcc_trimgalore.yml",
+    "tebreak": ENV_PATH+"mcc_tebreak.yml"
 }
 
 
@@ -71,5 +74,7 @@ OUTPUT = {
     "teflon" : INSTALL_PATH+"tools/teflon/teflon.v0.4.py",
     "jitterbug": INSTALL_PATH+"tools/jitterbug/jitterbug.py",
     "map_reads" : INSTALL_PATH+"tools/map_reads/map_reads.log",
-    "trimgalore" : INSTALL_PATH+"tools/trimgalore/trimgalore.log"
+    "trimgalore" : INSTALL_PATH+"tools/trimgalore/trimgalore.log",
+    "tebreak" : INSTALL_PATH+"tools/tebreak/tebreak/tebreak"
+
 }
