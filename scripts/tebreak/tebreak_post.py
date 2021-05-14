@@ -80,7 +80,19 @@ def read_insertions(tebreak_out, sample_name, chromosomes, config):
 
                 insert.name = insert.family+"|non-reference|NA|"+sample_name+"|tebreak|sr|"
 
-                if insert.chromosome in chromosomes:
+                if (
+                    insert.chromosome in chromosomes and
+                    insert.support_info.support["five_p_elt_match"].value >= config.MIN_5P_ELT_MATCH and 
+                    insert.support_info.support["three_p_elt_match"].value >= config.MIN_3P_ELT_MATCH and
+                    insert.support_info.support["five_p_genome_match"].value >= config.MIN_5P_GENOME_MATCH and
+                    insert.support_info.support["three_p_genome_match"].value >= config.MIN_3P_GENOME_MATCH and
+                    insert.support_info.support["split_reads_5prime"].value >= config.MIN_SPLIT_READS_5P and
+                    insert.support_info.support["split_reads_3prime"].value >= config.MIN_SPLIT_READS_3P and
+                    insert.support_info.support["remapped_discordant"].value >= config.MIN_REMAPPED_DISCORDANT and
+                    insert.support_info.support["remap_disc_fraction"].value >= config.MIN_REMAP_DISC_FRACTION and
+                    insert.support_info.support["remapped_splitreads"].value >= config.MIN_REMAPPED_SPLITREADS and
+                    insert.support_info.support["remap_split_fraction"].value >= config.MIN_REMAP_SPLIT_FRACTION
+                ):
                     insertions.append(insert)
     
     return insertions

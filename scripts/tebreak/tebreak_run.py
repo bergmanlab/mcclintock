@@ -29,7 +29,7 @@ def main():
 
     try:
         ref_tes = get_ref_tes(repeatmasker_out, out_dir)
-        run_tebreak(bam, consensus, reference, ref_tes, script_dir, out_dir, threads, log=log)
+        run_tebreak(bam, consensus, reference, ref_tes, script_dir, out_dir, threads, config.PARAMS, log=log)
         mccutils.check_file_exists(snakemake.output[0])
     except Exception as e:
         track = traceback.format_exc()
@@ -73,11 +73,18 @@ def get_ref_tes(rm_out, out):
     
     return ref_te_file
             
-def run_tebreak(bam, consensus, reference, ref_tes, script_dir, out_dir, threads, log=None):
+def run_tebreak(bam, consensus, reference, ref_tes, script_dir, out_dir, threads, params, log=None):
     os.chdir(out_dir)
     command = ["samtools", "index", bam]
     mccutils.run_command(command, log=log)
-    command = [script_dir+"/tebreak", "-b", bam, '-r', reference, '-p', str(threads), '-d', ref_tes, '-i', consensus, "--min_chr_len", "0"]
+    command = [script_dir+"/tebreak", "-b", bam, '-r', reference, '-p', str(threads), '-d', ref_tes, '-i', consensus]
+    for key in params.keys():
+        if params[key] != False:
+            if params[key] == True:
+                command.append(key)
+            else:
+                command.append(key)
+                command.append(params[key])
     mccutils.run_command(command, log=log)
 
 if __name__ == "__main__":                
