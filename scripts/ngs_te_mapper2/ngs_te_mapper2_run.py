@@ -49,19 +49,18 @@ def main():
             'python', script_dir+"/ngs_te_mapper2.py", 
                 "-r", reference_fasta, 
                 "-l", consensus_fasta, 
-                "-w", str(config.WINDOW),
-                "--min_mapq", str(config.MIN_MAPQ),
-                "--tsd_max", str(config.MAX_TSD),
-                "--gap_max", str(config.MAX_GAP),
                 "-t", str(threads), 
                 "-o", out_dir, 
                 "--keep_files",
                 "-p", sample_name,
                 "-a", locations,
-                "--min_af", str(config.MIN_ALLELE_FREQUENCY),
-                "-f"
         ]
 
+        for key in config.PARAMS.keys():
+            command.append(key)
+            command.append(str(config.PARAMS[key]))
+
+        command.append("-f")
         if is_paired:
             command.append(fastq1+","+fastq2)
         else:

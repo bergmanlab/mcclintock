@@ -57,11 +57,11 @@ def main():
     genome_depth = get_genome_depth(nonte_bed, bam, run_id, coverage_out, log)
 
     edge_trim = 0
-    if config.OMIT_EDGES:
-        if config.OMIT_EDGES_READ_LENGTH:
+    if config.PARAMS["omit_edges"]:
+        if config.PARAMS["omit_edges_read_length"]:
             edge_trim = mccutils.estimate_read_length(snakemake.input.fq1)
         else:
-            edge_trim = config.OMIT_EDGES_LENGTH
+            edge_trim = config.PARAMS["omit_edges_length"]
             
     te_names, all_coverage_files, uniq_coverage_files, avg_norm_te_depths = make_depth_table(te_seqs, bam, genome_depth, run_id, coverage_out, snakemake.output[0], log, trim_edges=edge_trim)
     make_plots(te_names, all_coverage_files, uniq_coverage_files, avg_norm_te_depths, genome_depth, snakemake.params.sample, coverage_out, trim_edges=edge_trim)

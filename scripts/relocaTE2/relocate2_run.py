@@ -74,13 +74,12 @@ def main():
                             "--run",
                             "-v", "4",
                             "-c", str(threads),
-                            "--aligner", config.RELOCATE2["aligner"],
-                            "--len_cut_match", str(config.RELOCATE2["len_cut_match"]),
-                            "--len_cut_trim", str(config.RELOCATE2["len_cut_trim"]),
-                            "--mismatch", str(config.RELOCATE2["mismatch"]),
-                            "--mismatch_junction", str(config.RELOCATE2["mismatch_junction"]),
                             "-d", fq_dir
         ]
+
+        for param in config.PARAMS.keys():
+            command.append(param)
+            command.append(str(config.PARAMS[param]))
 
         if is_paired:
             command += ["-1", "_1", "-2", "_2"]

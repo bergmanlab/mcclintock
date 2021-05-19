@@ -25,7 +25,7 @@ def main():
     prev_steps_succeeded = mccutils.check_status_file(status_log)
 
     if prev_steps_succeeded:
-        insertions = read_insertions(telocate_raw, sample_name, chromosomes, rp_threshold=config.READ_PAIR_SUPPORT_THRESHOLD)
+        insertions = read_insertions(telocate_raw, sample_name, chromosomes, rp_threshold=config.PARAMS['read_pair_support_threshold'])
         insertions = filter_by_reference(insertions, te_gff)
         if len(insertions) > 0:
             insertions = output.make_redundant_bed(insertions, sample_name, out_dir, method="telocate")

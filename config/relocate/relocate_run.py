@@ -53,10 +53,10 @@ See documentation for more information. http://srobb1.github.com/RelocaTE/
 '''
 
 
-RELOCATE = {
-    'l' : 10,
-    'm' : 0.0,
-    'bm' : 10,
-    'bt' : 7,
-    'f' : 100
+PARAMS = {
+    '-l' : 10,
+    '-m' : 0.0,
+    '-bm' : 10,
+    '-bt' : 7,
+    '-f' : 100
 }

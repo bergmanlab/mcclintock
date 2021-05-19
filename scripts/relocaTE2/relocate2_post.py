@@ -33,19 +33,19 @@ def main():
                                         sample_name,
                                         chromosomes, 
                                         insert_type="ref", 
-                                        l_support_threshold=config.REF_LEFT_SUPPORT_THRESHOLD, 
-                                        r_support_threshold=config.REF_RIGHT_SUPPORT_THRESHOLD,
-                                        l_junction_threshold=config.REF_LEFT_JUNCTION_THRESHOLD,
-                                        r_junction_threshold=config.REF_RIGHT_JUNCTION_THRESHOLD)
+                                        l_support_threshold=config.PARAMS["ref_left_support_threshold"], 
+                                        r_support_threshold=config.PARAMS["ref_right_support_threshold"],
+                                        l_junction_threshold=config.PARAMS["ref_left_junction_threshold"],
+                                        r_junction_threshold=config.PARAMS["ref_right_junction_threshold"])
 
         nonref_insertions = get_insertions(nonref_gff, 
                                         sample_name,
                                         chromosomes, 
                                         insert_type="nonref", 
-                                        l_support_threshold=config.NONREF_LEFT_SUPPORT_THRESHOLD, 
-                                        r_support_threshold=config.NONREF_RIGHT_SUPPORT_THRESHOLD,
-                                        l_junction_threshold=config.NONREF_LEFT_JUNCTION_THRESHOLD,
-                                        r_junction_threshold=config.NONREF_RIGHT_JUNCTION_THRESHOLD)
+                                        l_support_threshold=config.PARAMS["nonref_left_support_threshold"], 
+                                        r_support_threshold=config.PARAMS["nonref_right_support_threshold"],
+                                        l_junction_threshold=config.PARAMS["nonref_left_junction_threshold"],
+                                        r_junction_threshold=config.PARAMS["nonref_right_junction_threshold"])
 
         ref_insertions = fix_ref_te_names(ref_insertions, rm_out, sample_name)
 

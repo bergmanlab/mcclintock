@@ -1,9 +1,11 @@
-REF_LEFT_SUPPORT_THRESHOLD = 0
-REF_RIGHT_SUPPORT_THRESHOLD = 0
-REF_LEFT_JUNCTION_THRESHOLD = 0
-REF_RIGHT_JUNCTION_THRESHOLD = 0
+PARAMS = {
+    "ref_left_support_threshold" : 0,
+    "ref_right_support_threshold" : 0,
+    "ref_left_junction_threshold" : 0,
+    "ref_right_junction_threshold" : 0,
 
-NONREF_LEFT_SUPPORT_THRESHOLD = 0
-NONREF_RIGHT_SUPPORT_THRESHOLD = 0
-NONREF_LEFT_JUNCTION_THRESHOLD = 0
-NONREF_RIGHT_JUNCTION_THRESHOLD = 0
+    "nonref_left_support_threshold" : 0,
+    "nonref_right_support_threshold" : 0,
+    "nonref_left_junction_threshold" : 0,
+    "nonref_right_junction_threshold" : 0
+}

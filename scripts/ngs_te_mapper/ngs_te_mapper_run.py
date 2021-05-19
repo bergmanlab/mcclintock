@@ -43,7 +43,7 @@ def main():
         if snakemake.params.raw_fq2 == "None":
             is_paired = False
         
-        command = ['Rscript', "--vanilla", script_dir+"/ngs_te_mapper.R", "genome="+reference_fasta, "teFile="+consensus_fasta, "tsd="+str(config.MAX_TSD), "thread="+str(threads), "output="+out_dir, "sourceCodeFolder="+script_dir]
+        command = ['Rscript', "--vanilla", script_dir+"/ngs_te_mapper.R", "genome="+reference_fasta, "teFile="+consensus_fasta, "tsd="+str(config.PARAMS["tsd="]), "thread="+str(threads), "output="+out_dir, "sourceCodeFolder="+script_dir]
 
         if is_paired:
             command.append("sample="+fastq1+";"+fastq2)

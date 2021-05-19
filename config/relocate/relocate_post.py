@@ -1,5 +1,6 @@
-REF_LEFT_THRESHOLD = 0
-REF_RIGHT_THRESHOLD = 0
-
-NONREF_LEFT_THRESHOLD = 0
-NONREF_RIGHT_THRESHOLD = 0
+PARAMS = {
+    "ref_left_threshold" : 0,
+    "ref_right_threshold" : 0,
+    "nonref_left_threshold" : 0,
+    "nonref_right_threshold" : 0
+}

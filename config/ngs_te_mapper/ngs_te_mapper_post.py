@@ -1,2 +1,3 @@
-
-MIN_READ_SUPPORT = 0
+PARAMS = {
+    "min_read_support" : 0
+}

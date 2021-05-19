@@ -34,11 +34,11 @@ def main():
             chromosomes, 
             sample_name, 
             ref_tes,
-            min_presence=config.PARAMETERS['min_presence_reads'], 
-            max_absence=config.PARAMETERS['max_absence_reads'],
-            min_presence_fraction=config.PARAMETERS['min_presence_fraction'],
-            require_tsd=config.PARAMETERS['require_tsd'],
-            require_both_breakpoints=config.PARAMETERS['require_both_breakpoints']
+            min_presence=config.PARAMS['min_presence_reads'], 
+            max_absence=config.PARAMS['max_absence_reads'],
+            min_presence_fraction=config.PARAMS['min_presence_fraction'],
+            require_tsd=config.PARAMS['require_tsd'],
+            require_both_breakpoints=config.PARAMS['require_both_breakpoints']
         )
         if len(insertions) >= 1:
             insertions = output.make_redundant_bed(insertions, sample_name, out_dir, method="teflon")

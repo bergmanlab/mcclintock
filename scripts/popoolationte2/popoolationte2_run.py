@@ -28,12 +28,12 @@ def main():
         try:
             mccutils.mkdir(out_dir+"/tmp")
             taxonomy = format_taxonomy(taxonomy, out_dir)
-            ppileup = popoolationte2_ppileup(jar, config.ppileup, bam, taxonomy, out_dir, log=log)
-            ppileup = popoolationte2_subsample(jar, config.subsampleppileup, ppileup, out_dir, log=log)
-            signatures = popoolationte2_signatures(jar, config.identifySignatures, ppileup, out_dir, log=log)
-            signatures = popoolationte2_strand(jar, config.updateStrand, signatures, bam, taxonomy, out_dir, log=log)
+            ppileup = popoolationte2_ppileup(jar, config.PARAMS["ppileup"], bam, taxonomy, out_dir, log=log)
+            ppileup = popoolationte2_subsample(jar, config.PARAMS["subsampleppileup"], ppileup, out_dir, log=log)
+            signatures = popoolationte2_signatures(jar, config.PARAMS["identifySignatures"], ppileup, out_dir, log=log)
+            signatures = popoolationte2_strand(jar, config.PARAMS["updateStrand"], signatures, bam, taxonomy, out_dir, log=log)
             signatures = popoolationte2_frequency(jar, ppileup, signatures, out_dir, log=log)
-            te_insertions = popoolationte2_pairup(jar, config.pairupSignatures, signatures, ref_fasta, taxonomy, out_dir, log=log)
+            te_insertions = popoolationte2_pairup(jar, config.PARAMS["pairupSignatures"], signatures, ref_fasta, taxonomy, out_dir, log=log)
             mccutils.remove(out_dir+"/tmp")
             mccutils.check_file_exists(snakemake.output[0])
 
@@ -70,14 +70,18 @@ def format_taxonomy(taxon, out):
 def popoolationte2_ppileup(jar, params, bam, taxon, out, log=None):
     mccutils.log("popoolationte2","making physical pileup file", log=log)
     ppileup = out+"/output.ppileup.gz"
-    mccutils.run_command(['java', "-Djava.io.tmpdir="+out+"/tmp", "-jar", jar, "ppileup", 
+    command = ['java', "-Djava.io.tmpdir="+out+"/tmp", "-jar", jar, "ppileup", 
                                                "--bam", bam, 
                                                "--hier", taxon, 
-                                               "--map-qual", str(params["map-qual"]),
-                                               "--sr-mindist", str(params['sr-mindist']),
-                                               "--id-up-quant", str(params['id-up-quant']),
-                                               "--output", ppileup], log=log)
+                                               "--output", ppileup]
+   
     
+    for param in params.keys():
+        command.append(param)
+        command.append(str(params[param]))
+
+    mccutils.run_command(command, log=log)
+
     return ppileup
 
 def popoolationte2_subsample(jar, params, ppileup, out, log=None):
@@ -85,11 +89,15 @@ def popoolationte2_subsample(jar, params, ppileup, out, log=None):
     if params["run"]:
         mccutils.log("popoolationte2","subsampling physical pileup file to uniform coverage", log=log)
         command = ["java", "-Djava.io.tmpdir="+out+"/tmp", "-jar", jar, "subsampleppileup",
-                                       "--ppileup", ppileup, 
-                                       "--target-coverage", str(params['target-coverage']),
+                                       "--ppileup", ppileup,
                                        "--output", out_ppileup]
-        if params['with-replace']:
-            command.append("--with-replace")
+
+        for param in params.keys():
+            if param == True and param != "run":
+                command.append(param)
+            elif param != False:
+                command.append(param)
+                command.append(str(params[param]))
 
         mccutils.run_command(command, log=log)
     else:
@@ -101,29 +109,33 @@ def popoolationte2_subsample(jar, params, ppileup, out, log=None):
 def popoolationte2_signatures(jar, params, ppileup, out, log=None):
     mccutils.log("popoolationte2","identifying signatures of TE insertions", log=log)
     signatures = out+"/output.signatures"
-    mccutils.run_command(["java", "-Djava.io.tmpdir="+out+"/tmp", "-jar", jar, "identifySignatures",
+    command = ["java", "-Djava.io.tmpdir="+out+"/tmp", "-jar", jar, "identifySignatures",
                                                "--ppileup", ppileup,
                                                "--mode", "separate",
-                                               "--output", signatures,
-                                               "--signature-window", params['signature-window'],
-                                               "--min-valley", params['min-valley'],
-                                               "--chunk-distance", str(params['chunk-distance']),
-                                               "--min-count", str(params['min-count'])], log=log)
+                                               "--output", signatures]
+
+    for param in params.keys():
+        command.append(param)
+        command.append(str(params[param]))
+
+    mccutils.run_command(command, log=log)
     
     return signatures
 
 def popoolationte2_strand(jar, params, signatures, bam, taxon, out, log=None):
     mccutils.log("popoolationte2", "estimating strand of TEs", log=log)
     out_sig = out+"/output.stranded.signatures"
-    mccutils.run_command(["java", "-Djava.io.tmpdir="+out+"/tmp", "-jar", jar, "updateStrand",
+    command = ["java", "-Djava.io.tmpdir="+out+"/tmp", "-jar", jar, "updateStrand",
                                               "--signature", signatures,
                                               "--output", out_sig,
                                               "--bam", bam,
-                                              "--hier", taxon,
-                                              "--max-disagreement", str(params["max-disagreement"]),
-                                              "--sr-mindist", str(params['sr-mindist']),
-                                              "--map-qual", str(params['map-qual']),
-                                              "--id-up-quant", str(params['id-up-quant'])], log=log)
+                                              "--hier", taxon]
+
+    for param in params.keys():
+        command.append(param)
+        command.append(str(params[param]))
+
+    mccutils.run_command(command, log=log)
     
     return out_sig
 
@@ -140,15 +152,18 @@ def popoolationte2_frequency(jar, ppileup, signatures, out, log=None):
 def popoolationte2_pairup(jar, params, signatures, ref, taxon, out, log=None):
     mccutils.log("popoolationte2","generating raw TE insertion predictions", log=log)
     te_insertions = out+"/teinsertions.txt"
-    mccutils.run_command(["java", "-Djava.io.tmpdir="+out+"/tmp", "-jar", jar, "pairupSignatures",
+    command = ["java", "-Djava.io.tmpdir="+out+"/tmp", "-jar", jar, "pairupSignatures",
                                               "--signature", signatures,
                                               "--ref-genome", ref,
                                               "--hier", taxon,
                                               "--output-detail", "medium",
-                                              "--min-distance", str(params['min-distance']),
-                                              "--max-distance", str(params['max-distance']),
-                                              "--max-freq-diff", str(params['max-freq-diff']),
-                                              "--output", te_insertions], log=log)
+                                              "--output", te_insertions]
+
+    for param in params.keys():
+        command.append(param)
+        command.append(str(params[param]))
+
+    mccutils.run_command(command, log=log)
     
     return te_insertions
 

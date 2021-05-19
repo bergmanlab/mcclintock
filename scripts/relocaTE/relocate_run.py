@@ -73,13 +73,11 @@ def main():
                         "-d", fq_dir, 
                         "-g", reference_fasta, 
                         "-o", ".", 
-                        "-r", annotation,
-                        "-l", str(config.RELOCATE['l']),
-                        "-m", str(config.RELOCATE['m']),
-                        "-bm", str(config.RELOCATE['bm']),
-                        "-bt", str(config.RELOCATE['bt']),
-                        "-f", str(config.RELOCATE['f'])]
+                        "-r", annotation]
 
+        for param in config.PARAMS.keys():
+            command.append(param)
+            command.append(str(config.PARAMS[param]))
 
         if is_paired:
             command += ["-1", fq1_uniq_id, "-2", fq2_uniq_id]

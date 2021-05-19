@@ -1,3 +1,3 @@
-
-
-READ_PAIR_SUPPORT_THRESHOLD = 0
+PARAMS = {
+    "read_pair_support_threshold" : 0
+}

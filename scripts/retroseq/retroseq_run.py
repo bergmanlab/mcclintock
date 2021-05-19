@@ -46,7 +46,7 @@ def main():
 
         bed_location_file = make_consensus_beds(elements, ref_name, ref_te_bed, taxonomy, out_dir)
 
-        run_retroseq(bam, bed_location_file, ref_fasta, script_dir, sample_name, out_dir, config.PARAMETERS, log=log)
+        run_retroseq(bam, bed_location_file, ref_fasta, script_dir, sample_name, out_dir, config.PARAMS, log=log)
 
         with open(status_log,"w") as l:
             l.write("COMPLETED\n")
@@ -133,11 +133,31 @@ def make_consensus_beds(elements, ref_name, te_bed, taxon, out):
 
 def run_retroseq(bam, bed_locations, ref_fasta, script_dir, sample_name, out_dir, params, log=None):
     discovery_out = out_dir+"/"+sample_name+".discovery"
-    command = ["perl", script_dir+"/retroseq.pl", "-discover",  "-bam", bam, "-refTEs", bed_locations, "-output", discovery_out, "-depth", str(params["depth"]), "-reads", str(params['reads']), "-q", str(params['q'])]
+    command = ["perl", script_dir+"/retroseq.pl", 
+                    "-discover",  
+                    "-bam", bam, 
+                    "-refTEs", bed_locations, 
+                    "-output", discovery_out]
+    
+    for param in params.keys():
+        command.append(param)
+        command.append(str(params[param]))
     mccutils.run_command(command, log=log)
 
     call_out  = out_dir+"/"+sample_name+".call"
-    command = ["perl", script_dir+"/retroseq.pl", "-call", "-bam", bam, "-input", discovery_out, "-filter", bed_locations, "-ref", ref_fasta, "-output", call_out, "-orientate", "yes", "-depth", str(params["depth"]), "-reads", str(params['reads']), "-q", str(params['q'])]
+    command = ["perl", script_dir+"/retroseq.pl", 
+                    "-call", 
+                    "-bam", bam, 
+                    "-input", discovery_out, 
+                    "-filter", bed_locations, 
+                    "-ref", ref_fasta, 
+                    "-output", call_out, 
+                    "-orientate", "yes"]
+
+    for param in params.keys():
+        command.append(param)
+        command.append(str(params[param]))
+
     mccutils.run_command(command, log=log)
     
 

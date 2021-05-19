@@ -25,7 +25,7 @@ def main():
     
     succeeded = mccutils.check_status_file(status_log)
     if succeeded:
-        insertions = read_insertions(popoolationte_out, sample_name, chromosomes, require_both_end_support=config.REQUIRE_BOTH_END_SUPPORT, percent_read_support_threshold=config.PERCENT_READ_SUPPORT_THRESHOLD)
+        insertions = read_insertions(popoolationte_out, sample_name, chromosomes, require_both_end_support=config.PARAMS["require_both_end_support"], percent_read_support_threshold=config.PARAMS["percent_read_support_threshold"])
         if len(insertions) >= 1:
             insertions = output.make_redundant_bed(insertions, sample_name, out_dir, method="popoolationte")
             insertions = output.make_nonredundant_bed(insertions, sample_name, out_dir, method="popoolationte")
