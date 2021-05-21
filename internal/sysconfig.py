@@ -1,7 +1,7 @@
-ALL_METHODS = ["ngs_te_mapper", "ngs_te_mapper2", "relocate", "relocate2", "temp", "temp2", "retroseq", "popoolationte", "popoolationte2", "te-locate", "teflon", "coverage", "trimgalore","map_reads", "tebreak"]
-SINGLE_END_METHODS = ["ngs_te_mapper", "ngs_te_mapper2", "relocate", "coverage", "trimgalore", "map_reads", "tebreak"]
-MULTI_THREAD_METHODS = ["coverage", "temp", "temp2", "relocate2", "ngs_te_mapper", "ngs_te_mapper2", "popoolationte", "teflon", "trimgalore", "tebreak"]
-NO_INSTALL_METHODS = ["trimgalore", "map_reads", "coverage", "relocate2"] # no source code to install for these methods, just envs
+ALL_METHODS = ["ngs_te_mapper", "ngs_te_mapper2", "relocate", "relocate2", "temp", "temp2", "retroseq", "popoolationte", "popoolationte2", "te-locate", "teflon", "coverage", "trimgalore","map_reads", "tebreak", "jitterbug", "tepid"]
+SINGLE_END_METHODS = ["ngs_te_mapper", "ngs_te_mapper2", "relocate", "coverage", "trimgalore", "map_reads", "tebreak", "tepid"]
+MULTI_THREAD_METHODS = ["coverage", "temp", "temp2", "relocate2", "ngs_te_mapper", "ngs_te_mapper2", "popoolationte", "teflon", "trimgalore", "tebreak", "jitterbug", "tepid"]
+NO_INSTALL_METHODS = ["trimgalore", "map_reads", "coverage", "relocate2", "tepid"] # no source code to install for these methods, just envs
 
 INPUT_DIR = "{{indir}}"
 REF_DIR = "{{refdir}}"
@@ -24,6 +24,8 @@ CONFIGS = {
         "te-locate": ["telocate/telocate_run.py", "telocate/telocate_post.py"],
         "temp": ["temp/temp_run.py", "temp/temp_post.py"],
         "temp2": ["temp2/temp2_run.py", "temp2/temp2_post.py"],
+        "jitterbug": ["jitterbug/jitterbug_run.py", "jitterbug/jitterbug_post.py"],
+        "tepid": ["tepid/tepid_run.py", "tepid/tepid_post.py"],
         "tebreak": ["tebreak/tebreak_run.py", "tebreak/tebreak_post.py"]
 }
 
@@ -42,6 +44,8 @@ CONFIG_RULES = {
         "te-locate": ["telocate_run", "telocate_post"],
         "temp": ["run_temp", "process_temp"],
         "temp2": ["run_temp2", "process_temp2"],
+        "jitterbug": ["jitterbug_run", "jitterbug_post"],
+        "tepid": ["tepid_run", "tepid_post"],
         "tebreak": ["tebreak_run", "tebreak_post"]
 }
 
@@ -59,6 +63,8 @@ STATUS_FILES ={
         "te-locate": LOG_DIR+"status/telocate.status",
         "temp": LOG_DIR+"status/temp.status",
         "temp2": LOG_DIR+"status/temp2.status",
+        "jitterbug": LOG_DIR+"status/jitterbug.status",
+        "tepid": LOG_DIR+"status/tepid.status",
         "tebreak": LOG_DIR+"status/tebreak.status"
 }
 

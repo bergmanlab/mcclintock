@@ -209,20 +209,24 @@ class Tebreak:
 
         self.redundancy_filter = RedundancyFilter(["split_reads_5prime", "split_reads_3prime"], "sum")
 
-#################################################
-## TODO convert to proper format for VCF creation
+class Jitterbug:
+    def __init__(self):
+        self.support = {
+            "supporting_fwd_reads" : Info("SUPPORTING_FWD_READS", "Reads supporting the forward junction of the insertion", 0, "Integer"),
+            "supporting_rev_reads" : Info("SUPPORTING_REV_READS", "Reads supporting the reverse junction of the insertion", 0, "Integer"),
+            "softclipped_support" : Info("SOFTCLIPPED_SUPPORT", "Number of softclipped reads that support the breakpoint", 0, "Integer"),
+            "zygosity" : Info("ZYGOSITY", "The ratio of clipped and properly mapped reads at the insertion site", 0.0, "Float")
+        }
+
+        self.redundancy_filter = RedundancyFilter(["supporting_fwd_reads", "supporting_rev_reads"], "sum")
+
 class Tepid:
     def __init__(self):
         self.id = -1
-        self.support = 0
-
-class Jitterbug:
-    def __init__(self):
-        supporting_fwd_reads = 0
-        supporting_rev_reads = 0
-        split_read_support = 0
-        zygosity = 0.0
-################################################
+        self.support = {
+            "supporting_reads" : Info("SUPPORTING_READS", "Number of reads supporting the insertion", 0, "Integer")
+        }
+        self.redundancy_filter = RedundancyFilter(["supporting_reads"], "value")
 
 
 def make_redundant_bed(insertions, sample_name, out_dir, method="popoolationte"):

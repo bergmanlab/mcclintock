@@ -1,37 +1,52 @@
 import os
 import sys
 import subprocess
+import importlib.util as il
+spec = il.spec_from_file_location("config", snakemake.params.config)
+config = il.module_from_spec(spec)
+sys.modules[spec.name] = config
+spec.loader.exec_module(config)
 sys.path.append(snakemake.config['args']['mcc_path'])
 import scripts.mccutils as mccutils
-import config.jitterbug.jitterbug_post as config
+import scripts.output as output
 
 def main():
     mccutils.log("jitterbug","jitterbug postprocessing")
 
     jitterbug_out = snakemake.input.jitterbug_out
     te_taxonomy = snakemake.input.taxonomy
+    reference_fasta = snakemake.input.reference_fasta
 
     out_dir = snakemake.params.out_dir
     log = snakemake.params.log
     sample_name = snakemake.params.sample_name
     chromosomes = snakemake.params.chromosomes.split(",")
+    status_log = snakemake.params.status_log
 
     out = snakemake.output.out
 
-    insertions = read_insertions(
-                        jitterbug_out,
-                        te_taxonomy,
-                        chromosomes,
-                        sample_name,
-                        min_fwd_read_support=config.FILTER['MIN_FWD_READ_SUPPORT'],
-                        min_rev_read_support=config.FILTER['MIN_REV_READ_SUPPORT'],
-                        min_sr_support=config.FILTER['MIN_SPLIT_READ_SUPPORT'],
-                        min_zygosity=config.FILTER['MIN_ZYGOSITY']
-    )
+    prev_steps_succeeded = mccutils.check_status_file(status_log)
 
-    if len(insertions) >= 1:
-        insertions = mccutils.make_redundant_bed(insertions, sample_name, out_dir, method="jitterbug")
-        mccutils.make_nonredundant_bed(insertions, sample_name, out_dir, method="jitterbug")
+    if prev_steps_succeeded:
+        insertions = read_insertions(
+                            jitterbug_out,
+                            te_taxonomy,
+                            chromosomes,
+                            sample_name,
+                            min_fwd_read_support=config.FILTER['MIN_FWD_READ_SUPPORT'],
+                            min_rev_read_support=config.FILTER['MIN_REV_READ_SUPPORT'],
+                            min_sr_support=config.FILTER['MIN_SPLIT_READ_SUPPORT'],
+                            min_zygosity=config.FILTER['MIN_ZYGOSITY']
+        )
+
+        if len(insertions) >= 1:
+            insertions = output.make_redundant_bed(insertions, sample_name, out_dir, method="jitterbug")
+            insertions = output.make_nonredundant_bed(insertions, sample_name, out_dir, method="jitterbug")
+            output.write_vcf(insertions, reference_fasta, sample_name, "jitterbug", out_dir)
+        else:
+            mccutils.run_command(["touch", out_dir+"/"+sample_name+"_jitterbug_redundant.bed"])
+            mccutils.run_command(["touch", out_dir+"/"+sample_name+"_jitterbug_nonredundant.bed"])
+    
     else:
         mccutils.run_command(["touch", out_dir+"/"+sample_name+"_jitterbug_redundant.bed"])
         mccutils.run_command(["touch", out_dir+"/"+sample_name+"_jitterbug_nonredundant.bed"])
@@ -54,7 +69,8 @@ def read_insertions(jitterbug_gff, taxonomy, chroms, sample_name, min_fwd_read_s
             line = line.replace("\n","")
             split_line = line.split("\t")
             if len(split_line) == 9:
-                insert = mccutils.Insertion()
+                # insert = mccutils.Insertion()
+                insert = output.Insertion(output.Jitterbug())
 
                 insert.chromosome = split_line[0]
                 if insert.chromosome in chroms:
@@ -85,30 +101,31 @@ def read_insertions(jitterbug_gff, taxonomy, chroms, sample_name, min_fwd_read_s
                         if "predicted_superfam" in feat:
                             te  = feat.split("=")[1]
                             family = te_family[te]
+                            insert.family = family
                         
                         if "supporting_fwd_reads" in feat:
-                            insert.jitterbug.supporting_fwd_reads = int(feat.split("=")[1])
+                            insert.support_info.support['supporting_fwd_reads'].value = int(feat.split("=")[1])
                         
                         if "supporting_rev_reads" in feat:
-                            insert.jitterbug.supporting_rev_reads = int(feat.split("=")[1])
+                            insert.support_info.support['supporting_rev_reads'].value = int(feat.split("=")[1])
                         
                         if "softclipped_support" in feat:
-                            insert.jitterbug.split_read_support = int(feat.split("=")[1])
+                            insert.support_info.support['softclipped_support'].value = int(feat.split("=")[1])
                         
                         if "zygosity" in feat:
-                            insert.jitterbug.zygosity = float(feat.split("=")[1])
+                            insert.support_info.support['zygosity'].value = float(feat.split("=")[1])
                 
-                    insert.name = family+"|non-reference|"+sample_name+"|jitterbug|"
+                    insert.name = family+"|non-reference|"+str(insert.support_info.support['zygosity'].value)+"|"+sample_name+"|jitterbug|"
                     if sr:
                         insert.name += "sr|"
                     else:
                         insert.name = "rp|"
 
                     if (
-                        (insert.jitterbug.supporting_fwd_reads >= min_fwd_read_support) and 
-                        (insert.jitterbug.supporting_rev_reads >= min_rev_read_support) and
-                        (insert.jitterbug.split_read_support >= min_sr_support) and
-                        (insert.jitterbug.zygosity >= min_zygosity)
+                        (insert.support_info.support['supporting_fwd_reads'].value >= min_fwd_read_support) and 
+                        (insert.support_info.support['supporting_rev_reads'].value >= min_rev_read_support) and
+                        (insert.support_info.support['softclipped_support'].value >= min_sr_support) and
+                        (insert.support_info.support['zygosity'].value >= min_zygosity)
                     ):
                         insertions.append(insert)
     
