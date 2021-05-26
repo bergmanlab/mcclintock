@@ -709,3 +709,134 @@ postprocessing config
 
 read_pair_support_threshold
   * Minimum number of read pairs supporting a prediction
+
+****
+temp
+****
+
+run config
+==========
+:code:`/path/to/mcclintock/config/temp/temp_run.py` : `GitHub link <https://github.com/bergmanlab/mcclintock/blob/master/config/temp/temp_run.py>`_
+
+.. code:: python
+
+  PARAMS = {
+      '-x' : 30,
+      '-m' : 1
+  }
+
+-x
+  * The minimum score difference between the best hit and the second best hit for considering a read as uniquely mapped. For BWA mem.
+
+-m
+  * Number of mismatch allowed when mapping to TE concensus sequences.
+
+
+postprocessing config
+=====================
+:code:`/path/to/mcclintock/config/temp/temp_post.py` : `GitHub link <https://github.com/bergmanlab/mcclintock/blob/master/config/temp/temp_post.py>`_
+
+.. code:: python
+
+  PARAMS = {
+      "acceptable_insertion_support_classes" : ["1p1"],
+      "frequency_threshold" : 0.1
+  }
+
+acceptable_insertion_support_classes
+  * valid options: :code:`1p1`, :code:`2p`, :code:`singleton`
+  * The class of the insertions that are acceptable for final predictions. 
+  * :code:`1p1` means that the detected insertion is supported by reads at both sides. 
+  * :code:`2p` means the detected insertion is supported by more than 1 read at only 1 side. 
+  * :code:`singleton` means the detected insertion is supported by only 1 read at 1 side.
+
+frequency_threshold
+  * minimum frequency of the inserted transposon
+
+
+*****
+temp2
+*****
+
+run config
+==========
+:code:`/path/to/mcclintock/config/temp2/temp2_run.py` : `GitHub link <https://github.com/bergmanlab/mcclintock/blob/master/config/temp2/temp2_run.py>`_
+
+.. code:: python
+
+  PARAMS ={
+      "insertion" : {
+          "-M" : 2,
+          "-m" : 5,
+          "-U" : 0.8,
+          "-N" : 300,
+          "-T" : False,
+          "-L" : False,
+          "-S" : False
+      },
+
+      "absence" : {
+          "-x" : 0
+      }
+  }
+
+insertion
+  * :code:`-M` : Percentage of mismatch allowed when anchor to genome.
+  * :code:`-m` : Percentage of mismatch allowed when mapping to TEs.
+  * :code:`-U` : The ratio between the second best alignment and the best alignment to judge if a read is uniquely mapped.
+  * :code:`-N` : window size (+-n) for filtering insertions overlapping reference insertions.
+  * :code:`-T` : Set this parameter to :code:`True` to allow truncated de novo insertions.
+  * :code:`-L` : Set this parameter to :code:`True` to use a looser criteria to filter reference annotated copy overlapped insertions.
+  * :code:`-S` : Set this parameter to :code:`True` to skip insertion length checking; Default is to remove those insertions that are not full length of shorter than 500bp.
+
+absence
+  * :code:`-x` : The minimum score difference between the best hit and the second best hit for considering a read as uniquely mapped. For BWA MEM.
+
+
+postprocessing config
+=====================
+:code:`/path/to/mcclintock/config/temp2/temp2_post.py` : `GitHub link <https://github.com/bergmanlab/mcclintock/blob/master/config/temp2/temp2_post.py>`_
+
+.. code:: python
+
+  PARAMS = {
+      "acceptable_insertion_support_classes" : ["1p1"],
+      "frequency_threshold" : 0.1
+  }
+
+acceptable_insertion_support_classes
+  * valid options: :code:`1p1`, :code:`2p`, :code:`singleton`
+  * The class of the insertions that are acceptable for final predictions. 
+  * :code:`1p1` means that the detected insertion is supported by reads at both sides. 
+  * :code:`2p` means the detected insertion is supported by more than 1 read at only 1 side. 
+  * :code:`singleton` means the detected insertion is supported by only 1 read at 1 side.
+
+frequency_threshold
+  * minimum frequency of the inserted transposon. It generally means what fraction of sequenced genome present this insertion.
+
+
+**********
+trimgalore
+**********
+
+:code:`/path/to/mcclintock/config/trimgalore/trimgalore.py` : `GitHub link <https://github.com/bergmanlab/mcclintock/blob/master/config/trimgalore/trimgalore.py>`_
+
+.. code:: python
+
+  PARAMS = {
+      "single_end": {
+          "--fastqc": True,
+      },
+
+      "paired_end": {
+          "--fastqc": True,
+          "--paired": True
+      }
+  }
+
+single_end
+  * :code:`--fastqc`: Set to true to run fastqc when using single end data
+
+paired_end
+  * :code:`--fastqc`: Set to true to run fastqc when using paired end data
+  * :code:`--paired`: Run trimgalore using length trimming of quality/adapter/RRBS trimmed reads for paired-end data
