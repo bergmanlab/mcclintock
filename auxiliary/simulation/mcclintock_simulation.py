@@ -42,8 +42,8 @@ def main():
         fastq1 = modified_reference.replace(".fasta", "_1.fastq")
         fastq2 = modified_reference.replace(".fasta", "_2.fastq")
         if not os.path.exists(fastq1) or not os.path.exists(fastq2):
-            num_pairs = calculate_num_pairs(modified_reference, args.coverage, args.length, single=args.single)
-            fastq1, fastq2 = create_synthetic_reads(modified_reference, num_pairs, args.length, args.insert, args.error, x, args.out, run_id=args.runid, seed=args.seed)
+            # num_pairs = calculate_num_pairs(modified_reference, args.coverage, args.length, single=args.single)
+            fastq1, fastq2 = create_synthetic_reads(modified_reference, args.coverage, args.length, args.insert, args.error, x, args.out, run_id=args.runid, seed=args.seed)
 
         if not os.path.exists(summary_report):
             run_mcclintock(fastq1, fastq2, args.reference, args.consensus, args.locations, args.taxonomy, x, args.proc, args.out, args.config, args.keep_intermediate, run_id=args.runid, single=args.single, reverse=reverse)
@@ -374,7 +374,7 @@ def calculate_num_pairs(fasta, coverage, length, single=False):
 
     return num_pairs
 
-def create_synthetic_reads(reference, num_pairs, length, insert, error, rep, out, run_id="", seed=None):
+def create_synthetic_reads(reference, coverage, length, insert, error, rep, out, run_id="", seed=None):
     if seed is not None:
         random.seed(seed+"create_synthetic_reads"+str(rep))
     else:
@@ -386,8 +386,42 @@ def create_synthetic_reads(reference, num_pairs, length, insert, error, rep, out
     fastq2 = reference.replace(".fasta", "_2.fastq")
     report = reference.replace(".fasta", "_wgsim_report.txt")
 
-    command = ["wgsim", "-1", str(length), "-2", str(length), "-d", str(insert), "-N", str(num_pairs), "-S", str(seed_for_wgsim), "-e", str(error), "-h", reference, fastq1, fastq2]
+    # command = ["wgsim", "-1", str(length), "-2", str(length), "-d", str(insert), "-N", str(num_pairs), "-S", str(seed_for_wgsim), "-e", str(error), "-h", reference, fastq1, fastq2]
+    command = ["art_illumina", "-ss", "HS25", "-sam", "-i", reference, "-p", "-l", str(length), "-f", str(coverage), "-m", str(insert), "-s", "10", "-o", reference.replace(".fasta", "")]
     run_command_stdout(command, report)
+
+    tmp_fastq1 = reference.replace(".fasta", "") + "1.fq"
+    tmp_fastq2 = reference.replace(".fasta", "") + "2.fq"
+
+    with open(tmp_fastq1,"r") as infq, open(fastq1,"w") as outfq:
+        ln = 1
+        for line in infq:
+            line = line.replace("\n","")
+            if ln == 4:
+                line = "5"*len(line)
+                ln = 1
+            else:
+                ln += 1
+            
+            outfq.write(line+"\n")
+
+    with open(tmp_fastq2,"r") as infq, open(fastq2,"w") as outfq:
+        ln = 1
+        for line in infq:
+            line = line.replace("\n","")
+            if ln == 4:
+                line = "5"*len(line)
+                ln = 1
+            else:
+                ln += 1
+            
+            outfq.write(line+"\n")
+
+
+
+
+    # run_command(["mv", tmp_fastq1, fastq1])
+    # run_command(["mv", tmp_fastq2, fastq2])
 
     return fastq1, fastq2
 

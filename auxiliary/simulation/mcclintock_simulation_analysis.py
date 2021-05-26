@@ -317,8 +317,15 @@ def write_combined_metrics(forward_metrics, reverse_metrics, outfile):
     with open(outfile, "w") as out:
         out.write(",".join(forward_metrics[0]) + "\n")
         for method in metrics.keys():
-            precision = metrics[method][0] / (metrics[method][0] + metrics[method][1])
-            recall = metrics[method][0] / (metrics[method][0] + metrics[method][2])
+            if metrics[method][0] + metrics[method][1] > 0:
+                precision = metrics[method][0] / (metrics[method][0] + metrics[method][1])
+            else:
+                precision = 0
+            
+            if metrics[method][0] + metrics[method][2] > 0:
+                recall = metrics[method][0] / (metrics[method][0] + metrics[method][2])
+            else:
+                recall = 0
             outline = [method, str(metrics[method][0]), str(metrics[method][1]), str(metrics[method][2]), str(precision), str(recall)]
             out.write(",".join(outline) + "\n")
 

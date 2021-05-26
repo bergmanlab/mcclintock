@@ -53,7 +53,7 @@ def read_insertions(tebreak_out, sample_name, chromosomes, config):
             else:
                 insert = output.Insertion(output.Tebreak())
                 insert.chromosome = split_line[header['Chromosome']]
-                insert.start = int(split_line[header['3_Prime_End']])
+                insert.start = int(split_line[header['3_Prime_End']])+1
                 insert.end = int(split_line[header['5_Prime_End']])
                 insert.family = split_line[header['Superfamily']]
                 insert.type = "non-reference"
