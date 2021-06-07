@@ -8,11 +8,12 @@ dependencies:
   - _openmp_mutex=4.5=1_gnu
   - bcftools=1.9=h68d8f2e_9
   - bedtools=2.29.2=hc088bd4_0
+  - biopython=1.78=py36h8f6f2f9_2
   - bwa=0.7.17=hed695b0_7
   - bzip2=1.0.8=h7f98852_4
   - c-ares=1.11.0=h470a237_1
-  - ca-certificates=2020.12.5=ha878542_0
-  - certifi=2020.12.5=py36h5fab9bb_0
+  - ca-certificates=2021.5.30=ha878542_0
+  - certifi=2021.5.30=py36h5fab9bb_0
   - curl=7.71.1=he644dc0_8
   - entrez-direct=13.9=pl526h375a9b1_0
   - expat=2.2.9=he1b5a44_2
@@ -35,6 +36,7 @@ dependencies:
   - libgfortran-ng=9.3.0=he4bcb1c_17
   - libgfortran5=9.3.0=he4bcb1c_17
   - libgomp=9.3.0=h5dbcf3e_17
+  - liblapack=3.9.0=6_openblas
   - libnghttp2=1.41.0=hab1572f_1
   - libopenblas=0.3.12=pthreads_h4812303_1
   - libssh2=1.9.0=hab1572f_5
@@ -42,7 +44,8 @@ dependencies:
   - minimap2=2.17=hed695b0_3
   - ncurses=6.1=hf484d3e_1002
   - nettle=3.3=0
-  - openssl=1.1.1i=h7f98852_0
+  - numpy=1.19.5=py36h2aa4a07_1
+  - openssl=1.1.1k=h7f98852_0
   - pcre=8.44=he1b5a44_0
   - perl=5.26.2=h36c2ea0_1008
   - perl-app-cpanminus=1.7044=pl526_1
