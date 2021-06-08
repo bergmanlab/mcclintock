@@ -1,8 +1,3 @@
-.. mcclintock documentation master file, created by
-   sphinx-quickstart on Tue Jan  5 10:08:16 2021.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
 ==========
 McClintock
 ==========
@@ -63,40 +58,3 @@ Quick Start
       -2 test/SRR800842_2.fastq.gz \
       -p 4 \
       -o /path/to/output/directory
-
-
-
-
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Getting Started
-   :hidden:
-
-   getting_started/quick_start
-   getting_started/install
-
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Running McClintock
-   :hidden:
-
-   running/usage
-   running/input
-   running/config
-   running/examples
-
-.. toctree::
-   :maxdepth: 2
-   :caption: McClintock Output
-   :hidden:
-
-   output/raw
-   output/formatted
-   output/coverage
-   output/trimgalore
-   output/summary
-   output/report
-
-

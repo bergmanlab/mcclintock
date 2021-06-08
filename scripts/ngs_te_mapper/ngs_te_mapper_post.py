@@ -28,7 +28,7 @@ def main():
     succeeded = mccutils.check_status_file(status_log)
     if succeeded:
         mccutils.log("ngs_te_mapper","processing ngs_te_mapper results", log=log)
-        insertions = read_insertions(raw_bed, chromosomes, sample_name, out_dir, min_read_cutoff=config.MIN_READ_SUPPORT)
+        insertions = read_insertions(raw_bed, chromosomes, sample_name, out_dir, min_read_cutoff=config.PARAMS['min_read_support'])
 
         if len(insertions) > 0:
             insertions = output.make_redundant_bed(insertions, sample_name, out_dir, method="ngs_te_mapper")

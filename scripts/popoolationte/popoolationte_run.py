@@ -57,14 +57,9 @@ def main():
                             max_dist, 
                             known_inserts, 
                             script_dir, 
-                            out_dir, 
-                            log=log, 
-                            identify_min_count=config.IDENTIFY_TE_INSERTSITES["min-count"],
-                            identify_min_qual=config.IDENTIFY_TE_INSERTSITES["min-map-qual"],
-                            crosslink_site_shift=config.CROSSLINK_TE_SITES['single-site-shift'],
-                            update_te_inserts_site_shift=config.UPDATE_TEINSERTS_WITH_KNOWNTES['single-site-shift'],
-                            estimate_polymorphism_min_qual=config.ESTIMATE_POLYMORPHISM['min-map-qual'],
-                            filter_min_count=config.FILTER['min-count'])
+                            out_dir,
+                            config.PARAMS,
+                            log=log)
 
             mccutils.check_file_exists(snakemake.output[0])
 
@@ -145,14 +140,8 @@ def make_known_insert_file(gff, out):
     
     return out_file
 
-def run_popoolationte(sam, reference, taxon, read_len, insert_size, max_dist, ref_inserts, script_dir, out_dir, 
-                      log=None,                      
-                      identify_min_count=3,
-                      identify_min_qual=15,
-                      crosslink_site_shift=100,
-                      update_te_inserts_site_shift=100,
-                      estimate_polymorphism_min_qual=15,
-                      filter_min_count=5):
+def run_popoolationte(sam, reference, taxon, read_len, insert_size, max_dist, ref_inserts, script_dir, out_dir, params, 
+                      log=None):
 
     mccutils.log("popoolationte","identify-te-insertsites.pl")
     insert_sites = out_dir+"te-fwd-rev.txt"
@@ -160,8 +149,14 @@ def run_popoolationte(sam, reference, taxon, read_len, insert_size, max_dist, re
                     "--input", sam, 
                     "--te-hierarchy-file", taxon, 
                     "--te-hierarchy-level", "family", 
-                    "--narrow-range", str(read_len), "--min-count", str(identify_min_count),
-                    "--min-map-qual", str(identify_min_qual), "--output", insert_sites, "--insert-distance", str(insert_size), "--read-length", str(read_len)]
+                    "--narrow-range", str(read_len),
+                    "--output", insert_sites,
+                    "--insert-distance", str(insert_size), 
+                    "--read-length", str(read_len)]
+    
+    for param in params["identify-te-insertsites.pl"].keys():
+        command.append(param)
+        command.append(str(params["identify-te-insertsites.pl"][param]))
     mccutils.run_command(command, log=log)
 
     mccutils.log("popoolationte","genomic-N-2gtf.pl")
@@ -176,10 +171,13 @@ def run_popoolationte(sam, reference, taxon, read_len, insert_size, max_dist, re
                     "--min-dist", str(read_len), 
                     "--max-dist", str(max_dist),
                     "--output", crosslinked,
-                    "--single-site-shift", str(crosslink_site_shift),
                     "--poly-n", poly_n,
                     "--te-hierarchy", taxon,
                     "--te-hier-level", "family"]
+
+    for param in params["crosslink-te-sites.pl"].keys():
+        command.append(param)
+        command.append(str(params["crosslink-te-sites.pl"][param]))
     mccutils.run_command(command, log=log)
 
     mccutils.log("popoolationte","update-teinserts-with-knowntes.pl")
@@ -190,8 +188,11 @@ def run_popoolationte(sam, reference, taxon, read_len, insert_size, max_dist, re
                     "--te-hierarchy-file", taxon,
                     "--te-hierarchy-level", "family",
                     "--max-dist", str(max_dist),
-                    "--te-insertions", crosslinked,
-                    "--single-site-shift", str(update_te_inserts_site_shift)]
+                    "--te-insertions", crosslinked]
+
+    for param in params["update-teinserts-with-knowntes.pl"].keys():
+        command.append(param)
+        command.append(str(params["update-teinserts-with-knowntes.pl"][param]))
     mccutils.run_command(command, log=log)
 
     mccutils.log("popoolationte","estimate-polymorphism.pl")
@@ -201,8 +202,11 @@ def run_popoolationte(sam, reference, taxon, read_len, insert_size, max_dist, re
                     "--te-insert-file", updated_inserts,
                     "--te-hierarchy-file", taxon,
                     "--te-hierarchy-level", "family",
-                    "--min-map-qual", str(estimate_polymorphism_min_qual),
                     "--output", te_polymorphism]
+
+    for param in params["estimate-polymorphism.pl"].keys():
+        command.append(param)
+        command.append(str(params["estimate-polymorphism.pl"][param]))
     mccutils.run_command(command, log=log)
 
     mccutils.log("popoolationte","filter-teinserts.pl")
@@ -210,8 +214,11 @@ def run_popoolationte(sam, reference, taxon, read_len, insert_size, max_dist, re
     command = ["perl", script_dir+"filter-teinserts.pl",
                     "--te-insertions", te_polymorphism,
                     "--output", filtered,
-                    "--discard-overlapping",
-                    "--min-count", str(filter_min_count)]
+                    "--discard-overlapping"]
+
+    for param in params["filter-teinserts.pl"].keys():
+        command.append(param)
+        command.append(str(params["filter-teinserts.pl"][param]))
     mccutils.run_command(command, log=log)
 
 if __name__ == "__main__":                

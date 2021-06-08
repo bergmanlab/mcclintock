@@ -1,9 +1,14 @@
 import os
 import sys
 import subprocess
+import traceback
+import importlib.util as il
+spec = il.spec_from_file_location("config", snakemake.params.config)
+config = il.module_from_spec(spec)
+sys.modules[spec.name] = config
+spec.loader.exec_module(config)
 sys.path.append(snakemake.config['args']['mcc_path'])
 import scripts.mccutils as mccutils
-import config.jitterbug.jitterbug_run as config
 
 def main():
     reference_te_gff = snakemake.input.reference_tes
@@ -13,33 +18,46 @@ def main():
     script_dir = snakemake.params.script_dir
     sample_name = snakemake.params.sample_name
     log = snakemake.params.log
+    status_log = snakemake.params.status_log
     threads = snakemake.threads
 
     out = snakemake.output.out
 
     mccutils.log("jitterbug","Running jitterbug", log=log)
 
-    out_gff, config_file = run_jitterbug(
-                            script_dir, 
-                            bam, 
-                            reference_te_gff, 
-                            sample_name, out_dir, 
-                            minmapq=config.RUN['MINMAPQ'], 
-                            min_cluster_size=config.RUN['MIN_CLUSTER_SIZE'], 
-                            threads=threads, 
-                            log=log
-    )
+    try:
+        out_gff, config_file = run_jitterbug(
+                                script_dir, 
+                                bam, 
+                                reference_te_gff, 
+                                sample_name, out_dir, 
+                                minmapq=config.RUN['MINMAPQ'], 
+                                min_cluster_size=config.RUN['MIN_CLUSTER_SIZE'], 
+                                threads=threads, 
+                                log=log
+        )
 
-    config_file = make_config(
-                        config_file, 
-                        out_dir,
-                        cluster_size=config.FILTER["CLUSTER_SIZE"],
-                        span=config.FILTER['SPAN'],
-                        int_size=config.FILTER['INT_SIZE'],
-                        softclipped=config.FILTER['SOFTCLIPPED'],
-                        pick_consistent=config.FILTER['PICK_CONSISTENT']
-    )
-    filter_jitterbug(script_dir, out_gff, config_file, sample_name, out, log=log)
+        config_file = make_config(
+                            config_file, 
+                            out_dir,
+                            cluster_size=config.FILTER["CLUSTER_SIZE"],
+                            span=config.FILTER['SPAN'],
+                            int_size=config.FILTER['INT_SIZE'],
+                            softclipped=config.FILTER['SOFTCLIPPED'],
+                            pick_consistent=config.FILTER['PICK_CONSISTENT']
+        )
+        filter_jitterbug(script_dir, out_gff, config_file, sample_name, out, log=log)
+    
+    except Exception as e:
+        track = traceback.format_exc()
+        print(track, file=sys.stderr)
+        with open(log,"a") as l:
+            print(track, file=l)
+        mccutils.log("Jitterbug","Jitterbug run failed")
+        with open(status_log,"w") as l:
+            l.write("FAILED\n")
+
+        mccutils.run_command(["touch", out])
 
 
 def run_jitterbug(script_dir, bam, ref_te_gff, sample_name, out_dir, minmapq=15, min_cluster_size=2, threads=1, log=None):

@@ -89,21 +89,15 @@ def run_temp2_insertion(fq1, fq2, bam, insert_size, reference, scripts, consensu
             "-t", te_bed,
             "-c", str(threads),
             "-f", str(insert_size),
-            "-o", out,
-            "-M", str(config.GENOME_MISMATCH_PCT),
-            "-m", str(config.TE_MISMATCH_PCT),
-            "-U", str(config.RATIO),
-            "-N", str(config.FILTER_WINDOW),
+            "-o", out
     ]
     
-    if config.TRUNCATED:
-        command.append("-T")
-    
-    if config.LOOSE_FILTER:
-        command.append("-L")
-    
-    if config.SKIP_INS_LEN_CHECK:
-        command.append("-S")
+    for param in config.PARAMS['insertion'].keys():
+        if config.PARAMS['insertion'][param] == True:
+            command.append(param)
+        elif config.PARAMS['insertion'][param] != False:
+            command.append(param)
+            command.append(str(config.PARAMS['insertion'][param]))
 
     mccutils.run_command(command, log=log)
 
@@ -116,9 +110,12 @@ def run_temp2_absence(scripts, bam, reference_2bit, te_bed, insert_size, threads
             "-t", reference_2bit,
             "-f", str(insert_size),
             "-c", str(threads),
-            "-o", out,
-            "-x", str(config.UNIQ_MAP_SCORE)
+            "-o", out
     ]
+
+    for param in config.PARAMS['absence'].keys():
+        command.append(param)
+        command.append(str(config.PARAMS['absence']))
 
     mccutils.run_command(command, log=log)
 

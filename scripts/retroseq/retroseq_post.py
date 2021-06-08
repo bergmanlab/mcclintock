@@ -26,7 +26,7 @@ def main():
     prev_steps_succeeded = mccutils.check_status_file(status_log)
 
     if prev_steps_succeeded:
-        insertions = read_insertions(retroseq_out, sample_name, chromosomes, support_threshold=config.READ_SUPPORT_THRESHOLD, breakpoint_threshold=config.BREAKPOINT_CONFIDENCE_THRESHOLD)
+        insertions = read_insertions(retroseq_out, sample_name, chromosomes, support_threshold=config.PARAMS["read_support_threshold"], breakpoint_threshold=config.PARAMS["breakpoint_confidence_threshold"])
         if len(insertions) >= 1:
             insertions = output.make_redundant_bed(insertions, sample_name, out_dir, method="retroseq")
             insertions = output.make_nonredundant_bed(insertions, sample_name, out_dir, method="retroseq")

@@ -1,3 +1,12 @@
 # options used for adapter trimming with the trimgalore module
-SINGLE_END_FLAGS = ["--fastqc"]
-PAIRED_END_FLAGS = ["--paired", "--fastqc"]
+PARAMS = {
+    "single_end": {
+        "--fastqc": True,
+    },
+
+    "paired_end": {
+        "--fastqc": True,
+        "--paired": True
+    }
+}
+

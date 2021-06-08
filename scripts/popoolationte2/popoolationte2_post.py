@@ -29,7 +29,7 @@ def main():
 
     if prev_step_succeeded:
         ref_tes = get_ref_tes(te_gff, taxonomy, chromosomes)
-        insertions = read_insertions(te_predictions, ref_tes, chromosomes, sample_name, both_end_support_needed=config.REQUIRE_BOTH_END_SUPPORT, support_threshold=config.FREQUENCY_THRESHOLD)
+        insertions = read_insertions(te_predictions, ref_tes, chromosomes, sample_name, both_end_support_needed=config.PARAMS["require_both_end_support"], support_threshold=config.PARAMS["frequency_threshold"])
         if len(insertions) >= 1:
             insertions = output.make_redundant_bed(insertions, sample_name, out_dir, method="popoolationte2")
             insertions = output.make_nonredundant_bed(insertions, sample_name, out_dir, method="popoolationte2")

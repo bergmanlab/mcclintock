@@ -78,8 +78,8 @@ def read_insertions(insert_bed, sample_name, chromosomes, config):
 
                     if (
                         insert.chromosome in chromosomes and
-                        insert.support_info.support["frequency"].value >= config.FREQUENCY_THRESHOLD and 
-                        insert.support_info.support["class"].value in config.ACCEPTABLE_INSERTION_SUPPORT_CLASSES
+                        insert.support_info.support["frequency"].value >= config.PARAMS["frequency_threshold"] and 
+                        insert.support_info.support["class"].value in config.PARAMS["acceptable_insertion_support_classes"]
                     ):
                         insertions.append(insert)
     

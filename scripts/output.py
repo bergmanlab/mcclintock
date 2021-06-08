@@ -192,20 +192,41 @@ class Teflon:
 
         self.redundancy_filter = RedundancyFilter(["presence_reads"], "value")
 
-#################################################
-## TODO convert to proper format for VCF creation
-class Tepid:
+class Tebreak:
     def __init__(self):
-        self.id = -1
-        self.support = 0
+        self.support = {
+            "five_p_elt_match" : Info("FIVE_P_ELT_MATCH", "Fraction of bases matched to reference for inserted sequence on insertion seqment of 5' supporting contig", 0.0, "Float"),
+            "three_p_elt_match" : Info("THREE_P_ELT_MATCH", "Fraction of bases matched to reference for inserted sequence on insertion seqment of 3' supporting contig", 0.0, "Float"),
+            "five_p_genome_match" : Info("FIVE_P_GENOME_MATCH", "Fraction of bases matched to reference genome on genomic segment of 5' supporting contig", 0.0, "Float"),
+            "three_p_genome_match" : Info("THREE_P_GENOME_MATCH", "Fraction of bases matched to reference genome on genomic segment of 3' supporting contig", 0.0, "Float"),
+            "split_reads_5prime" : Info("SPLIT_READS_5PRIME", "Number of split reads supporting 5' end of the insertion", 0, "Integer"),
+            "split_reads_3prime" : Info("SPLIT_READS_3PRIME", "Number of split reads supporting 3' end of the insertion", 0, "Integer"),
+            "remapped_discordant" : Info("REMAPPED_DISCORDANT", "Number of discordant read ends re-mappable to insertion reference sequence", 0, "Integer"),
+            "remap_disc_fraction" : Info("REMAP_DISC_FRACTION", "The proportion of remapped discordant reads mapping to the reference insertion sequence", 0.0, "Float"),
+            "remapped_splitreads" : Info("REMAPPED_SPLITREADS", "Number of split reads re-mappable to insertion reference sequence", 0, "Integer"),
+            "remap_split_fraction" : Info("REMAP_SPLIT_FRACTION", "The proportion of remapped split reads mapping to the reference insertion sequence", 0.0, "Float")
+        }
+
+        self.redundancy_filter = RedundancyFilter(["split_reads_5prime", "split_reads_3prime"], "sum")
 
 class Jitterbug:
     def __init__(self):
-        supporting_fwd_reads = 0
-        supporting_rev_reads = 0
-        split_read_support = 0
-        zygosity = 0.0
-################################################
+        self.support = {
+            "supporting_fwd_reads" : Info("SUPPORTING_FWD_READS", "Reads supporting the forward junction of the insertion", 0, "Integer"),
+            "supporting_rev_reads" : Info("SUPPORTING_REV_READS", "Reads supporting the reverse junction of the insertion", 0, "Integer"),
+            "softclipped_support" : Info("SOFTCLIPPED_SUPPORT", "Number of softclipped reads that support the breakpoint", 0, "Integer"),
+            "zygosity" : Info("ZYGOSITY", "The ratio of clipped and properly mapped reads at the insertion site", 0.0, "Float")
+        }
+
+        self.redundancy_filter = RedundancyFilter(["supporting_fwd_reads", "supporting_rev_reads"], "sum")
+
+class Tepid:
+    def __init__(self):
+        self.id = -1
+        self.support = {
+            "supporting_reads" : Info("SUPPORTING_READS", "Number of reads supporting the insertion", 0, "Integer")
+        }
+        self.redundancy_filter = RedundancyFilter(["supporting_reads"], "value")
 
 
 def make_redundant_bed(insertions, sample_name, out_dir, method="popoolationte"):

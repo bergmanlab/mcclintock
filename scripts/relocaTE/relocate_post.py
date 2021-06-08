@@ -28,7 +28,15 @@ def main():
     prev_step_succeeded = mccutils.check_status_file(status_log)
 
     if prev_step_succeeded:
-        insertions = get_insertions(relocate_gff, sample_name, chromosomes, ref_l_threshold=config.REF_LEFT_THRESHOLD, ref_r_threshold=config.REF_RIGHT_THRESHOLD, nonref_l_threshold=config.NONREF_LEFT_THRESHOLD, nonref_r_threshold=config.NONREF_RIGHT_THRESHOLD)
+        insertions = get_insertions(
+                        relocate_gff, 
+                        sample_name, 
+                        chromosomes, 
+                        ref_l_threshold=config.PARAMS["ref_left_threshold"], 
+                        ref_r_threshold=config.PARAMS["ref_right_threshold"], 
+                        nonref_l_threshold=config.PARAMS["nonref_left_threshold"], 
+                        nonref_r_threshold=config.PARAMS["nonref_right_threshold"]
+                    )
         insertions = set_ref_orientations(insertions, te_gff)
 
         if len(insertions) >= 1:

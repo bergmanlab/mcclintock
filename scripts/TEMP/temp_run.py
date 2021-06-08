@@ -81,17 +81,19 @@ def run_temp_insertion(bam, scripts, consensus, te_bed, taxonomy, median_insert_
     mccutils.log("temp","running TEMP non-reference insertion prediction", log=log)
     command = [
         "bash", scripts+"TEMP_Insertion.sh", 
-            "-x", str(config.TEMP_Insertion['x']), 
             "-i", bam, 
             "-s", scripts, 
             "-r", consensus, 
             "-t", te_bed, 
             "-u", taxonomy, 
-            "-m", str(config.TEMP_Insertion['m']),
             "-f", str(median_insert_size),
             "-c", str(threads),
             "-o", out
     ]
+
+    for param in config.PARAMS.keys():
+        command.append(param)
+        command.append(str(config.PARAMS[param]))
 
     mccutils.run_command(command, log=log)
 

@@ -48,11 +48,9 @@ def main():
         if "trimgalore" in methods:
             mccutils.log("processing", "running trim_galore", log=log)
             if fq2 == "None":
-                flags = trimgalore.SINGLE_END_FLAGS
-                trimmedfq = run_trim_galore(fq1, run_id, log, mcc_out, cores=processors, flags=flags)
+                trimmedfq = run_trim_galore(fq1, run_id, log, mcc_out, cores=processors, params=trimgalore.PARAMS["single_end"])
             else:
-                flags = trimgalore.PAIRED_END_FLAGS
-                trimmedfq, trimmedfq2 = run_trim_galore(fq1, run_id, log, mcc_out, fq2=fq2, cores=processors, flags=flags)
+                trimmedfq, trimmedfq2 = run_trim_galore(fq1, run_id, log, mcc_out, fq2=fq2, cores=processors, params=trimgalore.PARAMS["paired_end"])
             
             run_multiqc(mcc_out+"/results/trimgalore/")
             
@@ -138,13 +136,18 @@ def check_fastqs(fq1, fq2, out, min_length=30, log=None):
         has_valid_read_ids(fq1, fq2, log=log)
 
 
-def run_trim_galore(fq1, run_id, log, out, fq2=None, cores=1, flags=[]):
+def run_trim_galore(fq1, run_id, log, out, fq2=None, cores=1, params={}):
     mccutils.mkdir(out+"/results/")
-    command = ['trim_galore'] + flags + ["-j", str(cores), "-o", out+"/results/trimgalore"]
+    command = ['trim_galore', "-j", str(cores), "-o", out+"/results/trimgalore"]
+
+    for param in params.keys():
+        if params[param] == True:
+            command.append(param)
+
     if fq2 is None:
         command.append(fq1)
     else:
-        command += ["--paired", fq1, fq2]
+        command += [fq1, fq2]
     
     mccutils.run_command(command, log=log)
 

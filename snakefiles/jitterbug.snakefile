@@ -11,7 +11,9 @@ rule jitterbug_run:
         out_dir = config['args']['out']+"results/jitterbug/unfiltered/",
         script_dir = config['args']['mcc_path']+"/install/tools/jitterbug/",
         sample_name = config['args']['sample_name'],
-        log=config['args']['log_dir']+"jitterbug.log"
+        log=config['args']['log_dir']+"jitterbug.log",
+        config = config['config']['jitterbug']['files'][0],
+        status_log = config['status']['jitterbug']
     
     output:
         out = config['args']['out']+"results/jitterbug/unfiltered/"+config['args']['sample_name']+".TE_insertions_paired_clusters.filtered.gff3"
@@ -22,7 +24,8 @@ rule jitterbug_run:
 rule jitterbug_post:
     input:
         jitterbug_out = config['args']['out']+"results/jitterbug/unfiltered/"+config['args']['sample_name']+".TE_insertions_paired_clusters.filtered.gff3",
-        taxonomy = config['mcc']['taxonomy']
+        taxonomy = config['mcc']['taxonomy'],
+        reference_fasta = config['mcc']['reference']
 
     threads: 1
 
@@ -32,7 +35,9 @@ rule jitterbug_post:
         out_dir = config['args']['out']+"results/jitterbug/",
         log=config['args']['log_dir']+"jitterbug.log",
         sample_name = config['args']['sample_name'],
-        chromosomes = config['args']['chromosomes']
+        chromosomes = config['args']['chromosomes'],
+        config = config['config']['jitterbug']['files'][1],
+        status_log = config['status']['jitterbug']
     
     output:
         out = config['out']['jitterbug']

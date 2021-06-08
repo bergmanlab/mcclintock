@@ -30,7 +30,7 @@ def main():
         absence_bed = make_absence_bed(absence_summary, sample_name, out_dir)
         non_absent_ref_insertions = get_non_absent_ref_tes(te_gff, absence_bed, sample_name, out_dir, log)
         insertions += non_absent_ref_insertions
-        insertions = filter_insertions(insertions, chromosomes, acceptable_classes=config.ACCEPTABLE_INSERTION_SUPPORT_CLASSES, frequency_theshold=config.FREQUENCY_THRESHOLD)
+        insertions = filter_insertions(insertions, chromosomes, acceptable_classes=config.PARAMS["acceptable_insertion_support_classes"], frequency_theshold=config.PARAMS["frequency_threshold"])
         if len(insertions) > 0:
             insertions = output.make_redundant_bed(insertions, sample_name, out_dir, method="temp")
             insertions = output.make_nonredundant_bed(insertions, sample_name, out_dir, method="temp")

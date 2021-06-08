@@ -1,3 +1,10 @@
+PARAMS = {
+    '--aligner' : "blat",
+    '--len_cut_match' : 10,
+    '--len_cut_trim' : 10,
+    '--mismatch' : 2,
+    '--mismatch_junction' : 2
+}
 
 '''
 python scripts/relocaTE2.py --help
@@ -28,12 +35,3 @@ usage: relocaTE2.py [-h] [-b BAM] [-t TE_FASTA] [-d FQ_DIR] [-g GENOME_FASTA]
 
 '''
 
-
-
-RELOCATE2 = {
-    'aligner' : "blat",
-    'len_cut_match' : 10,
-    'len_cut_trim' : 10,
-    'mismatch' : 2,
-    'mismatch_junction' : 2
-}

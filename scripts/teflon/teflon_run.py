@@ -37,13 +37,13 @@ def main():
                 sample_table, 
                 threads=threads, 
                 log=log, 
-                quality_threshold=config.PARAMETERS['q'],
-                stdev=config.PARAMETERS['sd'],
-                cov=config.PARAMETERS['cov'],
-                te_support1=config.PARAMETERS['n1'],
-                te_support2=config.PARAMETERS['n2'],
-                read_count_lower_threshold=config.PARAMETERS['lt'],
-                read_count_higher_threshold=config.PARAMETERS['ht']
+                quality_threshold=config.PARAMS['-q'],
+                stdev=config.PARAMS['-sd'],
+                cov=config.PARAMS['-cov'],
+                te_support1=config.PARAMS['-n1'],
+                te_support2=config.PARAMS['-n2'],
+                read_count_lower_threshold=config.PARAMS['-lt'],
+                read_count_higher_threshold=config.PARAMS['-ht']
             )
 
             mccutils.check_file_exists(snakemake.output[0])

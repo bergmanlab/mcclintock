@@ -29,14 +29,35 @@ def main():
 
 
     try:
-        command = ["samtools", "sort", "-@", str(snakemake.threads), snakemake.output.tmp_bam, snakemake.output.bam.replace(".bam", "")]
+        command = ["samtools", "sort", "-@", str(snakemake.threads), snakemake.output.tmp_bam, snakemake.output.tmp2_bam.replace(".bam", "")]
+        mccutils.run_command(command, log=log)
+        mccutils.check_file_exists(snakemake.output.tmp2_bam)
+    
+    except Exception as e:
+        track = traceback.format_exc()
+        print(track, file=sys.stderr)
+        print("ERROR...falied to sort the bam file using samtools sort...bam file:", snakemake.output.tmp_bam, file=sys.stderr)
+        sys.exit(1)
+
+    try:
+        command = ["samtools", "index", snakemake.output.tmp2_bam]
+        mccutils.run_command(command, log=log)
+
+    except Exception as e:
+        track = traceback.format_exc()
+        print(track, file=sys.stderr)
+        print("ERROR...falied to index the bam file using samtools index...bam file:", snakemake.output.tmp2_bam, file=sys.stderr)
+        sys.exit(1)
+
+    try:
+        command = ['picard', "MarkDuplicates", "-I", snakemake.output.tmp2_bam, "-O", snakemake.output.bam, "-M", snakemake.output.metrics]
         mccutils.run_command(command, log=log)
         mccutils.check_file_exists(snakemake.output.bam)
     
     except Exception as e:
         track = traceback.format_exc()
         print(track, file=sys.stderr)
-        print("ERROR...falied to sort the bam file using samtools sort...bam file:", snakemake.output.tmp_bam, file=sys.stderr)
+        print("ERROR...falied to mark duplicates with picard for the bam file ...bam file:", snakemake.output.tmp2_bam, file=sys.stderr)
         sys.exit(1)
 
     try:

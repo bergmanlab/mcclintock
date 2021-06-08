@@ -43,7 +43,7 @@ def main():
         fastq2 = modified_reference.replace(".fasta", "_2.fastq")
         if not os.path.exists(fastq1) or not os.path.exists(fastq2):
             num_pairs = calculate_num_pairs(modified_reference, args.coverage, args.length, single=args.single)
-            fastq1, fastq2 = create_synthetic_reads(modified_reference, num_pairs, args.length, args.insert, args.error, x, args.out, run_id=args.runid, seed=args.seed)
+            fastq1, fastq2 = create_synthetic_reads(args.sim, modified_reference, args.coverage, num_pairs, args.length, args.insert, args.error, x, args.out, run_id=args.runid, seed=args.seed)
 
         if not os.path.exists(summary_report):
             run_mcclintock(fastq1, fastq2, args.reference, args.consensus, args.locations, args.taxonomy, x, args.proc, args.out, args.config, args.keep_intermediate, run_id=args.runid, single=args.single, reverse=reverse)
@@ -71,6 +71,7 @@ def parse_args():
     parser.add_argument("--end", type=int, help="The number of replicates to run. [default = 300]", required=False)
     parser.add_argument("--seed", type=str, help="a seed to the random number generator so runs can be replicated", required=False)
     parser.add_argument("--runid", type=str, help="a string to prepend to output files so that multiple runs can be run at the same time without file name clashes", required=False)
+    parser.add_argument("--sim", type=str, help="Short read simulator to use (options=wgsim,art) [default = wgsim]", required=False)
     parser.add_argument("-s","--single", action="store_true", help="runs the simulation in single ended mode", required=False)
 
     args = parser.parse_args()
@@ -141,6 +142,13 @@ def parse_args():
         args.strand = "plus"
     elif args.strand != "plus" and args.strand != "minus":
         sys.exit("ERROR: --strand must be plus or minus \n")
+
+    
+    if args.sim is None:
+        args.sim = "wgsim"
+    elif args.sim not in ["wgsim", "art"]:
+        sys.exit("ERROR: --sim must be wgsim or art \n")
+    
 
     return args
 
@@ -374,7 +382,7 @@ def calculate_num_pairs(fasta, coverage, length, single=False):
 
     return num_pairs
 
-def create_synthetic_reads(reference, num_pairs, length, insert, error, rep, out, run_id="", seed=None):
+def create_synthetic_reads(simulator, reference, coverage, num_pairs, length, insert, error, rep, out, run_id="", seed=None):
     if seed is not None:
         random.seed(seed+"create_synthetic_reads"+str(rep))
     else:
@@ -382,12 +390,23 @@ def create_synthetic_reads(reference, num_pairs, length, insert, error, rep, out
     
     seed_for_wgsim = random.randint(0,1000)
 
+    tmp_fastq1 = reference.replace(".fasta", "") + "1.fq"
+    tmp_fastq2 = reference.replace(".fasta", "") + "2.fq"
+
     fastq1 = reference.replace(".fasta", "_1.fastq")
     fastq2 = reference.replace(".fasta", "_2.fastq")
     report = reference.replace(".fasta", "_wgsim_report.txt")
 
-    command = ["wgsim", "-1", str(length), "-2", str(length), "-d", str(insert), "-N", str(num_pairs), "-S", str(seed_for_wgsim), "-e", str(error), "-h", reference, fastq1, fastq2]
+    if simulator == "wgsim":
+        command = ["wgsim", "-1", str(length), "-2", str(length), "-d", str(insert), "-N", str(num_pairs), "-S", str(seed_for_wgsim), "-e", str(error), "-h", reference, tmp_fastq1, tmp_fastq2]
+
+    else:
+        command = ["art_illumina", "-ss", "HS25", "--rndSeed", str(seed_for_wgsim), "-sam", "-i", reference, "-p", "-l", str(length), "-f", str(coverage), "-m", str(insert), "-s", "10", "-o", reference.replace(".fasta", "")]
+    
+    
     run_command_stdout(command, report)
+    run_command(["mv", tmp_fastq1, fastq1])
+    run_command(["mv", tmp_fastq2, fastq2])
 
     return fastq1, fastq2
 

@@ -46,9 +46,9 @@ def main():
 
         median_insert_size = mccutils.get_median_insert_size(median_insert_size_file)
 
-        distance = (median_insert_size * config.MIN_DISTANCE)
+        distance = (median_insert_size * config.PARAMS["min_distance"])
 
-        command = ["perl", telocate, str(config.MAX_MEM), sam_dir, te_gff, ref_fasta, out_dir, str(distance), str(config.MIN_SUPPORT_READS), str(config.MIN_SUPPORT_INDIVIDUALS)]
+        command = ["perl", telocate, str(config.PARAMS["max_mem"]), sam_dir, te_gff, ref_fasta, out_dir, str(distance), str(config.PARAMS["min_support_reads"]), str(config.PARAMS["min_support_individuals"])]
 
         mccutils.run_command(command, log=log)
 

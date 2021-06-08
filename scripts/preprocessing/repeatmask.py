@@ -17,9 +17,9 @@ def main():
 
     output = snakemake.output.rm_out
 
-    mccutils.log("processing","Running RepeatMasker for RelocaTE2", log=log)
+    mccutils.log("processing","Running RepeatMasker", log=log)
     run_repeatmasker(reference, ref_name, te_seqs, threads, log, output, out_dir)
-    mccutils.log("processing","Repeatmasker for RelocaTE2 complete")
+    mccutils.log("processing","Repeatmasker complete")
 
 
 

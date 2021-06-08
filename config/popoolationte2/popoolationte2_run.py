@@ -1,4 +1,39 @@
 
+PARAMS = {
+    "ppileup" : {
+        "--map-qual": 15,
+        "--sr-mindist" : 10000,
+        "--id-up-quant": 0.01
+    },
+
+    "subsampleppileup" : {
+        "run" : False,
+        "--target-coverage": 100,
+        "--with-replace": False
+    },
+
+    "identifySignatures" : {
+        "--min-count": 2.0,
+        "--signature-window": "median",
+        "--min-valley": "median",
+        "--chunk-distance": 5
+    },
+
+    "updateStrand" : {
+        "--map-qual": 15,
+        "--max-disagreement": 0.1,
+        "--sr-mindist": 10000,
+        "--id-up-quant": 0.01
+    },
+
+    "pairupSignatures" : {
+        "--min-distance": -100,
+        "--max-distance": 500,
+        "--max-freq-diff": 1.0
+    }
+
+}
+
 #ppileup
 # create a physical pileup file from one or multiple bam files
 
@@ -11,11 +46,6 @@
 # --id-up-quant         paired end fragments with an insert size in the upper
 #                       quantile will be ignored [fraction]; default=0.01
 
-ppileup = {
-    "map-qual": 15,
-    "sr-mindist" : 10000,
-    "id-up-quant": 0.01
-}
 
 
 # subsampleppileup 
@@ -28,11 +58,7 @@ ppileup = {
 # == Parameters for fine tuning ==
 # --with-replace        use sampling with replacement instead of without replacement
 
-subsampleppileup = {
-    "run" : False,
-    "target-coverage": 100,
-    "with-replace": False
-}
+
 
 
 # identifySignatures
@@ -51,12 +77,7 @@ subsampleppileup = {
 # --chunk-distance      minimum distance between chromosomal chunks in multiples
 #                       of --min-valley [int]; default=5
 
-identifySignatures = {
-    "min-count": 2.0,
-    "signature-window": "median",
-    "min-valley": "median",
-    "chunk-distance": 5
-}
+
 
 
 # updateStrand
@@ -73,12 +94,6 @@ identifySignatures = {
 # --id-up-quant         paired end fragments with an insert size in the upper
 #                       quantile will be ignored [fraction]; default=0.01
 
-updateStrand = {
-    "map-qual": 15,
-    "max-disagreement": 0.1,
-    "sr-mindist": 10000,
-    "id-up-quant": 0.01
-}
 
 
 # pairupSignatures
@@ -92,8 +107,3 @@ updateStrand = {
 # --max-freq-diff       the maximum frequency difference between signatures;
 #                       default=1.0
 
-pairupSignatures = {
-    "min-distance": -100,
-    "max-distance": 500,
-    "max-freq-diff": 1.0
-}

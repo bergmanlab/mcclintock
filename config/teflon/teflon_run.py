@@ -1,3 +1,15 @@
+
+# When params: sd, cov, or ht are set to None, they are determined by TEFLoN, Can be set to a specific INT value 
+PARAMS = {
+    "-q": 20,
+    "-sd" : None,
+    "-cov" : None,
+    "-n1" : 1,
+    "-n2" : 1,
+    "-lt" : 1,
+    "-ht" : None
+}
+
 '''
 usage: python usr/local/teflon.v0.4.py <required> [optional]
     -q <map quality threshold> #NOTE: Mapped reads with map qualities lower than this number will be discarded
@@ -17,14 +29,3 @@ usage: python usr/local/teflon_genotype.py <required> [optional]
     -lt [sites genotyped as -9 if adjusted read counts lower than this threshold, default=1]
     -ht [sites genotyped as -9 if adjusted read counts higher than this threshold, default=mean_coverage + 2*STDEV]
 '''
-
-# When params: sd, cov, or ht are set to None, they are determined by TEFLoN, Can be set to a specific INT value 
-PARAMETERS = {
-    "q": 20,
-    "sd" : None,
-    "cov" : None,
-    "n1" : 1,
-    "n2" : 1,
-    "lt" : 1,
-    "ht" : None
-}

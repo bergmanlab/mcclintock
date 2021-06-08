@@ -5,3 +5,4 @@ channels:
   - defaults
 dependencies:
   - tepid=0.10
+  - tbb=2020.2

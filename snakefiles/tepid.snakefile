@@ -15,7 +15,9 @@ rule tepid_run:
         raw_fq2 = config['in']['fq2'],
         ref_name = config['args']['ref_name'],
         out_dir = config['args']['out']+"/results/tepid/unfiltered/",
-        log = config['args']['log_dir']+"tepid.log"
+        log = config['args']['log_dir']+"tepid.log",
+        config = config['config']['tepid']['files'][0],
+        status_log = config['status']['tepid']
     
     output:
         config['args']['out']+"results/tepid/unfiltered/insertions_"+config['args']['ref_name']+".bed",
@@ -33,7 +35,8 @@ rule tepid_post:
         insertions_support = config['args']['out']+"results/tepid/unfiltered/insertion_reads_"+config['args']['ref_name']+".txt",
         deletions_support = config['args']['out']+"results/tepid/unfiltered/deletion_reads_"+config['args']['ref_name']+".txt",
         te_gff = config['mcc']['locations'],
-        te_taxonomy = config['mcc']['taxonomy']
+        te_taxonomy = config['mcc']['taxonomy'],
+        reference_fasta = config['mcc']['reference']
 
     threads: 1
 
@@ -42,7 +45,9 @@ rule tepid_post:
     params:
         sample_name = config['args']['sample_name'],
         out_dir = config['args']['out']+"/results/tepid/",
-        chromosomes = config['args']['chromosomes']
+        chromosomes = config['args']['chromosomes'],
+        config = config['config']['tepid']['files'][1],
+        status_log = config['status']['tepid']
 
     output:
         config['out']['tepid']

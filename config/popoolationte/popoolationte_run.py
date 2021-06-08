@@ -1,3 +1,23 @@
+
+PARAMS = {
+    "identify-te-insertsites.pl" : {
+        "--min-count" : 3,
+        "--min-map-qual" : 15
+    },
+    "crosslink-te-sites.pl" : {
+        "--single-site-shift": 100
+    },
+    "update-teinserts-with-knowntes.pl" : {
+        "--single-site-shift": 100
+    },
+    "estimate-polymorphism.pl" : {
+        "--min-map-qual": 15
+    },
+    "filter-teinserts.pl" : {
+        "--min-count": 5
+    }
+}
+
 '''
 NAME
     perl identify-te-insertsites.pl - Identifies TE insertion sites (forward
@@ -11,27 +31,7 @@ Usage:
     --min-map-qual
         the minimum mapping quality; this will only apply to reads mapping
         to a reference contig.
-'''
-IDENTIFY_TE_INSERTSITES = {
-    "min-count" : 3,
-    "min-map-qual" : 15
-}
 
-
-
-
-CROSSLINK_TE_SITES = {
-    "single-site-shift": 100
-}
-
-
-
-UPDATE_TEINSERTS_WITH_KNOWNTES = {
-    "single-site-shift": 100
-}
-
-
-'''
 NAME
     perl estimate-polymorphism.pl - Estimte the insertion frequencies for a
     given set of TE insertions
@@ -44,12 +44,3 @@ OPTIONS
         the minimum mapping quality
 
 '''
-
-ESTIMATE_POLYMORPHISM = {
-    "min-map-qual": 15
-}
-
-
-FILTER = {
-    "min-count": 5
-}
