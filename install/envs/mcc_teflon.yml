@@ -10,3 +10,4 @@ dependencies:
   - repeatmasker=4.1.0
   - bedtools=2.17.0
   - gawk=5
+  - openssl=1.1
