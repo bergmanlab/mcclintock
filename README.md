@@ -208,7 +208,7 @@ python3 mcclintock.py --install
   * [example](https://github.com/bergmanlab/mcclintock/blob/master/test/reference_TE_locations.gff)
 * Taxonomy (`-t/--taxonomy`)
   * A Tab deliminted file that maps the unique reference TE to the family it belongs to.
-  * This file should contain two columns, the first corresponding to the refence TE idendifier which should match the `ID=` attribute from the locations GFF(`-g`). The second column contains the reference TE's family which should match the name of a sequence in the consensus fasta (`-c`)
+  * This file should contain two columns, the first corresponding to the reference TE identifier which should match the `ID=` attribute from the locations GFF(`-g`). The second column contains the reference TE's family which should match the name of a sequence in the consensus fasta (`-c`)
   * [example](https://github.com/bergmanlab/mcclintock/blob/master/test/sac_cer_te_families.tsv)
 * Coverage FASTA (`-s/--coverage_fasta`)
   * A fasta file of TE sequences to be used for the coverage analysis.
@@ -230,7 +230,7 @@ The results of McClintock component methods are output to the directory `<output
 * The HTML report also summarizes reference and non-reference predictions for all families. `<output>/<sample>/results/summary/html/families.html`
 * A page is also generated for each family, which summarizes the coverage for the family consensus sequence and the family-specific predictions from each component method. `<output>/<sample>/results/summary/html/<family>.html`
 
-#### Raw Summary files : 
+#### Raw Summary files :
 
 * `<output>/<sample>/results/summary/data/run/summary_report.txt` : Summary Report of McClintock run. Contains information on the McClintock command used, when and where the script was run, details about the mapped reads, and table that shows the number of TE predictions produced from each method.
 * `<output>/<sample>/results/summary/data/run/te_prediction_summary.txt` : A comma-delimited table showing reference and non-reference predictions for each component method
@@ -255,7 +255,7 @@ The results of McClintock component methods are output to the directory `<output
 #### ngs_te_mapper2 : `<output>/<sample>/results/ngs_te_mapper2/`
 * `unfiltered/<sample>.nonref.bed`: BED file containing raw 0-based intervals corresponding to the 5' and 3' breakpoints for non-reference predictions.
 * `unfiltered/<sample>.ref.bed`: BED file containing raw 0-based intervals corresponding to the reference TE annotations predicted by ngs_te_mapper2
-* `<reference>_ngs_te_mapper2_nonredundant.bed`: BED file containing predictions from `unfiltered/<reference>.nonref.bed` and `unfiltered/<reference>.ref.bed` with bed line names matching the standard McClintock naming convention. 
+* `<reference>_ngs_te_mapper2_nonredundant.bed`: BED file containing predictions from `unfiltered/<reference>.nonref.bed` and `unfiltered/<reference>.ref.bed` with bed line names matching the standard McClintock naming convention.
 
 #### RelocaTE : `<output>/<sample>/results/relocaTE/`
 * `unfiltered/combined.gff` : GFF containing 1-based TSDs for non-reference predictions and 1-based intervals for reference TEs. The reference intervals are based on the reference TE annotations.
