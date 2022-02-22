@@ -5,10 +5,10 @@
 # **McClintock**: <sub><sup>Meta-pipeline to identify transposable element insertions using next generation sequencing data</sup></sub>
 ## <a name="started"></a> Getting Started
 ```bash
-# INSTALL (Requires Conda)
+# INSTALL (Requires Conda and Mamba to be installed)
 git clone git@github.com:bergmanlab/mcclintock.git
 cd mcclintock
-conda env create -f install/envs/mcclintock.yml --name mcclintock
+mamba env create -f install/envs/mcclintock.yml --name mcclintock
 conda activate mcclintock
 python3 mcclintock.py --install
 python3 test/download_test_data.py
@@ -73,6 +73,11 @@ conda init
 conda update conda
 ```
 
+#### Install Mamba
+```bash
+conda install mamba=0.21.2
+```
+
 ## <a name="install"></a> Installing McClintock
 After installing and updating Conda, McClintock can be installed by: **1.** cloning the repository, **2.** creating the Conda environment, and **3.** running the install script.
 
@@ -84,7 +89,7 @@ cd mcclintock
 
 #### Create McClintock Conda Environment
 ```bash
-conda env create -f install/envs/mcclintock.yml --name mcclintock
+mamba env create -f install/envs/mcclintock.yml --name mcclintock
 ```
 * This installs the base dependencies (`Snakemake`, `Python3`, `BioPython`) needed to run the main McClintock script into the McClintock Conda environment
 
