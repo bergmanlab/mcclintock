@@ -407,9 +407,10 @@ python3 mcclintock.py \
 ## etc ##
 ```
 * Individual samples can be run in a serial manner as shown in the example above, or run in parallel, such as through separate jobs on a HPC cluster.
+
 License
 ------
-Copyright 2014-2020 Preston Basting, Michael G. Nelson, Shunhua Han, and Casey M. Bergman
+Copyright 2014-2022 Preston Basting, Michael G. Nelson, Shunhua Han, and Casey M. Bergman
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
 
