@@ -89,7 +89,7 @@ cd mcclintock
 
 #### Create McClintock Conda Environment
 ```bash
-conda env create -f install/envs/mcclintock.yml --name mcclintock
+mamba env create -f install/envs/mcclintock.yml --name mcclintock
 ```
 * This installs the base dependencies (`Snakemake`, `Python3`, `BioPython`) needed to run the main McClintock script into the McClintock Conda environment
 
