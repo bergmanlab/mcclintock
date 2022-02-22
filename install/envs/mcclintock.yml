@@ -4,7 +4,7 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - mamba
+  - mamba=0.21.2
   - python=3.7.8
   - snakemake=5.32.0
   - biopython=1.77

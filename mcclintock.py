@@ -48,7 +48,7 @@ def parse_args(expected_configs):
     parser.add_argument("-r", "--reference", type=str, help="A reference genome sequence in fasta format", required=('--install' not in sys.argv))
     parser.add_argument("-c", "--consensus", type=str, help="The consensus sequences of the TEs for the species in fasta format", required='--install' not in sys.argv)
     parser.add_argument("-1", "--first", type=str, help="The path of the first fastq file from paired end read sequencing or the fastq file from single read sequencing", required=(('--install' not in sys.argv) and ('--make_annotations' not in sys.argv)))
-    
+
 
     ## optional ##
     parser.add_argument("-2", "--second", type=str, help="The path of the second fastq file from a paired end read sequencing", required=False)
@@ -92,22 +92,22 @@ def parse_args(expected_configs):
         valid_methods = sysconfig.SINGLE_END_METHODS #from config.py
     else:
         valid_methods = sysconfig.ALL_METHODS #from config.py
-    
+
     # used to preserve trimgalore and mapped reads output if they are explicitly called by the user
     trimgalore_called = False
     map_reads_called = False
 
     if args.methods is None:
         args.methods = valid_methods
-    
+
     else:
         args.methods = args.methods.split(",")
         if "trimgalore" in args.methods:
             trimgalore_called = True
-        
+
         if "map_reads" in args.methods:
             map_reads_called = True
-            
+
         for x,method in enumerate(args.methods):
             args.methods[x] = method.lower()
             if args.methods[x] not in valid_methods:
@@ -157,11 +157,11 @@ def parse_args(expected_configs):
         if args.taxonomy is None:
             sys.stderr.write("If a GFF file is supplied (-g/--locations) then a TE taxonomy file that links it to the fasta consensus is also needed (-t/--taxonomy)...exiting...\n")
             sys.exit(1)
-    
+
     # check -t
     if args.taxonomy is not None:
         args.taxonomy = mccutils.get_abs_path(args.taxonomy)
-    
+
 
     # check -s
     if args.coverage_fasta is not None:
@@ -174,7 +174,7 @@ def parse_args(expected_configs):
     # check -a
     if args.augment is not None:
         args.augment = mccutils.get_abs_path(args.augment)
-    
+
     # check sample name
     if args.sample_name is not None:
         if "/" in args.sample_name or args.sample_name == "tmp":
@@ -197,7 +197,7 @@ def parse_args(expected_configs):
 
     if trimgalore_called:
         args.keep_intermediate.append("trimgalore")
-    
+
     if map_reads_called:
         args.keep_intermediate.append("map_reads")
 
@@ -210,19 +210,19 @@ def check_input_files(ref, consensus, fq1, fq2=None, locations=None, taxonomy=No
     if not annotations_only:
         #check fq1
         check_fastq(fq1)
-        
+
         #check fq2
         if fq2 is not None:
             check_fastq(fq2)
-    
+
     # checking consensus
     consensus_seq_names = format_fasta(consensus)
-    
+
     #check locations gff
     gff_ids = []
     if locations is not None:
         gff_ids = format_gff(locations)
-    
+
     # check taxonomy
     if taxonomy is not None:
         format_taxonomy(taxonomy, gff_ids, consensus_seq_names, consensus, locations)
@@ -253,7 +253,7 @@ def format_fasta(in_fasta):
                     mccutils.log("setup", in_fasta+": ERROR problematic symbol in feature name: "+seq_name+" ... reformat this feature name for compatibility with McClintock")
                     print("Problematic symbols:"," ".join(mccutils.INVALID_SYMBOLS))
                     sys.exit(1)
-                
+
                 if masked_seq_name not in seq_names:
                     seq_names.append(masked_seq_name)
                 else:
@@ -262,7 +262,7 @@ def format_fasta(in_fasta):
     except Exception as e:
         print(e)
         sys.exit(in_fasta+" appears to be a malformed FastA file..exiting...\n")
-    
+
     if len(seq_names) < 1:
         sys.exit(in_fasta+" contains no sequences... exiting...\n")
 
@@ -273,10 +273,10 @@ def check_fastq(fastq):
     #check fq1
     if ".fastq" not in fastq and ".fq" not in fastq:
         sys.exit(fastq+" is not a (.fastq/.fq) file, exiting...\n")
-    
+
     if not os.path.isfile(fastq):
         sys.exit(fastq+" does not exist... exiting...\n")
-    
+
     if (mccutils.is_empty_file(fastq)):
         sys.exit(fastq+" is empty... exiting...\n")
 
@@ -308,7 +308,7 @@ def format_gff(ingff):
                                 sys.exit("ID: "+masked_gff_id+" is not unique. please ensure each feature has a unique ID\n")
                     if masked_gff_id == "":
                         sys.exit("GFF line: "+line+" is missing an ID attribute (ex. ID=chr1_TY1s1)\n")
-    
+
     return gff_ids
 
 def format_taxonomy(in_taxonomy, gff_ids, consensus_ids, consensus_fasta, locations_gff):
@@ -340,7 +340,7 @@ def format_taxonomy(in_taxonomy, gff_ids, consensus_ids, consensus_fasta, locati
 
                 if masked_te_id not in gff_ids:
                     sys.exit("TE ID: "+masked_te_id+" not found in IDs from GFF: "+locations_gff+"\nplease make sure each ID in: "+in_taxonomy+" is found in:"+locations_gff+"\n")
-                
+
                 if masked_te_family not in consensus_ids:
                     sys.exit("TE Family: "+masked_te_family+" not found in sequence names from: "+consensus_fasta+"\nplease make sure each family in: "+in_taxonomy+" is found in: "+consensus_fasta+"\n")
 
@@ -357,7 +357,7 @@ def get_conda_envs(conda_env_dir):
                             name = line.split(":")[1].replace("\n","")
                             name = name.replace(" ","")
                             existing_envs[name] = yaml
-    
+
     return existing_envs
 
 def install(methods, resume=False, debug=False):
@@ -373,7 +373,7 @@ def install(methods, resume=False, debug=False):
         'install' : install_path,
         'log_dir': log_dir
     }
-    
+
     data['URLs'] = config_install.URL
     data['MD5s'] = config_install.MD5
     data['ENVs'] = config_install.ENV
@@ -381,7 +381,7 @@ def install(methods, resume=False, debug=False):
 
     for method in data['ENVs'].keys():
         data['ENVs'][method] = data['ENVs'][method].replace(config_install.ENV_PATH, install_path+"envs/")
-    
+
     for method in data['output'].keys():
         data['output'][method] = data['output'][method].replace(config_install.INSTALL_PATH, install_path)
 
@@ -417,10 +417,10 @@ def install(methods, resume=False, debug=False):
                 mccutils.log("install","Removing existing installation of: "+env)
                 print(install_path+"/tools/"+env)
                 mccutils.remove(install_path+"/tools/"+env)
-        
+
         # reinstall src code
         mccutils.log("install","Installing scripts for:"+env)
-        command = ["snakemake","--use-conda", "--conda-prefix", conda_env_dir, "--configfile", install_config, "--cores", "1", "--nolock", data['output'][env]]
+        command = ["snakemake", "--use-conda", "--conda-frontend mamba", "--conda-prefix", conda_env_dir, "--configfile", install_config, "--cores", "1", "--nolock", data['output'][env]]
         if not debug:
             command.append("--quiet")
         mccutils.run_command(command)
@@ -434,9 +434,9 @@ def get_installed_versions(tool_dir):
             with open(version_file,"r") as v_file:
                 for line in v_file:
                     version = line
-        
+
         versions[d] = version
-    
+
     return versions
 
 
@@ -451,7 +451,7 @@ def check_installed_modules(methods, no_install_methods, method_md5s, install_di
             print("ERROR: missing conda env for method:", method, file=sys.stderr)
             print("please install methods using: python mcclintock.py --install", file=sys.stderr)
             sys.exit(1)
-        
+
         if method not in no_install_methods:
             if installed_version[method] != method_md5s[method]:
                 print("ERROR: installed version of", method,"(", installed_version[method], ") does not match the expected: ", method_md5s[method])
@@ -476,7 +476,7 @@ def setup_config_info(config_dir, method_to_config, config_rules):
 
             out_dict[method]["files"].append(config_file)
             out_dict[method]["MD5s"].append(md5)
-    
+
     return out_dict
 
 def make_run_config(args, sample_name, ref_name, full_command, current_directory, debug=False):
@@ -502,7 +502,7 @@ def make_run_config(args, sample_name, ref_name, full_command, current_directory
         with open(git_commit_file,"r") as inf:
             for line in inf:
                 git_commit = line.replace("\n","")
-        
+
         mccutils.remove(git_commit_file)
 
     except Exception as e:
@@ -522,8 +522,8 @@ def make_run_config(args, sample_name, ref_name, full_command, current_directory
     out_files = sysconfig.OUT_PATHS
     for key in out_files.keys():
         out_files[key] = out_files[key].replace(sysconfig.METHOD_DIR, method_paths[key])
-        out_files[key] = out_files[key].replace(sysconfig.SAMPLE_NAME, sample_name)   
-    
+        out_files[key] = out_files[key].replace(sysconfig.SAMPLE_NAME, sample_name)
+
     for method in args.methods:
         out_files_to_make.append(out_files[method])
 
@@ -582,7 +582,7 @@ def make_run_config(args, sample_name, ref_name, full_command, current_directory
     }
 
     # where mcc copies will be stored
-    
+
     data["mcc"] = sysconfig.INTERMEDIATE_PATHS
     for key in data["mcc"].keys():
         data["mcc"][key] = data["mcc"][key].replace(sysconfig.INPUT_DIR, input_dir)
@@ -590,13 +590,13 @@ def make_run_config(args, sample_name, ref_name, full_command, current_directory
         data["mcc"][key] = data["mcc"][key].replace(sysconfig.SAM_DIR, sample_dir)
         data["mcc"][key] = data["mcc"][key].replace(sysconfig.REF_NAME, ref_name)
         data["mcc"][key] = data["mcc"][key].replace(sysconfig.SAMPLE_NAME, sample_name)
-    
+
     data['status'] = status_files
 
     data["out"] = out_files
 
     data['outdir'] = method_paths
-    
+
     data["essential"] = sysconfig.ESSENTIAL_PATHS
     for key in data["essential"].keys():
         for x,val in enumerate(data["essential"][key]):
@@ -612,7 +612,7 @@ def make_run_config(args, sample_name, ref_name, full_command, current_directory
 
     with open(run_config,"w") as conf:
         json.dump(data, conf, indent=4)
-    
+
     return run_id, out_files
 
 
@@ -622,7 +622,7 @@ def run_workflow(args, sample_name, ref_name, run_id, out_files, debug=False, an
     input_dir = args.out
     reference_dir = args.out+"/"+ref_name+"/"
     sample_dir = args.out+"/"+sample_name+"/"
-    results_dir = args.out+"/"+sample_name+"/results/" 
+    results_dir = args.out+"/"+sample_name+"/results/"
 
     path=os.path.dirname(os.path.abspath(__file__))
     mccutils.mkdir(args.out+"/snakemake")
@@ -644,7 +644,7 @@ def run_workflow(args, sample_name, ref_name, run_id, out_files, debug=False, an
             mccutils.remove(config_json)
             sys.exit("ERROR: output directory:"+sample_dir+" is not empty. If wanting to resume a previous run, use --resume, otherwise please delete this directory or change your -o/--output or --sample_name\n")
 
-    
+
     # check that previous runs are compatible
     else:
         mccutils.log("setup","Checking config files to ensure previous intermediate files are compatible with this run")
@@ -658,7 +658,7 @@ def run_workflow(args, sample_name, ref_name, run_id, out_files, debug=False, an
                 if not config_compatible:
                     mccutils.remove(config_json)
                     sys.exit(1)
-        
+
         if not config_found:
             mccutils.remove(config_json)
             sys.exit("ERROR: Unable to resume run. No config files from previous runs found in:"+input_dir+"/snakemake/config/ Remove --resume for clean run\n")
@@ -678,7 +678,7 @@ def run_workflow(args, sample_name, ref_name, run_id, out_files, debug=False, an
     if not annotations_only:
         for method in args.methods:
             command.append(out_files[method])
-        
+
         command.append(sample_dir+"results/summary/data/run/summary_report.txt")
     else:
         command.append(reference_dir+"reference_te_locations/inrefTEs.gff")
@@ -703,7 +703,7 @@ def run_workflow(args, sample_name, ref_name, run_id, out_files, debug=False, an
 def get_recent_config_md5s(prev_config, config_md5s):
     with open(prev_config) as f:
         prev_config_data = json.load(f)
-    
+
     run_methods = prev_config_data['args']['methods']
     start_time = datetime.strptime(prev_config_data['args']['time'], '%Y-%m-%d %H:%M:%S')
 
@@ -714,14 +714,14 @@ def get_recent_config_md5s(prev_config, config_md5s):
             else:
                 if config_md5s[config][1] < start_time:
                     config_md5s[config] = [prev_config_data['config'][config]['MD5s'], start_time]
-    
+
     return config_md5s
 
 def get_rules_to_rerun(run_config, prev_md5s):
     rules_to_rerun = []
     with open(run_config) as f:
         run_config_data = json.load(f)
-    
+
     for config in run_config_data['config'].keys():
         if config in prev_md5s.keys():
             for x,md5 in enumerate(prev_md5s[config][0]):
@@ -733,10 +733,10 @@ def get_rules_to_rerun(run_config, prev_md5s):
 def config_compatibility(run_config, prev_config):
     with open(run_config) as f:
         run_config_data = json.load(f)
-    
+
     with open(prev_config) as f:
         prev_config_data = json.load(f)
-    
+
     # check McClintock commit compatibility
     if run_config_data['args']['commit'] != prev_config_data['args']['commit']:
         sys.stderr.write("(--resume) ERROR: Unable to resume McClintock run\n")
@@ -752,19 +752,19 @@ def config_compatibility(run_config, prev_config):
                 sys.stderr.write("(--resume) ERROR: Unable to resume McClintock run\n")
                 sys.stderr.write("                  Previous mcclintock run intermediate files are incompatible due to differences in --augment\n")
                 return False
-            
+
             if run_config_data["in"]["reference"] != prev_config_data["in"]["reference"]:
                 sys.stderr.write("(--resume) ERROR: Unable to resume McClintock run\n")
                 sys.stderr.write("                  Previous McClintock run intermediate files are incompatible due to differences in -r/--reference\n")
                 return False
-    
+
     # check consensus compatibility
     if os.path.exists(run_config_data["mcc"]["consensus"]):
         if run_config_data["mcc"]["consensus"] == prev_config_data["mcc"]["consensus"] and run_config_data["in"]["consensus"] != prev_config_data["in"]["consensus"]:
             sys.stderr.write("(--resume) ERROR: Unable to resume McClintock run\n")
             sys.stderr.write("                  Previous McClintock run intermediate files are incompatible due to differences in -c/--consensus\n")
             return False
-    
+
     # check fastq compatibility
     if "--make_annotations" not in prev_config_data['args']['full_command']:
         if os.path.exists(run_config_data["mcc"]["fq1"]):
@@ -782,7 +782,7 @@ def config_compatibility(run_config, prev_config):
                 sys.stderr.write("(--resume) ERROR: Unable to resume McClintock run\n")
                 sys.stderr.write("                  Previous McClintock run intermediate files are incompatible due to differences in running Trimgalore\n")
                 return False
-    
+
     # check locations gff compatibility
     if os.path.exists(run_config_data["mcc"]["locations"]):
         if run_config_data["mcc"]["locations"] == prev_config_data["mcc"]["locations"]:
@@ -795,7 +795,7 @@ def config_compatibility(run_config, prev_config):
                 sys.stderr.write("(--resume) ERROR: Unable to resume McClintock run\n")
                 sys.stderr.write("                  Previous McClintock run intermediate files are incompatible due to differences in -g/--locations\n")
                 return False
-            
+
     # check taxonomy compatibility
     if os.path.exists(run_config_data["mcc"]["taxonomy"]):
         if run_config_data["mcc"]["taxonomy"] == prev_config_data["mcc"]["taxonomy"]:
@@ -833,12 +833,12 @@ def calculate_max_threads(avail_procs, methods_used, multithread_methods, slow=F
             is_even = False
             if max_threads%2 == 0:
                 is_even = True
-            
+
             max_threads = max_threads//2
             if is_even:
                 max_threads = max_threads-1
 
-    return max_threads        
+    return max_threads
 
 
 def remove_intermediate_files(options, run_config_file, methods, ref_name, sample_name, outdir):
@@ -863,20 +863,20 @@ def remove_intermediate_files(options, run_config_file, methods, ref_name, sampl
                             for essential_path in essential_paths:
                                 if (os.path.isdir(essential_path) and essential_path in file_path) or (essential_path == file_path):
                                     is_essential = True
-                            
+
                             if not is_essential:
                                 mccutils.remove(file_path)
-                    
+
                     # remove empty directories
                     for root, subdirs, files in os.walk(method_out, topdown=False):
                         for d in subdirs:
                             dir_path = os.path.join(root, d)
                             if len(os.listdir(dir_path)) < 1:
                                 mccutils.remove(dir_path)
-            
+
             else:
                 keep_paths.append(method_out)
-    
+
     if "general" not in options:
         intermediate_dir = outdir+"/"+sample_name+"/intermediate/"
         for root, subdirs, files in os.walk(intermediate_dir, topdown=False):
@@ -886,10 +886,10 @@ def remove_intermediate_files(options, run_config_file, methods, ref_name, sampl
                 for keep_path in keep_paths:
                     if keep_path in file_path:
                         keep = True
-                
+
                 if not keep:
                     mccutils.remove(file_path)
-        
+
         # remove empty directories
         for root, subdirs, files in os.walk(intermediate_dir, topdown=False):
             for d in subdirs:
@@ -906,5 +906,5 @@ def remove_intermediate_files(options, run_config_file, methods, ref_name, sampl
 
 
 
-if __name__ == "__main__":                
+if __name__ == "__main__":
     main()
