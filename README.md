@@ -70,12 +70,12 @@ conda init
 
 #### Update Conda
 ```bash
-conda update conda
+conda update -y conda
 ```
 
 #### Install Mamba
 ```bash
-conda install mamba=0.21.2
+conda install -y mamba=0.21.2 -c conda-forge
 ```
 
 ## <a name="install"></a> Installing McClintock
