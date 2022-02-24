@@ -12,4 +12,4 @@ dependencies:
   - gawk=5
   - openssl=1.1
   - unzip=6.0
-  - patch=v2.7.6
+  - patch=2.7.6

@@ -11,4 +11,4 @@ dependencies:
   - ucsc-fatotwobit=366
   - ucsc-twobittofa=366
   - unzip=6.0
-  - patch=v2.7.6
+  - patch=2.7.6
