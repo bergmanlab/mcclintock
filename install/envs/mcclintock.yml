@@ -9,3 +9,4 @@ dependencies:
   - snakemake=5.32.0
   - biopython=1.77
   - git=2.23.0
+  - unzip=6.0
