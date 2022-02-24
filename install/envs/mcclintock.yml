@@ -10,3 +10,4 @@ dependencies:
   - biopython=1.77
   - git=2.23.0
   - unzip=6.0
+  - patch=v2.7.6
