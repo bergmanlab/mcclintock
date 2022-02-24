@@ -10,3 +10,4 @@ dependencies:
   - samtools=0.1.19
   - ucsc-fatotwobit=366
   - ucsc-twobittofa=366
+  - unzip=6.0

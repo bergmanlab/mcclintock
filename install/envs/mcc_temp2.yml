@@ -14,3 +14,4 @@ dependencies:
   - perl-bioperl-run=1.007002
   - ucsc-twobittofa=377
   - ucsc-fatotwobit=377
+  - unzip=6.0

@@ -8,3 +8,4 @@ dependencies:
   - bwa=0.7.17
   - bedtools=2.17.0
   - samtools=0.1.19
+  - unzip=6.0
