@@ -11,3 +11,4 @@ dependencies:
   - bcftools=1.2
   - exonerate=2.4.0
   - biopython=1.76
+  - unzip=6.0

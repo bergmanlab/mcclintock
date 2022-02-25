@@ -18,3 +18,4 @@ dependencies:
   - exonerate=2.4.0
   - lockfile=0.12.2
   - ipython_genutils=0.2.0
+  - unzip=6.0

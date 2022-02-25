@@ -9,3 +9,5 @@ dependencies:
   - bowtie=1.0.0
   - ucsc-blat=366
   - samtools=0.1.19
+  - unzip=6.0
+  - patch=2.7.6

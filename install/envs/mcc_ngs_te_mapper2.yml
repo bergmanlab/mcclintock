@@ -128,3 +128,4 @@ dependencies:
   - wheel=0.36.2=pyhd3deb0d_0
   - xz=5.2.5=h516909a_1
   - zlib=1.2.11=h516909a_1010
+  - unzip=6.0
