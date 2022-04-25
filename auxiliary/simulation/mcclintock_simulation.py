@@ -10,6 +10,7 @@ from datetime import datetime
 from Bio import SeqIO
 from Bio.Seq import Seq
 from collections import OrderedDict
+import glob
 
 class Insertion:
     def __init__(self):
@@ -46,8 +47,7 @@ def main():
             fastq1, fastq2 = create_synthetic_reads(args.sim, modified_reference, args.coverage, num_pairs, args.length, args.insert, args.error, x, args.out, run_id=args.runid, seed=args.seed)
 
         if not os.path.exists(summary_report):
-            run_mcclintock(fastq1, fastq2, args.reference, args.consensus, args.locations, args.taxonomy, x, args.proc, args.out, args.config, args.keep_intermediate, run_id=args.runid, single=args.single, reverse=reverse)
-
+            run_mcclintock(fastq1, fastq2, args.reference, args.consensus, args.locations, args.taxonomy, x, args.proc, args.out, args.config, args.keep_intermediate, run_id=args.runid, single=args.single, reverse=reverse, mcc_version=args.mcc_version)
 
 def parse_args():
     parser = argparse.ArgumentParser(prog='McClintock Simulation', description="Script to run synthetic insertion simulations to evaluate mcclintock component methods")
@@ -73,6 +73,7 @@ def parse_args():
     parser.add_argument("--runid", type=str, help="a string to prepend to output files so that multiple runs can be run at the same time without file name clashes", required=False)
     parser.add_argument("--sim", type=str, help="Short read simulator to use (options=wgsim,art) [default = wgsim]", required=False)
     parser.add_argument("-s","--single", action="store_true", help="runs the simulation in single ended mode", required=False)
+    parser.add_argument("--mcc_version", type=int, help="Which version of McClintock to use for the simulation(1 or 2). [default = 2]", required=False, default=2)
 
     args = parser.parse_args()
 
@@ -410,7 +411,7 @@ def create_synthetic_reads(simulator, reference, coverage, num_pairs, length, in
 
     return fastq1, fastq2
 
-def run_mcclintock(fastq1, fastq2, reference, consensus, locations, taxonomy, rep, threads, out, config, keep_intermediate, run_id="", reverse=False, single=False):
+def run_mcclintock(fastq1, fastq2, reference, consensus, locations, taxonomy, rep, threads, out, config, keep_intermediate, run_id="", reverse=False, single=False, mcc_version=2):
     if not os.path.exists(out+"/results"):
         os.mkdir(out+"/results")
     
@@ -426,43 +427,86 @@ def run_mcclintock(fastq1, fastq2, reference, consensus, locations, taxonomy, re
     if not os.path.exists(mcc_out):
         os.mkdir(mcc_out)
     
-    mcc_path = config['mcclintock']['path']
-    if single:
-        command = [
-            "python3",mcc_path+"/mcclintock.py", 
-                "-r", reference, 
-                "-c", consensus, 
-                "-1", fastq1, 
-                "-p", str(threads), 
-                "-o", mcc_out, 
-                "-g", locations, 
-                "-t", taxonomy, 
-                "-m", config['mcclintock']['methods'],
-                "--keep_intermediate", keep_intermediate
-        ]
-    else:
-        command = [
-            "python3",mcc_path+"/mcclintock.py", 
-                "-r", reference, 
-                "-c", consensus, 
-                "-1", fastq1, 
-                "-2", fastq2, 
-                "-p", str(threads), 
-                "-o", mcc_out, 
-                "-g", locations, 
-                "-t", taxonomy, 
-                "-m", config['mcclintock']['methods'],
-                "--keep_intermediate", keep_intermediate
-        ]
+    if mcc_version == 2:
+        mcc_path = config['mcclintock']['path']
+        if single:
+            command = [
+                "python3",mcc_path+"/mcclintock.py", 
+                    "-r", reference, 
+                    "-c", consensus, 
+                    "-1", fastq1, 
+                    "-p", str(threads), 
+                    "-o", mcc_out, 
+                    "-g", locations, 
+                    "-t", taxonomy, 
+                    "-m", config['mcclintock']['methods'],
+                    "--keep_intermediate", keep_intermediate
+            ]
+        else:
+            command = [
+                "python3",mcc_path+"/mcclintock.py", 
+                    "-r", reference, 
+                    "-c", consensus, 
+                    "-1", fastq1, 
+                    "-2", fastq2, 
+                    "-p", str(threads), 
+                    "-o", mcc_out, 
+                    "-g", locations, 
+                    "-t", taxonomy, 
+                    "-m", config['mcclintock']['methods'],
+                    "--keep_intermediate", keep_intermediate
+            ]
 
-    if 'augment' in config['mcclintock'].keys() and config['mcclintock']['augment'] is not None:
-        command += ["-a", config['mcclintock']['augment']]
-    print("running mcclintock... output:", mcc_out)
-    print(command)
-    run_command_stdout(command, mcc_out+"/run.stdout", log=mcc_out+"/run.stderr")
-    if not os.path.exists(mcc_out+"/results/summary/summary_report.txt"):
-        sys.stderr.write("run at: "+mcc_out+" failed...")
-    
+        if 'augment' in config['mcclintock'].keys() and config['mcclintock']['augment'] is not None:
+            command += ["-a", config['mcclintock']['augment']]
+        print("running mcclintock... output:", mcc_out)
+        print(command)
+        run_command_stdout(command, mcc_out+"/run.stdout", log=mcc_out+"/run.stderr")
+        if not os.path.exists(mcc_out+"/results/summary/summary_report.txt"):
+            sys.stderr.write("run at: "+mcc_out+" failed...")
+    else:
+        mcc_path = config['mcclintock']['v1_path']
+        command = [
+            mcc_path+"/mcclintock.sh",
+            "-o", mcc_out,
+            "-r", reference,
+            "-c", consensus,
+            "-g", locations,
+            "-t", taxonomy,
+            "-1", fastq1,
+            "-p", str(threads),
+            "-i"
+        ]
+        if not single:
+            command += ["-2", fastq2]
+        
+        if 'augment' in config['mcclintock'].keys() and config['mcclintock']['augment'] is not None:
+            command += ["-C"]
+        
+        print("running mcclintock... output:", mcc_out)
+        print(command)
+        run_command_stdout(command, mcc_out+"/run.stdout", log=mcc_out+"/run.stderr")
+        reorder_mcc1_output(rep, mcc_out)
+        
+
+def reorder_mcc1_output(rep, out):
+    os.mkdir(f"{out}/{rep}.modref_1/")
+    results_dir = f"{out}/{rep}.modref_1/results/"
+    os.mkdir(results_dir)
+    beds = glob.glob(out+'*/*/*/results/*_nonredundant.bed')
+    for bed in beds:
+        base_name = bed.split("/")[-1]
+        method = base_name.replace("_nonredundant.bed","")
+        method = method[method.find("_")+1:]
+        method_dir = results_dir+"/"+method
+        os.mkdir(method_dir)
+        with open(bed,"r") as inbed, open(method_dir+"/"+base_name, "w") as outbed:
+            for line in inbed:
+                outbed.write(line.replace("_","|", 1))
+        
+
+
+
 
 
 
