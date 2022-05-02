@@ -27,7 +27,7 @@ def main():
         # forward
         consensus_seqs = get_seqs(args.consensus)
         reference_seqs = get_seqs(args.reference)
-        
+
         if args.strand == "plus":
             reverse = False
             modified_reference = args.out+"/data/forward/"+str(args.runid)+str(x)+".modref.fasta"
@@ -39,7 +39,7 @@ def main():
 
         if not os.path.exists(modified_reference):
             modified_reference = add_synthetic_insertion(reference_seqs, consensus_seqs, args.config, x, args.out, run_id=args.runid, seed=args.seed, reverse=reverse)
-        
+
         fastq1 = modified_reference.replace(".fasta", "_1.fastq")
         fastq2 = modified_reference.replace(".fasta", "_2.fastq")
         if not os.path.exists(fastq1) or not os.path.exists(fastq2):
@@ -50,7 +50,7 @@ def main():
             run_mcclintock(fastq1, fastq2, args.reference, args.consensus, args.locations, args.taxonomy, x, args.proc, args.out, args.config, args.keep_intermediate, run_id=args.runid, single=args.single, reverse=reverse, mcc_version=args.mcc_version)
 
 def parse_args():
-    parser = argparse.ArgumentParser(prog='McClintock Simulation', description="Script to run synthetic insertion simulations to evaluate mcclintock component methods")
+    parser = argparse.ArgumentParser(prog='McClintock Simulation', description="Script to run synthetic insertion simulations to evaluate McClintock component methods")
 
     ## required ##
     parser.add_argument("-r", "--reference", type=str, help="A reference genome sequence in fasta format", required=True)
@@ -117,25 +117,25 @@ def parse_args():
     # check --end
     if args.end is None:
         args.end = 1
-    
+
     if args.runid is None:
         args.runid = ""
-    
+
     if args.single is None:
         args.single = False
-    
+
     if args.coverage is None:
         args.coverage = 100
-    
+
     if args.length is None:
         args.length = 101
 
     if args.insert is None:
         args.insert = 300
-    
+
     if args.error is None:
         args.error = 0.01
-    
+
     if args.keep_intermediate is None:
         args.keep_intermediate = "general"
 
@@ -144,12 +144,12 @@ def parse_args():
     elif args.strand != "plus" and args.strand != "minus":
         sys.exit("ERROR: --strand must be plus or minus \n")
 
-    
+
     if args.sim is None:
         args.sim = "wgsim"
     elif args.sim not in ["wgsim", "art"]:
         sys.exit("ERROR: --sim must be wgsim or art \n")
-    
+
 
     return args
 
@@ -168,7 +168,7 @@ def run_command(cmd_list, log=None):
             msg += msg + cmd_string + "\n"
             sys.stderr.write(msg)
             sys.exit(1)
-    
+
     else:
         try:
             out = open(log,"a")
@@ -204,7 +204,7 @@ def run_command_stdout(cmd_list, out_file, log=None):
             msg += msg + cmd_string + "\n"
             sys.stderr.write(msg)
             sys.exit(1)
-    
+
     else:
         try:
             out_log = open(log,"a")
@@ -244,7 +244,7 @@ def get_seqs(fasta):
     records = SeqIO.parse(fasta, "fasta")
     for record in records:
         seq_dir.append([str(record.id), str(record.seq)])
-    
+
     return seq_dir
 
 def fix_fasta_lines(fasta, length):
@@ -264,18 +264,18 @@ def fix_fasta_lines(fasta, length):
         remainder = (len(seq)) - x
         # print(seq[x:x+remainder])
         lines.append(seq[x:x+remainder])
-    
+
     return lines
 
 def add_synthetic_insertion(reference_seqs, consensus_seqs, config, rep, out, run_id="", seed=None, reverse=False):
     if not os.path.exists(out+"/data"):
         os.mkdir(out+"/data")
-    
+
     if not reverse:
         outdir = out+"/data/forward"
     else:
         outdir = out+"/data/reverse"
-    
+
     if not os.path.exists(outdir):
         os.mkdir(outdir)
 
@@ -303,7 +303,7 @@ def add_synthetic_insertion(reference_seqs, consensus_seqs, config, rep, out, ru
         for line in t:
             chrom = line.split("\t")[0]
             valid_chroms.append(chrom)
-    
+
     # get target site to add TE
     targets = []
     with open(target_file,"r") as t:
@@ -313,7 +313,7 @@ def add_synthetic_insertion(reference_seqs, consensus_seqs, config, rep, out, ru
 
     if len(targets) == 0:
         sys.exit("no targets in target bed file...exiting...")
-    
+
     target = targets[random.randint(0, len(targets)-1)]
     target_site = random.randint(int(target[1]), int(target[2])-1)
     target_chrom = target[0]
@@ -342,12 +342,12 @@ def add_synthetic_insertion(reference_seqs, consensus_seqs, config, rep, out, ru
     outfasta = outdir+"/"+run_id+str(rep)+".modref.fasta"
     outbed = outdir+"/"+run_id+str(rep)+".modref.bed"
 
-    
+
     with open(outfasta+".tmp","w") as outfa:
         for seq in reference_seqs:
             outfa.write(">"+seq[0]+"\n")
             outfa.write(seq[1]+"\n")
-    
+
     # create fasta with fixed line lengths
     fasta_lines = fix_fasta_lines(outfasta+".tmp", 80)
     with open(outfasta,"w") as outfa:
@@ -355,7 +355,7 @@ def add_synthetic_insertion(reference_seqs, consensus_seqs, config, rep, out, ru
             outfa.write(line+"\n")
 
     os.remove(outfasta+".tmp")
-    
+
     # create bed that marks TSD
     with open(outbed,"w") as bed:
         bed.write(target_chrom+"\t"+str(target_site)+"\t"+str(target_site+duplication_size)+"\t"+family_to_add+"\n")
@@ -375,7 +375,7 @@ def calculate_num_pairs(fasta, coverage, length, single=False):
             split_line = line.split("\t")
             contig_length = int(split_line[1])
             total_length += contig_length
-    
+
     if single:
         num_pairs = (total_length * coverage)/(length)
     else:
@@ -388,7 +388,7 @@ def create_synthetic_reads(simulator, reference, coverage, num_pairs, length, in
         random.seed(seed+"create_synthetic_reads"+str(rep))
     else:
         random.seed(str(datetime.now())+"create_synthetic_reads"+str(rep))
-    
+
     seed_for_wgsim = random.randint(0,1000)
 
     tmp_fastq1 = reference.replace(".fasta", "") + "1.fq"
@@ -403,8 +403,8 @@ def create_synthetic_reads(simulator, reference, coverage, num_pairs, length, in
 
     else:
         command = ["art_illumina", "-ss", "HS25", "--rndSeed", str(seed_for_wgsim), "-sam", "-i", reference, "-p", "-l", str(length), "-f", str(coverage), "-m", str(insert), "-s", "10", "-o", reference.replace(".fasta", "")]
-    
-    
+
+
     run_command_stdout(command, report)
     run_command(["mv", tmp_fastq1, fastq1])
     run_command(["mv", tmp_fastq2, fastq2])
@@ -414,7 +414,7 @@ def create_synthetic_reads(simulator, reference, coverage, num_pairs, length, in
 def run_mcclintock(fastq1, fastq2, reference, consensus, locations, taxonomy, rep, threads, out, config, keep_intermediate, run_id="", reverse=False, single=False, mcc_version=2):
     if not os.path.exists(out+"/results"):
         os.mkdir(out+"/results")
-    
+
     if not reverse:
         if not os.path.exists(out+"/results/forward"):
             os.mkdir(out+"/results/forward")
@@ -426,33 +426,33 @@ def run_mcclintock(fastq1, fastq2, reference, consensus, locations, taxonomy, re
 
     if not os.path.exists(mcc_out):
         os.mkdir(mcc_out)
-    
+
     if mcc_version == 2:
         mcc_path = config['mcclintock']['path']
         if single:
             command = [
-                "python3",mcc_path+"/mcclintock.py", 
-                    "-r", reference, 
-                    "-c", consensus, 
-                    "-1", fastq1, 
-                    "-p", str(threads), 
-                    "-o", mcc_out, 
-                    "-g", locations, 
-                    "-t", taxonomy, 
+                "python3",mcc_path+"/mcclintock.py",
+                    "-r", reference,
+                    "-c", consensus,
+                    "-1", fastq1,
+                    "-p", str(threads),
+                    "-o", mcc_out,
+                    "-g", locations,
+                    "-t", taxonomy,
                     "-m", config['mcclintock']['methods'],
                     "--keep_intermediate", keep_intermediate
             ]
         else:
             command = [
-                "python3",mcc_path+"/mcclintock.py", 
-                    "-r", reference, 
-                    "-c", consensus, 
-                    "-1", fastq1, 
-                    "-2", fastq2, 
-                    "-p", str(threads), 
-                    "-o", mcc_out, 
-                    "-g", locations, 
-                    "-t", taxonomy, 
+                "python3",mcc_path+"/mcclintock.py",
+                    "-r", reference,
+                    "-c", consensus,
+                    "-1", fastq1,
+                    "-2", fastq2,
+                    "-p", str(threads),
+                    "-o", mcc_out,
+                    "-g", locations,
+                    "-t", taxonomy,
                     "-m", config['mcclintock']['methods'],
                     "--keep_intermediate", keep_intermediate
             ]
@@ -479,15 +479,15 @@ def run_mcclintock(fastq1, fastq2, reference, consensus, locations, taxonomy, re
         ]
         if not single:
             command += ["-2", fastq2]
-        
+
         if 'augment' in config['mcclintock'].keys() and config['mcclintock']['augment'] is not None:
             command += ["-C"]
-        
+
         print("running mcclintock... output:", mcc_out)
         print(command)
         run_command_stdout(command, mcc_out+"/run.stdout", log=mcc_out+"/run.stderr")
         reorder_mcc1_output(rep, mcc_out)
-        
+
 
 def reorder_mcc1_output(rep, out):
     os.mkdir(f"{out}/{rep}.modref_1/")
@@ -503,7 +503,6 @@ def reorder_mcc1_output(rep, out):
         with open(bed,"r") as inbed, open(method_dir+"/"+base_name, "w") as outbed:
             for line in inbed:
                 outbed.write(line.replace("_","|", 1))
-        
 
 
 
@@ -511,5 +510,6 @@ def reorder_mcc1_output(rep, out):
 
 
 
-if __name__ == "__main__":                
+
+if __name__ == "__main__":
     main()
