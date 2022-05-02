@@ -1,6 +1,6 @@
 # Simulation of McClintock 2.0
-## Installation
-* Install miniconda
+## Installation of simulation system
+* Install miniconda (If haven't installed before)
 ```bash
 wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O $HOME//miniconda.sh
 bash ~/miniconda.sh -b -p $HOME/miniconda # silent mode
@@ -11,7 +11,7 @@ conda init
 conda update conda
 ```
 
-* Clone and install mcclintock 2.0
+* Clone and install mcclintock 2.0 (If haven't installed before)
 ```bash
 cd ~
 git clone git@github.com:bergmanlab/mcclintock.git
@@ -27,14 +27,13 @@ python mcclintock.py --install
 conda deactivate mcclintock
 ```
 
-* install and activate mcclintock sim environment
+* Install and activate mcclintock sim environment
 ```
-conda env create -f ~/git/mcclintock/auxiliary/simulation/mcc_sim.yml --name mcc_sim
+conda env create -f ~/mcclintock/auxiliary/simulation/mcc_sim.yml --name mcc_sim
 conda activate mcc_sim
 ```
 
-## Run simulation with test data
-### Usage of [Simulation system](https://github.com/bergmanlab/mcclintock/blob/master/auxiliary/simulation/mcclintock_simulation.py)
+## Usage of [Simulation system](https://github.com/bergmanlab/mcclintock/blob/master/auxiliary/simulation/mcclintock_simulation.py)
 ```bash
 $ python mcclintock_simulation.py -h
 usage: McClintock Simulation [-h] -r REFERENCE -c CONSENSUS -g LOCATIONS -t TAXONOMY -j
@@ -90,6 +89,56 @@ optional arguments:
                         [default = 2]
 ```
 
+### Required options
+#### `-r/--reference` Reference genome sequences in FASTA format
+  - [example](https://github.com/bergmanlab/mcclintock/blob/master/test/sacCer2.fasta)
+#### `-c/--consensus` TE consensus library in FASTA format
+  - [example](https://github.com/bergmanlab/mcclintock/blob/master/test/sac_cer_par_TE_seqs.fasta)
+#### `-g/--locations` Known TE locations in reference genome in GFF format
+  - [example](https://github.com/bergmanlab/mcclintock/blob/master/test/reference_TE_locations.gff)
+#### `-t/--taxonomy` A tab delimited file with one entry per ID in the GFF format
+  - The file should contain two columns: the first containing the ID and the second containing the TE family it belongs to.
+  - [example](https://github.com/bergmanlab/mcclintock/blob/master/test/sac_cer_te_families.tsv)
+  - The TE annotation GFF and taxonomy file could be generated using main McClintock script with `--make_annotations` option:
+```
+python3 mcclintock/mcclintock.py --make_annotations -r REFERENCE.FASTA -c CONSENESUS.FASTA -p NUMTHREADS -o OUTDIR
+```
+#### `-j/--config` Configuration file in JSON format
+  - The config file contains information of TE family, TSD size in bp, target sites, path to McClintock installation and component methods for simulation.
+  - You could create a candidate target site file in BED format with reference genome FASTA and reference TE annotation GFF. The synthetic insertion would be created in random non-TE unique regions, regardless of the biological insertion preferences of the species.
+```
+python make_nonte_bed.py -r REFERENCE.FASTA -g REF_TE.GFF -o nonTE.bed
+```
+  - Example config file:
+```
+{
+    "families": {
+        "TY1": {
+            "TSD": 5,
+            "targets": "/path/to/target/sites"
+        },
+        "TY2": {
+            "TSD": 5,
+            "targets": "/path/to/target/sites"
+        },
+        "TY3": {
+            "TSD": 5,
+            "targets": "/path/to/target/sites"
+        },
+        "TY4": {
+            "TSD": 5,
+            "targets": "/path/to/target/sites"
+        }
+    },
+    "mcclintock": {
+        "path": "/path/to/mcclintock",
+        "methods": "ngs_te_mapper,ngs_te_mapper2,relocate,relocate2,temp,temp2,retroseq,popoolationte,popoolationte2,te-locate,teflon,tebreak"
+    }
+}
+```
+
+## Run simulation with test yeast data
+
 ### Example of running new simulation system on McC 2.0
 * Firstly, create config files as input for the simulation script.
   * `config/tRNA.json` is used to simulate biological TE insertion preference in yeast.
@@ -107,7 +156,7 @@ config=${out_dir}/config/tRNA.json
 ```bash
 conda activate mcc_sim
 python ~/mcclintock/auxiliary/simulation/mcclintock_simulation.py  \
--r ~/mcclintock/test/sacCer2.fasta \
+  -r ~/mcclintock/test/sacCer2.fasta \
   -c ~/mcclintock/test/sac_cer_TE_seqs.fasta \
   -g ~/mcclintock/test/reference_TE_locations.gff \
   -t ~/mcclintock/test/sac_cer_te_families.tsv \
@@ -172,4 +221,11 @@ do
 
       sbatch $qsub
 done
+```
+* Summarize simulation results with [script](https://github.com/bergmanlab/mcclintock/blob/master/auxiliary/simulation/mcclintock_simulation_analysis.py)
+  * This script would create a folder called `summary` under `${out_dir}`
+```
+conda activate mcc_sim
+cd ${out_dir}
+python ~/mcclintock/auxiliary/simulation/mcclintock_simulation_analysis.py -o ${out_dir}
 ```
