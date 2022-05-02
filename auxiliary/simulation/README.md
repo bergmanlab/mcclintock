@@ -1,6 +1,11 @@
-# Simulation of McClintock 2.0
-## Installation of simulation system
-* Install miniconda (If haven't installed before)
+# McClintock 2.0 Simulation System
+
+McClintock 2.0 provides several scripts to simulate genomes with a single synthetic TE insertion, generate a synthetic whole genome sequence (WGS) paired-end dataset, submit the synthetic WGS dataset to the main McClintock system, and summarize component method performance.
+
+ - ([mcclintock_simulation.py](https://github.com/bergmanlab/mcclintock/blob/master/auxiliary/simulation/mcclintock_simulation.py))
+
+## Install the McClintock 2.0 simulation system
+* Install miniconda (if not done previously)
 ```bash
 wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O $HOME//miniconda.sh
 bash ~/miniconda.sh -b -p $HOME/miniconda # silent mode
@@ -11,29 +16,30 @@ conda init
 conda update conda
 ```
 
-* Clone and install mcclintock 2.0 (If haven't installed before)
+* Clone and install McClintock 2.0 (if not done previously)
 ```bash
 cd ~
 git clone git@github.com:bergmanlab/mcclintock.git
 cd mcclintock
 
-# install and activate base mcclintock env
+# install and activate the main McClintock environment
 conda env create -f install/envs/mcclintock.yml --name mcclintock
 conda activate mcclintock
 
-# install mcclintock component environments
+# install McClintock component methods and environments
 python mcclintock.py --install
 
+# de-activate the main McClintock environment
 conda deactivate mcclintock
 ```
 
-* Install and activate mcclintock sim environment
+* Install and activate the McClintock simulation environment
 ```
 conda env create -f ~/mcclintock/auxiliary/simulation/mcc_sim.yml --name mcc_sim
 conda activate mcc_sim
 ```
 
-## Usage of [Simulation system](https://github.com/bergmanlab/mcclintock/blob/master/auxiliary/simulation/mcclintock_simulation.py)
+## Simulation script usage
 ```bash
 $ python mcclintock_simulation.py -h
 usage: McClintock Simulation [-h] -r REFERENCE -c CONSENSUS -g LOCATIONS -t TAXONOMY -j
@@ -42,7 +48,7 @@ usage: McClintock Simulation [-h] -r REFERENCE -c CONSENSUS -g LOCATIONS -t TAXO
                              [--start START] [--end END] [--seed SEED] [--runid RUNID]
                              [--sim SIM] [-s] [--mcc_version MCC_VERSION]
 
-Script to run synthetic insertion simulations to evaluate mcclintock component methods
+Script to run synthetic insertion simulations to evaluate McClintock component methods
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -90,26 +96,21 @@ optional arguments:
 ```
 
 ### Required options
-#### `-r/--reference` Reference genome sequences in FASTA format
-  - [example](https://github.com/bergmanlab/mcclintock/blob/master/test/sacCer2.fasta)
-#### `-c/--consensus` TE consensus library in FASTA format
-  - [example](https://github.com/bergmanlab/mcclintock/blob/master/test/sac_cer_par_TE_seqs.fasta)
-#### `-g/--locations` Known TE locations in reference genome in GFF format
-  - [example](https://github.com/bergmanlab/mcclintock/blob/master/test/reference_TE_locations.gff)
-#### `-t/--taxonomy` A tab delimited file with one entry per ID in the GFF format
-  - The file should contain two columns: the first containing the ID and the second containing the TE family it belongs to.
-  - [example](https://github.com/bergmanlab/mcclintock/blob/master/test/sac_cer_te_families.tsv)
-  - The TE annotation GFF and taxonomy file could be generated using main McClintock script with `--make_annotations` option:
-```
-python3 mcclintock/mcclintock.py --make_annotations -r REFERENCE.FASTA -c CONSENESUS.FASTA -p NUMTHREADS -o OUTDIR
-```
+#### `-r/--reference`
+  - Reference genome sequences in FASTA format
+  - [Example reference genome for S. cerevisiae](https://github.com/bergmanlab/mcclintock/blob/master/test/sacCer2.fasta)
+#### `-c/--consensus`
+  - TE consensus library in FASTA format
+  - [Example TE library for S. cerevisiae](https://github.com/bergmanlab/mcclintock/blob/master/test/sac_cer_par_TE_seqs.fasta)
+#### `-g/--locations`
+  - Known TE locations in reference genome in GFF format
+  - [Example reference TE annotation for S. cerevisiae](https://github.com/bergmanlab/mcclintock/blob/master/test/reference_TE_locations.gff)
+#### `-t/--taxonomy`
+  - A tab delimited file with two columns: the first containing the ID (in the GFF format) and the second containing the TE family it belongs to.
+  - [Example TE taxonomy file for for S. cerevisiae](https://github.com/bergmanlab/mcclintock/blob/master/test/sac_cer_te_families.tsv)
 #### `-j/--config` Configuration file in JSON format
-  - The config file contains information of TE family, TSD size in bp, target sites, path to McClintock installation and component methods for simulation.
-  - You could create a candidate target site file in BED format with reference genome FASTA and reference TE annotation GFF. The synthetic insertion would be created in random non-TE unique regions, regardless of the biological insertion preferences of the species.
-```
-python make_nonte_bed.py -r REFERENCE.FASTA -g REF_TE.GFF -o nonTE.bed
-```
-  - Example config file:
+  - The config file contains information of TE family, TSD size in bp, permissible locations for TEs to be inserted (in BED format), path to the McClintock repository and list of component methods to be used for simulation.
+  - An example config file in JSON format is as follows:
 ```
 {
     "families": {
@@ -135,6 +136,14 @@ python make_nonte_bed.py -r REFERENCE.FASTA -g REF_TE.GFF -o nonTE.bed
         "methods": "ngs_te_mapper,ngs_te_mapper2,relocate,relocate2,temp,temp2,retroseq,popoolationte,popoolationte2,te-locate,teflon,tebreak"
     }
 }
+```
+  - The reference TE annotation (in GFF format) and TE taxonomy file (in TSV format) can be generated automatically by RepeatMasker using main McClintock script with `--make_annotations` option:
+```
+python3 mcclintock/mcclintock.py --make_annotations -r REFERENCE.FASTA -c CONSENESUS.FASTA -p NUMTHREADS -o OUTDIR
+```
+  - A BED file of non-TE unique regions can be created using the `make_nonte_bed.py` script as follows:
+```
+python3 make_nonte_bed.py -r REFERENCE.FASTA -g REF_TE.GFF -o nonTE.bed
 ```
 
 ## Run simulation with test yeast data
@@ -175,7 +184,7 @@ python ~/mcclintock/auxiliary/simulation/mcclintock_simulation.py  \
   -o ${out_dir}/ &> ${out_dir}/logs/sample1.log
 ```
 
-* Run simulation script in a loop for 300 synthetic samples. 
+* Run simulation script in a loop for 300 synthetic samples.
   * This would take a while. It's recommended to run each simulated sample in paralell, or submit as separate jobs to a cluster.
 
 ```bash
