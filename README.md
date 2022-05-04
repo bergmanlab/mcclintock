@@ -42,18 +42,20 @@ Many methods have been developed to detect transposable element (TE) insertions 
 
 The complete pipeline requires a fasta reference genome, a fasta consensus set of TE sequences present in the organism and fastq paired-end sequencing reads. Optionally if a detailed annotation of TE sequences in the reference genome has been performed, a GFF file with the locations of reference genome TE annotations and a tab delimited taxonomy file linking individual insertions to the TE family they belong to can be supplied (an example of this file is included in the test directory as sac_cer_te_families.tsv). If only single-end fastq sequencing data are available, then this can be supplied as option -1, however only ngs_te_mapper and RelocaTE will run as these are the only methods that handle single-ended data.
 
-## <a name="methods"></a> McClintock Software Components for Detecting TE Insertions in NGS Data
+## <a name="methods"></a> McClintock Component Methods for Detecting TE Insertions in WGS Data
  * [ngs_te_mapper](https://github.com/bergmanlab/ngs_te_mapper) - [Linheiro and Bergman (2012)](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0030008)
- * [ngs_te_mapper2](https://github.com/bergmanlab/ngs_te_mapper2)
- * [RelocaTE](https://github.com/srobb1/RelocaTE) - [Robb *et al.* (2013)](http://www.g3journal.org/content/3/6/949.long)
- * [RelocaTE2](https://github.com/stajichlab/RelocaTE2) - [Chen *et al.* (2017)](https://peerj.com/articles/2942/)
- * [TEMP](https://github.com/JialiUMassWengLab/TEMP) - [Zhuang *et al.* (2014)](http://nar.oxfordjournals.org/content/42/11/6826.full)
- * [TEMP2](https://github.com/weng-lab/TEMP2) - [Yu *et al.* (2021)](https://academic.oup.com/nar/advance-article/doi/10.1093/nar/gkab010/6123378)
- * [RetroSeq](https://github.com/tk2/RetroSeq) - [Keane *et al.* (2012)](http://bioinformatics.oxfordjournals.org/content/29/3/389.long)
+ * [ngs_te_mapper2](https://github.com/bergmanlab/ngs_te_mapper2) - [Han *et al.* (2021)](https://academic.oup.com/genetics/article/219/2/iyab113/6321957)
  * [PoPoolationTE](https://sourceforge.net/projects/popoolationte/) - [Kofler *et al.* (2012)](https://journals.plos.org/plosgenetics/article?id=10.1371/journal.pgen.1002487)
  * [PoPoolationTE2](https://sourceforge.net/p/popoolation-te2/wiki/Home) - [Kofler *et al.* (2016)](https://academic.oup.com/mbe/article/33/10/2759/2925581)
- * [TE-locate](https://sourceforge.net/projects/te-locate/) - [Platzer *et al.* (2012)](http://www.mdpi.com/2079-7737/1/2/395)
+ * [RelocaTE](https://github.com/srobb1/RelocaTE) - [Robb *et al.* (2013)](http://www.g3journal.org/content/3/6/949.long)
+ * [RelocaTE2](https://github.com/stajichlab/RelocaTE2) - [Chen *et al.* (2017)](https://peerj.com/articles/2942/)
+ * [RetroSeq](https://github.com/tk2/RetroSeq) - [Keane *et al.* (2012)](http://bioinformatics.oxfordjournals.org/content/29/3/389.long)
+ * [TEBreak](https://github.com/adamewing/tebreak) - [Schauer *et al.* (2018)](https://genome.cshlp.org/content/28/5/639)
  * [TEFLoN](https://github.com/jradrion/TEFLoN) - [Adrion *et al.* (2017)](https://academic.oup.com/gbe/article/9/5/1329/3064433)
+ * [TE-locate](https://sourceforge.net/projects/te-locate/) - [Platzer *et al.* (2012)](http://www.mdpi.com/2079-7737/1/2/395)
+ * [TEMP](https://github.com/JialiUMassWengLab/TEMP) - [Zhuang *et al.* (2014)](http://nar.oxfordjournals.org/content/42/11/6826.full)
+ * [TEMP2](https://github.com/weng-lab/TEMP2) - [Yu *et al.* (2021)](https://academic.oup.com/nar/advance-article/doi/10.1093/nar/gkab010/6123378)
+
 
 ## <a name="dependency"></a> Software Dependencies
 McClintock is written in Python3 leveraging the [SnakeMake](https://snakemake.readthedocs.io/en/stable/) workflow system and is designed to run on linux operating systems. Installation of software dependencies for McClintock is automated by [Conda](https://docs.conda.io/en/latest/), thus a working installation of Conda is required to install  McClintock. Conda can be installed via the [Miniconda installer](https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh).
