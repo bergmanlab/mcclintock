@@ -342,7 +342,7 @@ python3 mcclintock.py \
 * You can also increase `-p 4` to a higher number if you have more CPU threads available.
 
 #### Running McClintock with specific component methods
-* By default, McClintock runs all component TE detection methods with the data provided.
+* By default, McClintock runs all components (all 12 TE detection methods plus the coverage module using the output of the trimgalore method).
 * If you only want to run a specific component method, you can use the `-m` flag to specify which method to run:
 ```
 python3 mcclintock.py \
@@ -366,9 +366,10 @@ python3 mcclintock.py \
     -1 test/SRR800842_1.fastq.gz \
     -2 test/SRR800842_2.fastq.gz \
     -p 4 \
-    -m temp,ngs_te_mapper,retroseq \
+    -m trimgalore,temp,ngs_te_mapper,retroseq \
     -o /path/to/output/directory
 ```
+* Note: if the `-m` option is set, you must specify the `trimgalore` method explicitly for the other component methods to use trimmed reads as input.
 
 #### Running McClintock with multiple samples using same reference genome
 * When running McClintock on multiple samples that use the same reference genome and consensus TEs, it is advised to generate the reference TE annotation GFF and TE Taxonomy TSV files as a pre-processing step. Otherwise, these files will be created by McClintock for each sample, which can lead to increased run time and disk usage.
