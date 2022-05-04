@@ -320,11 +320,11 @@ C14: numbered identifier for each TE in the population
 
 ## <a name="examples"></a> Run Examples
 #### Running McClintock with test data
-This repository also provides test data to ensure your McClintock installation is working. Test data can be found in the `test/` and includes a UCSC sacCer2 yeast reference genome, and an annotation of TEs in the yeast reference genome from [Carr, Bensasson and Bergman (2012)](http://www.plosone.org/article/info%3Adoi%2F10.1371%2Fjournal.pone.0050978). A pair of fastq files can be downloaded from SRA using the `test/download_test_data.py` script:
+This repository also provides test data to ensure your McClintock installation is working. Test data can be found in the `test/` directory which includes a yeast reference genome (UCSC sacCer2) and an annotation of TEs in this version of the yeast genome from [Carr, Bensasson and Bergman (2012)](http://www.plosone.org/article/info%3Adoi%2F10.1371%2Fjournal.pone.0050978). A pair of fastq files can be downloaded from SRA using the `test/download_test_data.py` script:
 ```
 python test/download_test_data.py
 ```
-* Once the fastq files have been downloaded, the Mcclintock can be run on the test data as follows:
+* Once the fastq files have been downloaded, Mcclintock can be run on the test data as follows:
 ```
 python3 mcclintock.py \
     -r test/sacCer2.fasta \
