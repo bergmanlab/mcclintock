@@ -412,7 +412,7 @@ python3 mcclintock.py \
 
 License
 ------
-Copyright 2014-2022 Preston Basting, Shunhua Han, Jingxuan Chen, Michael G. Nelson, and Casey M. Bergman
+Copyright 2014-2022 Preston Basting, Jingxuan Chen, Shunhua Han, Michael G. Nelson, and Casey M. Bergman
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
 
