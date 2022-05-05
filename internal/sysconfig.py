@@ -9,7 +9,6 @@ SAM_DIR = "{{samdir}}"
 REF_NAME = "{{refname}}"
 SAMPLE_NAME = "{{samplename}}"
 
-
 CONFIGS = {
         "coverage" : ["coverage/coverage.py"],
         "trimgalore" : ["trimgalore/trimgalore.py"],
@@ -68,7 +67,6 @@ STATUS_FILES ={
         "tebreak": LOG_DIR+"status/tebreak.status"
 }
 
-
 INTERMEDIATE_PATHS = {
         'mcc_files' : REF_DIR,
         'reference' : REF_DIR+"genome_fasta/"+REF_NAME+".fasta",
@@ -102,9 +100,7 @@ INTERMEDIATE_PATHS = {
         'repeatmasker_out' : SAM_DIR+"intermediate/"+REF_NAME+".repeatmasker.out"
     }
 
-
 RESULTS_DIR = "{{results}}"
-
 
 OUT_DIRS = {
         'coverage': RESULTS_DIR+"coverage/",
@@ -274,6 +270,7 @@ ESSENTIAL_PATHS = {
         'tebreak': [
                 METHOD_DIR+SAMPLE_NAME+"_tebreak_nonredundant.bed",
                 METHOD_DIR+SAMPLE_NAME+"_tebreak_redundant.bed",
-                METHOD_DIR+"unfiltered/"+SAMPLE_NAME+".tebreak.table.txt"
+                METHOD_DIR+SAMPLE_NAME+"_tebreak_nonredundant_non-reference.vcf",
+                METHOD_DIR+"unfiltered/"+SAMPLE_NAME+".sorted.tebreak.table.txt"
         ]
 }
