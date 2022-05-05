@@ -20,10 +20,6 @@ except ImportError as e:
     print(e)
     sys.exit("ERROR...unable to load required python modules\ntry reinstalling and/or activating mcclintock environment:\n\tconda env create -f install/envs/mcclintock.yml --name mcclintock\n\tconda activate mcclintock\n")
 
-
-
-
-
 def main():
     full_command = " ".join(["python3"] + sys.argv)
     current_directory = os.getcwd()
@@ -48,7 +44,6 @@ def parse_args(expected_configs):
     parser.add_argument("-r", "--reference", type=str, help="A reference genome sequence in fasta format", required=('--install' not in sys.argv))
     parser.add_argument("-c", "--consensus", type=str, help="The consensus sequences of the TEs for the species in fasta format", required='--install' not in sys.argv)
     parser.add_argument("-1", "--first", type=str, help="The path of the first fastq file from paired end read sequencing or the fastq file from single read sequencing", required=(('--install' not in sys.argv) and ('--make_annotations' not in sys.argv)))
-
 
     ## optional ##
     parser.add_argument("-2", "--second", type=str, help="The path of the second fastq file from a paired end read sequencing", required=False)
@@ -147,7 +142,6 @@ def parse_args(expected_configs):
             print("cannot create output directory: ",args.out,"exiting...", file=sys.stderr)
             sys.exit(1)
 
-
     # check -g
     if args.locations is not None:
         args.locations = mccutils.get_abs_path(args.locations)
@@ -232,7 +226,6 @@ def check_input_files(ref, consensus, fq1, fq2=None, locations=None, taxonomy=No
     #check augment fasta
     if augment_fasta is not None:
         format_fasta(augment_fasta)
-
 
 def format_fasta(in_fasta):
     mccutils.log("setup","checking fasta: "+in_fasta)
@@ -389,10 +382,8 @@ def install(methods, resume=False, debug=False):
     if os.path.exists(install_path+"install.log"):
         os.remove(install_path+"install.log")
 
-
     # finding existing conda yamls
     existing_envs = get_conda_envs(conda_env_dir)
-
 
     mccutils.mkdir(conda_env_dir)
     os.chdir(install_path)
@@ -437,7 +428,6 @@ def get_installed_versions(tool_dir):
 
     return versions
 
-
 def check_installed_modules(methods, no_install_methods, method_md5s, install_dir):
     # finding existing conda yamls
     conda_env_dir = install_dir+"/envs/conda/"
@@ -455,7 +445,6 @@ def check_installed_modules(methods, no_install_methods, method_md5s, install_di
                 print("ERROR: installed version of", method,"(", installed_version[method], ") does not match the expected: ", method_md5s[method])
                 print("please install methods using: python mcclintock.py --install", file=sys.stderr)
                 sys.exit(1)
-
 
 # stores config file info and hashes so that future runs can determine if config files have changed
 def setup_config_info(config_dir, method_to_config, config_rules):
@@ -535,13 +524,11 @@ def make_run_config(args, sample_name, ref_name, full_command, current_directory
     for key in status_files.keys():
         status_files[key] = status_files[key].replace(sysconfig.LOG_DIR, log_dir)
 
-
     chromosomes = []
     for record in SeqIO.parse(args.reference, "fasta"):
         chrom = str(record.id)
         chrom = mccutils.replace_special_chars(chrom)
         chromosomes.append(chrom)
-
 
     data = {}
     data['args'] = {
@@ -612,7 +599,6 @@ def make_run_config(args, sample_name, ref_name, full_command, current_directory
         json.dump(data, conf, indent=4)
 
     return run_id, out_files
-
 
 def run_workflow(args, sample_name, ref_name, run_id, out_files, debug=False, annotations_only=False):
     log = args.out+"/mcclintock."+str(run_id)+".log"
@@ -817,7 +803,6 @@ def config_compatibility(run_config, prev_config):
 
     return True
 
-
 def calculate_max_threads(avail_procs, methods_used, multithread_methods, slow=False):
     max_threads = avail_procs
 
@@ -837,7 +822,6 @@ def calculate_max_threads(avail_procs, methods_used, multithread_methods, slow=F
                 max_threads = max_threads-1
 
     return max_threads
-
 
 def remove_intermediate_files(options, run_config_file, methods, ref_name, sample_name, outdir):
     if "all" in options:
@@ -897,12 +881,6 @@ def remove_intermediate_files(options, run_config_file, methods, ref_name, sampl
 
         if len(os.listdir(intermediate_dir)) < 1:
             mccutils.remove(intermediate_dir)
-
-
-
-
-
-
 
 if __name__ == "__main__":
     main()
