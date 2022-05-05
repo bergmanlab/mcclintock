@@ -18,7 +18,7 @@ try:
     from Bio import SeqIO
 except ImportError as e:
     print(e)
-    sys.exit("ERROR...unable to load required python modules\ntry reinstalling and/or activating mcclintock environment:\n\tconda env create -f install/envs/mcclintock.yml --name mcclintock\n\tconda activate mcclintock\n")
+    sys.exit("ERROR...unable to load required python modules\ntry reinstalling and/or activating McClintock environment:\n\tconda env create -f install/envs/mcclintock.yml --name mcclintock\n\tconda activate mcclintock\n")
 
 def main():
     full_command = " ".join(["python3"] + sys.argv)
@@ -57,12 +57,12 @@ def parse_args(expected_configs):
     parser.add_argument("-a", "--augment", type=str, help="A fasta file of TE sequences that will be included as extra chromosomes in the reference file (useful if the organism is known to have TEs that are not present in the reference strain)", required=False)
     parser.add_argument("--sample_name", type=str, help="The sample name to use for output files [default: fastq1 name]", required=False)
     parser.add_argument("--resume", action="store_true", help="This option will attempt to use existing intermediate files from a previous McClintock run", required=False)
-    parser.add_argument("--install", action="store_true", help="This option will install the dependencies of mcclintock", required=False)
+    parser.add_argument("--install", action="store_true", help="This option will install the dependencies of McClintock", required=False)
     parser.add_argument("--debug", action="store_true", help="This option will allow snakemake to print progress to stdout", required=False)
     parser.add_argument("--slow", action="store_true", help="This option runs without attempting to optimize thread usage to run rules concurrently. Each multithread rule will use the max processors designated by -p/--proc", required=False)
     parser.add_argument("--make_annotations", action="store_true", help="This option will only run the pipeline up to the creation of the repeat annotations", required=False)
     parser.add_argument("-k","--keep_intermediate", type=str, help="This option determines which intermediate files are preserved after McClintock completes [default: general][options: minimal, general, methods, <list,of,methods>, all]", required=False)
-    parser.add_argument("--config", type=str, help="This option determines which config files to use for your mcclintock run [default: config in McClintock Repository]", required=False)
+    parser.add_argument("--config", type=str, help="This option determines which config files to use for your McClintock run [default: config in McClintock Repository]", required=False)
 
     args = parser.parse_args()
 
@@ -724,7 +724,7 @@ def config_compatibility(run_config, prev_config):
     # check McClintock commit compatibility
     if run_config_data['args']['commit'] != prev_config_data['args']['commit']:
         sys.stderr.write("(--resume) ERROR: Unable to resume McClintock run\n")
-        sys.stderr.write("                  Previous mcclintock run intermediate files are incompatible due to differences in McClintock commit version\n")
+        sys.stderr.write("                  Previous McClintock run intermediate files are incompatible due to differences in McClintock commit version\n")
         sys.stderr.write("                  Current McClintock Version: "+run_config_data['args']['commit']+"\n")
         sys.stderr.write("                  Previous McClintock run Version: "+prev_config_data['args']['commit']+"\n")
         return False
@@ -734,7 +734,7 @@ def config_compatibility(run_config, prev_config):
         if run_config_data["mcc"]["reference"] == prev_config_data["mcc"]["reference"]:
             if run_config_data["args"]["augment_fasta"] != prev_config_data["args"]["augment_fasta"]:
                 sys.stderr.write("(--resume) ERROR: Unable to resume McClintock run\n")
-                sys.stderr.write("                  Previous mcclintock run intermediate files are incompatible due to differences in --augment\n")
+                sys.stderr.write("                  Previous McClintock run intermediate files are incompatible due to differences in --augment\n")
                 return False
 
             if run_config_data["in"]["reference"] != prev_config_data["in"]["reference"]:
@@ -772,7 +772,7 @@ def config_compatibility(run_config, prev_config):
         if run_config_data["mcc"]["locations"] == prev_config_data["mcc"]["locations"]:
             if run_config_data["args"]["augment_fasta"] != prev_config_data["args"]["augment_fasta"]:
                 sys.stderr.write("(--resume) ERROR: Unable to resume McClintock run\n")
-                sys.stderr.write("                  Previous mcclintock run intermediate files are incompatible due to differences in --augment\n")
+                sys.stderr.write("                  Previous McClintock run intermediate files are incompatible due to differences in --augment\n")
                 return False
 
             if run_config_data["in"]["locations"] != prev_config_data["in"]["locations"]:
@@ -785,7 +785,7 @@ def config_compatibility(run_config, prev_config):
         if run_config_data["mcc"]["taxonomy"] == prev_config_data["mcc"]["taxonomy"]:
             if run_config_data["args"]["augment_fasta"] != prev_config_data["args"]["augment_fasta"]:
                 sys.stderr.write("(--resume) ERROR: Unable to resume McClintock run\n")
-                sys.stderr.write("                  Previous mcclintock run intermediate files are incompatible due to differences in --augment\n")
+                sys.stderr.write("                  Previous McClintock run intermediate files are incompatible due to differences in --augment\n")
                 return False
 
             if run_config_data["in"]["taxonomy"] != prev_config_data["in"]["taxonomy"]:
