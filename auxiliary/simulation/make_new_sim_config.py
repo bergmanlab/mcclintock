@@ -33,7 +33,7 @@ def main():
 
     config['mcclintock'] = {
         "path": mcc2_path,
-        "methods": "ngs_te_mapper,ngs_te_mapper2,relocate,relocate2,temp,temp2,retroseq,popoolationte,popoolationte2,te-locate,teflon,tebreak"
+        "methods": "ngs_te_mapper,ngs_te_mapper2,relocate,relocate2,temp,temp2,retroseq,popoolationte,popoolationte2,te-locate,teflon,tebreak,coverage"
     }
 
     with open(cwd+"/config/tRNA.json", "w") as conf:
@@ -62,7 +62,7 @@ def main():
 
     config['mcclintock'] = {
         "path": mcc2_path,
-        "methods": "ngs_te_mapper,ngs_te_mapper2,relocate,relocate2,temp,temp2,retroseq,popoolationte,popoolationte2,te-locate,teflon,tebreak"
+        "methods": "ngs_te_mapper,ngs_te_mapper2,relocate,relocate2,temp,temp2,retroseq,popoolationte,popoolationte2,te-locate,teflon,tebreak,coverage"
     }
 
     with open(cwd+"/config/non_TE.json", "w") as conf:
