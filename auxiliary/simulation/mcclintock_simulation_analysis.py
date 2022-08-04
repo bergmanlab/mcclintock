@@ -195,7 +195,7 @@ def get_predicted_insertions(out, exclude=None):
 
 def make_out_table(actual_insertions, predicted_insertions, methods, out_csv, out_metrics):
     columns = [["Method","Reference","Nonreference", "Exact", "Within-5", "Within-100", "Within-300", "Within-500"]]
-    rows = [["Method", "TP", "FP","FN", "Precision", "Recall"]]
+    rows = [["Method", "TP_0", "FP_0","FN_0", "Precision_0", "Recall_0", "TP_5", "FP_5","FN_5", "Precision_5", "Recall_5", "TP_100", "FP_100","FN_100", "Precision_100", "Recall_100", "TP_300", "FP_300","FN_300", "Precision_300", "Recall_300", "TP_500", "FP_500","FN_500", "Precision_500", "Recall_500"]]
     for method in methods:
         ref_counts = []
         nonref_counts = []
@@ -205,9 +205,9 @@ def make_out_table(actual_insertions, predicted_insertions, methods, out_csv, ou
         within_300s = []
         within_500s = []
         all_pred = 0
-        true_pos = 0
-        false_pos = 0
-        false_neg = 0
+        true_pos_0 = true_pos_5 = true_pos_100 = true_pos_300 = true_pos_500 = 0
+        false_pos_0 = false_pos_5 = false_pos_100 = false_pos_300 = false_pos_500 = 0
+        false_neg_0 = false_neg_5 = false_neg_100 = false_neg_300 = false_neg_500 = 0
         for rep in predicted_insertions[method].keys():
             ref_count = 0
             nonref_count = 0
@@ -254,10 +254,26 @@ def make_out_table(actual_insertions, predicted_insertions, methods, out_csv, ou
             within_500s.append(within_500)
         
             all_pred += nonref_count
-            if within_5 > 0:
-                true_pos += 1
+            if exact > 0:
+                true_pos_0 += 1
             else:
-                false_neg += 1
+                false_neg_0 += 1
+            if within_5 > 0:
+                true_pos_5 += 1
+            else:
+                false_neg_5 += 1
+            if within_100 > 0:
+                true_pos_100 += 1
+            else:
+                false_neg_100 += 1
+            if within_300 > 0:
+                true_pos_300 += 1
+            else:
+                false_neg_300 += 1
+            if within_500 > 0:
+                true_pos_500 += 1
+            else:
+                false_neg_500 += 1
             
 
 
@@ -270,16 +286,52 @@ def make_out_table(actual_insertions, predicted_insertions, methods, out_csv, ou
         mean_500 = statistics.mean(within_500s)
         columns.append([method, str(ref_mean), str(nonref_mean), str(exact_mean), str(mean_5), str(mean_100), str(mean_300), str(mean_500)])
 
-        false_pos = all_pred-true_pos
-        if (true_pos+false_pos) > 0:
-            precision = true_pos/(true_pos+false_pos)
+        false_pos_0 = all_pred-true_pos_0
+        if (true_pos_0+false_pos_0) > 0:
+            precision_0 = true_pos_0/(true_pos_0+false_pos_0)
         else:
-            precision = "NaN"
-        if (true_pos+false_neg) > 0:
-            recall = true_pos/(true_pos+false_neg)
+            precision_0 = "NaN"
+        if (true_pos_0+false_neg_0) > 0:
+            recall_0 = true_pos_0/(true_pos_0+false_neg_0)
         else:
-            recall = "NaN"
-        rows.append([method, str(true_pos), str(false_pos), str(false_neg), str(precision), str(recall)])
+            recall_0 = "NaN"
+        false_pos_5 = all_pred-true_pos_5
+        if (true_pos_5+false_pos_5) > 0:
+            precision_5 = true_pos_5/(true_pos_5+false_pos_5)
+        else:
+            precision_5 = "NaN"
+        if (true_pos_5+false_neg_5) > 0:
+            recall_5 = true_pos_5/(true_pos_5+false_neg_5)
+        else:
+            recall_5 = "NaN"
+        false_pos_100 = all_pred-true_pos_100
+        if (true_pos_100+false_pos_100) > 0:
+            precision_100 = true_pos_100/(true_pos_100+false_pos_100)
+        else:
+            precision_100 = "NaN"
+        if (true_pos_100+false_neg_100) > 0:
+            recall_100 = true_pos_100/(true_pos_100+false_neg_100)
+        else:
+            recall_100 = "NaN"
+        false_pos_300 = all_pred-true_pos_300
+        if (true_pos_300+false_pos_300) > 0:
+            precision_300 = true_pos_300/(true_pos_300+false_pos_300)
+        else:
+            precision_300 = "NaN"
+        if (true_pos_300+false_neg_300) > 0:
+            recall_300 = true_pos_300/(true_pos_300+false_neg_300)
+        else:
+            recall_300 = "NaN"
+        false_pos_500 = all_pred-true_pos_500
+        if (true_pos_500+false_pos_500) > 0:
+            precision_500 = true_pos_500/(true_pos_500+false_pos_500)
+        else:
+            precision_500 = "NaN"
+        if (true_pos_500+false_neg_500) > 0:
+            recall_500 = true_pos_500/(true_pos_500+false_neg_500)
+        else:
+            recall_500 = "NaN"
+        rows.append([method, str(true_pos_0), str(false_pos_0), str(false_neg_0), str(precision_0), str(recall_0), str(true_pos_5), str(false_pos_5), str(false_neg_5), str(precision_5), str(recall_5), str(true_pos_100), str(false_pos_100), str(false_neg_100), str(precision_100), str(recall_100), str(true_pos_300), str(false_pos_300), str(false_neg_300), str(precision_300), str(recall_300), str(true_pos_500), str(false_pos_500), str(false_neg_500), str(precision_500), str(recall_500)])
     
     with open(out_csv, "w") as csv:
         for y in range(0, len(columns[0])):
@@ -300,33 +352,92 @@ def write_combined_metrics(forward_metrics, reverse_metrics, outfile):
     for x,metric in enumerate(forward_metrics):
         if x > 0:
             method = metric[0]
-            true_pos = int(metric[1])
-            false_pos = int(metric[2])
-            false_neg = int(metric[3])
-            metrics[method] = [true_pos, false_pos, false_neg]
+            true_pos_0 = int(metric[1])
+            false_pos_0 = int(metric[2])
+            false_neg_0 = int(metric[3])
+            true_pos_5 = int(metric[6])
+            false_pos_5 = int(metric[7])
+            false_neg_5 = int(metric[8])
+            true_pos_100 = int(metric[11])
+            false_pos_100 = int(metric[12])
+            false_neg_100 = int(metric[13])
+            true_pos_300 = int(metric[16])
+            false_pos_300 = int(metric[17])
+            false_neg_300 = int(metric[18])
+            true_pos_500 = int(metric[21])
+            false_pos_500 = int(metric[22])
+            false_neg_500 = int(metric[23])
+            metrics[method] = [true_pos_0, false_pos_0, false_neg_0, true_pos_5, false_pos_5, false_neg_5, true_pos_100, false_pos_100, false_neg_100, true_pos_300, false_pos_300, false_neg_300, true_pos_500, false_pos_500, false_neg_500]
             
     for x,metric in enumerate(reverse_metrics):
         if x > 0:
             method = metric[0]
-            true_pos = int(metric[1])
-            false_pos = int(metric[2])
-            false_neg = int(metric[3])
-
-            metrics[method] = [metrics[method][0]+true_pos, metrics[method][1]+false_pos, metrics[method][2]+false_neg]
+            true_pos_0 = int(metric[1])
+            false_pos_0 = int(metric[2])
+            false_neg_0 = int(metric[3])
+            true_pos_5 = int(metric[6])
+            false_pos_5 = int(metric[7])
+            false_neg_5 = int(metric[8])
+            true_pos_100 = int(metric[11])
+            false_pos_100 = int(metric[12])
+            false_neg_100 = int(metric[13])
+            true_pos_300 = int(metric[16])
+            false_pos_300 = int(metric[17])
+            false_neg_300 = int(metric[18])
+            true_pos_500 = int(metric[21])
+            false_pos_500 = int(metric[22])
+            false_neg_500 = int(metric[23])
+            metrics[method] = [metrics[method][0]+true_pos_0, metrics[method][1]+false_pos_0, metrics[method][2]+false_neg_0, metrics[method][3]+true_pos_5, metrics[method][4]+false_pos_5, metrics[method][5]+false_neg_5, metrics[method][6]+true_pos_100, metrics[method][7]+false_pos_100, metrics[method][8]+false_neg_100, metrics[method][9]+true_pos_300, metrics[method][10]+false_pos_300, metrics[method][11]+false_neg_300, metrics[method][12]+true_pos_500, metrics[method][13]+false_pos_500, metrics[method][14]+false_neg_500]
     
     with open(outfile, "w") as out:
         out.write(",".join(forward_metrics[0]) + "\n")
         for method in metrics.keys():
             if metrics[method][0] + metrics[method][1] > 0:
-                precision = metrics[method][0] / (metrics[method][0] + metrics[method][1])
+                precision_0 = metrics[method][0] / (metrics[method][0] + metrics[method][1])
             else:
-                precision = 0
-            
+                precision_0 = 0
             if metrics[method][0] + metrics[method][2] > 0:
-                recall = metrics[method][0] / (metrics[method][0] + metrics[method][2])
+                recall_0 = metrics[method][0] / (metrics[method][0] + metrics[method][2])
             else:
-                recall = 0
-            outline = [method, str(metrics[method][0]), str(metrics[method][1]), str(metrics[method][2]), str(precision), str(recall)]
+                recall_0 = 0
+
+            if metrics[method][3] + metrics[method][4] > 0:
+                precision_5 = metrics[method][3] / (metrics[method][3] + metrics[method][4])
+            else:
+                precision_5 = 0
+            if metrics[method][3] + metrics[method][5] > 0:
+                recall_5 = metrics[method][3] / (metrics[method][3] + metrics[method][5])
+            else:
+                recall_5 = 0
+
+            if metrics[method][6] + metrics[method][7] > 0:
+                precision_100 = metrics[method][6] / (metrics[method][6] + metrics[method][7])
+            else:
+                precision_100 = 0
+            if metrics[method][6] + metrics[method][8] > 0:
+                recall_100 = metrics[method][6] / (metrics[method][6] + metrics[method][8])
+            else:
+                recall_100 = 0
+
+            if metrics[method][9] + metrics[method][10] > 0:
+                precision_300 = metrics[method][9] / (metrics[method][9] + metrics[method][10])
+            else:
+                precision_300 = 0
+            if metrics[method][9] + metrics[method][11] > 0:
+                recall_300 = metrics[method][9] / (metrics[method][9] + metrics[method][11])
+            else:
+                recall_300 = 0
+
+            if metrics[method][12] + metrics[method][13] > 0:
+                precision_500 = metrics[method][12] / (metrics[method][12] + metrics[method][13])
+            else:
+                precision_500 = 0
+            if metrics[method][12] + metrics[method][14] > 0:
+                recall_500 = metrics[method][12] / (metrics[method][12] + metrics[method][14])
+            else:
+                recall_500 = 0
+
+            outline = [method, str(metrics[method][0]), str(metrics[method][1]), str(metrics[method][2]), str(precision_0), str(recall_0), str(metrics[method][3]), str(metrics[method][4]), str(metrics[method][5]), str(precision_5), str(recall_5), str(metrics[method][6]), str(metrics[method][7]), str(metrics[method][8]), str(precision_100), str(recall_100), str(metrics[method][9]), str(metrics[method][10]), str(metrics[method][11]), str(precision_300), str(recall_300), str(metrics[method][12]), str(metrics[method][13]), str(metrics[method][14]), str(precision_500), str(recall_500)]
             out.write(",".join(outline) + "\n")
 
 
