@@ -77,7 +77,7 @@ conda update -y conda
 
 #### Install Mamba
 ```bash
-conda install -y mamba=0.21.2 -c conda-forge
+conda install -c conda-forge mamba
 ```
 
 ## <a name="install"></a> Installing McClintock
