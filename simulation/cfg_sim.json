@@ -1,0 +1,58 @@
+{
+    "submit": {
+        "cov_range": [3,6,12,25,50,100],
+        "num_rep": 30,
+        "strand": ["forward","reverse"]
+    },
+    "config": {
+        "family": [
+            "TY1",
+            "TY2",
+            "TY3",
+            "TY4"
+        ],
+        "ins_bed": [
+            "/home/jc33471/mcclintock/simulation/yeast/200-195_tRNA_targets.bed",
+            "/home/jc33471/mcclintock/simulation/yeast/200-195_tRNA_targets.bed",
+            "/home/jc33471/mcclintock/simulation/yeast/17-12_tRNA_targets.bed",
+            "/home/jc33471/mcclintock/simulation/yeast/200-195_tRNA_targets.bed"
+        ],
+        "cfg_script": "/home/jc33471/mcclintock/simulation/make_sim_config.py"
+    },
+    "in": {
+        "cfg": "config/run_simulation.json",
+        "ref": "/home/jc33471/mcclintock/test/sacCer2.fasta",
+        "consensus": "/home/jc33471/mcclintock/test/sac_cer_TE_seqs.fasta",
+        "gff": "/home/jc33471/mcclintock/test/reference_TE_locations.gff",
+        "tax": "/home/jc33471/mcclintock/test/sac_cer_te_families.tsv",
+        "script": "/home/jc33471/mcclintock/simulation/mcclintock_simulation_snk.py"
+    },
+    "out": {
+        "outdir": "/scratch/jc33471/snakemake_test/"
+    },
+    "simparams": {
+        "runid": null,
+        "single": null,
+        "length": 101,
+        "insertsize": 300,
+        "error": 0.01,
+        "keep_intermediate": "minimal",
+        "simulator": "art",
+        "mcc_version": 2
+    },
+    "resources": {
+        "threads": 4,
+        "mem": "20G",
+        "condaenv": "mcclintock",
+        "renv": "mcc_analysis"
+    },
+    "analysis": {
+        "summary": "/home/jc33471/mcclintock/simulation/mcclintock_simulation_analysis.py",
+        "r_vis_precision_recall": "/home/jc33471/mcclintock/simulation/sim_r_vis_precision_recall.R",
+        "r_vis_for_cov": "/home/jc33471/mcclintock/simulation/sim_r_vis_for_cov.R"
+    },
+    "analysisparams": {
+        "exclude": null
+    },
+    "mccdir": "/home/jc33471/mcclintock/"
+}
