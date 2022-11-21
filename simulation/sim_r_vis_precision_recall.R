@@ -80,14 +80,15 @@ sim_precision_recall <- function(p_stat){
 
     # create ggplot
     max_cov <- max(all_sim_table_covs$coverage)
-    breaks_4 <- as.vector(quantile(0:max_cov))[-1]
+    breaks_4 = seq.int(0, max_cov, by = ceiling((max_cov-0)/4))[-1]
+    # breaks_4 <- as.vector(quantile(0:max_cov))[-1]
     p <- all_sim_table_covs %>% filter(Method==x & stat==p_stat) %>% ggplot( aes(x=coverage, y=value, group=window, color=window)) +
       geom_line() +
       geom_point(aes(x=coverage,y=value)) +
       scale_color_manual(values = setcolors, labels = labels) +
       theme_bw() +
       scale_y_continuous(limits = c(0, 1), breaks = c(0.25, 0.5, 0.75, 1)) +
-      scale_x_continuous(limits = c(0, max_cov), breaks = breaks_4) +
+      scale_x_continuous(limits = c(0, max_cov), breaks = c(breaks_4, max_cov)) +
       labs(x = NULL, y = NULL, title = title[x]) +
       guides(color=guide_legend(title=NULL,nrow = 1)) +
       theme(plot.title = element_text(hjust = 0.5, size = 14), text = element_text(size = 15))
@@ -148,14 +149,15 @@ sim_precision_recall_main <- function(p_stat){
 
     # create ggplot
     max_cov <- max(all_sim_table_covs$coverage)
-    breaks_4 <- as.vector(quantile(0:max_cov))[-1]
+    breaks_4 = seq.int(0, max_cov, by = ceiling((max_cov-0)/4))[-1]
+    # breaks_4 <- as.vector(quantile(0:max_cov))[-1]
     p <- all_sim_table_covs %>% filter(Method==x & stat==p_stat) %>% filter(window=="100" | window=="0") %>% ggplot( aes(x=coverage, y=value, group=window, color=window)) +
       geom_line() +
       geom_point(aes(x=coverage,y=value)) +
       scale_color_manual(values = setcolors, labels = labels) +
       theme_bw() +
       scale_y_continuous(limits = c(0, 1), breaks = c(0.25, 0.5, 0.75, 1)) +
-      scale_x_continuous(limits = c(0, max_cov), breaks = breaks_4) +
+      scale_x_continuous(limits = c(0, max_cov), breaks = c(breaks_4, max_cov)) +
       labs(x = NULL, y = NULL, title = title[x]) +
       guides(color=guide_legend(title=NULL,nrow = 1)) +
       theme(plot.title = element_text(hjust = 0.5, size = 14), text = element_text(size = 15))
