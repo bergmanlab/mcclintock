@@ -14,9 +14,10 @@ rule generate_config:
         mccdir=config['mccdir'],
         script=config['config']['cfg_script'],
         family=config['config']['family'],
-        ins_bed=config['config']['ins_bed']
+        ins_bed=config['config']['ins_bed'],
+        len_tsd=config['config']['len_tsd']
     shell:
-        "python {params.script} --family {params.family} --bed {params.ins_bed} --mcc {params.mccdir} --out {output}"
+        "python {params.script} --family {params.family} --bed {params.ins_bed} --mcc {params.mccdir} --out {output} --tsd {params.len_tsd}"
 
 rule run_simulation:
     input:

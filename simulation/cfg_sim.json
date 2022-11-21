@@ -4,20 +4,20 @@
         "num_rep": 30,
         "strand": ["forward","reverse"]
     },
+    "out": {
+        "outdir": "/scratch/jc33471/snakemake_test/"
+    },
+    "mccdir": "/home/jc33471/mcclintock/",
     "config": {
-        "family": [
-            "TY1",
-            "TY2",
-            "TY3",
-            "TY4"
-        ],
+        "family": ["TY1","TY2","TY3","TY4"],
         "ins_bed": [
             "/home/jc33471/mcclintock/simulation/yeast/200-195_tRNA_targets.bed",
             "/home/jc33471/mcclintock/simulation/yeast/200-195_tRNA_targets.bed",
             "/home/jc33471/mcclintock/simulation/yeast/17-12_tRNA_targets.bed",
             "/home/jc33471/mcclintock/simulation/yeast/200-195_tRNA_targets.bed"
         ],
-        "cfg_script": "/home/jc33471/mcclintock/simulation/make_sim_config.py"
+        "cfg_script": "/home/jc33471/mcclintock/simulation/make_sim_config.py",
+        "len_tsd": 5
     },
     "in": {
         "cfg": "config/run_simulation.json",
@@ -26,10 +26,7 @@
         "gff": "/home/jc33471/mcclintock/test/reference_TE_locations.gff",
         "tax": "/home/jc33471/mcclintock/test/sac_cer_te_families.tsv",
         "script": "/home/jc33471/mcclintock/simulation/mcclintock_simulation_snk.py"
-    },
-    "out": {
-        "outdir": "/scratch/jc33471/snakemake_test/"
-    },
+    },  
     "simparams": {
         "runid": null,
         "single": null,
@@ -53,6 +50,5 @@
     },
     "analysisparams": {
         "exclude": null
-    },
-    "mccdir": "/home/jc33471/mcclintock/"
+    }
 }

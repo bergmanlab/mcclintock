@@ -1,12 +1,9 @@
-configfile: "/home/jc33471/jingxuan/src/mcc_eval_snk/cfg_sim.json"
-
 rule all:
     input:
         config['out']['outdir']+"/r_vis/sim_Recall_allcovs.pdf",
         config['out']['outdir']+"/r_vis/sim_Precision_allcovs.pdf",
         expand(config['out']['outdir']+"/r_vis/simdensity_{cov}x_{te_family}.pdf", cov=config['submit']['cov_range'], te_family=config['config']['family']),
         expand(config['out']['outdir']+"/r_vis/simtsd_{cov}x_{te_family}.pdf", cov=config['submit']['cov_range'], te_family=config['config']['family'])
-
 
 rule summary:
     input:
@@ -40,26 +37,6 @@ rule r_vis_precision_recall:
         config['out']['outdir']+"/logs/r_vis_precision_recall.log"
     shell:
         "Rscript --vanilla {params.script} {params.mccdir} {params.out} {input} &> {log}"
-
-# rule r_prep_for_cov:
-#     input:
-#         config['out']['outdir']+"/{cov}/"
-#     conda:
-#         config['resources']['renv']
-#     output:
-#         config['out']['outdir']+"/{cov}/r_prep/{te_family}_{method}_relative.bedgraph"
-#     params:
-#         mccdir=config['mccdir'],
-#         out=config['out']['outdir']+"/{cov}/r_prep/",
-#         family=config['in']['family']
-#     log:
-#         config['out']['outdir']+"/logs/r_prep_for_cov{cov}.log"
-#     shell:
-#         '''
-#         cat {input}/data/forward/*.modref.bed | awk 'BEGIN{OFS="\t"}{$2=$2+1; $3=$2; $5=0; $6="+"; print $0}' | sort -k1,1 -k2,2n > {params.out}/singleinsertionlocationsTSS_for.bed
-#         cat {input}/data/reverse/*.modref.bed | awk 'BEGIN{OFS="\t"}{$2=$2+1; $3=$2; $5=0; $6="+"; print $0}' | sort -k1,1 -k2,2n > {params.out}/singleinsertionlocationsTSS_rev.bed
-#         grep {wildcards.te_family} {params.out}/singleinsertionlocationsTSS_for.bed > {params.out}/singleinsertionlocationsTSS_for_{wildcards.te_family}.bed
-#         '''
 
 rule r_vis_for_cov:
     input:
