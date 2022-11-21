@@ -59,7 +59,7 @@ mkdir -p logs/ config/
 config=${test_dir}/config/test.json
 
 # create json config for entire simulation framework
-python /home/jc33471/mcclintock/simulation/make_snakemake_config.py \
+python ${mcc_dir}/simulation/make_snakemake_config.py \
     --family "TY1" "TY2" "TY3" "TY4" \
     --bed "${mcc_dir}/simulation/yeast/200-195_tRNA_targets.bed" \
         "${mcc_dir}/simulation/yeast/200-195_tRNA_targets.bed" \
