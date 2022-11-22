@@ -99,7 +99,7 @@ def parse_args():
     parser = argparse.ArgumentParser(prog='make_snakemake_config.py', description="Create config file in json format for snakemake pipeline that runs simulation framework.")
 
     ## required ##
-    parser.add_argument("--family", type=str, nargs='+', help="List of TE families. Required.", required=True)
+    parser.add_argument("--family", type=str, nargs='+', help="##Required##\nList of TE families. Required.", required=True)
     parser.add_argument("--bed", type=str, nargs='+', help="List of candidate insertion region files in bed format for each TE family, respectively. Or one bed file for all TE families. Required.", required=True)
     parser.add_argument("--mcc", type=str, help="Path to local McClintock repo. Required.", required=True)
     parser.add_argument("--out", type=str, help="File name of the output json. Required.", required=True)
@@ -111,12 +111,12 @@ def parse_args():
 
 
     ## optional ##
-    parser.add_argument("--tsd", type=int, help="Integer for length of target site duplication in bp. Default is 5 bp.", default=5, required=False)
+    parser.add_argument("--tsd", type=int, nargs='+', help="##Optional##\nIntegers for length of target site duplication in bp. Default is 5 bp for all families.", default=[5], required=False)
     parser.add_argument("--covrange", type=int, nargs='+', help="List of ingeters for tested coverage range. Default is 3 6 12 25 50 100. ", default=[3,6,12,25,50,100], required=False)
     parser.add_argument("--numrep", type=int, help="Integer of replicate counts for each coverage and each strand. Default is 30.", default=30, required=False)
     parser.add_argument("--strand", type=str, nargs='+', help="List of strands for simulation. 'forward' and 'reverse' are allowed. Default is both strands.", default=["forward","reverse"], required=False)
     ## read simulataion options from mcclintock_simulation.py ##
-    parser.add_argument("--length", type=int, help="The read length of the simulated reads [default = 101]", default=101, required=False)
+    parser.add_argument("--length", type=int, help="#For simulation script#\nThe read length of the simulated reads [default = 101]", default=101, required=False)
     parser.add_argument("--insert", type=int, help="The median insert size of the simulated reads [default = 300]", default=300, required=False)
     parser.add_argument("--error", type=float, help="The base error rate for the simulated reads [default = 0.01]", default=0.01, required=False)
     parser.add_argument("--keep_intermediate", type=str, help="This option determines which intermediate files are preserved after McClintock completes [default: minimal][options: minimal, general, methods, <list,of,methods>, all]", default="minimal", required=False)
@@ -124,10 +124,10 @@ def parse_args():
     parser.add_argument("--sim", type=str, help="Short read simulator to use (options=wgsim,art) [default = art]", default="art", required=False)
     parser.add_argument("--single", action="store_true", help="runs the simulation in single ended mode", required=False)
     ## resources options ##
-    parser.add_argument("--threads", type=int, help="The number of processors to use for individual cluster jobs. [default = 4]", default=4, required=False)
+    parser.add_argument("--threads", type=int, help="#Resources#\nThe number of processors to use for individual cluster jobs. [default = 4]", default=4, required=False)
     parser.add_argument("--memory", type=str, help="The number of memory in 'G' to use for individual cluster jobs. [default = '20G']", default="20G", required=False)
-    ## resources options ##
-    parser.add_argument("--exclude", type=str, help="BED file of regions in which predictions will be excluded from counts (ex. low recombination regions), for analysis script.", required=False)
+    ## analysis options ##
+    parser.add_argument("--exclude", type=str, help="#For analysis script#\nBED file of regions in which predictions will be excluded from counts (ex. low recombination regions), for analysis script.", required=False)
 
 
     args = parser.parse_args()
@@ -166,6 +166,24 @@ def parse_args():
     args.taxonomy = os.path.abspath(args.taxonomy)
 
     ## optional ##
+    # parse tsd length
+    if not len(args.family) == len(args.tsd):
+        if not len(args.tsd) == 1:
+            sys.exit("ERROR: Integer for length of target site duplication must be specified for each TE family. Or one integer for all TE families. \n")
+        else:
+            tsd = int(args.tsd[0])
+            args.tsd.extend([tsd] * (len(args.family) - 1))
+    else:
+        for i in range(len(args.family)):
+            args.tsd[i] = int(args.tsd[i])
+
+    # parse covrange
+    for i in range(len(args.covrange)):
+        args.covrange[i] = int(args.covrange[i])
+             
+    # parse numrep
+    args.numrep = int(args.numrep)
+
     # parse strand
     strands = ["forward","reverse"]
     for option in args.strand:
@@ -173,12 +191,24 @@ def parse_args():
             sys.stderr.write("Only 'forward' and/or 'reverse' are allowed for --strand option.")
             sys.exit(1)
 
+    # parse length
+    args.length = int(args.length)
+
+    # parse insert
+    args.insert = int(args.insert)
+
+    # parse error
+    args.error = float(args.error)
+
     # parse simulator
     simulators = ["wgsim", "art"]
     if args.sim not in simulators:
         sys.stderr.write("Only 'wgsim' or 'art' are allowed for --sim option.")
         sys.exit(1)
 
+    # parse threads
+    args.threads = int(args.threads)
+    
     # parse memory
     if re.search("G$", args.memory) is None:
         sys.stderr.write("Only memory in 'G' is allowed for --memory option, i.e, '20G'")
@@ -189,7 +219,6 @@ def parse_args():
         args.exclude = os.path.abspath(args.exclude)
     
     return args
-
 
 
 if __name__ == "__main__":

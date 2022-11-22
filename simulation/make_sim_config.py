@@ -12,7 +12,7 @@ def main():
     # tsd length and targets for each family
     for i in range(te_count):
         config['families'][args.family[i]] = {
-            "TSD": args.tsd,
+            "TSD": args.tsd[i],
             "targets": args.bed[i]
         }
     
@@ -38,7 +38,7 @@ def parse_args():
     parser.add_argument("--out", type=str, help="File name of the output json. Required.", required=True)
 
     ## optional ##
-    parser.add_argument("--tsd", type=int, help="Integer for length of target site duplication in bp. Default is 5 bp.", default=5, required=False)
+    parser.add_argument("--tsd", type=int, nargs='+', help="Integers for length of target site duplication in bp. Default is 5 bp for all families.", default=[5], required=False)
     
     args = parser.parse_args()
 
@@ -60,8 +60,16 @@ def parse_args():
     args.out = os.path.abspath(args.out)
 
     # parse tsd length
-    if args.tsd is None:
-        args.tsd = 5
+    if not len(args.family) == len(args.tsd):
+        if not len(args.tsd) == 1:
+            sys.exit("ERROR: Integer for length of target site duplication must be specified for each TE family. Or one integer for all TE families. \n")
+        else:
+            tsd = int(args.tsd[0])
+            args.tsd.extend([tsd] * (len(args.family) - 1))
+    else:
+        for i in range(len(args.family)):
+            args.tsd[i] = int(args.tsd[i])
+
 
     return args
 
