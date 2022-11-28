@@ -1,6 +1,6 @@
-# McClintock 2.0 Simulation System
+# Reproducible and Automated McClintock Simulation Framework
 
-McClintock 2.0 provides several scripts to simulate genomes with a single synthetic TE insertion, generate a synthetic whole genome sequence (WGS) paired-end dataset, submit the synthetic WGS dataset to the main McClintock system, and summarize component method performance.
+McClintock provides several scripts in snakemake to simulate genomes with a single synthetic TE insertion, generate a synthetic whole genome sequence (WGS) paired-end dataset, submit the synthetic WGS dataset to the main McClintock system, and summarize component method performance.
 
 
 ## Install McClintock 2.0 simulation system
@@ -76,7 +76,7 @@ snakemake \
             --mem={resources.mem} \
             --time=72:00:00 \
             --mail-user=<email.address> \
-            --mail-type=END,FAIL \
+            --mail-type=FAIL \
             --output=logs/{wildcards.cov}x_{wildcards.strand}_rep{wildcards.rep}.o \
             --error=logs/{wildcards.cov}x_{wildcards.strand}_rep{wildcards.rep}.e'
 
@@ -207,11 +207,11 @@ Optional analysis parameters:
     - `--tsd`: Space delimited list of TSD length for each TE family in bp. Or one integer for all TE families. 
       - Default: 5 bp for all TE families.
     - `--covrange`: Space delimited list of simulated WGS data coverage range.
-      - Default: `3 6 12 25 50 100`.
+      - Default: 3 6 12 25 50 100.
     - `--numrep`: Number of replicates for each simulated coverage and each strand.
       - Default: 30.
     - `--strand`: Strands to create synthetic insertion. 'forward' and 'reverse' are allowed.
-      - Default: `'forward' 'reverse'`.
+      - Default: 'forward' 'reverse'.
   - Parameters to run simulation:
     - `--length`: The read length of the simulated WGS reads in bp.
       - Default: 101.
@@ -232,7 +232,7 @@ Optional analysis parameters:
     - `--threads`: Number of processors to run simulater and McClintock for each replicate.
       - Default: 4.
     - `--memory`: The amount of memory to run simulater and McClintock for each replicate in G.
-      - Default: `20G`.
+      - Default: 20G.
   - Parameters for analysis:
     - `--exclude`: Regions in which predictions will be excluded from counts (ex. low recombination regions) in BED format.
 - A sample config file in json could be found at `simulation/cfg_sim.json`.
@@ -241,7 +241,11 @@ Optional analysis parameters:
 - In this section, we implemented a "single synthetic insertion" simulation framework to evaluate the performance of McClintock component methods.
   - Firstly, a synthetic genome comprised of a single non-reference TE insertion and its corresponding target site duplication (TSD) is created.
   - Then, synthetic paired-end WGS dataset are generated with read simulator.
-  - Finally, completed McClintock meta-pipeline is executed with simulated WGS data as input.
+  - Finally, McClintock meta-pipeline is executed with simulated WGS data as input.
+
+![singleinssim](https://user-images.githubusercontent.com/44645406/204376432-a1d617d4-64b7-4a3f-aa06-5fe95a86e89f.jpeg)
+
+
 - Each replicate for simulation framework would be submitted as a separate cluster job that could run in parallel.
 - Run Snakefile `simulation/Snakefile_sim` along with the config file:
 ```
@@ -268,9 +272,9 @@ snakemake \
 ```
 - Parameters
   - `--jobs`: The number of jobs to be submitted at the same time. Please modify this parameter according to available amount of computing resources on your cluster.
-  - `--use-conda`: Use conda environment in snakemake rule. This is required.
+  - `--use-conda`: Required. Use conda environment in snakemake rule.
   - `--latency-wait`: Wait given seconds if an output file of a job is not present after the job finished. Please modify this parameter according to latency of your filesystem.
-  - `--keep-going`: Keep running even though there are failed jobs. This is required.
+  - `--keep-going`: Required. Keep running even though there are failed jobs.
   - `--restart-times`: Number of times to re-run if job failed. Recommended.
   - `--snakefile`: Required. Specify the absolute path to `simulation/Snakefile_sim`.
   - `--configfile`: Required. Specify the absolute path to the configuration file.
