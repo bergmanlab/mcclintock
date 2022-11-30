@@ -50,6 +50,7 @@ python ${mcc_dir}/simulation/make_snakemake_config.py \
         "${mcc_dir}/simulation/yeast/200-195_tRNA_targets.bed" \
         "${mcc_dir}/simulation/yeast/17-12_tRNA_targets.bed" \
         "${mcc_dir}/simulation/yeast/200-195_tRNA_targets.bed" \
+    --tsd 5 5 5 5 \
     --mcc ${mcc_dir} \
     --out ${config} \
     --outdir ${test_dir} \
