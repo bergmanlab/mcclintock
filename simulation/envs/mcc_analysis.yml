@@ -16,3 +16,4 @@ dependencies:
   - conda-forge::r-ggpubr=0.4.0
   - r::r-tidyverse
   - bioconda::bedtools=2.30.0
+  - conda-forge::r-ggally

@@ -6,6 +6,7 @@ library(Rmisc)
 library(ggpubr)
 library(reshape2)
 # library(optparse)
+pdf(NULL)
 
 # setup working directory
 args = commandArgs(trailingOnly=TRUE)

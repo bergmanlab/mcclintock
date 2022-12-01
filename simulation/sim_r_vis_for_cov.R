@@ -5,6 +5,7 @@ library(tidyr)
 library(Rmisc)
 library(ggpubr)
 library(reshape2)
+pdf(NULL)
 
 args = commandArgs(trailingOnly=TRUE)
 if (length(args) < 4 ) {
