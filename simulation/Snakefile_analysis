@@ -1,10 +1,20 @@
-rule all:
-    input:
+# check if running old simulation framework, only used for McC2 paper
+if config['simparams']['oldsim'] is True:
+    inputlist = expand(config['out']['outdir']+"/{cov}/"+"/summary/combined_metrics.csv", cov=config['submit']['cov_range']) 
+else:
+    inputlist = [
         config['out']['outdir']+"/r_vis/sim_Recall_allcovs.pdf",
         config['out']['outdir']+"/r_vis/sim_Precision_allcovs.pdf",
         expand(config['out']['outdir']+"/r_vis/simdensity_{cov}x_{te_family}.pdf", cov=config['submit']['cov_range'], te_family=config['config']['family']),
         expand(config['out']['outdir']+"/r_vis/simtsd_{cov}x_{te_family}.pdf", cov=config['submit']['cov_range'], te_family=config['config']['family'])
+    ] 
 
+rule all:
+    input:
+        inputlist
+
+# summarize simulation results for each coverage, preparing for visualization
+# run external script: mcclintock/simulation/mcclintock_simulation_analysis.py
 rule summary:
     input:
         config['out']['outdir']+"/{cov}/"
@@ -21,6 +31,8 @@ rule summary:
     shell:
         "python {params.script} -o {params.out} &> {log}"
 
+# plot precision recall curved combining all coverages
+# run external script: mcclintock/simulation/sim_r_vis_precision_recall.R
 rule r_vis_precision_recall:
     input:
         expand(config['out']['outdir']+"/{cov}/"+"/summary/combined_metrics.csv", cov=config['submit']['cov_range'])
@@ -38,6 +50,8 @@ rule r_vis_precision_recall:
     shell:
         "Rscript --vanilla {params.script} {params.mccdir} {params.out} {input} &> {log}"
 
+# plots for each coverage
+# run external script: mcclintock/simulation/sim_r_vis_for_cov.R
 rule r_vis_for_cov:
     input:
         config['out']['outdir']+"/{cov}/"

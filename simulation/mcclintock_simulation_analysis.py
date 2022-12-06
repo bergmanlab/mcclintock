@@ -150,45 +150,46 @@ def get_predicted_insertions(out, exclude=None):
         rep_num = d.replace("run_","")
         if os.path.exists(out+"/"+d+"/"+rep_num+".modref_1/results/"):
             for e in os.listdir(out+"/"+d+"/"+rep_num+".modref_1/results/"):
-                method = e
-                for f in os.listdir(out+"/"+d+"/"+rep_num+".modref_1/results/"+e):
-                    if "nonredundant.bed" in f and "exclude.bed" not in f:
-                        if method not in methods:
-                            methods.append(method)
-                        inbed = out+"/"+d+"/"+rep_num+".modref_1/results/"+e+"/"+f
-                        if exclude is not None:
-                            tmpbed = out+"/"+d+"/"+rep_num+".modref_1/results/"+e+"/"+f+".exclude.bed"
-                            if os.path.exists(tmpbed):
-                                subprocess.call(["rm", tmpbed])
-                            run_command_stdout(["bedtools", "intersect", "-v", "-a", inbed, "-b", exclude], tmpbed)
-                            inbed = tmpbed
-                        with open(inbed, "r") as bed:
-                            if method not in predicted_insertions.keys():
-                                predicted_insertions[method] = {rep: []}
-                            elif rep not in predicted_insertions[method].keys():
-                                predicted_insertions[method][rep] = []
+                if not e.startswith('.'):
+                    method = e
+                    for f in os.listdir(out+"/"+d+"/"+rep_num+".modref_1/results/"+e):
+                        if "nonredundant.bed" in f and "exclude.bed" not in f:
+                            if method not in methods:
+                                methods.append(method)
+                            inbed = out+"/"+d+"/"+rep_num+".modref_1/results/"+e+"/"+f
+                            if exclude is not None:
+                                tmpbed = out+"/"+d+"/"+rep_num+".modref_1/results/"+e+"/"+f+".exclude.bed"
+                                if os.path.exists(tmpbed):
+                                    subprocess.call(["rm", tmpbed])
+                                run_command_stdout(["bedtools", "intersect", "-v", "-a", inbed, "-b", exclude], tmpbed)
+                                inbed = tmpbed
+                            with open(inbed, "r") as bed:
+                                if method not in predicted_insertions.keys():
+                                    predicted_insertions[method] = {rep: []}
+                                elif rep not in predicted_insertions[method].keys():
+                                    predicted_insertions[method][rep] = []
 
-                            for line in bed:
-                                if "#" not in line:
-                                    insertion = Insertion()
-                                    line = line.replace("\n","")
-                                    split_line = line.split("\t")
-                                    if len(split_line) > 5:
-                                        insertion.chromosome = split_line[0]
-                                        insertion.start = int(split_line[1])
-                                        insertion.end = int(split_line[2])
-                                        info = split_line[3].split("|")
-                                        for x, inf in enumerate(info):
-                                            if "reference" in inf:
-                                                family = "_".join(info[:x])
-                                        insertion.family = family
-                                        insertion.strand = split_line[5]
-                                        if "non-reference" in line:
-                                            insertion.reference = False
-                                        else:
-                                            insertion.reference = True
-                                        
-                                        predicted_insertions[method][rep].append(insertion)
+                                for line in bed:
+                                    if "#" not in line:
+                                        insertion = Insertion()
+                                        line = line.replace("\n","")
+                                        split_line = line.split("\t")
+                                        if len(split_line) > 5:
+                                            insertion.chromosome = split_line[0]
+                                            insertion.start = int(split_line[1])
+                                            insertion.end = int(split_line[2])
+                                            info = split_line[3].split("|")
+                                            for x, inf in enumerate(info):
+                                                if "reference" in inf:
+                                                    family = "_".join(info[:x])
+                                            insertion.family = family
+                                            insertion.strand = split_line[5]
+                                            if "non-reference" in line:
+                                                insertion.reference = False
+                                            else:
+                                                insertion.reference = True
+                                            
+                                            predicted_insertions[method][rep].append(insertion)
                         
     
     return predicted_insertions, methods

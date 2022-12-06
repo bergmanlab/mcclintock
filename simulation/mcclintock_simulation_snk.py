@@ -24,116 +24,144 @@ class Insertion:
         self.reference = False
 
 def main():
-    # args = parse_args()
-    # parsing arguments from snakemake
+    args = parse_args()
+
     #check -r
-    reference = get_abs_path(snakemake.input.ref)
+    reference = args.reference
     #check -c
-    consensus = get_abs_path(snakemake.input.consensus)
+    consensus = args.consensus
     # check -g
-    locations = get_abs_path(snakemake.input.gff)
+    locations = args.locations
     # check -t
-    taxonomy = get_abs_path(snakemake.input.tax)
+    taxonomy = args.taxonomy
     # check -j
-    config = get_abs_path(snakemake.input.cfg)
-    with open(config, "r") as j:
-        cfg = json.load(j, object_pairs_hook = OrderedDict)
-    config = cfg
+    config = args.config
 
-    #check -p
-    if snakemake.threads is None:
-        proc = 1
-    else:
-        proc = int(snakemake.threads)
+    proc = args.proc
+    out = args.out
+    start = args.start
+    end = args.end
+    runid = args.runid
+    single = args.single
+    coverage = args.coverage
+    length = args.length
+    insert = args.insert
+    error = args.error
+    keep_intermediate = args.keep_intermediate
+    strand = args.strand
+    sim = args.sim
+    mcc_version = args.mcc_version
+    seed = args.seed
+
+    # # parsing arguments from snakemake
+    # #check -r
+    # reference = get_abs_path(snakemake.input.ref)
+    # #check -c
+    # consensus = get_abs_path(snakemake.input.consensus)
+    # # check -g
+    # locations = get_abs_path(snakemake.input.gff)
+    # # check -t
+    # taxonomy = get_abs_path(snakemake.input.tax)
+    # # check -j
+    # config = get_abs_path(snakemake.input.cfg)
+    # with open(config, "r") as j:
+    #     cfg = json.load(j, object_pairs_hook = OrderedDict)
+    # config = cfg
+
+    # #check -p
+    # if snakemake.threads is None:
+    #     proc = 1
+    # else:
+    #     proc = int(snakemake.threads)
 
 
-    #check -o
-    if snakemake.params.out is None:
-        out = os.path.abspath(".")
-    else:
-        out = os.path.abspath(snakemake.params.out)
+    # #check -o
+    # if snakemake.params.out is None:
+    #     out = os.path.abspath(".")
+    # else:
+    #     out = os.path.abspath(snakemake.params.out)
 
-        if not os.path.exists(out):
-            try:
-                os.mkdir(out)
-            except Exception as e:
-                track = traceback.format_exc()
-                print(track, file=sys.stderr)
-                print("cannot create output directory: ",out,"exiting...", file=sys.stderr)
-                sys.exit(1)
+    #     if not os.path.exists(out):
+    #         try:
+    #             os.mkdir(out)
+    #         except Exception as e:
+    #             track = traceback.format_exc()
+    #             print(track, file=sys.stderr)
+    #             print("cannot create output directory: ",out,"exiting...", file=sys.stderr)
+    #             sys.exit(1)
 
-    # check --start
-    if snakemake.params.start is None:
-        start = 1
-    else:
-        start = int(snakemake.params.start)
+    # # check --start
+    # if snakemake.params.start is None:
+    #     start = 1
+    # else:
+    #     start = int(snakemake.params.start)
 
-    # check --end
-    if snakemake.params.end is None:
-        end = 1
-    else:
-        end = int(snakemake.params.end)
+    # # check --end
+    # if snakemake.params.end is None:
+    #     end = 1
+    # else:
+    #     end = int(snakemake.params.end)
 
     
-    if snakemake.params.runid is None:
-        runid = ""
-    else:
-        runid = snakemake.params.runid
+    # if snakemake.params.runid is None:
+    #     runid = ""
+    # else:
+    #     runid = snakemake.params.runid
 
-    if snakemake.params.single is None:
-        single = False
-    else:
-        single = snakemake.params.single
+    # if snakemake.params.single is None:
+    #     single = False
+    # else:
+    #     single = snakemake.params.single
 
-    if snakemake.params.coverage is None:
-        coverage = 100
-    else:
-        coverage = int(snakemake.params.coverage)
+    # if snakemake.params.coverage is None:
+    #     coverage = 100
+    # else:
+    #     coverage = int(snakemake.params.coverage)
 
-    if snakemake.params.length is None:
-        length = 101
-    else:
-        length = int(snakemake.params.length)
+    # if snakemake.params.length is None:
+    #     length = 101
+    # else:
+    #     length = int(snakemake.params.length)
 
-    if snakemake.params.insertsize is None:
-        insert = 300
-    else:
-        insert = int(snakemake.params.insertsize)
+    # if snakemake.params.insertsize is None:
+    #     insert = 300
+    # else:
+    #     insert = int(snakemake.params.insertsize)
 
-    if snakemake.params.error is None:
-        error = 0.01
-    else:
-        error = float(snakemake.params.error)
+    # if snakemake.params.error is None:
+    #     error = 0.01
+    # else:
+    #     error = float(snakemake.params.error)
 
-    if snakemake.params.keep_intermediate is None:
-        keep_intermediate = "general"
-    else:
-        keep_intermediate = snakemake.params.keep_intermediate
+    # if snakemake.params.keep_intermediate is None:
+    #     keep_intermediate = "general"
+    # else:
+    #     keep_intermediate = snakemake.params.keep_intermediate
 
-    if snakemake.params.strand is None:
-        strand = "forward"
-    elif snakemake.params.strand != "forward" and snakemake.params.strand != "reverse":
-        sys.exit("ERROR: --strand must be plus or minus \n")
-    else:
-        strand = snakemake.params.strand
+    # if snakemake.params.strand is None:
+    #     strand = "forward"
+    # elif snakemake.params.strand != "forward" and snakemake.params.strand != "reverse":
+    #     sys.exit("ERROR: --strand must be forward or reverse \n")
+    # else:
+    #     strand = snakemake.params.strand
 
 
-    if snakemake.params.sim is None:
-        sim = "wgsim"
-    elif snakemake.params.sim not in ["wgsim", "art"]:
-        sys.exit("ERROR: --sim must be wgsim or art \n")
-    else:
-        sim = snakemake.params.sim
+    # if snakemake.params.sim is None:
+    #     sim = "wgsim"
+    # elif snakemake.params.sim not in ["wgsim", "art"]:
+    #     sys.exit("ERROR: --sim must be wgsim or art \n")
+    # else:
+    #     sim = snakemake.params.sim
 
-    if snakemake.params.mcc_version is None:
-        mcc_version = 2
-    else:
-        mcc_version = int(snakemake.params.mcc_version)
+    # if snakemake.params.mcc_version is None:
+    #     mcc_version = 2
+    # else:
+    #     mcc_version = int(snakemake.params.mcc_version)
     
-    if snakemake.params.seed is None:
-        seed = None
-    else:
-        seed = snakemake.params.seed
+    # if snakemake.params.seed is None:
+    #     seed = None
+    # else:
+    #     seed = snakemake.params.seed
 
     ### start simulation
     for x in range(start,end+1):
@@ -166,109 +194,109 @@ def main():
                 shutil.rmtree(mcc_out)
             run_mcclintock(fastq1, fastq2, reference, consensus, locations, taxonomy, x, proc, out, config, keep_intermediate, run_id=runid, single=single, reverse=reverse, mcc_version=mcc_version)
 
-# def parse_args():
-#     parser = argparse.ArgumentParser(prog='McClintock Simulation', description="Script to run synthetic insertion simulations to evaluate McClintock component methods")
+def parse_args():
+    parser = argparse.ArgumentParser(prog='McClintock Simulation', description="Script to run synthetic insertion simulations to evaluate McClintock component methods")
 
-#     ## required ##
-#     parser.add_argument("-r", "--reference", type=str, help="A reference genome sequence in fasta format", required=True)
-#     parser.add_argument("-c", "--consensus", type=str, help="The consensus sequences of the TEs for the species in fasta format", required=True)
-#     parser.add_argument("-g", "--locations", type=str, help="The locations of known TEs in the reference genome in GFF 3 format. This must include a unique ID attribute for every entry", required=True)
-#     parser.add_argument("-t", "--taxonomy", type=str, help="A tab delimited file with one entry per ID in the GFF file and two columns: the first containing the ID and the second containing the TE family it belongs to. The family should correspond to the names of the sequences in the consensus fasta file", required=True)
-#     parser.add_argument("-j","--config", type=str, help="A json config file containing information on TE family TSD size and target sites", required=True)
-#     ## optional ##
-#     parser.add_argument("-p", "--proc", type=int, help="The number of processors to use for parallel stages of the pipeline [default = 1]", required=False)
-#     parser.add_argument("-o", "--out", type=str, help="An output folder for the run. [default = '.']", required=False)
-#     parser.add_argument("-C","--coverage", type=int, help="The target genome coverage for the simulated reads [default = 100]", required=False)
-#     parser.add_argument("-l","--length", type=int, help="The read length of the simulated reads [default = 101]", required=False)
-#     parser.add_argument("-i","--insert", type=int, help="The median insert size of the simulated reads [default = 300]", required=False)
-#     parser.add_argument("-e","--error", type=float, help="The base error rate for the simulated reads [default = 0.01]", required=False)
-#     parser.add_argument("-k","--keep_intermediate", type=str, help="This option determines which intermediate files are preserved after McClintock completes [default: general][options: minimal, general, methods, <list,of,methods>, all]", required=False)
-#     parser.add_argument("--strand", type=str, help="The strand to insert the TE into [options=plus,minus][default = plus]", required=False)
-#     parser.add_argument("--start", type=int, help="The number of replicates to run. [default = 1]", required=False)
-#     parser.add_argument("--end", type=int, help="The number of replicates to run. [default = 300]", required=False)
-#     parser.add_argument("--seed", type=str, help="a seed to the random number generator so runs can be replicated", required=False)
-#     parser.add_argument("--runid", type=str, help="a string to prepend to output files so that multiple runs can be run at the same time without file name clashes", required=False)
-#     parser.add_argument("--sim", type=str, help="Short read simulator to use (options=wgsim,art) [default = wgsim]", required=False)
-#     parser.add_argument("-s","--single", action="store_true", help="runs the simulation in single ended mode", required=False)
-#     parser.add_argument("--mcc_version", type=int, help="Which version of McClintock to use for the simulation(1 or 2). [default = 2]", required=False, default=2)
+    ## required ##
+    parser.add_argument("-r", "--reference", type=str, help="A reference genome sequence in fasta format", required=True)
+    parser.add_argument("-c", "--consensus", type=str, help="The consensus sequences of the TEs for the species in fasta format", required=True)
+    parser.add_argument("-g", "--locations", type=str, help="The locations of known TEs in the reference genome in GFF 3 format. This must include a unique ID attribute for every entry", required=True)
+    parser.add_argument("-t", "--taxonomy", type=str, help="A tab delimited file with one entry per ID in the GFF file and two columns: the first containing the ID and the second containing the TE family it belongs to. The family should correspond to the names of the sequences in the consensus fasta file", required=True)
+    parser.add_argument("-j","--config", type=str, help="A json config file containing information on TE family TSD size and target sites", required=True)
+    ## optional ##
+    parser.add_argument("-p", "--proc", type=int, help="The number of processors to use for parallel stages of the pipeline [default = 1]", required=False)
+    parser.add_argument("-o", "--out", type=str, help="An output folder for the run. [default = '.']", required=False)
+    parser.add_argument("-C","--coverage", type=int, help="The target genome coverage for the simulated reads [default = 100]", required=False)
+    parser.add_argument("-l","--length", type=int, help="The read length of the simulated reads [default = 101]", required=False)
+    parser.add_argument("-i","--insert", type=int, help="The median insert size of the simulated reads [default = 300]", required=False)
+    parser.add_argument("-e","--error", type=float, help="The base error rate for the simulated reads [default = 0.01]", required=False)
+    parser.add_argument("-k","--keep_intermediate", type=str, help="This option determines which intermediate files are preserved after McClintock completes [default: general][options: minimal, general, methods, <list,of,methods>, all]", required=False)
+    parser.add_argument("--strand", type=str, help="The strand to insert the TE into [options=plus,minus][default = plus]", required=False)
+    parser.add_argument("--start", type=int, help="The number of replicates to run. [default = 1]", required=False)
+    parser.add_argument("--end", type=int, help="The number of replicates to run. [default = 300]", required=False)
+    parser.add_argument("--seed", type=str, help="a seed to the random number generator so runs can be replicated", required=False)
+    parser.add_argument("--runid", type=str, help="a string to prepend to output files so that multiple runs can be run at the same time without file name clashes", required=False)
+    parser.add_argument("--sim", type=str, help="Short read simulator to use (options=wgsim,art) [default = wgsim]", required=False)
+    parser.add_argument("-s","--single", action="store_true", help="runs the simulation in single ended mode", required=False)
+    parser.add_argument("--mcc_version", type=int, help="Which version of McClintock to use for the simulation(1 or 2). [default = 2]", required=False, default=2)
 
-#     args = parser.parse_args()
+    args = parser.parse_args()
 
-#     #check -r
-#     args.reference = get_abs_path(args.reference)
-#     #check -c
-#     args.consensus = get_abs_path(args.consensus)
-#     # check -g
-#     args.locations = get_abs_path(args.locations)
-#     # check -t
-#     args.taxonomy = get_abs_path(args.taxonomy)
-#     # check -j
-#     args.config = get_abs_path(args.config)
-#     with open(args.config, "r") as j:
-#         config = json.load(j, object_pairs_hook = OrderedDict)
-#     args.config = config
+    #check -r
+    args.reference = get_abs_path(args.reference)
+    #check -c
+    args.consensus = get_abs_path(args.consensus)
+    # check -g
+    args.locations = get_abs_path(args.locations)
+    # check -t
+    args.taxonomy = get_abs_path(args.taxonomy)
+    # check -j
+    args.config = get_abs_path(args.config)
+    with open(args.config, "r") as j:
+        config = json.load(j, object_pairs_hook = OrderedDict)
+    args.config = config
 
-#     #check -p
-#     if args.proc is None:
-#         args.proc = 1
+    #check -p
+    if args.proc is None:
+        args.proc = 1
 
-#     #check -o
-#     if args.out is None:
-#         args.out = os.path.abspath(".")
-#     else:
-#         args.out = os.path.abspath(args.out)
+    #check -o
+    if args.out is None:
+        args.out = os.path.abspath(".")
+    else:
+        args.out = os.path.abspath(args.out)
 
-#         if not os.path.exists(args.out):
-#             try:
-#                 os.mkdir(args.out)
-#             except Exception as e:
-#                 track = traceback.format_exc()
-#                 print(track, file=sys.stderr)
-#                 print("cannot create output directory: ",args.out,"exiting...", file=sys.stderr)
-#                 sys.exit(1)
+        if not os.path.exists(args.out):
+            try:
+                os.makedirs(args.out, exist_ok=True)
+            except Exception as e:
+                track = traceback.format_exc()
+                print(track, file=sys.stderr)
+                print("cannot create output directory: ",args.out,"exiting...", file=sys.stderr)
+                sys.exit(1)
 
-#     # check --start
-#     if args.start is None:
-#         args.start = 1
+    # check --start
+    if args.start is None:
+        args.start = 1
 
-#     # check --end
-#     if args.end is None:
-#         args.end = 1
+    # check --end
+    if args.end is None:
+        args.end = 1
 
-#     if args.runid is None:
-#         args.runid = ""
+    if args.runid is None:
+        args.runid = ""
 
-#     if args.single is None:
-#         args.single = False
+    if args.single is None:
+        args.single = False
 
-#     if args.coverage is None:
-#         args.coverage = 100
+    if args.coverage is None:
+        args.coverage = 100
 
-#     if args.length is None:
-#         args.length = 101
+    if args.length is None:
+        args.length = 101
 
-#     if args.insert is None:
-#         args.insert = 300
+    if args.insert is None:
+        args.insert = 300
 
-#     if args.error is None:
-#         args.error = 0.01
+    if args.error is None:
+        args.error = 0.01
 
-#     if args.keep_intermediate is None:
-#         args.keep_intermediate = "general"
+    if args.keep_intermediate is None:
+        args.keep_intermediate = "general"
 
-#     if args.strand is None:
-#         args.strand = "plus"
-#     elif args.strand != "plus" and args.strand != "minus":
-#         sys.exit("ERROR: --strand must be plus or minus \n")
-
-
-#     if args.sim is None:
-#         args.sim = "wgsim"
-#     elif args.sim not in ["wgsim", "art"]:
-#         sys.exit("ERROR: --sim must be wgsim or art \n")
+    if args.strand is None:
+        args.strand = "forward"
+    elif args.strand != "forward" and args.strand != "reverse":
+        sys.exit("ERROR: --strand must be forward or reverse \n")
 
 
-#     return args
+    if args.sim is None:
+        args.sim = "wgsim"
+    elif args.sim not in ["wgsim", "art"]:
+        sys.exit("ERROR: --sim must be wgsim or art \n")
+
+
+    return args
 
 def run_command(cmd_list, log=None):
     msg = ""
@@ -386,7 +414,7 @@ def fix_fasta_lines(fasta, length):
 
 def add_synthetic_insertion(reference_seqs, consensus_seqs, config, rep, out, run_id="", seed=None, reverse=False):
     if not os.path.exists(out+"/data"):
-        os.mkdir(out+"/data")
+        os.makedirs(out+"/data", exist_ok=True)
 
     if not reverse:
         outdir = out+"/data/forward"
@@ -394,7 +422,7 @@ def add_synthetic_insertion(reference_seqs, consensus_seqs, config, rep, out, ru
         outdir = out+"/data/reverse"
 
     if not os.path.exists(outdir):
-        os.mkdir(outdir)
+        os.makedirs(outdir, exist_ok=True)
 
     if seed is not None:
         random.seed(seed+"add_synthetic_"+str(reverse)+"_insertion"+str(rep))
@@ -530,19 +558,19 @@ def create_synthetic_reads(simulator, reference, coverage, num_pairs, length, in
 
 def run_mcclintock(fastq1, fastq2, reference, consensus, locations, taxonomy, rep, threads, out, config, keep_intermediate, run_id="", reverse=False, single=False, mcc_version=2):
     if not os.path.exists(out+"/results"):
-        os.mkdir(out+"/results")
+        os.makedirs(out+"/results", exist_ok=True)
 
     if not reverse:
         if not os.path.exists(out+"/results/forward"):
-            os.mkdir(out+"/results/forward")
+            os.makedirs(out+"/results/forward", exist_ok=True)
         mcc_out = out+"/results/forward/run"+run_id+"_"+str(rep)
     else:
         if not os.path.exists(out+"/results/reverse"):
-            os.mkdir(out+"/results/reverse")
+            os.makedirs(out+"/results/reverse", exist_ok=True)
         mcc_out = out+"/results/reverse/run"+run_id+"_"+str(rep)
 
     if not os.path.exists(mcc_out):
-        os.mkdir(mcc_out)
+        os.makedirs(mcc_out, exist_ok=True)
 
     if mcc_version == 2:
         mcc_path = config['mcclintock']['path']
@@ -579,7 +607,7 @@ def run_mcclintock(fastq1, fastq2, reference, consensus, locations, taxonomy, re
         print("running mcclintock... output:", mcc_out)
         print(command)
         run_command_stdout(command, mcc_out+"/run.stdout", log=mcc_out+"/run.stderr")
-        if not os.path.exists(mcc_out+"/results/summary/summary_report.txt"):
+        if not os.path.exists(mcc_out+"/results/summary/te_summary.csv"):
             sys.stderr.write("run at: "+mcc_out+" failed...")
     else:
         mcc_path = config['mcclintock']['v1_path']
@@ -607,16 +635,16 @@ def run_mcclintock(fastq1, fastq2, reference, consensus, locations, taxonomy, re
 
 
 def reorder_mcc1_output(rep, out):
-    os.mkdir(f"{out}/{rep}.modref_1/")
+    os.makedirs(f"{out}/{rep}.modref_1/", exist_ok=True)
     results_dir = f"{out}/{rep}.modref_1/results/"
-    os.mkdir(results_dir)
+    os.makedirs(results_dir, exist_ok=True)
     beds = glob.glob(out+'*/*/*/results/*_nonredundant.bed')
     for bed in beds:
         base_name = bed.split("/")[-1]
         method = base_name.replace("_nonredundant.bed","")
         method = method[method.find("_")+1:]
         method_dir = results_dir+"/"+method
-        os.mkdir(method_dir)
+        os.makedirs(method_dir, exist_ok=True)
         with open(bed,"r") as inbed, open(method_dir+"/"+base_name, "w") as outbed:
             for line in inbed:
                 outbed.write(line.replace("_","|", 1))

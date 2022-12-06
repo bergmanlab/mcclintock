@@ -271,7 +271,7 @@ snakemake \
             --output=logs/{wildcards.cov}x_{wildcards.strand}_rep{wildcards.rep}.o \
             --error=logs/{wildcards.cov}x_{wildcards.strand}_rep{wildcards.rep}.e'
 ```
-- Parameters
+- Parameters to run `snakemake`
   - `--jobs`: The number of jobs to be submitted at the same time. Please modify this parameter according to available amount of computing resources on your cluster.
   - `--use-conda`: Required. Use conda environment in snakemake rule.
   - `--latency-wait`: Wait given seconds if an output file of a job is not present after the job finished. Please modify this parameter according to latency of your filesystem.
@@ -281,7 +281,9 @@ snakemake \
   - `--configfile`: Required. Specify the absolute path to the configuration file.
   - `--cluster`: Required. Provide headers for job submission. *Note that if `--mail-user` and `--mail-type` are provided, you may get tons of emails for each replicate.*
   - Other arguments to run snakemake may be applicable. Please check [snakemake tutorial](https://snakemake.readthedocs.io/en/v7.16.0/index.html).
-
+- External scripts called by `mcclintock/simulation/Snakefile_sim`:
+  - `mcclintock/simulation/make_sim_config.py`
+  - `mcclintock/simulation/mcclintock_simulation_snk.py`
 
 ### 3: Preliminary anslysis on simulation results
 - Run Snakefile `simulation/Snakefile_analysis` along with the config file:
@@ -301,3 +303,7 @@ snakemake \
     - `<outdir>/r_vis/sim_<Precision/Recall>_mainfig.pdf` and `<outdir>/r_vis/sim_<Precision/Recall>_allcovs.pdf`: Precision and recall curves for 2 window sizes and all windows, respectively.
     - `<outdir>/r_vis/simdensity_<cov>x_<TE_name>.pdf`: Positional accuracy. Distribution of non-reference predictions relative to true location of component methods across fold-coverage and TE families.
     - `<outdir>/r_vis/simtsd_<cov>x_<TE_name>.pdf`: TSD length disbutions for component methods using split-read evidence.
+- External scripts called by `mcclintock/simulation/Snakefile_analysis`:
+  - `mcclintock/simulation/mcclintock_simulation_analysis.py`
+  - `mcclintock/simulation/sim_r_vis_precision_recall.R`
+  - `mcclintock/simulation/sim_r_vis_for_cov.R`

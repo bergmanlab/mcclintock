@@ -36,7 +36,7 @@ def main():
     families = ["TY1", "TY2","TY3", "TY4"]
     fam_idx = 0
     feat_idx = 0
-    for x in range(1,300):
+    for x in range(0,299):
         if feat_idx >= len(features):
             feat_idx = 0
 

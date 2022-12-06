@@ -34,14 +34,24 @@ def main():
     }
 
     ## parameters for simulation script inputs
-    config["in"] = {
-        "cfg": args.outdir+"/config/run_simulation.json",
-        "ref": args.reference,
-        "consensus": args.consensus,
-        "gff": args.locations,
-        "tax": args.taxonomy,
-        "script": args.mcc+"/simulation/mcclintock_simulation_snk.py"
-    }
+    if args.oldsim is True:
+        config["in"] = {
+            "cfg": [f"{args.outdir}/config/run_{i}.json" for i in range(0,299)],
+            "ref": args.reference,
+            "consensus": args.consensus,
+            "gff": args.locations,
+            "tax": args.taxonomy,
+            "script": args.mcc+"/simulation/mcclintock_simulation_snk.py"
+        }
+    else:
+        config["in"] = {
+            "cfg": args.outdir+"/config/run_simulation.json",
+            "ref": args.reference,
+            "consensus": args.consensus,
+            "gff": args.locations,
+            "tax": args.taxonomy,
+            "script": args.mcc+"/simulation/mcclintock_simulation_snk.py"
+        }
 
     ## parameters for simulation script
     config["simparams"] = {
@@ -52,7 +62,8 @@ def main():
         "error": args.error,
         "keep_intermediate": args.keep_intermediate,
         "simulator": args.sim,
-        "mcc_version": 2
+        "mcc_version": args.mcc_version,
+        "oldsim": args.oldsim
     }
 
     ## parameters for cluster job resources/envs
@@ -133,6 +144,10 @@ def parse_args():
     ## analysis options ##
     analysis_args = parser.add_argument_group('Optional analysis parameters')
     analysis_args.add_argument("--exclude", type=str, help="BED file of regions in which predictions will be excluded from counts (ex. low recombination regions), for analysis script.", required=False)
+    ## additional options for old sim framework ##
+    additional_args = parser.add_argument_group('Additional options for old simulation framework. Only used for McC2 paper')
+    additional_args.add_argument("--oldsim", action="store_true", help="Runs old simulation framework. Only used for McC2 paper.", required=False)
+    additional_args.add_argument("--mcc_version", type=int, help="Which version of McClintock to use for the simulation(1 or 2). [default = 2]", default=2, required=False)
 
 
     args = parser.parse_args()
@@ -223,6 +238,9 @@ def parse_args():
     if args.exclude is not None:
         args.exclude = os.path.abspath(args.exclude)
     
+    # parse mcc_version
+    args.mcc_version = int(args.mcc_version)
+
     return args
 
 

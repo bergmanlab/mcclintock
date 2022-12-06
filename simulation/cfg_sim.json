@@ -29,13 +29,14 @@
     },  
     "simparams": {
         "runid": null,
-        "single": null,
+        "single": false,
         "length": 101,
         "insertsize": 300,
         "error": 0.01,
         "keep_intermediate": "minimal",
         "simulator": "art",
-        "mcc_version": 2
+        "mcc_version": 2,
+        "oldsim": false
     },
     "resources": {
         "threads": 4,
