@@ -638,7 +638,7 @@ def reorder_mcc1_output(rep, out):
     os.makedirs(f"{out}/{rep}.modref_1/", exist_ok=True)
     results_dir = f"{out}/{rep}.modref_1/results/"
     os.makedirs(results_dir, exist_ok=True)
-    beds = glob.glob(out+'*/*/*/results/*_nonredundant.bed')
+    beds = glob.glob(out+'/*/*/results/*_nonredundant.bed')
     for bed in beds:
         base_name = bed.split("/")[-1]
         method = base_name.replace("_nonredundant.bed","")
