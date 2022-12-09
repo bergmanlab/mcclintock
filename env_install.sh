@@ -10,7 +10,7 @@ mamba remove -y -n MCCLINTOCK_retroseq --all
 
 # create specific conda envs for McC main pipeilne
 mamba create -y -n MCCLINTOCK_main python=3.6
-mamba install -n MCCLINTOCK_main -y repeatmasker=4.0.7 perl-bioperl-run=1.006900 bwa=0.7.4 bedtools=2.17.0 samtools=0.1.19 fastqc=0.11.2 ucsc-fatotwobit=366
+mamba install -n MCCLINTOCK_main -y repeatmasker=4.0.7 perl-bioperl-run=1.006900 bwa=0.7.4 bedtools=2.17.0 samtools=0.1.19 fastqc=0.11.2 ucsc-fatotwobit=366 unzip=6.0 patch=2.7.6
 
 # create specific conda envs for coverage module
 mamba create -y -n MCCLINTOCK_cov python=3.6
