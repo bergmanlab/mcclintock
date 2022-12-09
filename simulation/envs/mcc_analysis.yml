@@ -5,6 +5,7 @@ channels:
   - r
   - defaults
 dependencies:
+  - pandas=1.5.2
   - conda-forge::r-devtools=2.4.1
   - conda-forge::r-phangorn=2.7.0
   - conda-forge::r-dplyr=1.0.6
