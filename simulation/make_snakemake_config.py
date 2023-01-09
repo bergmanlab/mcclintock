@@ -132,7 +132,7 @@ def parse_args():
     sim_args = parser.add_argument_group('Optional simulation parameters')
     sim_args.add_argument("--length", type=int, help="The read length of the simulated reads [default = 101]", default=101, required=False)
     sim_args.add_argument("--insert", type=int, help="The median insert size of the simulated reads [default = 300]", default=300, required=False)
-    sim_args.add_argument("--error", type=float, help="The base error rate for the simulated reads [default = 0.01]", default=0.01, required=False)
+    sim_args.add_argument("--error", type=float, help="The base error rate for the simulated reads (Only useful with wgsim) [default = 0.01]", default=0.01, required=False)
     sim_args.add_argument("--keep_intermediate", type=str, help="This option determines which intermediate files are preserved after McClintock completes (options: minimal, general, methods, <list,of,methods>, all)[default = 'minimal']", default="minimal", required=False)
     sim_args.add_argument("--runid", type=str, help="(not recommended) a string to prepend to output files so that multiple runs can be run at the same time without file name clashes", required=False)
     sim_args.add_argument("--sim", type=str, help="Short read simulator to use (options: wgsim,art) [default = 'art']", default="art", required=False)
