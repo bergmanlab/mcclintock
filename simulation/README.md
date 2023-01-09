@@ -218,7 +218,7 @@ Optional analysis parameters:
       - Default: 101.
     - `--insert`: The median insert size of the simulated WGS reads in bp.
       - Default: 300.
-    - `--error`: The base error rate for the simulated WGS reads. Only useful when using wgsim as the read simulator.
+    - `--error`: The base error rate for the simulated WGS reads. Useful when specifying wgsim as the read simulator.
       - Default: 0.01.
     - `--keep_intermediate`: Intermediate files to preserve after McClintock completes. This is helpful when users would keep large intermediate files (eg. SAM files) for debug.
       - This is the same optional input file to run McClintock.
