@@ -202,14 +202,16 @@ simulation_tsd_len <- function(te_list){
     # newTEs <- paste(dataset$Method[new.TEs],dataset$Sample[new.TEs])
     # new.TE.counts <- table(newTEs)
     get_ty_plot <- function(method,te){
-        p1 <- dataset %>% filter(Method==method & TE==te) %>% ggplot(aes(x = tsd)) +
+        dataset_plot <- dataset %>% filter(Method==method & TE==te)
+        p1 <- dataset_plot %>% ggplot(aes(x = tsd)) +
             xlim(c(0,15)) +
             geom_histogram(binwidth = 1, color="brown", fill="white") +
             theme_bw() +
             theme(axis.text.x = element_text(), axis.ticks.x = element_line(),
                     axis.text.y = element_text(angle = 90, hjust = 0.5), axis.ticks.y = element_line(),
                     plot.title = element_text(face = "bold", hjust = 0.5, size = 14)) +
-            scale_y_continuous(breaks = function(x) seq.int(ceiling(x[1]), floor(x[2]), by = ceiling((floor(x[2])-ceiling(x[1]))/4))) +
+            scale_y_continuous(breaks = function(x) seq.int(0, floor(x[2]), by = ceiling((floor(x[2])-0)/4))) +
+            { if(length(dataset_plot$tsd) > 0) geom_text(x = 13, aes(y = max(table(tsd)), label = paste0("5bp=",scales::percent(length(tsd[tsd==5])/length(tsd)))), colour="brown") } +
             labs(x = NULL, y = NULL, title = title2[method])
         return(p1)
     }
