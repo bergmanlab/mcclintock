@@ -1,0 +1,20 @@
+name: mcc_analysis
+channels:
+  - bioconda
+  - conda-forge
+  - r
+  - defaults
+dependencies:
+  - pandas=1.5.2
+  - conda-forge::r-devtools=2.4.1
+  - conda-forge::r-phangorn=2.7.0
+  - conda-forge::r-dplyr=1.0.6
+  - conda-forge::r-rmisc=1.5
+  - conda-forge::r-gridextra=2.3
+  - conda-forge::r-gridbase=0.4_7
+  - conda-forge::r-lattice=0.20_44
+  - conda-forge::r-git2r=0.28.0
+  - conda-forge::r-ggpubr=0.4.0
+  - r::r-tidyverse
+  - bioconda::bedtools=2.30.0
+  - conda-forge::r-ggally

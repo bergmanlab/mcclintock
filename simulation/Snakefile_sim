@@ -1,0 +1,154 @@
+localrules: generate_config
+
+# check if running old simulation framework, only used for McC2 paper
+if config['simparams']['oldsim'] is True:
+    inputlist = expand(config['out']['outdir']+"/{cov}/results/{strand}/run_{rep}/{rep}.modref_1/results/", cov=config['submit']['cov_range'], rep=range(config['submit']['num_rep']), strand=config['submit']['strand']) 
+else:
+    inputlist = expand(config['out']['outdir']+"/{cov}/results/{strand}/run_{rep}/{rep}.modref_1/results/summary/te_summary.csv", cov=config['submit']['cov_range'], rep=range(config['submit']['num_rep']), strand=config['submit']['strand']) 
+
+rule all:
+    input:
+        inputlist
+
+# generate config file for each replicate
+# run external script: mcclintock/simulation/make_sim_config.py
+rule generate_config:
+    conda:
+        config['resources']['condaenv'] 
+    output:
+        config['in']['cfg']
+    params:
+        mccdir=config['mccdir'],
+        script=config['config']['cfg_script'],
+        family=config['config']['family'],
+        ins_bed=config['config']['ins_bed'],
+        len_tsd=config['config']['len_tsd']
+    shell:
+        "python {params.script} --family {params.family} --bed {params.ins_bed} --mcc {params.mccdir} --out {output} --tsd {params.len_tsd}"
+
+# submit job for each replicate
+# run external script: mcclintock/simulation/mcclintock_simulation_snk.py
+rule run_simulation:
+    input:
+        cfg=config['in']['cfg'],
+        ref=config['in']['ref'],
+        consensus=config['in']['consensus'],
+        gff=config['in']['gff'],
+        tax=config['in']['tax']
+    conda:
+        config['resources']['condaenv']
+    output:
+        config['out']['outdir']+"/{cov}/results/{strand}/run_{rep}/{rep}.modref_1/results/summary/te_summary.csv"
+    params:
+        out=config['out']['outdir']+"/{cov}/",
+        start=lambda wc: wc.get("rep"),
+        end=lambda wc: wc.get("rep"),
+        runid=config['simparams']['runid'],
+        single=config['simparams']['single'],
+        coverage=lambda wc: wc.get("cov"),
+        length=config['simparams']['length'],
+        insertsize=config['simparams']['insertsize'],
+        error=config['simparams']['error'],
+        keep_intermediate=config['simparams']['keep_intermediate'],
+        strand=lambda wc: wc.get("strand"),
+        seed=lambda wc: wc.get("rep"),
+        sim=config['simparams']['simulator'],
+        mcc_version=config['simparams']['mcc_version'],
+        script=config['in']['script'],
+        env=config['resources']['condaenv']
+    threads: config['resources']['threads']
+    resources:
+        mem=config['resources']['mem']
+    log:
+        config['out']['outdir']+"/logs/{cov}x_{strand}_rep{rep}.log"
+    shell:
+        '''
+        if [[ {params.single} == "True" ]]; then
+            SINGLE="--single"
+        else
+            SINGLE=""
+        fi
+        python {params.script} \
+            -r {input.ref} \
+            -c {input.consensus} \
+            -g {input.gff} \
+            -t {input.tax} \
+            -p {threads} \
+            --coverage {params.coverage} \
+            --length {params.length} \
+            --insert {params.insertsize} \
+            --error {params.error} \
+            --keep_intermediate {params.keep_intermediate} \
+            -j {input.cfg} \
+            --strand {params.strand} \
+            --start {params.start} \
+            --end {params.end} \
+            --seed {params.seed} \
+            --sim {params.sim} \
+            --mcc_version {params.mcc_version} \
+            ${{SINGLE}} \
+            -o {params.out} &> {log}
+        '''
+
+# running old simulation framework, only used for McC2 paper
+rule run_simulation_oldframe:
+    input:
+        cfg=config['out']['outdir']+"/config/run_{rep}.json",
+        ref=config['in']['ref'],
+        consensus=config['in']['consensus'],
+        gff=config['in']['gff'],
+        tax=config['in']['tax']
+    conda:
+        config['resources']['condaenv']
+    output:
+        directory(config['out']['outdir']+"/{cov}/results/{strand}/run_{rep}/{rep}.modref_1/results/")
+    params:
+        out=config['out']['outdir']+"/{cov}/",
+        start=lambda wc: wc.get("rep"),
+        end=lambda wc: wc.get("rep"),
+        runid=config['simparams']['runid'],
+        single=config['simparams']['single'],
+        coverage=lambda wc: wc.get("cov"),
+        length=config['simparams']['length'],
+        insertsize=config['simparams']['insertsize'],
+        error=config['simparams']['error'],
+        keep_intermediate=config['simparams']['keep_intermediate'],
+        strand=lambda wc: wc.get("strand"),
+        seed=lambda wc: wc.get("rep"),
+        sim=config['simparams']['simulator'],
+        mcc_version=config['simparams']['mcc_version'],
+        script=config['in']['script'],
+        env=config['resources']['condaenv']
+    threads: config['resources']['threads']
+    resources:
+        mem=config['resources']['mem']
+    log:
+        config['out']['outdir']+"/logs/{cov}x_{strand}_rep{rep}.log"
+    shell:
+        '''
+        if [[ {params.single} == "True" ]]; then
+            SINGLE="--single"
+        else
+            SINGLE=""
+        fi
+        python {params.script} \
+            -r {input.ref} \
+            -c {input.consensus} \
+            -g {input.gff} \
+            -t {input.tax} \
+            -p {threads} \
+            --coverage {params.coverage} \
+            --length {params.length} \
+            --insert {params.insertsize} \
+            --error {params.error} \
+            --keep_intermediate {params.keep_intermediate} \
+            -j {input.cfg} \
+            --strand {params.strand} \
+            --start {params.start} \
+            --end {params.end} \
+            --seed {params.seed} \
+            --sim {params.sim} \
+            --mcc_version {params.mcc_version} \
+            ${{SINGLE}} \
+            -o {params.out} &> {log}
+        '''
