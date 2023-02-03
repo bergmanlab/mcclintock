@@ -21,13 +21,16 @@ except ImportError as e:
     sys.exit("ERROR...unable to load required python modules\ntry reinstalling and/or activating McClintock environment:\n\tconda env create -f install/envs/mcclintock.yml --name mcclintock\n\tconda activate mcclintock\n")
 
 def main():
+    #setting Variables and initilizing the complete command
     full_command = " ".join(["python3"] + sys.argv)
     current_directory = os.getcwd()
-
+    
+    #creates customized system path based on device used
     expected_configs = sysconfig.CONFIGS
     args = parse_args(expected_configs)
     sys.path = [args.config] + sys.path
-
+    
+    #creates the logs and the tmp directories
     mccutils.mkdir(args.out+"/logs")
     mccutils.mkdir(args.out+"/tmp")
     check_installed_modules(args.methods, sysconfig.NO_INSTALL_METHODS, config_install.MD5, os.path.dirname(os.path.abspath(__file__))+"/install/")
@@ -38,6 +41,7 @@ def main():
     mccutils.remove(args.out+"/tmp")
 
 def parse_args(expected_configs):
+    #adding options to the parser to eventually allow the user to make the desecion on which options to use?
     parser = argparse.ArgumentParser(prog='McClintock', description="Meta-pipeline to identify transposable element insertions using next generation sequencing data")
 
     ## required ##
@@ -63,36 +67,42 @@ def parse_args(expected_configs):
     parser.add_argument("--make_annotations", action="store_true", help="This option will only run the pipeline up to the creation of the repeat annotations", required=False)
     parser.add_argument("-k","--keep_intermediate", type=str, help="This option determines which intermediate files are preserved after McClintock completes [default: general][options: minimal, general, methods, <list,of,methods>, all]", required=False)
     parser.add_argument("--config", type=str, help="This option determines which config files to use for your McClintock run [default: config in McClintock Repository]", required=False)
-
+    
+    #recursion??(note: not sure about how the whole parser things works, will look more into it after getting a rouch draft done)
     args = parser.parse_args()
-
+    
+    #change dir if specified in the options
     if args.config is None:
         args.config = os.path.dirname(os.path.abspath(__file__)) + "/config/"
     else:
         args.config = os.path.abspath(args.config)+"/"
-
+    
+    #checking if the configuartion file specifiedin options is in place
     for key in expected_configs.keys():
         for config_file in expected_configs[key]:
             if not os.path.exists(args.config+"/"+config_file):
                 sys.exit("Error: can't find config file: "+args.config+"/"+config_file+"\n Check that --config is set correctly...exiting...\n")
-
+    
+    #sets the args.debug to false if it is not explictly set in the options(args.debug is used later to initiate debugging)
     if args.debug is None:
         args.debug = False
 
-    #check -m
-    # If only one fastq has been supplied assume this is single ended data and launch only ngs_te_mapper and RelocaTE
+    ## check -m ##
+    ## If only one fastq has been supplied assume this is single ended data and launch only ngs_te_mapper and RelocaTE ##
     if args.second is None and not args.install:
         valid_methods = sysconfig.SINGLE_END_METHODS #from config.py
     else:
         valid_methods = sysconfig.ALL_METHODS #from config.py
 
-    # used to preserve trimgalore and mapped reads output if they are explicitly called by the user
+    ## used to preserve trimgalore and mapped reads output if they are explicitly called by the user ##
     trimgalore_called = False
     map_reads_called = False
 
+    #sets the methods to the prespecified defaults based on args.second and args.install only if there are no methods specified initially
     if args.methods is None:
         args.methods = valid_methods
-
+    
+    #checks methods specified initlially to make sure they are valid methods by comparing them to a established valid_methods file
     else:
         args.methods = args.methods.split(",")
         if "trimgalore" in args.methods:
@@ -106,30 +116,32 @@ def parse_args(expected_configs):
             if args.methods[x] not in valid_methods:
                 sys.stderr.write(" ".join(["Method:",method, "not a valid method...", "Valid methods:"," ".join(valid_methods),"\n"]))
                 sys.exit(1)
-
+    
+    #runs the install command if install is specified as an option
     if args.install:
         mccutils.log("install","installing dependencies")
         mccutils.log("install","WARNING: this could take awhile")
         install(args.methods, resume=args.resume, debug=args.debug)
         sys.exit(0)
 
-    #check -r
+    ## check -r ##
     args.reference = mccutils.get_abs_path(args.reference)
-    #check -c
+    ## check -c ##
     args.consensus = mccutils.get_abs_path(args.consensus)
 
     if args.make_annotations != True:
-        #check -1
+        ## check -1 ## 
         args.first = mccutils.get_abs_path(args.first)
-        #check -2
+        ## check -2 ## 
         if args.second is not None:
             args.second = mccutils.get_abs_path(args.second)
 
-    #check -p
+    ## check -p ## 
     if args.proc is None:
         args.proc = 1
-
-    #check -o
+    ## if there is no output argument specified the output will be set to nothing elsewise an output dir is created ## 
+    
+    ## check -o ## 
     if args.out is None:
         args.out = os.path.abspath(".")
     else:
@@ -142,7 +154,7 @@ def parse_args(expected_configs):
             print("cannot create output directory: ",args.out,"exiting...", file=sys.stderr)
             sys.exit(1)
 
-    # check -g
+    ## check -g ## 
     if args.locations is not None:
         args.locations = mccutils.get_abs_path(args.locations)
 
@@ -150,24 +162,24 @@ def parse_args(expected_configs):
             sys.stderr.write("If a GFF file is supplied (-g/--locations) then a TE taxonomy file that links it to the fasta consensus is also needed (-t/--taxonomy)...exiting...\n")
             sys.exit(1)
 
-    # check -t
+    ## check -t ## 
     if args.taxonomy is not None:
         args.taxonomy = mccutils.get_abs_path(args.taxonomy)
 
 
-    # check -s
+    ## check -s
     if args.coverage_fasta is not None:
         args.coverage_fasta = mccutils.get_abs_path(args.coverage_fasta)
 
-    # check -T
+    ## check -T ## 
     if args.comments is None:
         args.comments = False
 
-    # check -a
+    ## check -a ## 
     if args.augment is not None:
         args.augment = mccutils.get_abs_path(args.augment)
 
-    # check sample name
+    ## check sample name ## 
     if args.sample_name is not None:
         if "/" in args.sample_name or args.sample_name == "tmp":
             sys.exit(args.sample_name+" is not a valid sample name...\n")
@@ -176,7 +188,8 @@ def parse_args(expected_configs):
             args.sample_name = mccutils.get_base_name(args.first)
         else:
             args.sample_name = "tmp"
-
+    
+    #unsure what intermediate options are used for?
     keep_intermediate_options = ["minimal","general", "methods", "all"] + args.methods
     if args.keep_intermediate is None:
         args.keep_intermediate = ["general"]
@@ -196,34 +209,35 @@ def parse_args(expected_configs):
     return args
 
 def check_input_files(ref, consensus, fq1, fq2=None, locations=None, taxonomy=None, coverage_fasta=None, augment_fasta=None, annotations_only=False):
-    # check reference fasta
+    #calling methods defined shortly to format and check given files
+    ## check reference fasta ## 
     format_fasta(ref)
 
     if not annotations_only:
-        #check fq1
+        ## check fq1 ## 
         check_fastq(fq1)
 
-        #check fq2
+        ## check fq2 ## 
         if fq2 is not None:
             check_fastq(fq2)
 
-    # checking consensus
+    ## checking consensus ## 
     consensus_seq_names = format_fasta(consensus)
 
-    #check locations gff
+    ## check locations gff ## 
     gff_ids = []
     if locations is not None:
         gff_ids = format_gff(locations)
 
-    # check taxonomy
+    ## check taxonomy ## 
     if taxonomy is not None:
         format_taxonomy(taxonomy, gff_ids, consensus_seq_names, consensus, locations)
 
-    #check coverage fasta
+    ## check coverage fasta ## 
     if coverage_fasta is not None:
         format_fasta(coverage_fasta)
 
-    #check augment fasta
+    ## check augment fasta ## 
     if augment_fasta is not None:
         format_fasta(augment_fasta)
 
@@ -231,6 +245,7 @@ def format_fasta(in_fasta):
     mccutils.log("setup","checking fasta: "+in_fasta)
     seq_names = []
     try:
+        #iterates through the in_fasta file reorginizing it to allow for (repeat masker)? to interpret the file.
         with open(in_fasta,"r") as infa:
             for record in SeqIO.parse(infa, "fasta"):
                 seq_name = str(record.id)
@@ -238,7 +253,8 @@ def format_fasta(in_fasta):
                     org_seq_name = seq_name
                     seq_name = seq_name[:(seq_name.find("#"))]
                     mccutils.log("setup", in_fasta+": replacing "+org_seq_name+" with "+seq_name+" for compatibility with RepeatMasker")
-
+                
+                #unsure of how the masked_seq_name and the seq_name relate?
                 masked_seq_name = mccutils.replace_special_chars(seq_name)
                 if seq_name != masked_seq_name:
                     mccutils.log("setup", in_fasta+": ERROR problematic symbol in feature name: "+seq_name+" ... reformat this feature name for compatibility with McClintock")
@@ -251,17 +267,20 @@ def format_fasta(in_fasta):
                     sys.exit(in_fasta+": Duplicate sequence name:"+masked_seq_name+"...exiting...\n")
 
     except Exception as e:
+        #in case it runs into any kind of error
         print(e)
         sys.exit(in_fasta+" appears to be a malformed FastA file..exiting...\n")
 
     if len(seq_names) < 1:
+        #checks that there is at least one valid sequence
         sys.exit(in_fasta+" contains no sequences... exiting...\n")
 
     return seq_names
 
 def check_fastq(fastq):
     mccutils.log("setup","checking fastq: "+fastq)
-    #check fq1
+    ## check fq1 ## 
+    #checks specifically for the correct file name and directory or if it is empty 
     if ".fastq" not in fastq and ".fq" not in fastq:
         sys.exit(fastq+" is not a (.fastq/.fq) file, exiting...\n")
 
@@ -275,24 +294,30 @@ def format_gff(ingff):
     mccutils.log("setup","checking locations gff: "+ingff)
     gff_ids = []
     with open(ingff,"r") as gff:
+        #creates an array containing any values with a tab between them
         for line in gff:
             if "#" not in line[0]:
                 split_line = line.split("\t")
+                #checks if the GFF file is valid by checking for lower than 9 elements in each line
                 if len(split_line) < 9:
                     sys.exit(ingff+" appears to be a malformed GFF file..exiting...\n")
                 else:
+                    #sets feats to the last element from the line and then procceds to split it into seprate feats based on semicolons
                     feats = split_line[8]
                     split_feats = feats.split(";")
                     gff_id = ""
                     for feat in split_feats:
+                        #iterates through each feat and splits it according to an equals sign then replaces the new lines with nothing
                         if feat[:3] == "ID=":
                             gff_id = feat.split("=")[1].replace("\n","")
+                            #uses a function to remove special chars and generate a masked gff_id from the split feat
                             masked_gff_id = mccutils.replace_special_chars(gff_id)
+                            #checks if the new masked gff_id and the old gff_id are equal
                             if gff_id != masked_gff_id:
                                 mccutils.log("setup", ingff+": ERROR problematic symbol in feature name: "+gff_id+" ... reformat this feature name for compatibility with McClintock")
                                 print("Problematic symbols:"," ".join(mccutils.INVALID_SYMBOLS))
                                 sys.exit(1)
-
+                            #adds the masked_gff_id to gff_ids if it is not already there
                             if masked_gff_id not in gff_ids:
                                 gff_ids.append(masked_gff_id)
                             else:
@@ -306,29 +331,33 @@ def format_taxonomy(in_taxonomy, gff_ids, consensus_ids, consensus_fasta, locati
     mccutils.log("setup","checking taxonomy TSV: "+in_taxonomy)
     with open(in_taxonomy, "r") as tsv:
         for line in tsv:
+            #creates and array of 2 elements for every line in in_taxonomy based on tabs
             split_line = line.split("\t")
             if len(split_line) != 2:
                 sys.exit(in_taxonomy+" does not have two columns. Should be tab-separated file with feature ID and TE family as columns\n")
             else:
+                #sets the te_id to the firse element and then iterates throguh using the same masking proccess used for the gff_id
                 te_id = split_line[0]
                 masked_te_id = mccutils.replace_special_chars(te_id)
                 if masked_te_id != te_id:
                     mccutils.log("setup", in_taxonomy+": ERROR problematic symbol in feature name: "+te_id+" ... reformat this feature name for compatibility with McClintock")
                     print("Problematic symbols:"," ".join(mccutils.INVALID_SYMBOLS))
                     sys.exit(1)
-
+                #sets the te_family to the second element and gets rid of the new line
                 te_family = split_line[1].replace("\n","")
                 if "#" in te_family:
+                    #iterates through te_family reorginizing it to allow for (repeat masker)? to interpret the element.
                     org_te_family = te_family
                     te_family = te_family[:(te_family.find("#"))]
                     mccutils.log("setup", in_taxonomy+": replacing "+org_te_family+" with "+te_family+" for compatibility with RepeatMasker")
-
+                #uses the standard masking proccess to create the masked_te_family variables
                 masked_te_family = mccutils.replace_special_chars(te_family)
                 if masked_te_family != te_family:
                     mccutils.log("setup", in_taxonomy+": ERROR problematic symbol in feature name: "+te_family+" ... reformat this feature name for compatibility with McClintock")
+ 
                     print("Problematic symbols:"," ".join(mccutils.INVALID_SYMBOLS))
                     sys.exit(1)
-
+                #adds the masked variables to thier respective files if the are not already there
                 if masked_te_id not in gff_ids:
                     sys.exit("TE ID: "+masked_te_id+" not found in IDs from GFF: "+locations_gff+"\nplease make sure each ID in: "+in_taxonomy+" is found in:"+locations_gff+"\n")
 
@@ -338,12 +367,14 @@ def format_taxonomy(in_taxonomy, gff_ids, consensus_ids, consensus_fasta, locati
 def get_conda_envs(conda_env_dir):
     existing_envs = {}
     if os.path.exists(conda_env_dir):
+        #finds the yaml file in the conda_env_dir
         for f in os.listdir(conda_env_dir):
             if ".yaml" in f:
                 yaml = conda_env_dir+"/"+f
                 name = ""
                 with open(yaml,"r") as y:
                     for line in y:
+                        #creates an array with the name from each line as the element then removes spaces
                         if "name:" in line:
                             name = line.split(":")[1].replace("\n","")
                             name = name.replace(" ","")
