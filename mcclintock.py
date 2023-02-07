@@ -153,7 +153,7 @@ def parse_args(expected_configs):
             print(track, file=sys.stderr)
             print("cannot create output directory: ",args.out,"exiting...", file=sys.stderr)
             sys.exit(1)
-
+ 
     ## check -g ## 
     if args.locations is not None:
         args.locations = mccutils.get_abs_path(args.locations)
@@ -245,7 +245,7 @@ def format_fasta(in_fasta):
     mccutils.log("setup","checking fasta: "+in_fasta)
     seq_names = []
     try:
-        #iterates through the in_fasta file reorginizing it to allow for (repeat masker)? to interpret the file.
+        #iterates through the in_fasta file reorganizing it to allow for (repeat masker)? to interpret the file.
         with open(in_fasta,"r") as infa:
             for record in SeqIO.parse(infa, "fasta"):
                 seq_name = str(record.id)
@@ -346,7 +346,7 @@ def format_taxonomy(in_taxonomy, gff_ids, consensus_ids, consensus_fasta, locati
                 #sets the te_family to the second element and gets rid of the new line
                 te_family = split_line[1].replace("\n","")
                 if "#" in te_family:
-                    #iterates through te_family reorginizing it to allow for (repeat masker)? to interpret the element.
+                    #iterates through te_family reorganizing it to allow for (repeat masker)? to interpret the element.
                     org_te_family = te_family
                     te_family = te_family[:(te_family.find("#"))]
                     mccutils.log("setup", in_taxonomy+": replacing "+org_te_family+" with "+te_family+" for compatibility with RepeatMasker")
