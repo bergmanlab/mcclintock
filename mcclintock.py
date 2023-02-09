@@ -209,6 +209,7 @@ def parse_args(expected_configs):
     return args
 
 def check_input_files(ref, consensus, fq1, fq2=None, locations=None, taxonomy=None, coverage_fasta=None, augment_fasta=None, annotations_only=False):
+    
     #calling methods defined shortly to format and check given files
     ## check reference fasta ## 
     format_fasta(ref)
@@ -245,6 +246,7 @@ def format_fasta(in_fasta):
     mccutils.log("setup","checking fasta: "+in_fasta)
     seq_names = []
     try:
+        
         #iterates through the in_fasta file reorganizing it to allow for (repeat masker)? to interpret the file.
         with open(in_fasta,"r") as infa:
             for record in SeqIO.parse(infa, "fasta"):
@@ -253,6 +255,7 @@ def format_fasta(in_fasta):
                     org_seq_name = seq_name
                     seq_name = seq_name[:(seq_name.find("#"))]
                     mccutils.log("setup", in_fasta+": replacing "+org_seq_name+" with "+seq_name+" for compatibility with RepeatMasker")
+                
                 
                 #unsure of how the masked_seq_name and the seq_name relate?
                 masked_seq_name = mccutils.replace_special_chars(seq_name)
@@ -267,11 +270,13 @@ def format_fasta(in_fasta):
                     sys.exit(in_fasta+": Duplicate sequence name:"+masked_seq_name+"...exiting...\n")
 
     except Exception as e:
+        
         #in case it runs into any kind of error
         print(e)
         sys.exit(in_fasta+" appears to be a malformed FastA file..exiting...\n")
 
     if len(seq_names) < 1:
+        
         #checks that there is at least one valid sequence
         sys.exit(in_fasta+" contains no sequences... exiting...\n")
 
@@ -279,6 +284,7 @@ def format_fasta(in_fasta):
 
 def check_fastq(fastq):
     mccutils.log("setup","checking fastq: "+fastq)
+    
     ## check fq1 ## 
     #checks specifically for the correct file name and directory or if it is empty 
     if ".fastq" not in fastq and ".fq" not in fastq:
@@ -294,29 +300,36 @@ def format_gff(ingff):
     mccutils.log("setup","checking locations gff: "+ingff)
     gff_ids = []
     with open(ingff,"r") as gff:
+        
         #creates an array containing any values with a tab between them
         for line in gff:
             if "#" not in line[0]:
                 split_line = line.split("\t")
+                
                 #checks if the GFF file is valid by checking for lower than 9 elements in each line
                 if len(split_line) < 9:
                     sys.exit(ingff+" appears to be a malformed GFF file..exiting...\n")
                 else:
+                    
                     #sets feats to the last element from the line and then procceds to split it into seprate feats based on semicolons
                     feats = split_line[8]
                     split_feats = feats.split(";")
                     gff_id = ""
                     for feat in split_feats:
+                        
                         #iterates through each feat and splits it according to an equals sign then replaces the new lines with nothing
                         if feat[:3] == "ID=":
                             gff_id = feat.split("=")[1].replace("\n","")
+                           
                             #uses a function to remove special chars and generate a masked gff_id from the split feat
                             masked_gff_id = mccutils.replace_special_chars(gff_id)
+                            
                             #checks if the new masked gff_id and the old gff_id are equal
                             if gff_id != masked_gff_id:
                                 mccutils.log("setup", ingff+": ERROR problematic symbol in feature name: "+gff_id+" ... reformat this feature name for compatibility with McClintock")
                                 print("Problematic symbols:"," ".join(mccutils.INVALID_SYMBOLS))
                                 sys.exit(1)
+                            
                             #adds the masked_gff_id to gff_ids if it is not already there
                             if masked_gff_id not in gff_ids:
                                 gff_ids.append(masked_gff_id)
@@ -331,11 +344,13 @@ def format_taxonomy(in_taxonomy, gff_ids, consensus_ids, consensus_fasta, locati
     mccutils.log("setup","checking taxonomy TSV: "+in_taxonomy)
     with open(in_taxonomy, "r") as tsv:
         for line in tsv:
+            
             #creates and array of 2 elements for every line in in_taxonomy based on tabs
             split_line = line.split("\t")
             if len(split_line) != 2:
                 sys.exit(in_taxonomy+" does not have two columns. Should be tab-separated file with feature ID and TE family as columns\n")
             else:
+                
                 #sets the te_id to the firse element and then iterates throguh using the same masking proccess used for the gff_id
                 te_id = split_line[0]
                 masked_te_id = mccutils.replace_special_chars(te_id)
@@ -343,13 +358,16 @@ def format_taxonomy(in_taxonomy, gff_ids, consensus_ids, consensus_fasta, locati
                     mccutils.log("setup", in_taxonomy+": ERROR problematic symbol in feature name: "+te_id+" ... reformat this feature name for compatibility with McClintock")
                     print("Problematic symbols:"," ".join(mccutils.INVALID_SYMBOLS))
                     sys.exit(1)
+                
                 #sets the te_family to the second element and gets rid of the new line
                 te_family = split_line[1].replace("\n","")
                 if "#" in te_family:
+                    
                     #iterates through te_family reorganizing it to allow for (repeat masker)? to interpret the element.
                     org_te_family = te_family
                     te_family = te_family[:(te_family.find("#"))]
                     mccutils.log("setup", in_taxonomy+": replacing "+org_te_family+" with "+te_family+" for compatibility with RepeatMasker")
+                
                 #uses the standard masking proccess to create the masked_te_family variables
                 masked_te_family = mccutils.replace_special_chars(te_family)
                 if masked_te_family != te_family:
@@ -357,6 +375,7 @@ def format_taxonomy(in_taxonomy, gff_ids, consensus_ids, consensus_fasta, locati
  
                     print("Problematic symbols:"," ".join(mccutils.INVALID_SYMBOLS))
                     sys.exit(1)
+                
                 #adds the masked variables to thier respective files if the are not already there
                 if masked_te_id not in gff_ids:
                     sys.exit("TE ID: "+masked_te_id+" not found in IDs from GFF: "+locations_gff+"\nplease make sure each ID in: "+in_taxonomy+" is found in:"+locations_gff+"\n")
@@ -367,6 +386,7 @@ def format_taxonomy(in_taxonomy, gff_ids, consensus_ids, consensus_fasta, locati
 def get_conda_envs(conda_env_dir):
     existing_envs = {}
     if os.path.exists(conda_env_dir):
+        
         #finds the yaml file in the conda_env_dir
         for f in os.listdir(conda_env_dir):
             if ".yaml" in f:
@@ -374,6 +394,7 @@ def get_conda_envs(conda_env_dir):
                 name = ""
                 with open(yaml,"r") as y:
                     for line in y:
+                        
                         #creates an array with the name from each line as the element then removes spaces
                         if "name:" in line:
                             name = line.split(":")[1].replace("\n","")
@@ -384,61 +405,67 @@ def get_conda_envs(conda_env_dir):
 
 def install(methods, resume=False, debug=False):
 
+    #specifies file paths required for install and execution
     mcc_path = os.path.dirname(os.path.abspath(__file__))
     install_path = mcc_path+"/install/"
     install_config = install_path+"/config.json"
     log_dir = install_path+"/log/"
     conda_env_dir = install_path+"/envs/conda"
     data = {}
+   
+    #creates a python dictionary to manage file paths for easy access to files throughout the install process
     data['paths'] = {
         'mcc_path': mcc_path,
         'install' : install_path,
         'log_dir': log_dir
     }
 
+    #adds a series of files to the dictionary
     data['URLs'] = config_install.URL
     data['MD5s'] = config_install.MD5
     data['ENVs'] = config_install.ENV
     data['output'] = config_install.OUTPUT
 
+    #parses through OUTPUT and ENVs to add new install paths
     for method in data['ENVs'].keys():
         data['ENVs'][method] = data['ENVs'][method].replace(config_install.ENV_PATH, install_path+"envs/")
 
     for method in data['output'].keys():
         data['output'][method] = data['output'][method].replace(config_install.INSTALL_PATH, install_path)
 
+    #removes the now purposeless install file as it has been used to create the new files and thier contents
     with open(install_config,"w") as c:
         json.dump(data, c, indent=4)
 
     if os.path.exists(install_path+"install.log"):
         os.remove(install_path+"install.log")
 
-    # finding existing conda yamls
+    ##finding existing conda yamls##
     existing_envs = get_conda_envs(conda_env_dir)
 
     mccutils.mkdir(conda_env_dir)
     os.chdir(install_path)
     mccutils.mkdir(log_dir)
 
-    # temp requires te-locate scripts to make taxonomy file
+    ##temp requires te-locate scripts to make taxonomy file##
     if "temp" in methods and "te-locate" not in methods:
         methods.append("te-locate")
 
     for env in methods:
         if not resume:
-            # remove existing envs
+            ##remove existing envs##
             if env in existing_envs.keys():
                 mccutils.log("install","Removing existing conda env for: "+env)
                 mccutils.remove(existing_envs[env])
                 mccutils.remove(existing_envs[env].replace(".yaml",""))
 
-            # remove existing src code
+            ##remove existing src code##
             if os.path.exists(install_path+"/tools/"+env):
                 mccutils.log("install","Removing existing installation of: "+env)
                 print(install_path+"/tools/"+env)
                 mccutils.remove(install_path+"/tools/"+env)
 
-        # reinstall src code
+        ##reinstall src code##
         mccutils.log("install","Installing scripts for:"+env)
         command = ["snakemake", "--use-conda", "--conda-frontend=mamba", "--conda-prefix", conda_env_dir, "--configfile", install_config, "--cores", "1", "--nolock", data['output'][env]]
         if not debug:
@@ -446,6 +473,8 @@ def install(methods, resume=False, debug=False):
         mccutils.run_command(command)
 
 def get_installed_versions(tool_dir):
+
+    #lists the installed versions by parsing through a specified dir and saving the contents to an array after verifying them
     versions = {}
     for d in os.listdir(tool_dir):
         version = ""
@@ -460,11 +489,12 @@ def get_installed_versions(tool_dir):
     return versions
 
 def check_installed_modules(methods, no_install_methods, method_md5s, install_dir):
-    # finding existing conda yamls
+    ##finding existing conda yamls##
     conda_env_dir = install_dir+"/envs/conda/"
     existing_envs = get_conda_envs(conda_env_dir)
     installed_version = get_installed_versions(install_dir+"/tools/")
 
+    #verify methods are valid and exist
     for method in methods:
         if method not in existing_envs.keys():
             print("ERROR: missing conda env for method:", method, file=sys.stderr)
@@ -477,7 +507,7 @@ def check_installed_modules(methods, no_install_methods, method_md5s, install_di
                 print("please install methods using: python mcclintock.py --install", file=sys.stderr)
                 sys.exit(1)
 
-# stores config file info and hashes so that future runs can determine if config files have changed
+##stores config file info and hashes so that future runs can determine if config files have changed##
 def setup_config_info(config_dir, method_to_config, config_rules):
     out_dict = {}
     out_dict["path"] = config_dir
@@ -498,7 +528,11 @@ def setup_config_info(config_dir, method_to_config, config_rules):
     return out_dict
 
 def make_run_config(args, sample_name, ref_name, full_command, current_directory, debug=False):
+    
+    #generates run_id as a random number
     run_id = random.randint(1000000,9999999)
+    
+    #creates new dir and assigns file paths based on args
     mccutils.mkdir(args.out+"/snakemake")
     mccutils.mkdir(args.out+"/snakemake/config")
     run_config = args.out+"/snakemake/config/config_"+str(run_id)+".json"
@@ -509,7 +543,7 @@ def make_run_config(args, sample_name, ref_name, full_command, current_directory
 
     mcc_path = os.path.dirname(os.path.abspath(__file__))
 
-    # get git commit hash to provide in summary report
+    ##get git commit hash to provide in summary report##
     git_commit = "?"
     try:
         os.chdir(mcc_path)
@@ -586,7 +620,7 @@ def make_run_config(args, sample_name, ref_name, full_command, current_directory
 
     data["config"] = setup_config_info(args.config, sysconfig.CONFIGS, sysconfig.CONFIG_RULES)
 
-    # input paths for files
+    ##input paths for files##
     data["in"] = {
         'reference' : str(args.reference),
         'consensus' : str(args.consensus),
@@ -597,7 +631,7 @@ def make_run_config(args, sample_name, ref_name, full_command, current_directory
         'coverage_fasta': str(args.coverage_fasta),
     }
 
-    # where mcc copies will be stored
+    ##where mcc copies will be stored##
 
     data["mcc"] = sysconfig.INTERMEDIATE_PATHS
     for key in data["mcc"].keys():
@@ -660,7 +694,7 @@ def run_workflow(args, sample_name, ref_name, run_id, out_files, debug=False, an
             sys.exit("ERROR: output directory:"+sample_dir+" is not empty. If wanting to resume a previous run, use --resume, otherwise please delete this directory or change your -o/--output or --sample_name\n")
 
 
-    # check that previous runs are compatible
+    ##check that previous runs are compatible##
     else:
         mccutils.log("setup","Checking config files to ensure previous intermediate files are compatible with this run")
         config_found = False
@@ -699,7 +733,7 @@ def run_workflow(args, sample_name, ref_name, run_id, out_files, debug=False, an
         command.append(reference_dir+"reference_te_locations/inrefTEs.gff")
         command.append(reference_dir+"te_taxonomy/taxonomy.tsv")
 
-    # print(" ".join(command))
+    ##print(" ".join(command))##
     try:
         sys.stdout.flush()
         mccutils.mkdir(sample_dir)
@@ -752,7 +786,7 @@ def config_compatibility(run_config, prev_config):
     with open(prev_config) as f:
         prev_config_data = json.load(f)
 
-    # check McClintock commit compatibility
+    ##check McClintock commit compatibility##
     if run_config_data['args']['commit'] != prev_config_data['args']['commit']:
         sys.stderr.write("(--resume) ERROR: Unable to resume McClintock run\n")
         sys.stderr.write("                  Previous McClintock run intermediate files are incompatible due to differences in McClintock commit version\n")
@@ -760,7 +794,7 @@ def config_compatibility(run_config, prev_config):
         sys.stderr.write("                  Previous McClintock run Version: "+prev_config_data['args']['commit']+"\n")
         return False
 
-    # check ref compatibility
+    ##check ref compatibility##
     if os.path.exists(run_config_data["mcc"]["reference"]):
         if run_config_data["mcc"]["reference"] == prev_config_data["mcc"]["reference"]:
             if run_config_data["args"]["augment_fasta"] != prev_config_data["args"]["augment_fasta"]:
@@ -773,14 +807,14 @@ def config_compatibility(run_config, prev_config):
                 sys.stderr.write("                  Previous McClintock run intermediate files are incompatible due to differences in -r/--reference\n")
                 return False
 
-    # check consensus compatibility
+    ##check consensus compatibility##
     if os.path.exists(run_config_data["mcc"]["consensus"]):
         if run_config_data["mcc"]["consensus"] == prev_config_data["mcc"]["consensus"] and run_config_data["in"]["consensus"] != prev_config_data["in"]["consensus"]:
             sys.stderr.write("(--resume) ERROR: Unable to resume McClintock run\n")
             sys.stderr.write("                  Previous McClintock run intermediate files are incompatible due to differences in -c/--consensus\n")
             return False
 
-    # check fastq compatibility
+    ##check fastq compatibility##
     if "--make_annotations" not in prev_config_data['args']['full_command']:
         if os.path.exists(run_config_data["mcc"]["fq1"]):
             if run_config_data["in"]["fq1"] != prev_config_data["in"]["fq1"]:
@@ -798,7 +832,7 @@ def config_compatibility(run_config, prev_config):
                 sys.stderr.write("                  Previous McClintock run intermediate files are incompatible due to differences in running Trimgalore\n")
                 return False
 
-    # check locations gff compatibility
+    ##check locations gff compatibility##
     if os.path.exists(run_config_data["mcc"]["locations"]):
         if run_config_data["mcc"]["locations"] == prev_config_data["mcc"]["locations"]:
             if run_config_data["args"]["augment_fasta"] != prev_config_data["args"]["augment_fasta"]:
@@ -811,7 +845,7 @@ def config_compatibility(run_config, prev_config):
                 sys.stderr.write("                  Previous McClintock run intermediate files are incompatible due to differences in -g/--locations\n")
                 return False
 
-    # check taxonomy compatibility
+    ##check taxonomy compatibility##
     if os.path.exists(run_config_data["mcc"]["taxonomy"]):
         if run_config_data["mcc"]["taxonomy"] == prev_config_data["mcc"]["taxonomy"]:
             if run_config_data["args"]["augment_fasta"] != prev_config_data["args"]["augment_fasta"]:
@@ -824,7 +858,7 @@ def config_compatibility(run_config, prev_config):
                 sys.stderr.write("                  Previous McClintock run intermediate files are incompatible due to differences in -t/--taxonomy\n")
                 return False
 
-    # check coverage fasta compatibility
+    ##check coverage fasta compatibility##
     if os.path.exists(run_config_data["mcc"]["coverage_fasta"]):
         if run_config_data["mcc"]["coverage_fasta"] == prev_config_data["mcc"]["coverage_fasta"] and run_config_data["in"]["coverage_fasta"] != prev_config_data["in"]["coverage_fasta"]:
             sys.stderr.write("(--resume) ERROR: Unable to resume McClintock run\n")
@@ -868,7 +902,7 @@ def remove_intermediate_files(options, run_config_file, methods, ref_name, sampl
             if method not in options:
                 essential_paths = run_config_data['essential'][method]
                 if os.path.exists(method_out):
-                    # delete all files not marked as essential
+                    ##delete all files not marked as essential##
                     for root, subdirs, files in os.walk(method_out, topdown=False):
                         for f in files:
                             file_path = os.path.join(root, f)
@@ -880,7 +914,7 @@ def remove_intermediate_files(options, run_config_file, methods, ref_name, sampl
                             if not is_essential:
                                 mccutils.remove(file_path)
 
-                    # remove empty directories
+                    ##remove empty directories##
                     for root, subdirs, files in os.walk(method_out, topdown=False):
                         for d in subdirs:
                             dir_path = os.path.join(root, d)
@@ -903,7 +937,7 @@ def remove_intermediate_files(options, run_config_file, methods, ref_name, sampl
                 if not keep:
                     mccutils.remove(file_path)
 
-        # remove empty directories
+        ##remove empty directories##
         for root, subdirs, files in os.walk(intermediate_dir, topdown=False):
             for d in subdirs:
                 dir_path = os.path.join(root, d)
