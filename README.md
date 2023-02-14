@@ -35,10 +35,11 @@ python3 mcclintock.py \
 * [McClintock Input](#input)
 * [McClintock Output](#output)
 * [Run Examples](#examples)
-
+* [Citation](#citation)
+* [License](#license)
 
 ## <a name="intro"></a> Introduction
-Many methods have been developed to detect transposable element (TE) insertions from whole genome shotgun next-generation sequencing (NGS) data, each of which has different dependencies, run interfaces, and output formats. Here, we have developed a meta-pipeline to install and run multiple methods for detecting TE insertions in NGS data, which generates output in the UCSC Browser extensible data (BED) format. A detailed description of the original McClintock pipeline and evaluation of the original six McClintock component methods on the yeast genome can be found in [Nelson, Linheiro and Bergman (2017) *G3* 7:2763-2778](http://www.g3journal.org/content/7/8/2763).
+Many methods have been developed to detect transposable element (TE) insertions from short-read whole genome sequencing (WGS) data, each of which has different dependencies, run interfaces, and output formats. McClintock provides a meta-pipeline to reproducibly install, execute and evaluate multiple TE detectors, and generate output in standardized output formats. A description of the original McClintock 1 pipeline and evaluation of the original six TE detectors on the yeast genome can be found in [Nelson, Linheiro and Bergman (2017) *G3* 7:2763-2778](http://www.g3journal.org/content/7/8/2763). A description of the re-implemented McClintock pipeline, the reproducible simulation system, and evaluation of 12 TE dectectors on the yeast genome can be found in [Chen, Basting, Han, Garfinkel and Bergman (2023) bioRxiv](https://www.biorxiv.org/content/10.1101/2023.02.13.528343v1).
 
 The complete pipeline requires a fasta reference genome, a fasta consensus set of TE sequences present in the organism and fastq paired-end sequencing reads. Optionally if a detailed annotation of TE sequences in the reference genome has been performed, a GFF file with the locations of reference genome TE annotations and a tab delimited taxonomy file linking individual insertions to the TE family they belong to can be supplied (an example of this file is included in the test directory as sac_cer_te_families.tsv). If only single-end fastq sequencing data are available, then this can be supplied as option -1, however only ngs_te_mapper and RelocaTE will run as these are the only methods that handle single-ended data.
 
@@ -54,7 +55,7 @@ The complete pipeline requires a fasta reference genome, a fasta consensus set o
  * [TEFLoN](https://github.com/jradrion/TEFLoN) - [Adrion *et al.* (2017)](https://academic.oup.com/gbe/article/9/5/1329/3064433)
  * [TE-locate](https://sourceforge.net/projects/te-locate/) - [Platzer *et al.* (2012)](http://www.mdpi.com/2079-7737/1/2/395)
  * [TEMP](https://github.com/JialiUMassWengLab/TEMP) - [Zhuang *et al.* (2014)](http://nar.oxfordjournals.org/content/42/11/6826.full)
- * [TEMP2](https://github.com/weng-lab/TEMP2) - [Yu *et al.* (2021)](https://academic.oup.com/nar/advance-article/doi/10.1093/nar/gkab010/6123378)
+ * [TEMP2](https://github.com/weng-lab/TEMP2) - [Yu *et al.* (2021)](https://academic.oup.com/nar/article/49/8/e44/6123378?login=true)
 
 
 ## <a name="dependency"></a> Software Dependencies
@@ -414,9 +415,14 @@ python3 mcclintock.py \
 ```
 * Individual samples can be run in a serial manner as shown in the example above, or run in parallel, such as through separate jobs on a HPC cluster.
 
-License
+## <a name="citation"></a> Citation
+To cite McClintock 1, the general TE detector meta-pipeline concept, or the single syntehtic insertion simulation framework, please use: Nelson, M.G., R.S. Linheiro & C.M. Bergman (2017) McClintock: An integrated pipeline for detecting transposable element insertions in whole genome shotgun sequencing data. [G3. 7:2763-2778](https://academic.oup.com/g3journal/article/7/8/2763/6031520).
+
+To cite McClintock 2 or the reproducible simulation system, please use: Chen, J., P.J. Basting, S. Han, D.J. Garfinkel & C.M. Bergman (2023) Reproducible evaluation of short-read transposable element detectors and large-scale data mining of insertion patterns in yeast [bioRxiv](https://www.biorxiv.org/content/10.1101/2023.02.13.528343v1).
+
+## <a name="license"></a> License
 ------
-Copyright 2014-2022 Preston Basting, Jingxuan Chen, Shunhua Han, Michael G. Nelson, and Casey M. Bergman
+Copyright 2014-2023 Preston Basting, Jingxuan Chen, Shunhua Han, Michael G. Nelson, and Casey M. Bergman
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
 
