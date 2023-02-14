@@ -1,0 +1,45 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+  - family-names: "Chen"
+    given-names: "Jingxuan"
+    orcid: "https://orcid.org/0000-0001-6313-7264"
+  - family-names: "Basting"
+    given-names: "Preston"
+    orcid: "https://orcid.org/0000-0001-9290-8339"
+  - family-names: "Han"
+    given-names: "Shunhua"
+    orcid: "https://orcid.org/0000-0002-8605-7547"
+  - family-names: "Garfinkel"
+    given-names: "David J."
+    orcid: "https://orcid.org/0000-0001-6234-2426"
+  - family-names: "Bergman"
+    given-names: "Casey M."
+    orcid: "https://orcid.org/0000-0002-5462-9854"  
+title: "McClintock: A meta-pipeline to identify transposable element insertions using short-read whole genome sequencing data"
+version: 2
+date-released: 2020-12-01
+url: "https://github.com/bergmanlab/mcclintock"
+preferred-citation:
+  type: article
+  authors:
+  - family-names: "Chen"
+    given-names: "Jingxuan"
+    orcid: "https://orcid.org/0000-0001-6313-7264"
+  - family-names: "Basting"
+    given-names: "Preston"
+    orcid: "https://orcid.org/0000-0001-9290-8339"
+  - family-names: "Han"
+    given-names: "Shunhua"
+    orcid: "https://orcid.org/0000-0002-8605-7547"
+  - family-names: "Garfinkel"
+    given-names: "David J."
+    orcid: "https://orcid.org/0000-0001-6234-2426"
+  - family-names: "Bergman"
+    given-names: "Casey M."
+    orcid: "https://orcid.org/0000-0002-5462-9854"                
+  doi: "10.1101/2023.02.13.528343"
+  journal: "bioRxiv"
+  month: 2
+  title: "Reproducible evaluation of short-read transposable element detectors and large-scale data mining of insertion patterns in yeast"
+  year: 2023
