@@ -2,7 +2,7 @@
     <img src="https://github.com/bergmanlab/mcclintock/blob/4b860571da3aa358b8dbd637831db194ff94ea08/img/mcclintock.jpg?raw=true" alt="McClintock in action"/>
 </p>
 
-# **McClintock**: <sub><sup>Meta-pipeline to identify transposable element insertions using next generation sequencing data</sup></sub>
+# **McClintock**: <sub><sup>Meta-pipeline to identify transposable element insertions using short-read whole genome sequencing data</sup></sub>
 ## <a name="started"></a> Getting Started
 ```bash
 # INSTALL (Requires Conda and Mamba to be installed)
@@ -39,7 +39,7 @@ python3 mcclintock.py \
 * [License](#license)
 
 ## <a name="intro"></a> Introduction
-Many methods have been developed to detect transposable element (TE) insertions from short-read whole genome sequencing (WGS) data, each of which has different dependencies, run interfaces, and output formats. McClintock provides a meta-pipeline to reproducibly install, execute and evaluate multiple TE detectors, and generate output in standardized output formats. A description of the original McClintock 1 pipeline and evaluation of the original six TE detectors on the yeast genome can be found in [Nelson, Linheiro and Bergman (2017) *G3* 7:2763-2778](http://www.g3journal.org/content/7/8/2763). A description of the re-implemented McClintock pipeline, the reproducible simulation system, and evaluation of 12 TE dectectors on the yeast genome can be found in [Chen, Basting, Han, Garfinkel and Bergman (2023) bioRxiv](https://www.biorxiv.org/content/10.1101/2023.02.13.528343v1).
+Many methods have been developed to detect transposable element (TE) insertions from short-read whole genome sequencing (WGS) data, each of which has different dependencies, run interfaces, and output formats. McClintock provides a meta-pipeline to reproducibly install, execute and evaluate multiple TE detectors, and generate output in standardized output formats. A description of the original McClintock 1 pipeline and evaluation of the original six TE detectors on the yeast genome can be found in [Nelson, Linheiro and Bergman (2017) *G3* 7:2763-2778](http://www.g3journal.org/content/7/8/2763). A description of the re-implemented McClintock 2 pipeline, the reproducible simulation system, and evaluation of 12 TE dectectors on the yeast genome can be found in [Chen, Basting, Han, Garfinkel and Bergman (2023) bioRxiv](https://www.biorxiv.org/content/10.1101/2023.02.13.528343v1).
 
 The complete pipeline requires a fasta reference genome, a fasta consensus set of TE sequences present in the organism and fastq paired-end sequencing reads. Optionally if a detailed annotation of TE sequences in the reference genome has been performed, a GFF file with the locations of reference genome TE annotations and a tab delimited taxonomy file linking individual insertions to the TE family they belong to can be supplied (an example of this file is included in the test directory as sac_cer_te_families.tsv). If only single-end fastq sequencing data are available, then this can be supplied as option -1, however only ngs_te_mapper and RelocaTE will run as these are the only methods that handle single-ended data.
 
