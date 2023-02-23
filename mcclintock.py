@@ -546,30 +546,37 @@ def make_run_config(args, sample_name, ref_name, full_command, current_directory
     ##get git commit hash to provide in summary report##
     git_commit = "?"
     try:
+        #establish the location of the git commit file
         os.chdir(mcc_path)
         git_commit_file = args.out+"/git-commit.txt"
+        #iterate through specefied directory and find the git commit file 
         passed = mccutils.run_command_stdout(["git","rev-parse","HEAD"], git_commit_file, fatal=False)
+        #error handeling in case of no git commit file
         if not passed:
             raise Exception("Could not locate git commit hash")
         with open(git_commit_file,"r") as inf:
+            #take all the \n out of the file
             for line in inf:
                 git_commit = line.replace("\n","")
 
         mccutils.remove(git_commit_file)
 
     except Exception as e:
+        #error handling continuation
         track = traceback.format_exc()
         print(track, file=sys.stderr)
         print("Could not locate git commit hash...using '?' ", file=sys.stderr)
         git_commit = "?"
 
     mccutils.log("SETUP","McClintock Version: "+git_commit)
-
+        
+    #iterate through methods in order to replace a designated directory with a new directory defined at the beginng of this method
     method_paths = sysconfig.OUT_DIRS
     for method in method_paths.keys():
         method_paths[method] = method_paths[method].replace(sysconfig.RESULTS_DIR, results_dir)
         method_paths[method] = method_paths[method].replace(sysconfig.SAM_DIR, sample_dir)
 
+    #iterate through the keys in order to replace a designated directory with a new directory defined at the beginng of this method
     out_files_to_make = []
     out_files = sysconfig.OUT_PATHS
     for key in out_files.keys():
@@ -579,6 +586,7 @@ def make_run_config(args, sample_name, ref_name, full_command, current_directory
     for method in args.methods:
         out_files_to_make.append(out_files[method])
 
+    #create a new directory as status in another defined directory named after the current date
     now = datetime.now()
     now_str = now.strftime("%Y%m%d.%H%M%S")
     log_dir = args.out+"/logs/"+now_str+"."+str(run_id)+"/"
@@ -589,12 +597,14 @@ def make_run_config(args, sample_name, ref_name, full_command, current_directory
     for key in status_files.keys():
         status_files[key] = status_files[key].replace(sysconfig.LOG_DIR, log_dir)
 
+    #establish a collection of chromosomes
     chromosomes = []
     for record in SeqIO.parse(args.reference, "fasta"):
         chrom = str(record.id)
         chrom = mccutils.replace_special_chars(chrom)
         chromosomes.append(chrom)
 
+    #establish the data dictonary for useful variables
     data = {}
     data['args'] = {
         'proc': str(args.proc),
@@ -631,8 +641,7 @@ def make_run_config(args, sample_name, ref_name, full_command, current_directory
         'coverage_fasta': str(args.coverage_fasta),
     }
 
-    ##where mcc copies will be stored##
-
+    ##where mcc copies will be stored## 
     data["mcc"] = sysconfig.INTERMEDIATE_PATHS
     for key in data["mcc"].keys():
         data["mcc"][key] = data["mcc"][key].replace(sysconfig.INPUT_DIR, input_dir)
@@ -648,6 +657,8 @@ def make_run_config(args, sample_name, ref_name, full_command, current_directory
     data['outdir'] = method_paths
 
     data["essential"] = sysconfig.ESSENTIAL_PATHS
+    
+    #asssign the essential keys a storage site
     for key in data["essential"].keys():
         for x,val in enumerate(data["essential"][key]):
             data["essential"][key][x] = val.replace(sysconfig.METHOD_DIR, method_paths[key])
@@ -659,13 +670,15 @@ def make_run_config(args, sample_name, ref_name, full_command, current_directory
     for key in data["envs"].keys():
         data['envs'][key] = data['envs'][key].replace(config_install.ENV_PATH, env_path)
 
-
+    #creates a json config file based on the run_cofig file
     with open(run_config,"w") as conf:
         json.dump(data, conf, indent=4)
 
     return run_id, out_files
 
 def run_workflow(args, sample_name, ref_name, run_id, out_files, debug=False, annotations_only=False):
+    
+    #creates the strings representing the complete directories for the locations of prestablished files
     log = args.out+"/mcclintock."+str(run_id)+".log"
 
     input_dir = args.out
@@ -673,6 +686,7 @@ def run_workflow(args, sample_name, ref_name, run_id, out_files, debug=False, an
     sample_dir = args.out+"/"+sample_name+"/"
     results_dir = args.out+"/"+sample_name+"/results/"
 
+    #create a new directory for the snakemake config and general files
     path=os.path.dirname(os.path.abspath(__file__))
     mccutils.mkdir(args.out+"/snakemake")
     snakemake_path = args.out+"/snakemake/"+str(run_id)
@@ -685,6 +699,7 @@ def run_workflow(args, sample_name, ref_name, run_id, out_files, debug=False, an
     command += ["--configfile", config_json]
     command += ["--cores", str(args.proc)]
 
+    #check if there is already the remenants of a previous run that need to be extracted to run
     if not args.resume:
         if os.path.exists(reference_dir) and len(os.listdir(reference_dir)) > 0:
             mccutils.remove(config_json)
@@ -718,6 +733,7 @@ def run_workflow(args, sample_name, ref_name, run_id, out_files, debug=False, an
             for rule in rules_to_rerun:
                 command.append(rule)
 
+    #check if extra command parameters need to be defined in order to create the output speceifed from the initial run command
     if not debug:
         command.append("--quiet")
     else:
@@ -750,6 +766,8 @@ def run_workflow(args, sample_name, ref_name, run_id, out_files, debug=False, an
     remove_intermediate_files(args.keep_intermediate, config_json, args.methods, ref_name, sample_name, args.out)
 
 def get_recent_config_md5s(prev_config, config_md5s):
+    
+    #extract info from json file for prevconfig to a data file in order to extract important variables
     with open(prev_config) as f:
         prev_config_data = json.load(f)
 
@@ -767,6 +785,8 @@ def get_recent_config_md5s(prev_config, config_md5s):
     return config_md5s
 
 def get_rules_to_rerun(run_config, prev_md5s):
+
+    #extract info from json file for prevconfig to a data file in order to extract important variables
     rules_to_rerun = []
     with open(run_config) as f:
         run_config_data = json.load(f)
@@ -871,6 +891,7 @@ def config_compatibility(run_config, prev_config):
 def calculate_max_threads(avail_procs, methods_used, multithread_methods, slow=False):
     max_threads = avail_procs
 
+    #check and return the amount of threads allocated for the process
     if not slow:
         multi_methods_used = 0
         for method in methods_used:
