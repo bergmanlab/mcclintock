@@ -41,7 +41,7 @@ def main():
     mccutils.remove(args.out+"/tmp")
 
 def parse_args(expected_configs):
-    #adding options to the parser to eventually allow the user to make the desecion on which options to use?
+    #adding options to the parser to eventually allow the user to make the desecion on which options to use
     parser = argparse.ArgumentParser(prog='McClintock', description="Meta-pipeline to identify transposable element insertions using next generation sequencing data")
 
     ## required ##
@@ -68,7 +68,7 @@ def parse_args(expected_configs):
     parser.add_argument("-k","--keep_intermediate", type=str, help="This option determines which intermediate files are preserved after McClintock completes [default: general][options: minimal, general, methods, <list,of,methods>, all]", required=False)
     parser.add_argument("--config", type=str, help="This option determines which config files to use for your McClintock run [default: config in McClintock Repository]", required=False)
     
-    #recursion??(note: not sure about how the whole parser things works, will look more into it after getting a rouch draft done)
+    #arguments parser
     args = parser.parse_args()
     
     #change dir if specified in the options
@@ -189,7 +189,7 @@ def parse_args(expected_configs):
         else:
             args.sample_name = "tmp"
     
-    #unsure what intermediate options are used for?
+    #check argument on which intermediate files to keep
     keep_intermediate_options = ["minimal","general", "methods", "all"] + args.methods
     if args.keep_intermediate is None:
         args.keep_intermediate = ["general"]
@@ -247,7 +247,7 @@ def format_fasta(in_fasta):
     seq_names = []
     try:
         
-        #iterates through the in_fasta file reorganizing it to allow for (repeat masker)? to interpret the file.
+        #iterates through the in_fasta file reorganizing it to allow for repeatmasker to interpret the file.
         with open(in_fasta,"r") as infa:
             for record in SeqIO.parse(infa, "fasta"):
                 seq_name = str(record.id)
@@ -363,7 +363,7 @@ def format_taxonomy(in_taxonomy, gff_ids, consensus_ids, consensus_fasta, locati
                 te_family = split_line[1].replace("\n","")
                 if "#" in te_family:
                     
-                    #iterates through te_family reorganizing it to allow for (repeat masker)? to interpret the element.
+                    #iterates through te_family reorganizing it to allow for repeatmasker to interpret the element.
                     org_te_family = te_family
                     te_family = te_family[:(te_family.find("#"))]
                     mccutils.log("setup", in_taxonomy+": replacing "+org_te_family+" with "+te_family+" for compatibility with RepeatMasker")
