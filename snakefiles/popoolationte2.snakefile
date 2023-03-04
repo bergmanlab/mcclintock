@@ -65,7 +65,8 @@ rule popoolationTE2_post:
         chromosomes = config['args']['chromosomes'],
         log = config['args']['log_dir']+"popoolationTE2.log",
         config = config['config']['popoolationte2']['files'][1],
-        status_log = config['status']['popoolationte2']
+        status_log = config['status']['popoolationte2'],
+        vcf = config['args']['vcf']
 
     output:
         config['out']['popoolationte2']

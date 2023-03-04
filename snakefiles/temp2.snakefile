@@ -45,7 +45,8 @@ rule process_temp2:
         sample_name = config['args']['sample_name'],
         chromosomes = config['args']['chromosomes'],
         config = config['config']['temp2']['files'][1],
-        status_log = config['status']['temp2']
+        status_log = config['status']['temp2'],
+        vcf = config['args']['vcf']
 
     threads: 1
 

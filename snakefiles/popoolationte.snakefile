@@ -109,7 +109,8 @@ rule popoolationTE_post:
         chromosomes = config['args']['chromosomes'],
         log = config['args']['log_dir']+"popoolationTE.log",
         config = config['config']['popoolationte']['files'][1],
-        status_log = config['status']['popoolationte']
+        status_log = config['status']['popoolationte'],
+        vcf = config['args']['vcf']
 
     output:
         config['out']['popoolationte']

@@ -77,7 +77,8 @@ rule relocaTE_post:
         sample_name = config['args']['sample_name'],
         chromosomes = config['args']['chromosomes'],
         config = config['config']['relocate']['files'][1],
-        status_log = config['status']['relocate']
+        status_log = config['status']['relocate'],
+        vcf = config['args']['vcf']
 
     output:
         config['out']['relocate']

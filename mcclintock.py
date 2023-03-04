@@ -63,10 +63,11 @@ def parse_args(expected_configs):
     parser.add_argument("--resume", action="store_true", help="This option will attempt to use existing intermediate files from a previous McClintock run", required=False)
     parser.add_argument("--install", action="store_true", help="This option will install the dependencies of McClintock", required=False)
     parser.add_argument("--debug", action="store_true", help="This option will allow snakemake to print progress to stdout", required=False)
-    parser.add_argument("--slow", action="store_true", help="This option runs without attempting to optimize thread usage to run rules concurrently. Each multithread rule will use the max processors designated by -p/--proc", required=False)
+    parser.add_argument("--serial", action="store_true", help="This option runs without attempting to optimize thread usage to run rules concurrently. Each multithread rule will use the max processors designated by -p/--proc", required=False)
     parser.add_argument("--make_annotations", action="store_true", help="This option will only run the pipeline up to the creation of the repeat annotations", required=False)
     parser.add_argument("-k","--keep_intermediate", type=str, help="This option determines which intermediate files are preserved after McClintock completes [default: general][options: minimal, general, methods, <list,of,methods>, all]", required=False)
     parser.add_argument("--config", type=str, help="This option determines which config files to use for your McClintock run [default: config in McClintock Repository]", required=False)
+    parser.add_argument("--vcf", type=str, help="This option determines which format of VCF output would be created [default: siteonly][options: siteonly,sample]", required=False)
     
     #arguments parser
     args = parser.parse_args()
@@ -205,6 +206,18 @@ def parse_args(expected_configs):
 
     if map_reads_called:
         args.keep_intermediate.append("map_reads")
+
+    ## check --vcf requested vcf format ##
+    vcf_options = ["siteonly","sample"]
+    if args.vcf is None:
+        # default is to create site-only vcf file
+        args.vcf = ["siteonly"]
+    else:
+        args.vcf = args.vcf.split(",")
+        for option in args.vcf:
+            if option not in vcf_options:
+                sys.stderr.write("vcf option: "+option+" is not valid. Valid options: "+" ".join(vcf_options)+"\nExample:(--vcf siteonly,sample)\n")
+                sys.exit(1)
 
     return args
 
@@ -620,12 +633,13 @@ def make_run_config(args, sample_name, ref_name, full_command, current_directory
         'methods' : ",".join(args.methods),
         'out_files': ",".join(out_files_to_make),
         'save_comments' : str(args.comments),
-        'max_threads_per_rule' : max(1, calculate_max_threads(args.proc, args.methods, sysconfig.MULTI_THREAD_METHODS, slow=args.slow)),
+        'max_threads_per_rule' : max(1, calculate_max_threads(args.proc, args.methods, sysconfig.MULTI_THREAD_METHODS, slow=args.serial)),
         'full_command' : full_command,
         'call_directory': current_directory,
         'time': now.strftime("%Y-%m-%d %H:%M:%S"),
         "chromosomes" : ",".join(chromosomes),
-        "debug": str(debug)
+        "debug": str(debug),
+        "vcf": ",".join(args.vcf)
     }
 
     data["config"] = setup_config_info(args.config, sysconfig.CONFIGS, sysconfig.CONFIG_RULES)

@@ -54,7 +54,8 @@ rule ngs_te_mapper2_post:
         sample_name = config['args']['sample_name'],
         chromosomes = config['args']['chromosomes'],
         config = config['config']['ngs_te_mapper2']['files'][1],
-        status_log = config['status']['ngs_te_mapper2']
+        status_log = config['status']['ngs_te_mapper2'],
+        vcf = config['args']['vcf']
     
     threads: 1
 

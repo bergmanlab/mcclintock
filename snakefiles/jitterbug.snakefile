@@ -37,7 +37,8 @@ rule jitterbug_post:
         sample_name = config['args']['sample_name'],
         chromosomes = config['args']['chromosomes'],
         config = config['config']['jitterbug']['files'][1],
-        status_log = config['status']['jitterbug']
+        status_log = config['status']['jitterbug'],
+        vcf = config['args']['vcf']
     
     output:
         out = config['out']['jitterbug']

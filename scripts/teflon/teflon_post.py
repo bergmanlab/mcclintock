@@ -22,6 +22,7 @@ def main():
     sample_name = snakemake.params.sample_name
     chromosomes = snakemake.params.chromosomes.split(",")
     status_log = snakemake.params.status_log
+    vcf_options = snakemake.params.vcf.split(",")
 
     out = snakemake.output.out
 
@@ -43,7 +44,7 @@ def main():
         if len(insertions) >= 1:
             insertions = output.make_redundant_bed(insertions, sample_name, out_dir, method="teflon")
             insertions = output.make_nonredundant_bed(insertions, sample_name, out_dir, method="teflon")
-            output.write_vcf(insertions, reference_fasta, sample_name, "teflon", out_dir)
+            output.write_vcf(insertions, reference_fasta, sample_name, "teflon", out_dir, vcf_options)
         else:
             mccutils.run_command(["touch", out_dir+"/"+sample_name+"_teflon_redundant.bed"])
             mccutils.run_command(["touch", out_dir+"/"+sample_name+"_teflon_nonredundant.bed"])

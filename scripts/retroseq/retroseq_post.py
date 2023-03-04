@@ -22,6 +22,7 @@ def main():
     sample_name = snakemake.params.sample_name
     chromosomes = snakemake.params.chromosomes.split(",")
     status_log = snakemake.params.status_log
+    vcf_options = snakemake.params.vcf.split(",")
 
     prev_steps_succeeded = mccutils.check_status_file(status_log)
 
@@ -30,7 +31,7 @@ def main():
         if len(insertions) >= 1:
             insertions = output.make_redundant_bed(insertions, sample_name, out_dir, method="retroseq")
             insertions = output.make_nonredundant_bed(insertions, sample_name, out_dir, method="retroseq")
-            output.write_vcf(insertions, reference_fasta, sample_name, "retroseq", out_dir)
+            output.write_vcf(insertions, reference_fasta, sample_name, "retroseq", out_dir, vcf_options)
         else:
             mccutils.run_command(["touch",out_dir+"/"+sample_name+"_retroseq_redundant.bed"])
             mccutils.run_command(["touch",out_dir+"/"+sample_name+"_retroseq_nonredundant.bed"])

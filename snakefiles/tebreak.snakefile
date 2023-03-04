@@ -39,7 +39,8 @@ rule tebreak_post:
         sample_name=config['args']['sample_name'],
         chromosomes = config['args']['chromosomes'],
         config = config['config']['tebreak']['files'][1],
-        status_log = config['status']['tebreak']
+        status_log = config['status']['tebreak'],
+        vcf = config['args']['vcf']
     
     output:
         config['out']['tebreak']

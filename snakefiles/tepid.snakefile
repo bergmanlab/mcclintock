@@ -47,7 +47,8 @@ rule tepid_post:
         out_dir = config['args']['out']+"/results/tepid/",
         chromosomes = config['args']['chromosomes'],
         config = config['config']['tepid']['files'][1],
-        status_log = config['status']['tepid']
+        status_log = config['status']['tepid'],
+        vcf = config['args']['vcf']
 
     output:
         config['out']['tepid']
