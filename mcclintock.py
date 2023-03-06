@@ -270,7 +270,7 @@ def format_fasta(in_fasta):
                     mccutils.log("setup", in_fasta+": replacing "+org_seq_name+" with "+seq_name+" for compatibility with RepeatMasker")
                 
                 
-                #unsure of how the masked_seq_name and the seq_name relate?
+                #check problematic symbol in seq name
                 masked_seq_name = mccutils.replace_special_chars(seq_name)
                 if seq_name != masked_seq_name:
                     mccutils.log("setup", in_fasta+": ERROR problematic symbol in feature name: "+seq_name+" ... reformat this feature name for compatibility with McClintock")
