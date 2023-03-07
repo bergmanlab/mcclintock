@@ -170,14 +170,29 @@ python3 mcclintock.py --install
                         extra chromosomes in the reference file (useful if the
                         organism is known to have TEs that are not present in
                         the reference strain)
-  --resume              This option will attempt to use existing intermediate
+  --sample_name SAMPLE_NAME
+                        The sample name to use for output files [default: 
+                        fastq1 name]
+  --resume              This option will attempt to use existing intermediate 
                         files from a previous McClintock run
-  --install             This option will install the dependencies of
-                        mcclintock
-  --debug               This option will allow snakemake to print progress to
+  --install             This option will install the dependencies of McClintock
+  --debug               This option will allow snakemake to print progress to 
                         stdout
-  --make_annotations    This option will only run the pipeline up to the
+  --serial              This option runs without attempting to optimize thread 
+                        usage to run rules concurrently. Each multithread rule 
+                        will use the max processors designated by -p/--proc
+  --make_annotations    This option will only run the pipeline up to the 
                         creation of the repeat annotations
+  -k KEEP_INTERMEDIATE, --keep_intermediate KEEP_INTERMEDIATE
+                        This option determines which intermediate files are 
+                        preserved after McClintock completes [default: general]
+                        [options: minimal, general, methods, <list,of,methods>, 
+                        all]
+  --config CONFIG       This option determines which config files to use for 
+                        your McClintock run [default: config in McClintock 
+                        Repository]
+  --vcf VCF             This option determines which format of VCF output would 
+                        be created [default: siteonly][options: siteonly,sample]
 ```
 
 * Available methods to use with `-m/--methods`:
@@ -197,6 +212,11 @@ python3 mcclintock.py --install
   * `teflon` : Runs the [TEFLoN](https://github.com/jradrion/TEFLoN) component method (Paired-End Only)
 
 ## <a name="input"></a> Mcclintock Input Files
+* Warning:
+
+  * Feature names (contig IDs, TE IDs, Family IDs) must not contain any contain any invalid symbols to ensure compatibility with all component methods
+  * INVALID_SYMBOLS:`; & ( ) | * ? [ ] ~ { } < ! ^ " , \  $ / + - #`
+
 #### Required
 * Reference FASTA (`-r/--reference`)
   * The genome sequence of the reference genome in FASTA format. The reads from the FASTQ file(s) will be mapped to this reference genome to predict TE insertions
@@ -231,6 +251,7 @@ The results of McClintock component methods are output to the directory `<output
 * Each component method has raw output files which can be found at `<output>/<sample>/results/<method>/unfiltered/`.
 * Raw results are standardized into a BED format and can be found in `<output>/<sample>/results/<method>/*.bed` where `<output>/<sample>/results/<method>/*.nonredundant.bed` has any redundant predictions removed.
 * Standardized results are filtered by parameters defined in the `<method>_post.py` postprocessing configuration files for each method. These config files can be found in `/path/to/mcclintock/config/<method>` and can be modified if you want to adjust default filtering parameters.
+* Standardized results are then converted into VCF format which can be found in  `<output>/<sample>/results/<method>/*_nonredundant_non-reference_*.vcf`. Two types of VCF are supported, i.e, the VCF that is site-only (`*_nonredundant_non-reference_siteonly.vcf`) and VCF that contains a sample column (`*_nonredundant_non-reference_sample.vcf`). Note that the genotype (GT) field of `*_nonredundant_non-reference_sample.vcf` only indicates the presence/absence of SV, rather than the ploidy.
 
 #### HTML Summary Report: `<output>/<sample>/results/summary/summary.html`
 * McClintock generates a summary report that contains information on how the run was executed, read mapping information, QC information, and a summary of component method predictions
