@@ -212,9 +212,8 @@ python3 mcclintock.py --install
   * `teflon` : Runs the [TEFLoN](https://github.com/jradrion/TEFLoN) component method (Paired-End Only)
 
 ## <a name="input"></a> Mcclintock Input Files
-* Warning:
-
-  * Feature names (contig IDs, TE IDs, Family IDs) must not contain any contain any invalid symbols to ensure compatibility with all component methods
+Warning:
+  * Feature names (contig IDs, TE IDs, Family IDs) must not contain any invalid symbols to ensure compatibility with all component methods.
   * INVALID_SYMBOLS:`; & ( ) | * ? [ ] ~ { } < ! ^ " , \  $ / + - #`
 
 #### Required
