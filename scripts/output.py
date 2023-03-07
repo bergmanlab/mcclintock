@@ -403,7 +403,7 @@ def write_vcf(inserts, genome_fasta, sample_name, method, out_dir, vcf_options):
             meta.append('##INFO=<ID=SVTYPE,Number=1,Type=String,Description="Type of structural variant">')
             meta.append('##INFO=<ID=STRAND,Number=1,Type=String,Description="Strand orientation">')
             meta.append('##INFO=<ID=FAMILY,Number=1,Type=String,Description="TE family">')
-            meta.append('##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">')
+            meta.append('##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype (1 indicates the presence of sv, does not indicate the ploidy)">')
             meta.append('##FORMAT=<ID=END,Number=1,Type=Integer,Description="End position of the structure variant">')
             for key,value in inserts[0].support_info.support.items():
                 meta.append('##FORMAT=<ID='+value.tag+',Number=1,Type='+value.type+',Description="'+value.description+'">')
@@ -421,7 +421,7 @@ def write_vcf(inserts, genome_fasta, sample_name, method, out_dir, vcf_options):
                     vals = [insert.chromosome, str(insert.start), te_id, ref.upper(), "<INS:ME>", ".", "PASS"]
                     info = ["SVTYPE=INS", "STRAND="+insert.strand, "FAMILY="+insert.family]
                     format_col = ["GT","END"]
-                    sample_col = ["1/1",str(insert.end)]
+                    sample_col = ["1",str(insert.end)]
                     for key,value in insert.support_info.support.items():
                         format_col.append(value.tag)
                         sample_col.append(str(value.value))
