@@ -121,12 +121,12 @@ python3 mcclintock.py --install
 ##########################
 ##       Required       ##
 ##########################
-  -r REFERENCE, --reference REFERENCE
+  -r, --reference REFERENCE
                         A reference genome sequence in fasta format
-  -c CONSENSUS, --consensus CONSENSUS
+  -c, --consensus CONSENSUS
                         The consensus sequences of the TEs for the species in
                         fasta format
-  -1 FIRST, --first FIRST
+  -1, --first FIRST
                         The path of the first fastq file from paired end read
                         sequencing or the fastq file from single read
                         sequencing
@@ -136,28 +136,28 @@ python3 mcclintock.py --install
 ##       Optional       ##
 ##########################
   -h, --help            show this help message and exit
-  -2 SECOND, --second SECOND
+  -2, --second SECOND
                         The path of the second fastq file from a paired end
                         read sequencing
-  -p PROC, --proc PROC  The number of processors to use for parallel stages of
+  -p, --proc PROC       The number of processors to use for parallel stages of
                         the pipeline [default = 1]
-  -o OUT, --out OUT     An output folder for the run. [default = '.']
-  -m METHODS, --methods METHODS
+  -o, --out OUT         An output folder for the run. [default = '.']
+  -m, --methods METHODS
                         A comma-delimited list containing the software you
                         want the pipeline to use for analysis. e.g. '-m
                         relocate,TEMP,ngs_te_mapper' will launch only those
                         three methods
-  -g LOCATIONS, --locations LOCATIONS
+  -g, --locations LOCATIONS
                         The locations of known TEs in the reference genome in
                         GFF 3 format. This must include a unique ID attribute
                         for every entry
-  -t TAXONOMY, --taxonomy TAXONOMY
+  -t, --taxonomy TAXONOMY
                         A tab delimited file with one entry per ID in the GFF
                         file and two columns: the first containing the ID and
                         the second containing the TE family it belongs to. The
                         family should correspond to the names of the sequences
                         in the consensus fasta file
-  -s COVERAGE_FASTA, --coverage_fasta COVERAGE_FASTA
+  -s, --coverage_fasta COVERAGE_FASTA
                         A fasta file that will be used for TE-based coverage
                         analysis, if not supplied then the consensus sequences
                         of the TEs will be used for the analysis
@@ -165,7 +165,7 @@ python3 mcclintock.py --install
                         barcode) will be incorporated to SAM output. Warning:
                         do not use this option if the input fastq files do not
                         have comments
-  -a AUGMENT, --augment AUGMENT
+  -a, --augment AUGMENT
                         A fasta file of TE sequences that will be included as
                         extra chromosomes in the reference file (useful if the
                         organism is known to have TEs that are not present in
@@ -183,7 +183,7 @@ python3 mcclintock.py --install
                         will use the max processors designated by -p/--proc
   --make_annotations    This option will only run the pipeline up to the 
                         creation of the repeat annotations
-  -k KEEP_INTERMEDIATE, --keep_intermediate KEEP_INTERMEDIATE
+  -k, --keep_intermediate KEEP_INTERMEDIATE
                         This option determines which intermediate files are 
                         preserved after McClintock completes [default: general]
                         [options: minimal, general, methods, <list,of,methods>, 
@@ -212,8 +212,8 @@ python3 mcclintock.py --install
   * `teflon` : Runs the [TEFLoN](https://github.com/jradrion/TEFLoN) component method (Paired-End Only)
 
 ## <a name="input"></a> Mcclintock Input Files
-Warning:
-  * Feature names (contig IDs, TE IDs, Family IDs) must not contain any invalid symbols to ensure compatibility with all component methods.
+#### Warning
+  * Feature names (contig IDs, TE IDs, Family IDs) in input files must not contain any invalid symbols to ensure compatibility with all component methods.
   * INVALID_SYMBOLS:`; & ( ) | * ? [ ] ~ { } < ! ^ " , \  $ / + - #`
 
 #### Required
