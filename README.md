@@ -170,6 +170,11 @@ python3 mcclintock.py --install
                         extra chromosomes in the reference file (useful if the
                         organism is known to have TEs that are not present in
                         the reference strain)
+  -k, --keep_intermediate KEEP_INTERMEDIATE
+                        This option determines which intermediate files are 
+                        preserved after McClintock completes [default: general]
+                        [options: minimal, general, methods, <list,of,methods>, 
+                        all]
   --sample_name SAMPLE_NAME
                         The sample name to use for output files [default: 
                         fastq1 name]
@@ -183,15 +188,10 @@ python3 mcclintock.py --install
                         will use the max processors designated by -p/--proc
   --make_annotations    This option will only run the pipeline up to the 
                         creation of the repeat annotations
-  -k, --keep_intermediate KEEP_INTERMEDIATE
-                        This option determines which intermediate files are 
-                        preserved after McClintock completes [default: general]
-                        [options: minimal, general, methods, <list,of,methods>, 
-                        all]
   --config CONFIG       This option determines which config files to use for 
                         your McClintock run [default: config in McClintock 
                         Repository]
-  --vcf VCF             This option determines which format of VCF output would 
+  --vcf VCF             This option determines which format of VCF output will 
                         be created [default: siteonly][options: siteonly,sample]
 ```
 
