@@ -149,7 +149,7 @@ python3 mcclintock.py --install
                         will be run [options: ngs_te_mapper, ngs_te_mapper2, 
                         relocate, relocate2, temp, temp2, retroseq, 
                         popoolationte, popoolationte2, te-locate, teflon, 
-                        coverage", trimgalore, map_reads, tebreak]
+                        coverage, trimgalore, map_reads, tebreak]
 
   -g, --locations LOCATIONS
                         The locations of known TEs in the reference genome in
