@@ -258,18 +258,17 @@ python3 mcclintock.py --install
 The results of McClintock component methods are output to the directory `<output>/<sample>/results`.
 * Summary files from the run can be located at `<output>/<sample>/results/summary/`.
 * Each component method has raw output files which can be found at `<output>/<sample>/results/<method>/unfiltered/`.
-* Raw results are standardized into a BED format and can be found in `<output>/<sample>/results/<method>/*.bed` where `<output>/<sample>/results/<method>/*.nonredundant.bed` has any redundant predictions removed.
-* Standardized results are filtered by parameters defined in the `<method>_post.py` postprocessing configuration files for each method. These config files can be found in `/path/to/mcclintock/config/<method>` and can be modified if you want to adjust default filtering parameters.
-* Standardized results are then converted into VCF format which can be found in  `<output>/<sample>/results/<method>/*_nonredundant_non-reference_*.vcf`. Two types of VCF are supported, i.e, the VCF that is site-only (`*_nonredundant_non-reference_siteonly.vcf`) and VCF that contains a sample column (`*_nonredundant_non-reference_sample.vcf`). Note that the genotype (GT) field of `*_nonredundant_non-reference_sample.vcf` only indicates the presence/absence of SV, rather than the ploidy.
+* Raw results are filtered by parameters defined in the `<method>_post.py` postprocessing configuration files for each method, then standardized into BED and VCF formats. Post-processing config files can be found in `/path/to/mcclintock/config/<method>` and can be modified if you want to adjust default filtering parameters. 
+* Standardize results in BED format contain non-reference and (when available for a method) reference TE predicitions and can be found in `<output>/<sample>/results/<method>/*.bed`, where `<output>/<sample>/results/<method>/*.nonredundant.bed` has any redundant predictions removed.
+* Standardized results in VCF format contain only non-reference TE predicitions and can be found in  `<output>/<sample>/results/<method>/*_nonredundant_non-reference_*.vcf`. Two types of VCF are supported: (i) VCF files with "site-only" information (`*_nonredundant_non-reference_siteonly.vcf`) and (ii) VCF files that contains a "sample" column (`*_nonredundant_non-reference_sample.vcf`). Note that the genotype (GT) field of `*_nonredundant_non-reference_sample.vcf` only indicates the presence/absence of a non-reference TE insertion variant call in the sample, and does not contain information about the ploidy or zygosity of the variant in the sample.
 
-#### HTML Summary Report: `<output>/<sample>/results/summary/summary.html`
-* McClintock generates a summary report that contains information on how the run was executed, read mapping information, QC information, and a summary of component method predictions
+#### HTML Summary Report: `<output>/<sample>/results/summary/`
+* McClintock generates an interactive HTML summary report that contains information on how the run was executed, read mapping information, QC information, and a summary of component method predictions. `<output>/<sample>/results/summary/summary.html`
 * This page also links to the pages that summarize the predictions from each method: all predictions by method, predictions for each family, predictions for each contig. `<output>/<sample>/results/summary/html/<method>.html`
 * The HTML report also summarizes reference and non-reference predictions for all families. `<output>/<sample>/results/summary/html/families.html`
 * A page is also generated for each family, which summarizes the coverage for the family consensus sequence and the family-specific predictions from each component method. `<output>/<sample>/results/summary/html/<family>.html`
 
-#### Raw Summary files :
-
+#### Raw Summary files : `<output>/<sample>/results/summary/`
 * `<output>/<sample>/results/summary/data/run/summary_report.txt` : Summary Report of McClintock run. Contains information on the McClintock command used, when and where the script was run, details about the mapped reads, and table that shows the number of TE predictions produced from each method.
 * `<output>/<sample>/results/summary/data/run/te_prediction_summary.txt` : A comma-delimited table showing reference and non-reference predictions for each component method
 * `<output>/<sample>/results/summary/data/families/family_prediction_summary.txt` : a comma-delimited table showing TE predictions (all, reference, non-reference) from each method for each TE family
