@@ -160,10 +160,6 @@ python3 mcclintock.py --install
                         A fasta file that will be used for TE-based coverage
                         analysis, if not supplied then the consensus sequences
                         of the TEs will be used for the analysis
-  -T, --comments        If this option is specified then fastq comments (e.g.
-                        barcode) will be incorporated to SAM output. Warning:
-                        do not use this option if the input fastq files do not
-                        have comments
   -a, --augment AUGMENT
                         A fasta file of TE sequences that will be included as
                         extra chromosomes in the reference file (useful if the
@@ -174,13 +170,13 @@ python3 mcclintock.py --install
                         preserved after McClintock completes [default: general]
                         [options: minimal, general, methods, <list,of,methods>, 
                         all]
-  --sample_name SAMPLE_NAME
+  -s, --sample_name SAMPLE_NAME
                         The sample name to use for output files [default: 
                         fastq1 name]
-  --config CONFIG       This option determines which config files to use for 
+  -n, --config CONFIG   This option determines which config files to use for 
                         your McClintock run [default: config in McClintock 
                         Repository]
-  --vcf VCF             This option determines which format of VCF output will 
+  -v, --vcf VCF         This option determines which format of VCF output will 
                         be created [default: siteonly][options: siteonly,sample]
   --install             This option will install the dependencies of McClintock
   --resume              This option will attempt to use existing intermediate 
@@ -192,6 +188,10 @@ python3 mcclintock.py --install
                         will use the max processors designated by -p/--proc
   --make_annotations    This option will only run the pipeline up to the 
                         creation of the repeat annotations
+  --comments            If this option is specified then fastq comments (e.g.
+                        barcode) will be incorporated to SAM output. Warning:
+                        do not use this option if the input fastq files do not
+                        have comments
 ```
 
 * Available methods to use with `-m/--methods`:
