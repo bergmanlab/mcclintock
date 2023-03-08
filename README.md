@@ -145,21 +145,31 @@ python3 mcclintock.py --install
                         A comma-delimited list containing the software you
                         want the pipeline to use for analysis. e.g. '-m
                         relocate,TEMP,ngs_te_mapper' will launch only those
-                        three methods
+                        three methods. If this option is not set, all methods
+                        will be run [options: ngs_te_mapper, ngs_te_mapper2, 
+                        relocate, relocate2, temp, temp2, retroseq, 
+                        popoolationte, popoolationte2, te-locate, teflon, 
+                        coverage", trimgalore, map_reads, tebreak]
+
   -g, --locations LOCATIONS
                         The locations of known TEs in the reference genome in
                         GFF 3 format. This must include a unique ID attribute
-                        for every entry
+                        for every entry. If this option is not set, a file of 
+                        reference TE locations in GFF format will be produced 
+                        using RepeatMasker
   -t, --taxonomy TAXONOMY
                         A tab delimited file with one entry per ID in the GFF
                         file and two columns: the first containing the ID and
                         the second containing the TE family it belongs to. The
                         family should correspond to the names of the sequences
-                        in the consensus fasta file
+                        in the consensus fasta file. If this option is not set, 
+                        a file mapping reference TE instances to TE families 
+                        in TSV format will be produced using RepeatMasker
   -s, --coverage_fasta COVERAGE_FASTA
                         A fasta file that will be used for TE-based coverage
                         analysis, if not supplied then the consensus sequences
-                        of the TEs will be used for the analysis
+                        of the TEs set by -c/--consensus will be used for the 
+                        analysis
   -a, --augment AUGMENT
                         A fasta file of TE sequences that will be included as
                         extra chromosomes in the reference file (useful if the
@@ -233,8 +243,9 @@ python3 mcclintock.py --install
   * If both the locations GFF and taxonomy TSV are not provided, McClintock will produce them using RepeatMasker with the consensus sequences
   * [example](https://github.com/bergmanlab/mcclintock/blob/master/test/reference_TE_locations.gff)
 * Taxonomy (`-t/--taxonomy`)
-  * A Tab deliminted file that maps the unique reference TE to the family it belongs to.
+  * A Tab delimited file that maps the unique reference TE to the family it belongs to.
   * This file should contain two columns, the first corresponding to the reference TE identifier which should match the `ID=` attribute from the locations GFF(`-g`). The second column contains the reference TE's family which should match the name of a sequence in the consensus fasta (`-c`)
+  * If both the locations GFF and taxonomy TSV are not provided, McClintock will produce them using RepeatMasker with the consensus sequences
   * [example](https://github.com/bergmanlab/mcclintock/blob/master/test/sac_cer_te_families.tsv)
 * Coverage FASTA (`-s/--coverage_fasta`)
   * A fasta file of TE sequences to be used for the coverage analysis.
