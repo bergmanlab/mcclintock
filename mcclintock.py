@@ -61,13 +61,13 @@ def parse_args(expected_configs):
     parser.add_argument("-a", "--augment", type=str, help="A fasta file of TE sequences that will be included as extra chromosomes in the reference file (useful if the organism is known to have TEs that are not present in the reference strain)", required=False)
     parser.add_argument("-k","--keep_intermediate", type=str, help="This option determines which intermediate files are preserved after McClintock completes [default: general][options: minimal, general, methods, <list,of,methods>, all]", required=False)
     parser.add_argument("--sample_name", type=str, help="The sample name to use for output files [default: fastq1 name]", required=False)
-    parser.add_argument("--resume", action="store_true", help="This option will attempt to use existing intermediate files from a previous McClintock run", required=False)
+    parser.add_argument("--config", type=str, help="This option determines which config files to use for your McClintock run [default: config in McClintock Repository]", required=False)
+    parser.add_argument("--vcf", type=str, help="This option determines which format of VCF output will be created [default: siteonly][options: siteonly,sample]", required=False)
     parser.add_argument("--install", action="store_true", help="This option will install the dependencies of McClintock", required=False)
+    parser.add_argument("--resume", action="store_true", help="This option will attempt to use existing intermediate files from a previous McClintock run", required=False)
     parser.add_argument("--debug", action="store_true", help="This option will allow snakemake to print progress to stdout", required=False)
     parser.add_argument("--serial", action="store_true", help="This option runs without attempting to optimize thread usage to run rules concurrently. Each multithread rule will use the max processors designated by -p/--proc", required=False)
     parser.add_argument("--make_annotations", action="store_true", help="This option will only run the pipeline up to the creation of the repeat annotations", required=False)
-    parser.add_argument("--config", type=str, help="This option determines which config files to use for your McClintock run [default: config in McClintock Repository]", required=False)
-    parser.add_argument("--vcf", type=str, help="This option determines which format of VCF output would be created [default: siteonly][options: siteonly,sample]", required=False)
     
     #arguments parser
     args = parser.parse_args()
