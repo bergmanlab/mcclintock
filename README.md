@@ -131,7 +131,6 @@ python3 mcclintock.py --install
                         sequencing or the fastq file from single read
                         sequencing
 
-
 ##########################
 ##       Optional       ##
 ##########################
@@ -178,9 +177,14 @@ python3 mcclintock.py --install
   --sample_name SAMPLE_NAME
                         The sample name to use for output files [default: 
                         fastq1 name]
+  --config CONFIG       This option determines which config files to use for 
+                        your McClintock run [default: config in McClintock 
+                        Repository]
+  --vcf VCF             This option determines which format of VCF output will 
+                        be created [default: siteonly][options: siteonly,sample]
+  --install             This option will install the dependencies of McClintock
   --resume              This option will attempt to use existing intermediate 
                         files from a previous McClintock run
-  --install             This option will install the dependencies of McClintock
   --debug               This option will allow snakemake to print progress to 
                         stdout
   --serial              This option runs without attempting to optimize thread 
@@ -188,11 +192,6 @@ python3 mcclintock.py --install
                         will use the max processors designated by -p/--proc
   --make_annotations    This option will only run the pipeline up to the 
                         creation of the repeat annotations
-  --config CONFIG       This option determines which config files to use for 
-                        your McClintock run [default: config in McClintock 
-                        Repository]
-  --vcf VCF             This option determines which format of VCF output will 
-                        be created [default: siteonly][options: siteonly,sample]
 ```
 
 * Available methods to use with `-m/--methods`:
