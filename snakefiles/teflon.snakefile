@@ -68,7 +68,8 @@ rule teflon_post:
         sample_name = config['args']['sample_name'],
         chromosomes = config['args']['chromosomes'],
         config = config['config']['teflon']['files'][1],
-        status_log = config['status']['teflon']
+        status_log = config['status']['teflon'],
+        vcf = config['args']['vcf']
     
     output:
         out = config['out']['teflon']

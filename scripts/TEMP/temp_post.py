@@ -22,6 +22,7 @@ def main():
     chromosomes = snakemake.params.chromosomes.split(",")
     out_dir = snakemake.params.out_dir
     status_log = snakemake.params.status_log
+    vcf_options = snakemake.params.vcf.split(",")
 
     prev_steps_succeeded = mccutils.check_status_file(status_log)
 
@@ -34,7 +35,7 @@ def main():
         if len(insertions) > 0:
             insertions = output.make_redundant_bed(insertions, sample_name, out_dir, method="temp")
             insertions = output.make_nonredundant_bed(insertions, sample_name, out_dir, method="temp")
-            output.write_vcf(insertions, reference_fasta, sample_name, "temp", out_dir)
+            output.write_vcf(insertions, reference_fasta, sample_name, "temp", out_dir, vcf_options)
         else:
             mccutils.run_command(["touch", out_dir+"/"+sample_name+"_temp_redundant.bed"])
             mccutils.run_command(["touch", out_dir+"/"+sample_name+"_temp_nonredundant.bed"])

@@ -39,7 +39,7 @@ python3 mcclintock.py \
 * [License](#license)
 
 ## <a name="intro"></a> Introduction
-Many methods have been developed to detect transposable element (TE) insertions from short-read whole genome sequencing (WGS) data, each of which has different dependencies, run interfaces, and output formats. McClintock provides a meta-pipeline to reproducibly install, execute and evaluate multiple TE detectors, and generate output in standardized output formats. A description of the original McClintock 1 pipeline and evaluation of the original six TE detectors on the yeast genome can be found in [Nelson, Linheiro and Bergman (2017) *G3* 7:2763-2778](http://www.g3journal.org/content/7/8/2763). A description of the re-implemented McClintock 2 pipeline, the reproducible simulation system, and evaluation of 12 TE dectectors on the yeast genome can be found in [Chen, Basting, Han, Garfinkel and Bergman (2023) bioRxiv](https://www.biorxiv.org/content/10.1101/2023.02.13.528343v1).
+Many methods have been developed to detect transposable element (TE) insertions from short-read whole genome sequencing (WGS) data, each of which has different dependencies, run interfaces, and output formats. McClintock provides a meta-pipeline to reproducibly install, execute and evaluate multiple TE detectors, and generate output in standardized output formats. A description of the original McClintock 1 pipeline and evaluation of the original six TE detectors on the yeast genome can be found in [Nelson, Linheiro and Bergman (2017) *G3* 7:2763-2778](http://www.g3journal.org/content/7/8/2763). A description of the re-implemented McClintock 2 pipeline, the reproducible simulation system, and evaluation of 12 TE detectors on the yeast genome can be found in [Chen, Basting, Han, Garfinkel and Bergman (2023) bioRxiv](https://www.biorxiv.org/content/10.1101/2023.02.13.528343v1).
 
 The complete pipeline requires a fasta reference genome, a fasta consensus set of TE sequences present in the organism and fastq paired-end sequencing reads. Optionally if a detailed annotation of TE sequences in the reference genome has been performed, a GFF file with the locations of reference genome TE annotations and a tab delimited taxonomy file linking individual insertions to the TE family they belong to can be supplied (an example of this file is included in the test directory as sac_cer_te_families.tsv). If only single-end fastq sequencing data are available, then this can be supplied as option -1, however only ngs_te_mapper and RelocaTE will run as these are the only methods that handle single-ended data.
 
@@ -121,63 +121,87 @@ python3 mcclintock.py --install
 ##########################
 ##       Required       ##
 ##########################
-  -r REFERENCE, --reference REFERENCE
+  -r, --reference REFERENCE
                         A reference genome sequence in fasta format
-  -c CONSENSUS, --consensus CONSENSUS
+  -c, --consensus CONSENSUS
                         The consensus sequences of the TEs for the species in
                         fasta format
-  -1 FIRST, --first FIRST
+  -1, --first FIRST
                         The path of the first fastq file from paired end read
                         sequencing or the fastq file from single read
                         sequencing
-
 
 ##########################
 ##       Optional       ##
 ##########################
   -h, --help            show this help message and exit
-  -2 SECOND, --second SECOND
+  -2, --second SECOND
                         The path of the second fastq file from a paired end
                         read sequencing
-  -p PROC, --proc PROC  The number of processors to use for parallel stages of
+  -p, --proc PROC       The number of processors to use for parallel stages of
                         the pipeline [default = 1]
-  -o OUT, --out OUT     An output folder for the run. [default = '.']
-  -m METHODS, --methods METHODS
+  -o, --out OUT         An output folder for the run. [default = '.']
+  -m, --methods METHODS
                         A comma-delimited list containing the software you
                         want the pipeline to use for analysis. e.g. '-m
                         relocate,TEMP,ngs_te_mapper' will launch only those
-                        three methods
-  -g LOCATIONS, --locations LOCATIONS
+                        three methods. If this option is not set, all methods
+                        will be run [options: ngs_te_mapper, ngs_te_mapper2, 
+                        relocate, relocate2, temp, temp2, retroseq, 
+                        popoolationte, popoolationte2, te-locate, teflon, 
+                        coverage, trimgalore, map_reads, tebreak]
+
+  -g, --locations LOCATIONS
                         The locations of known TEs in the reference genome in
                         GFF 3 format. This must include a unique ID attribute
-                        for every entry
-  -t TAXONOMY, --taxonomy TAXONOMY
+                        for every entry. If this option is not set, a file of 
+                        reference TE locations in GFF format will be produced 
+                        using RepeatMasker
+  -t, --taxonomy TAXONOMY
                         A tab delimited file with one entry per ID in the GFF
                         file and two columns: the first containing the ID and
                         the second containing the TE family it belongs to. The
                         family should correspond to the names of the sequences
-                        in the consensus fasta file
-  -s COVERAGE_FASTA, --coverage_fasta COVERAGE_FASTA
+                        in the consensus fasta file. If this option is not set, 
+                        a file mapping reference TE instances to TE families 
+                        in TSV format will be produced using RepeatMasker
+  -s, --coverage_fasta COVERAGE_FASTA
                         A fasta file that will be used for TE-based coverage
                         analysis, if not supplied then the consensus sequences
-                        of the TEs will be used for the analysis
-  -T, --comments        If this option is specified then fastq comments (e.g.
-                        barcode) will be incorporated to SAM output. Warning:
-                        do not use this option if the input fastq files do not
-                        have comments
-  -a AUGMENT, --augment AUGMENT
+                        of the TEs set by -c/--consensus will be used for the 
+                        analysis
+  -a, --augment AUGMENT
                         A fasta file of TE sequences that will be included as
                         extra chromosomes in the reference file (useful if the
                         organism is known to have TEs that are not present in
                         the reference strain)
-  --resume              This option will attempt to use existing intermediate
+  -k, --keep_intermediate KEEP_INTERMEDIATE
+                        This option determines which intermediate files are 
+                        preserved after McClintock completes [default: general]
+                        [options: minimal, general, methods, <list,of,methods>, 
+                        all]
+  -s, --sample_name SAMPLE_NAME
+                        The sample name to use for output files [default: 
+                        fastq1 name]
+  -n, --config CONFIG   This option determines which config files to use for 
+                        your McClintock run [default: config in McClintock 
+                        Repository]
+  -v, --vcf VCF         This option determines which format of VCF output will 
+                        be created [default: siteonly][options: siteonly,sample]
+  --install             This option will install the dependencies of McClintock
+  --resume              This option will attempt to use existing intermediate 
                         files from a previous McClintock run
-  --install             This option will install the dependencies of
-                        mcclintock
-  --debug               This option will allow snakemake to print progress to
+  --debug               This option will allow snakemake to print progress to 
                         stdout
-  --make_annotations    This option will only run the pipeline up to the
+  --serial              This option runs without attempting to optimize thread 
+                        usage to run rules concurrently. Each multithread rule 
+                        will use the max processors designated by -p/--proc
+  --make_annotations    This option will only run the pipeline up to the 
                         creation of the repeat annotations
+  --comments            If this option is specified then fastq comments (e.g.
+                        barcode) will be incorporated to SAM output. Warning:
+                        do not use this option if the input fastq files do not
+                        have comments
 ```
 
 * Available methods to use with `-m/--methods`:
@@ -197,6 +221,10 @@ python3 mcclintock.py --install
   * `teflon` : Runs the [TEFLoN](https://github.com/jradrion/TEFLoN) component method (Paired-End Only)
 
 ## <a name="input"></a> Mcclintock Input Files
+#### Warning
+  * Feature names (contig IDs, TE IDs, Family IDs) in input files must not contain any invalid symbols to ensure compatibility with all component methods.
+  * INVALID_SYMBOLS:`; & ( ) | * ? [ ] ~ { } < ! ^ " , \  $ / + - #`
+
 #### Required
 * Reference FASTA (`-r/--reference`)
   * The genome sequence of the reference genome in FASTA format. The reads from the FASTQ file(s) will be mapped to this reference genome to predict TE insertions
@@ -215,8 +243,9 @@ python3 mcclintock.py --install
   * If both the locations GFF and taxonomy TSV are not provided, McClintock will produce them using RepeatMasker with the consensus sequences
   * [example](https://github.com/bergmanlab/mcclintock/blob/master/test/reference_TE_locations.gff)
 * Taxonomy (`-t/--taxonomy`)
-  * A Tab deliminted file that maps the unique reference TE to the family it belongs to.
+  * A Tab delimited file that maps the unique reference TE to the family it belongs to.
   * This file should contain two columns, the first corresponding to the reference TE identifier which should match the `ID=` attribute from the locations GFF(`-g`). The second column contains the reference TE's family which should match the name of a sequence in the consensus fasta (`-c`)
+  * If both the locations GFF and taxonomy TSV are not provided, McClintock will produce them using RepeatMasker with the consensus sequences
   * [example](https://github.com/bergmanlab/mcclintock/blob/master/test/sac_cer_te_families.tsv)
 * Coverage FASTA (`-s/--coverage_fasta`)
   * A fasta file of TE sequences to be used for the coverage analysis.
@@ -229,17 +258,17 @@ python3 mcclintock.py --install
 The results of McClintock component methods are output to the directory `<output>/<sample>/results`.
 * Summary files from the run can be located at `<output>/<sample>/results/summary/`.
 * Each component method has raw output files which can be found at `<output>/<sample>/results/<method>/unfiltered/`.
-* Raw results are standardized into a BED format and can be found in `<output>/<sample>/results/<method>/*.bed` where `<output>/<sample>/results/<method>/*.nonredundant.bed` has any redundant predictions removed.
-* Standardized results are filtered by parameters defined in the `<method>_post.py` postprocessing configuration files for each method. These config files can be found in `/path/to/mcclintock/config/<method>` and can be modified if you want to adjust default filtering parameters.
+* Raw results are filtered by parameters defined in the `<method>_post.py` postprocessing configuration files for each method, then standardized into BED and VCF formats. Post-processing config files can be found in `/path/to/mcclintock/config/<method>` and can be modified if you want to adjust default filtering parameters. 
+* Standardize results in BED format contain non-reference and (when available for a method) reference TE predictions and can be found in `<output>/<sample>/results/<method>/*.bed`, where `<output>/<sample>/results/<method>/*.nonredundant.bed` has any redundant predictions removed.
+* Standardized results in VCF format contain only non-reference TE predictions and can be found in  `<output>/<sample>/results/<method>/*_nonredundant_non-reference_*.vcf`. Two types of VCF are supported: (i) VCF files with "site-only" information (`*_nonredundant_non-reference_siteonly.vcf`) and (ii) VCF files that contains a "sample" column (`*_nonredundant_non-reference_sample.vcf`). Note that the genotype (GT) field of `*_nonredundant_non-reference_sample.vcf` only indicates the presence/absence of a non-reference TE insertion variant call in the sample, and does not contain information about the ploidy or zygosity of the variant in the sample.
 
-#### HTML Summary Report: `<output>/<sample>/results/summary/summary.html`
-* McClintock generates a summary report that contains information on how the run was executed, read mapping information, QC information, and a summary of component method predictions
+#### HTML Summary Report: `<output>/<sample>/results/summary/`
+* McClintock generates an interactive HTML summary report that contains information on how the run was executed, read mapping information, QC information, and a summary of component method predictions. `<output>/<sample>/results/summary/summary.html`
 * This page also links to the pages that summarize the predictions from each method: all predictions by method, predictions for each family, predictions for each contig. `<output>/<sample>/results/summary/html/<method>.html`
 * The HTML report also summarizes reference and non-reference predictions for all families. `<output>/<sample>/results/summary/html/families.html`
 * A page is also generated for each family, which summarizes the coverage for the family consensus sequence and the family-specific predictions from each component method. `<output>/<sample>/results/summary/html/<family>.html`
 
-#### Raw Summary files :
-
+#### Raw Summary files : `<output>/<sample>/results/summary/`
 * `<output>/<sample>/results/summary/data/run/summary_report.txt` : Summary Report of McClintock run. Contains information on the McClintock command used, when and where the script was run, details about the mapped reads, and table that shows the number of TE predictions produced from each method.
 * `<output>/<sample>/results/summary/data/run/te_prediction_summary.txt` : A comma-delimited table showing reference and non-reference predictions for each component method
 * `<output>/<sample>/results/summary/data/families/family_prediction_summary.txt` : a comma-delimited table showing TE predictions (all, reference, non-reference) from each method for each TE family

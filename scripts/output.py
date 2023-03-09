@@ -94,7 +94,7 @@ class Temp2:
             "frequency": Info("FREQUENCY", "Frequency of the inserted transposon. It generally means what fraction of sequenced genome present this insertion", 0.0, "Float"),
             "supportreads": Info("SUPPORT_READS", "Number of reads supporting this insertion", 0.0, "Float"),
             "referencereads": Info("REF_READS", "Number of reads that do not support this insertion, AKA reference reads", 0.0, "Float"),
-            "fiveprimesupport": Info("FIVE_PRIME_SUPPORT", "Number of supporting reads at 5'end of the insertion", 0.0, 'Float'),
+            "fiveprimesupport": Info("FIVE_PRIME_SUPPORT", "Number of supporting reads at 5'end of the insertion", 0.0, "Float"),
             "threeprimesupport": Info("THREE_PRIME_SUPPORT", "Number of supporting reads at 3'end of the insertion", 0.0, "Float"),
             "reliability": Info("RELIABILITY", "Reliability of this insertion (0–100). 100 for 2p and 1p1 insertions. For singleton insertions, TEMP2 already filtered out most of the false positives but not all of them. The reliability is a percentage stand for how many singleton insertions of a specific transposon is", 0.0, "Float"),
             "fiveprimejunctionsupport": Info("FIVE_PRIME_JUNCTION_SUPPORT", "Number of supporting reads at 5'end of the insertion junction", 0.0, "Float"),
@@ -331,7 +331,7 @@ def make_nonredundant_bed(insertions, sample_name, out_dir, method="popoolationt
 
     return out_inserts
 
-def write_vcf(inserts, genome_fasta, sample_name, method, out_dir):
+def write_vcf(inserts, genome_fasta, sample_name, method, out_dir, vcf_options):
     contigs = {}
 
     for record in SeqIO.parse(genome_fasta, "fasta"):
@@ -344,42 +344,87 @@ def write_vcf(inserts, genome_fasta, sample_name, method, out_dir):
     for insert in inserts:
         if insert.chromosome not in contigs_with_inserts:
             contigs_with_inserts.append(insert.chromosome)
-    
 
-    out_vcf = out_dir+"/"+sample_name+"_"+method+"_nonredundant_non-reference.vcf"
-    with open(out_vcf, "w") as vcf:
-        today = date.today()
-        today_date = today.strftime("%Y-%m-%d")
-        meta = [
-            "##fileformat=VCFv4.2",
-            "##fileDate="+today_date,
-            "##source=McClintock",
-            "##reference="+genome_fasta
-        ]
-        for contig in contigs_with_inserts:
-            meta.append("##contig=<ID="+contig+",length="+str(len(contigs[contig]))+">")
-        
-        meta.append('##INFO=<ID=END,Number=1,Type=Integer,Description="End position of the structure variant">')
-        meta.append('##INFO=<ID=SVTYPE,Number=1,Type=String,Description="Type of structural variant">')
-        meta.append('##INFO=<ID=STRAND,Number=1,Type=String,Description="Strand orientation">')
-        meta.append('##INFO=<ID=FAMILY,Number=1,Type=String,Description="TE family">')
-        for key,value in inserts[0].support_info.support.items():
-            meta.append('##INFO=<ID='+value.tag+',Number=1,Type='+value.type+',Description="'+value.description+'">')
+    # create site-only vcf   
+    if "siteonly" in vcf_options:
+        out_vcf = out_dir+"/"+sample_name+"_"+method+"_nonredundant_non-reference_siteonly.vcf"
+        with open(out_vcf, "w") as vcf:
+            today = date.today()
+            today_date = today.strftime("%Y-%m-%d")
+            meta = [
+                "##fileformat=VCFv4.2",
+                "##fileDate="+today_date,
+                "##source=McClintock",
+                "##reference="+genome_fasta
+            ]
+            for contig in contigs_with_inserts:
+                meta.append("##contig=<ID="+contig+",length="+str(len(contigs[contig]))+">")
+            
+            meta.append('##INFO=<ID=END,Number=1,Type=Integer,Description="End position of the structure variant">')
+            meta.append('##INFO=<ID=SVTYPE,Number=1,Type=String,Description="Type of structural variant">')
+            meta.append('##INFO=<ID=STRAND,Number=1,Type=String,Description="Strand orientation">')
+            meta.append('##INFO=<ID=FAMILY,Number=1,Type=String,Description="TE family">')
+            for key,value in inserts[0].support_info.support.items():
+                meta.append('##INFO=<ID='+value.tag+',Number=1,Type='+value.type+',Description="'+value.description+'">')
 
-        for line in meta:
-            vcf.write(line+"\n")
-        header = "\t".join(["#CHROM","POS","ID","REF","ALT","QUAL","FILTER","INFO"])
-        vcf.write(header+"\n")
+            for line in meta:
+                vcf.write(line+"\n")
+            header = "\t".join(["#CHROM","POS","ID","REF","ALT","QUAL","FILTER","INFO"])
+            vcf.write(header+"\n")
 
 
-        for insert in inserts:
-            if insert.type == "non-reference":
-                ref = contigs[insert.chromosome][insert.start-1]
-                te_id = insert.family+"_"+insert.name.split("|")[-1]
-                vals = [insert.chromosome, str(insert.start), te_id, ref.upper(), "<INS:ME>", ".", "PASS"]
-                info = ["END="+str(insert.end),"SVTYPE=INS", "STRAND="+insert.strand, "FAMILY="+insert.family]
-                for key,value in insert.support_info.support.items():
-                    info.append(value.tag+"="+str(value.value))
+            for insert in inserts:
+                if insert.type == "non-reference":
+                    ref = contigs[insert.chromosome][insert.start-1]
+                    te_id = insert.family+"_"+insert.name.split("|")[-1]
+                    vals = [insert.chromosome, str(insert.start), te_id, ref.upper(), "<INS:ME>", ".", "PASS"]
+                    info = ["END="+str(insert.end),"SVTYPE=INS", "STRAND="+insert.strand, "FAMILY="+insert.family]
+                    for key,value in insert.support_info.support.items():
+                        info.append(value.tag+"="+str(value.value))
 
-                out_line = ("\t".join(vals)) + "\t" + (";".join(info))
-                vcf.write(out_line+"\n")
+                    out_line = ("\t".join(vals)) + "\t" + (";".join(info))
+                    vcf.write(out_line+"\n")
+
+    # create mergable vcf with sample column
+    if "sample" in vcf_options:
+        out_vcf_sample = out_dir+"/"+sample_name+"_"+method+"_nonredundant_non-reference_sample.vcf"
+        with open(out_vcf_sample, "w") as vcf:
+            today = date.today()
+            today_date = today.strftime("%Y-%m-%d")
+            meta = [
+                "##fileformat=VCFv4.2",
+                "##fileDate="+today_date,
+                "##source=McClintock",
+                "##reference="+genome_fasta
+            ]
+            for contig in contigs_with_inserts:
+                meta.append("##contig=<ID="+contig+",length="+str(len(contigs[contig]))+">")
+            
+            meta.append('##INFO=<ID=SVTYPE,Number=1,Type=String,Description="Type of structural variant">')
+            meta.append('##INFO=<ID=STRAND,Number=1,Type=String,Description="Strand orientation">')
+            meta.append('##INFO=<ID=FAMILY,Number=1,Type=String,Description="TE family">')
+            meta.append('##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype (1 indicates the presence of sv, does not indicate the ploidy)">')
+            meta.append('##FORMAT=<ID=END,Number=1,Type=Integer,Description="End position of the structure variant">')
+            for key,value in inserts[0].support_info.support.items():
+                meta.append('##FORMAT=<ID='+value.tag+',Number=1,Type='+value.type+',Description="'+value.description+'">')
+
+            for line in meta:
+                vcf.write(line+"\n")
+            header = "\t".join(["#CHROM","POS","ID","REF","ALT","QUAL","FILTER","INFO","FORMAT",sample_name])
+            vcf.write(header+"\n")
+
+
+            for insert in inserts:
+                if insert.type == "non-reference":
+                    ref = contigs[insert.chromosome][insert.start-1]
+                    te_id = insert.family+"_"+insert.name.split("|")[-1]
+                    vals = [insert.chromosome, str(insert.start), te_id, ref.upper(), "<INS:ME>", ".", "PASS"]
+                    info = ["SVTYPE=INS", "STRAND="+insert.strand, "FAMILY="+insert.family]
+                    format_col = ["GT","END"]
+                    sample_col = ["1",str(insert.end)]
+                    for key,value in insert.support_info.support.items():
+                        format_col.append(value.tag)
+                        sample_col.append(str(value.value))
+
+                    out_line = ("\t".join(vals)) + "\t" + (";".join(info)) + "\t" + (":".join(format_col)) + "\t" + (":".join(sample_col))
+                    vcf.write(out_line+"\n")

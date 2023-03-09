@@ -21,6 +21,7 @@ def main():
     sample_name = snakemake.params.sample_name
     chromosomes = snakemake.params.chromosomes.split(",")
     status_log = snakemake.params.status_log
+    vcf_options = snakemake.params.vcf.split(",")
 
     prev_steps_succeeded = mccutils.check_status_file(status_log)
     if prev_steps_succeeded:
@@ -29,7 +30,7 @@ def main():
         if len(insertions) > 0:
             insertions = output.make_redundant_bed(insertions, sample_name, out_dir, method="tebreak")
             insertions = output.make_nonredundant_bed(insertions, sample_name, out_dir, method="tebreak")
-            output.write_vcf(insertions, ref_fasta, sample_name, "tebreak", out_dir)
+            output.write_vcf(insertions, ref_fasta, sample_name, "tebreak", out_dir, vcf_options)
         else:
             mccutils.run_command(["touch", out_dir+"/"+sample_name+"_tebreak_redundant.bed"])
             mccutils.run_command(["touch", out_dir+"/"+sample_name+"_tebreak_nonredundant.bed"])
@@ -71,11 +72,11 @@ def read_insertions(tebreak_out, sample_name, chromosomes, config):
                 insert.support_info.support["three_p_elt_match"].value = float(split_line[header['3p_Elt_Match']])
                 insert.support_info.support["five_p_genome_match"].value = float(split_line[header['5p_Genome_Match']])
                 insert.support_info.support["three_p_genome_match"].value = float(split_line[header['3p_Genome_Match']])
-                insert.support_info.support["split_reads_5prime"].value = float(split_line[header['Split_reads_5prime']])
-                insert.support_info.support["split_reads_3prime"].value = float(split_line[header['Split_reads_3prime']])
-                insert.support_info.support["remapped_discordant"].value = float(split_line[header['Remapped_Discordant']])
+                insert.support_info.support["split_reads_5prime"].value = int(split_line[header['Split_reads_5prime']])
+                insert.support_info.support["split_reads_3prime"].value = int(split_line[header['Split_reads_3prime']])
+                insert.support_info.support["remapped_discordant"].value = int(split_line[header['Remapped_Discordant']])
                 insert.support_info.support["remap_disc_fraction"].value = float(split_line[header['Remap_Disc_Fraction']])
-                insert.support_info.support["remapped_splitreads"].value = float(split_line[header['Remapped_Splitreads']])
+                insert.support_info.support["remapped_splitreads"].value = int(split_line[header['Remapped_Splitreads']])
                 insert.support_info.support["remap_split_fraction"].value = float(split_line[header['Remap_Split_Fraction']])
 
                 insert.name = insert.family+"|non-reference|NA|"+sample_name+"|tebreak|sr|"

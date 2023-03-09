@@ -18,3 +18,4 @@ dependencies:
   - r::r-tidyverse
   - bioconda::bedtools=2.30.0
   - conda-forge::r-ggally
+  - bioconda::bcftools

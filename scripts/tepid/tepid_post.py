@@ -25,6 +25,7 @@ def main():
 
     sample_name = snakemake.params.sample_name
     out_dir = snakemake.params.out_dir
+    vcf_options = snakemake.params.vcf.split(",")
 
     
     prev_steps_succeeded = mccutils.check_status_file(status_log)
@@ -45,7 +46,7 @@ def main():
         if len(insertions) > 0:
             insertions = output.make_redundant_bed(insertions, sample_name, out_dir, method="tepid")
             insertions = output.make_nonredundant_bed(insertions, sample_name, out_dir, method="tepid")
-            output.write_vcf(insertions, reference_fasta, sample_name, "tepid", out_dir)
+            output.write_vcf(insertions, reference_fasta, sample_name, "tepid", out_dir, vcf_options)
         else:
             mccutils.run_command(["touch",out_dir+"/"+sample_name+"_tepid_redundant.bed"])
             mccutils.run_command(["touch",out_dir+"/"+sample_name+"_tepid_nonredundant.bed"])

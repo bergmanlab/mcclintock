@@ -22,6 +22,7 @@ def main():
     chromosomes = snakemake.params.chromosomes.split(",")
     out_dir = snakemake.params.out_dir
     status_log = snakemake.params.status_log
+    vcf_options = snakemake.params.vcf.split(",")
 
     prev_steps_succeeded = mccutils.check_status_file(status_log)
 
@@ -34,7 +35,7 @@ def main():
         if len(insertions) > 0:
             insertions = output.make_redundant_bed(insertions, sample_name, out_dir, method="temp2")
             insertions = output.make_nonredundant_bed(insertions, sample_name, out_dir, method="temp2")
-            output.write_vcf(insertions, reference_fasta, sample_name, "temp2", out_dir)
+            output.write_vcf(insertions, reference_fasta, sample_name, "temp2", out_dir, vcf_options)
         else:
             mccutils.run_command(["touch", out_dir+"/"+sample_name+"_temp2_redundant.bed"])
             mccutils.run_command(["touch", out_dir+"/"+sample_name+"_temp2_nonredundant.bed"])
@@ -116,7 +117,7 @@ def get_non_absent_ref_tes(te_gff, absence_bed, sample, chromosomes, out, log):
             if "#" not in line:
                 line = line.replace(";","\t")
                 split_line = line.split("\t")
-                insert = output.Insertion(output.Temp())
+                insert = output.Insertion(output.Temp2())
                 insert.chromosome = split_line[0]
                 insert.start = int(split_line[3])
                 insert.end = int(split_line[4])

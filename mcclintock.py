@@ -53,20 +53,21 @@ def parse_args(expected_configs):
     parser.add_argument("-2", "--second", type=str, help="The path of the second fastq file from a paired end read sequencing", required=False)
     parser.add_argument("-p", "--proc", type=int, help="The number of processors to use for parallel stages of the pipeline [default = 1]", required=False)
     parser.add_argument("-o", "--out", type=str, help="An output folder for the run. [default = '.']", required=False)
-    parser.add_argument("-m", "--methods", type=str, help="A comma-delimited list containing the software you want the pipeline to use for analysis. e.g. '-m relocate,TEMP,ngs_te_mapper' will launch only those three methods", required=False)
-    parser.add_argument("-g", "--locations", type=str, help="The locations of known TEs in the reference genome in GFF 3 format. This must include a unique ID attribute for every entry", required=False)
-    parser.add_argument("-t", "--taxonomy", type=str, help="A tab delimited file with one entry per ID in the GFF file and two columns: the first containing the ID and the second containing the TE family it belongs to. The family should correspond to the names of the sequences in the consensus fasta file", required=False)
-    parser.add_argument("-s", "--coverage_fasta", type=str, help="A fasta file that will be used for TE-based coverage analysis, if not supplied then the consensus sequences of the TEs will be used for the analysis", required=False)
-    parser.add_argument("-T", "--comments", action="store_true", help="If this option is specified then fastq comments (e.g. barcode) will be incorporated to SAM output. Warning: do not use this option if the input fastq files do not have comments", required=False)
+    parser.add_argument("-m", "--methods", type=str, help="A comma-delimited list containing the software you want the pipeline to use for analysis. e.g. '-m relocate,TEMP,ngs_te_mapper' will launch only those three methods. If this option is not set, all methods will be run [options: ngs_te_mapper, ngs_te_mapper2, relocate, relocate2, temp, temp2, retroseq, popoolationte, popoolationte2, te-locate, teflon, coverage, trimgalore, map_reads, tebreak]", required=False)
+    parser.add_argument("-g", "--locations", type=str, help="The locations of known TEs in the reference genome in GFF 3 format. This must include a unique ID attribute for every entry. If this option is not set, a file of reference TE locations in GFF format will be produced using RepeatMasker", required=False)
+    parser.add_argument("-t", "--taxonomy", type=str, help="A tab delimited file with one entry per ID in the GFF file and two columns: the first containing the ID and the second containing the TE family it belongs to. The family should correspond to the names of the sequences in the consensus fasta file. If this option is not set, a file mapping reference TE instances to TE families in TSV format will be produced using RepeatMasker", required=False)
+    parser.add_argument("-s", "--coverage_fasta", type=str, help="A fasta file that will be used for TE-based coverage analysis, if not supplied then the consensus sequences of the TEs set by -c/--consensus will be used for the analysis", required=False)
     parser.add_argument("-a", "--augment", type=str, help="A fasta file of TE sequences that will be included as extra chromosomes in the reference file (useful if the organism is known to have TEs that are not present in the reference strain)", required=False)
-    parser.add_argument("--sample_name", type=str, help="The sample name to use for output files [default: fastq1 name]", required=False)
-    parser.add_argument("--resume", action="store_true", help="This option will attempt to use existing intermediate files from a previous McClintock run", required=False)
+    parser.add_argument("-k", "--keep_intermediate", type=str, help="This option determines which intermediate files are preserved after McClintock completes [default: general][options: minimal, general, methods, <list,of,methods>, all]", required=False)
+    parser.add_argument("-v", "--vcf", type=str, help="This option determines which format of VCF output will be created [default: siteonly][options: siteonly,sample]", required=False)
+    parser.add_argument("-n", "--sample_name", type=str, help="The sample name to use for output files [default: fastq1 name]", required=False)
+    parser.add_argument("-f", "--config", type=str, help="This option determines which config files to use for your McClintock run [default: config in McClintock Repository]", required=False)
     parser.add_argument("--install", action="store_true", help="This option will install the dependencies of McClintock", required=False)
+    parser.add_argument("--resume", action="store_true", help="This option will attempt to use existing intermediate files from a previous McClintock run", required=False)
     parser.add_argument("--debug", action="store_true", help="This option will allow snakemake to print progress to stdout", required=False)
-    parser.add_argument("--slow", action="store_true", help="This option runs without attempting to optimize thread usage to run rules concurrently. Each multithread rule will use the max processors designated by -p/--proc", required=False)
+    parser.add_argument("--serial", action="store_true", help="This option runs without attempting to optimize thread usage to run rules concurrently. Each multithread rule will use the max processors designated by -p/--proc", required=False)
     parser.add_argument("--make_annotations", action="store_true", help="This option will only run the pipeline up to the creation of the repeat annotations", required=False)
-    parser.add_argument("-k","--keep_intermediate", type=str, help="This option determines which intermediate files are preserved after McClintock completes [default: general][options: minimal, general, methods, <list,of,methods>, all]", required=False)
-    parser.add_argument("--config", type=str, help="This option determines which config files to use for your McClintock run [default: config in McClintock Repository]", required=False)
+    parser.add_argument("--comments", action="store_true", help="If this option is specified then fastq comments (e.g. barcode) will be incorporated to SAM output. Warning: do not use this option if the input fastq files do not have comments", required=False)
     
     #arguments parser
     args = parser.parse_args()
@@ -206,6 +207,18 @@ def parse_args(expected_configs):
     if map_reads_called:
         args.keep_intermediate.append("map_reads")
 
+    ## check --vcf requested vcf format ##
+    vcf_options = ["siteonly","sample"]
+    if args.vcf is None:
+        # default is to create site-only vcf file
+        args.vcf = ["siteonly"]
+    else:
+        args.vcf = args.vcf.split(",")
+        for option in args.vcf:
+            if option not in vcf_options:
+                sys.stderr.write("vcf option: "+option+" is not valid. Valid options: "+" ".join(vcf_options)+"\nExample:(--vcf siteonly,sample)\n")
+                sys.exit(1)
+
     return args
 
 def check_input_files(ref, consensus, fq1, fq2=None, locations=None, taxonomy=None, coverage_fasta=None, augment_fasta=None, annotations_only=False):
@@ -257,7 +270,7 @@ def format_fasta(in_fasta):
                     mccutils.log("setup", in_fasta+": replacing "+org_seq_name+" with "+seq_name+" for compatibility with RepeatMasker")
                 
                 
-                #unsure of how the masked_seq_name and the seq_name relate?
+                #check problematic symbol in seq name
                 masked_seq_name = mccutils.replace_special_chars(seq_name)
                 if seq_name != masked_seq_name:
                     mccutils.log("setup", in_fasta+": ERROR problematic symbol in feature name: "+seq_name+" ... reformat this feature name for compatibility with McClintock")
@@ -620,12 +633,13 @@ def make_run_config(args, sample_name, ref_name, full_command, current_directory
         'methods' : ",".join(args.methods),
         'out_files': ",".join(out_files_to_make),
         'save_comments' : str(args.comments),
-        'max_threads_per_rule' : max(1, calculate_max_threads(args.proc, args.methods, sysconfig.MULTI_THREAD_METHODS, slow=args.slow)),
+        'max_threads_per_rule' : max(1, calculate_max_threads(args.proc, args.methods, sysconfig.MULTI_THREAD_METHODS, slow=args.serial)),
         'full_command' : full_command,
         'call_directory': current_directory,
         'time': now.strftime("%Y-%m-%d %H:%M:%S"),
         "chromosomes" : ",".join(chromosomes),
-        "debug": str(debug)
+        "debug": str(debug),
+        "vcf": ",".join(args.vcf)
     }
 
     data["config"] = setup_config_info(args.config, sysconfig.CONFIGS, sysconfig.CONFIG_RULES)

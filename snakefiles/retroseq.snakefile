@@ -40,7 +40,8 @@ rule retroseq_post:
         sample_name=config['args']['sample_name'],
         chromosomes = config['args']['chromosomes'],
         config = config['config']['retroseq']['files'][1],
-        status_log = config['status']['retroseq']
+        status_log = config['status']['retroseq'],
+        vcf = config['args']['vcf']
     
     output:
         config['out']['retroseq']

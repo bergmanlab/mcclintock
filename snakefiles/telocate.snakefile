@@ -87,7 +87,8 @@ rule telocate_post:
         sample_name = config['args']['sample_name'],
         chromosomes = config['args']['chromosomes'],
         config = config['config']['te-locate']['files'][1],
-        status_log = config['status']['te-locate']
+        status_log = config['status']['te-locate'],
+        vcf = config['args']['vcf']
     
     threads: 1
 

@@ -22,6 +22,7 @@ def main():
     out_dir = snakemake.params.out_dir
     chromosomes = snakemake.params.chromosomes.split(",")
     status_log = snakemake.params.status_log
+    vcf_options = snakemake.params.vcf.split(",")
 
     out_bed = snakemake.output[0]
 
@@ -33,7 +34,7 @@ def main():
         if len(insertions) > 0:
             insertions = output.make_redundant_bed(insertions, sample_name, out_dir, method="ngs_te_mapper")
             intertions = output.make_nonredundant_bed(insertions, sample_name, out_dir, method="ngs_te_mapper")
-            output.write_vcf(insertions, reference_fasta, sample_name, "ngs_te_mapper", out_dir)
+            output.write_vcf(insertions, reference_fasta, sample_name, "ngs_te_mapper", out_dir, vcf_options)
 
         else:
             mccutils.run_command(["touch", out_dir+"/"+sample_name+"_ngs_te_mapper_redundant.bed"])
