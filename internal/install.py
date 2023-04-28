@@ -32,7 +32,6 @@ MD5 = {
     "tebreak": "ac475d3cc4b0435f0a333c8d86f57d3f"
 }
 
-
 ENV_PATH = "{{envpath}}"
 ENV = {
     "coverage" : ENV_PATH+"mcc_coverage.yml",
@@ -56,7 +55,6 @@ ENV = {
     "tebreak": ENV_PATH+"mcc_tebreak.yml"
 }
 
-
 INSTALL_PATH = "{{inspath}}"
 OUTPUT = {
     "coverage" : INSTALL_PATH+"tools/coverage/coverage.log",
@@ -76,5 +74,4 @@ OUTPUT = {
     "map_reads" : INSTALL_PATH+"tools/map_reads/map_reads.log",
     "trimgalore" : INSTALL_PATH+"tools/trimgalore/trimgalore.log",
     "tebreak" : INSTALL_PATH+"tools/tebreak/tebreak/tebreak"
-
 }
