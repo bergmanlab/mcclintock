@@ -41,7 +41,7 @@ def main():
     mccutils.remove(snakemake.params.zipfile)
 
     # write version to file
-    with open(snakemake.config['paths']['install']+"/tools/teflon/version.log","w") as version:
+    with open(install_path+"/"+method_name+"/version.log","w") as version:
         version.write(snakemake.params.md5)
 
 if __name__ == "__main__":                
