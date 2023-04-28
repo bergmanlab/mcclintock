@@ -11,7 +11,6 @@ def main():
 
     if not download_success:
         print("teflon download failed... exiting...")
-        print("try running --install with --clean for clean installation")
         sys.exit(1)
     
     mccutils.remove(snakemake.config['paths']['install']+"TEFLoN-3e2d67886b70644fd1f7d79263b3c8dbed639e46")

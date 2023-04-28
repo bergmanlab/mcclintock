@@ -11,7 +11,6 @@ def main():
 
     if not download_success:
         print("popoolationte download failed... exiting...")
-        print("try running --install with --clean for clean installation")
         sys.exit(1)
 
     mccutils.remove(snakemake.config['paths']['install']+"popoolationte")

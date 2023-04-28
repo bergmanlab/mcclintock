@@ -11,7 +11,6 @@ def main():
 
     if not download_success:
         print("relocaTE download failed... exiting...")
-        print("try running --install with --clean for clean installation")
         sys.exit(1)
 
     mccutils.remove(snakemake.config['paths']['install']+"RelocaTE-ce3a2066e15f5c14e2887fdf8dce0485e1750e5b")

@@ -11,7 +11,6 @@ def main():
 
     if not download_success:
         print("temp download failed... exiting...")
-        print("try running --install with --clean for clean installation")
         sys.exit(1)
 
     extracted_file_name = "TEMP-4f67e1da836721a9f0999efa52e1e648fedb75fc"

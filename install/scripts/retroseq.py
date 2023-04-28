@@ -10,7 +10,6 @@ def main():
 
     if not download_success:
         print("retroseq download failed... exiting...")
-        print("try running --install with --clean for clean installation")
         sys.exit(1)
 
     extracted_file_name = "RetroSeq-9d4f3b5270af2383f40e6e7ea1204ea718365db2"

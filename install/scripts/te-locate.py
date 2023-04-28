@@ -9,7 +9,6 @@ def main():
 
     if not download_success:
         print("TE-Locate download failed... exiting...")
-        print("try running --install with --clean for clean installation")
         sys.exit(1)
 
 
