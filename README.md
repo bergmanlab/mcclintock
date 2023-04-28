@@ -121,12 +121,14 @@ python3 mcclintock.py --install
 python3 mcclintock.py --install -m <method1>,<method2>
 ```
 
+* *NOTE: If you re-run either the full installation or installation of specific methods, the installation script will do a clean installation and remove previously installed components.*
+
 * If you want to install missing methods to an already existing mcclintock installation, you can use the `--resume` flag:
 ```bash
 python3 mcclintock.py --install --resume
 ```
 
-* *NOTE: If you use the `--resume` flag when installing specific method(s) with `-m`, the installation script will only install the specified method(s) if they aren't already installed. Do not use the `--resume` flag if you want to do a clean installation of a specific method.*
+* *NOTE: If you use the `--resume` flag when installing specific method(s) with `-m`, the installation script will only install the specified method(s) if they haven't previously been installed. Do not use the `--resume` flag if you want to do a clean installation of a specific method.*
 
 ## <a name="run"></a> McClintock Usage
 ```
