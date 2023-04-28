@@ -1,8 +1,8 @@
 import sys
 import os
-import subprocess
 sys.path.append(snakemake.config['paths']['mcc_path'])
 import scripts.mccutils as mccutils
+import subprocess
 
 def main():
     install_path = snakemake.config['paths']['install']+"/tools/"
