@@ -30,7 +30,6 @@ def main():
         command = ["mv", install_path+raw_name+"/"+f, install_path+method_name]
         mccutils.run_command(command, log=snakemake.params.log)
 
-
     command = ["patch", "-i", snakemake.params.patch, install_path+"/"+method_name+"/scripts/TEMP_Absence.sh"]
     mccutils.run_command(command,log=snakemake.params.log) 
 
