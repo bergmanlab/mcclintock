@@ -35,7 +35,6 @@ def main():
     command = ["patch", "-i", snakemake.params.patch4, install_path+"/"+method_name+"/identify-te-insertsites.pl"]
     mccutils.run_command(command, log=snakemake.params.log)
 
-
     mccutils.remove(snakemake.params.zipfile)
     mccutils.remove(snakemake.config['paths']['install']+method_name)
 

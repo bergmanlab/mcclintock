@@ -11,7 +11,6 @@ def main():
         print("TE-Locate download failed... exiting...")
         sys.exit(1)
 
-
     command = ["tar", "-xvf", snakemake.params.tar, "-C", snakemake.config['paths']['install']+"/tools/te-locate/"]
     mccutils.run_command(command, log=snakemake.params.log)
 

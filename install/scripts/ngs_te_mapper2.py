@@ -30,7 +30,6 @@ def main():
         command = ["mv", install_path+raw_name+"/"+f, install_path+method_name]
         mccutils.run_command(command, log=snakemake.params.log)  
 
-
     mccutils.remove(install_path+raw_name)
     mccutils.remove(snakemake.params.zipfile)
 
