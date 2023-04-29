@@ -473,7 +473,7 @@ def install(methods, resume=False, debug=False):
                 mccutils.remove(existing_envs[env])
                 mccutils.remove(existing_envs[env].replace(".yaml",""))
 
-            ##remove existing omponent method code##
+            ##remove existing component method code##
             if os.path.exists(install_path+"tools/"+env):
                 mccutils.log("install","Removing existing installation of: "+env)
                 print(install_path+"tools/"+env)
