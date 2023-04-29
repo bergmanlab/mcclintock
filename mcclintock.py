@@ -421,9 +421,9 @@ def install(methods, resume=False, debug=False):
     #specifies file paths required for install and execution
     mcc_path = os.path.dirname(os.path.abspath(__file__))
     install_path = mcc_path+"/install/"
-    install_config = install_path+"/config.json"
-    log_dir = install_path+"/log/"
-    conda_env_dir = install_path+"/envs/conda"
+    install_config = install_path+"config.json"
+    log_dir = install_path+"log/"
+    conda_env_dir = install_path+"envs/conda"
     data = {}
    
     #creates a python dictionary to manage file paths for easy access to files throughout the install process
@@ -446,10 +446,11 @@ def install(methods, resume=False, debug=False):
     for method in data['output'].keys():
         data['output'][method] = data['output'][method].replace(config_install.INSTALL_PATH, install_path)
 
-    #removes the now purposeless install file as it has been used to create the new files and thier contents
+    #write the install_config json file using install path and config information taken from install.py
     with open(install_config,"w") as c:
         json.dump(data, c, indent=4)
 
+    ##remove existing install.log##
     if os.path.exists(install_path+"install.log"):
         os.remove(install_path+"install.log")
 
@@ -472,13 +473,13 @@ def install(methods, resume=False, debug=False):
                 mccutils.remove(existing_envs[env])
                 mccutils.remove(existing_envs[env].replace(".yaml",""))
 
-            ##remove existing src code##
-            if os.path.exists(install_path+"/tools/"+env):
+            ##remove existing omponent method code##
+            if os.path.exists(install_path+"tools/"+env):
                 mccutils.log("install","Removing existing installation of: "+env)
-                print(install_path+"/tools/"+env)
-                mccutils.remove(install_path+"/tools/"+env)
+                print(install_path+"tools/"+env)
+                mccutils.remove(install_path+"tools/"+env)
 
-        ##reinstall src code##
+        ##install component methods into conda environments using snakemake##
         mccutils.log("install","Installing scripts for:"+env)
         command = ["snakemake", "--use-conda", "--conda-frontend=mamba", "--conda-prefix", conda_env_dir, "--configfile", install_config, "--cores", "1", "--nolock", data['output'][env]]
         if not debug:
