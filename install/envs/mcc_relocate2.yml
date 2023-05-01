@@ -5,4 +5,12 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-    - relocate2=2.0.1=pypl526_4
+  - python >= 2.7.12
+  - perl >= 5.10.0
+  - samtools = 1.10
+  - bowtie2 = 2.2.8
+  - bedtools = 2.26.0-0
+  - bwa = 0.6.2-0
+  - seqtk = 1.2-0
+  - pysam = 0.9.0
+  - blat = 35

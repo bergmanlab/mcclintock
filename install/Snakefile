@@ -76,13 +76,19 @@ rule relocate:
        config['paths']['install']+"scripts/relocate.py" 
 
 rule relocate2:
+    params:
+        url = config['URLs']['relocate2'],
+        md5 = config['MD5s']['relocate2'],
+        zipfile = config['paths']['install']+"tools/relocate2/relocate2.zip",
+        log = config['paths']['log_dir']+"install.log",
+
     conda: config['ENVs']['relocate2']
 
     output:
         config['output']['relocate2']
     
-    shell:
-        "echo 'RelocaTE2 env installed' > {output}"
+    script:
+        config['paths']['install']+"scripts/relocate2.py" 
 
 rule ngs_te_mapper:
     params:
