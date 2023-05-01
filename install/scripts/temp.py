@@ -11,6 +11,7 @@ def main():
     method_name = "temp"
 
     #download component method source code and check for integrity
+    #note: snakemake.params are found in /install/Snakefile
     mccutils.remove(snakemake.params.zipfile)
     download_success = mccutils.download(snakemake.params.url, snakemake.params.zipfile, md5=snakemake.params.md5, max_attempts=3)
 
