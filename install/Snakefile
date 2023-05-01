@@ -82,10 +82,10 @@ rule relocate2:
         zipfile = config['paths']['install']+"tools/relocate2/relocate2.zip",
         log = config['paths']['log_dir']+"install.log",
 
-    conda: config['ENVs']['relocate2']
-
     output:
         config['output']['relocate2']
+
+    conda: config['ENVs']['relocate2']
     
     script:
         config['paths']['install']+"scripts/relocate2.py" 
