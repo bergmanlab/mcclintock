@@ -1,48 +1,58 @@
 import sys
 import os
-import subprocess
 sys.path.append(snakemake.config['paths']['mcc_path'])
 import scripts.mccutils as mccutils
+import subprocess
 
 def main():
+    #set up installation path and variable names for component method
     install_path = snakemake.config['paths']['install']+"/tools/"
+
+    raw_name = "RelocaTE-ce3a2066e15f5c14e2887fdf8dce0485e1750e5b"
+    method_name = "relocate"
+
+    #download component method source code and check for integrity
+    #note: snakemake.params are found in /install/Snakefile
     mccutils.remove(snakemake.params.zipfile)
     download_success = mccutils.download(snakemake.params.url, snakemake.params.zipfile, md5=snakemake.params.md5, max_attempts=3)
 
     if not download_success:
-        print("relocaTE download failed... exiting...")
-        print("try running --install with --clean for clean installation")
+        print(method_name+" download failed... exiting...")
         sys.exit(1)
 
-    mccutils.remove(snakemake.config['paths']['install']+"RelocaTE-ce3a2066e15f5c14e2887fdf8dce0485e1750e5b")
+    #unpack component method source code
+    mccutils.remove(snakemake.config['paths']['install']+raw_name)
     command = ["unzip", snakemake.params.zipfile]
     mccutils.run_command(command, log=snakemake.params.log)
 
-    mccutils.remove(install_path+"RelocaTE-ce3a2066e15f5c14e2887fdf8dce0485e1750e5b")
-    command = ["mv", snakemake.config['paths']['install']+"RelocaTE-ce3a2066e15f5c14e2887fdf8dce0485e1750e5b", install_path]
+    #move component method source code directory into tools directory
+    mccutils.remove(install_path+raw_name)
+    command = ["mv", snakemake.config['paths']['install']+raw_name, install_path]
     mccutils.run_command(command, log=snakemake.params.log)
 
-    mccutils.remove(install_path+"relocate")
-    mccutils.mkdir(install_path+"relocate/")
-    for f in os.listdir(install_path+"RelocaTE-ce3a2066e15f5c14e2887fdf8dce0485e1750e5b"):
-        command = ["mv", install_path+"RelocaTE-ce3a2066e15f5c14e2887fdf8dce0485e1750e5b/"+f, install_path+"relocate/"]
+    #move component method source code files into component method directory
+    mccutils.remove(install_path+method_name)
+    mccutils.mkdir(install_path+method_name)
+    for f in os.listdir(install_path+raw_name):
+        command = ["mv", install_path+raw_name+"/"+f, install_path+method_name]
         mccutils.run_command(command, log=snakemake.params.log)
 
-
-    command = ["patch", "-i", snakemake.params.patch, install_path+"relocate/scripts/relocaTE_insertionFinder.pl"]
+    #patch component method source code files
+    command = ["patch", "-i", snakemake.params.patch, install_path+method_name+"/scripts/relocaTE_insertionFinder.pl"]
     mccutils.run_command(command, log=snakemake.params.log)
 
-    mccutils.remove(install_path+"RelocaTE-ce3a2066e15f5c14e2887fdf8dce0485e1750e5b")
+    mccutils.remove(install_path+raw_name)
     mccutils.remove(snakemake.params.zipfile)
 
     output = subprocess.Popen(["which", "perl"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     perl_path = output.stdout.read()
     perl_path = perl_path.decode()
 
-    for f in os.listdir(install_path+"relocate/scripts/"):
+    #update version of perl used in source code files
+    for f in os.listdir(install_path+method_name+"/scripts/"):
         if "pl" == f.split(".")[-1]:
             with open(install_path+"tmp","w") as tmp:
-                with open(install_path+"relocate/scripts/"+f, "r") as script:
+                with open(install_path+method_name+"/scripts/"+f, "r") as script:
                     for line in script:
                         if "#!/usr/bin/perl" in line:
                             # line = "#!"+perl_path
@@ -55,10 +65,10 @@ def main():
                         
                         tmp.write(line)
             
-            mccutils.run_command(["mv", install_path+"tmp", install_path+"relocate/scripts/"+f])
+            mccutils.run_command(["mv", install_path+"tmp", install_path+method_name+"/scripts/"+f])
 
-    # write version to file
-    with open(snakemake.config['paths']['install']+"/tools/relocate/version.log","w") as version:
+    #write version to file
+    with open(install_path+method_name+"/version.log","w") as version:
         version.write(snakemake.params.md5)
 
 if __name__ == "__main__":                

@@ -13,7 +13,6 @@ rule telocate:
     script:
         config['paths']['install']+"scripts/te-locate.py"
 
-
 rule retroseq:
     params:
         url = config['URLs']['retroseq'],
@@ -166,7 +165,6 @@ rule tepid:
     shell:
         "echo 'TEPID env installed' > {output}"
 
-
 rule map_reads:
     output:
         config['output']['map_reads'] 
@@ -185,7 +183,6 @@ rule trimgalore:
     shell:
         "echo 'trimgalore env installed' > {output}"
         
-
 rule teflon:
     params:
         url = config["URLs"]['teflon'],

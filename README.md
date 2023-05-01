@@ -29,7 +29,7 @@ python3 mcclintock.py \
 * [Getting Started](#started)
 * [Introduction](#intro)
 * [Software Components](#methods)
-* [Software Dependencies](#dependency)
+* [Installing Conda/Mamba](#conda)
 * [Installing McClintock](#install)
 * [McClintock Usage](#run)
 * [McClintock Input](#input)
@@ -58,8 +58,8 @@ The complete pipeline requires a fasta reference genome, a fasta consensus set o
  * [TEMP2](https://github.com/weng-lab/TEMP2) - [Yu *et al.* (2021)](https://academic.oup.com/nar/article/49/8/e44/6123378?login=true)
 
 
-## <a name="dependency"></a> Software Dependencies
-McClintock is written in Python3 leveraging the [SnakeMake](https://snakemake.readthedocs.io/en/stable/) workflow system and is designed to run on linux operating systems. Installation of software dependencies for McClintock is automated by [Conda](https://docs.conda.io/en/latest/), thus a working installation of Conda is required to install  McClintock. Conda can be installed via the [Miniconda installer](https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh).
+## <a name="conda"></a> Installing Conda/Mamba
+McClintock is written in Python3 leveraging the [SnakeMake](https://snakemake.readthedocs.io/en/stable/) workflow system and is designed to run on linux operating systems. Installation of software dependencies for McClintock and its component methods is automated by [Conda](https://docs.conda.io/en/latest/), thus a working installation of Conda is required to install  McClintock. Conda can be installed via the [Miniconda installer](https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh).
 
 #### Installing Miniconda (Python 3.X)
 ```bash
@@ -82,7 +82,7 @@ conda install -c conda-forge mamba
 ```
 
 ## <a name="install"></a> Installing McClintock
-After installing and updating Conda, McClintock can be installed by: **1.** cloning the repository, **2.** creating the Conda environment, and **3.** running the install script.
+After installing and updating Conda/Mamba, McClintock and its component methods can be installed by: **1.** cloning the repository, **2.** creating the Conda environment, and **3.** running the install script.
 
 #### Clone McClintock Repository
 ```bash
@@ -111,10 +111,24 @@ conda activate mcclintock
 * For more on Conda: see the [Conda User Guide](https://docs.conda.io/projects/conda/en/latest/index.html)
 
 #### Install McClintock Component Methods
-```
+* To install all of the component methods and create their associated conda environments, use the following command:
+```bash
 python3 mcclintock.py --install
 ```
-* This command installs each of the TE insertion detection tools and installs a conda environment for each method.
+
+* If you only want to install specific methods to save space and time, you can specify method(s) using the `-m` flag:
+```bash
+python3 mcclintock.py --install -m <method1>,<method2>
+```
+
+* *NOTE: If you re-run either the full installation or installation of specific methods, the installation script will do a clean installation and remove previously installed components.*
+
+* If you want to install missing methods to an already existing mcclintock installation, you can use the `--resume` flag:
+```bash
+python3 mcclintock.py --install --resume
+```
+
+* *NOTE: If you use the `--resume` flag when installing specific method(s) with `-m`, the installation script will only install the specified method(s) if they haven't previously been installed. Do not use the `--resume` flag if you want to do a clean installation of a specific method.*
 
 ## <a name="run"></a> McClintock Usage
 ```
@@ -445,7 +459,7 @@ python3 mcclintock.py \
 * Individual samples can be run in a serial manner as shown in the example above, or run in parallel, such as through separate jobs on a HPC cluster.
 
 ## <a name="citation"></a> Citation
-To cite McClintock 1, the general TE detector meta-pipeline concept, or the single syntehtic insertion simulation framework, please use: Nelson, M.G., R.S. Linheiro & C.M. Bergman (2017) McClintock: An integrated pipeline for detecting transposable element insertions in whole genome shotgun sequencing data. [G3. 7:2763-2778](https://academic.oup.com/g3journal/article/7/8/2763/6031520).
+To cite McClintock 1, the general TE detector meta-pipeline concept, or the single synthetic insertion simulation framework, please use: Nelson, M.G., R.S. Linheiro & C.M. Bergman (2017) McClintock: An integrated pipeline for detecting transposable element insertions in whole genome shotgun sequencing data. [G3. 7:2763-2778](https://academic.oup.com/g3journal/article/7/8/2763/6031520).
 
 To cite McClintock 2 or the reproducible simulation system, please use: Chen, J., P.J. Basting, S. Han, D.J. Garfinkel & C.M. Bergman (2023) Reproducible evaluation of short-read transposable element detectors and large-scale data mining of insertion patterns in yeast [bioRxiv](https://www.biorxiv.org/content/10.1101/2023.02.13.528343v1).
 

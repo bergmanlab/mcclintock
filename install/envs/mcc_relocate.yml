@@ -7,7 +7,7 @@ dependencies:
   - perl-bioperl-run=1.006900
   - bedtools=2.17.0
   - bowtie=1.0.0
-  - ucsc-blat=366
+  - ucsc-blat=377
   - samtools=0.1.19
   - unzip=6.0
   - patch=2.7.6
