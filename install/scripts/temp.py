@@ -36,7 +36,7 @@ def main():
         mccutils.run_command(command, log=snakemake.params.log)
 
     #patch component method source code files
-    command = ["patch", "-i", snakemake.params.patch, install_path+"/"+method_name+"/scripts/TEMP_Absence.sh"]
+    command = ["patch", "-i", snakemake.params.patch, install_path+method_name+"/scripts/TEMP_Absence.sh"]
     mccutils.run_command(command,log=snakemake.params.log) 
 
     #remove download files
