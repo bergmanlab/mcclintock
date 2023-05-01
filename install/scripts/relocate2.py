@@ -37,13 +37,10 @@ def main():
         command = ["mv", install_path+raw_name+"/"+f, install_path+method_name]
         mccutils.run_command(command, log=snakemake.params.log)
 
-    mccutils.remove(install_path+raw_name)
-    mccutils.remove(snakemake.params.zipfile)
-
     tools = [ "bwa", "bowtie2", "bowtie2_build", "blat", "samtools", "bedtools", "seqtk" ]
 
     #update paths to executables in relocate2 config file
-    with open(install_path+method_name"/CONFIG","w") as config_file:
+    with open(install_path+method_name+"/CONFIG","w") as config_file:
         config_file.write("#tools\n")
         for tool in tools:
             if tool == "bowtie2_build":
@@ -55,6 +52,9 @@ def main():
             path = path.decode()
             line = tool+"="+path
             config_file.write(line)
+
+    mccutils.remove(install_path+raw_name)
+    mccutils.remove(snakemake.params.zipfile)
 
     #write version to file
     with open(install_path+method_name+"/version.log","w") as version:
