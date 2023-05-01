@@ -27,7 +27,7 @@ def main():
     mccutils.remove(install_path+method_name)
     mccutils.mkdir(install_path+method_name)
     for f in os.listdir(snakemake.config['paths']['install']+method_name):
-        command = ["mv", snakemake.config['paths']['install']+method_name+f, install_path+method_name]
+        command = ["mv", snakemake.config['paths']['install']+method_name+"/"+f, install_path+method_name]
         mccutils.run_command(command, log=snakemake.params.log)
 
     #patch component method source code files
