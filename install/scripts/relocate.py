@@ -6,7 +6,7 @@ import subprocess
 
 def main():
     #set up installation path and variable names for component method
-    install_path = snakemake.config['paths']['install']+"/tools/"
+    install_path = snakemake.config['paths']['install']+"tools/"
 
     raw_name = "RelocaTE-ce3a2066e15f5c14e2887fdf8dce0485e1750e5b"
     method_name = "relocate"
@@ -55,16 +55,12 @@ def main():
                 with open(install_path+method_name+"/scripts/"+f, "r") as script:
                     for line in script:
                         if "#!/usr/bin/perl" in line:
-                            # line = "#!"+perl_path
                             line = "#!/usr/bin/env perl\n"
                         elif "defined @" in line:
                             line = line.replace("defined @", "@")
-                        
                         elif "$scripts/" in line and "perl" not in line and "relocaTE.pl" in f:
                             line = line.replace("$scripts/", "perl $scripts/")
-                        
                         tmp.write(line)
-            
             mccutils.run_command(["mv", install_path+"tmp", install_path+method_name+"/scripts/"+f])
 
     #write version to file
