@@ -80,7 +80,7 @@ rule relocate2:
         url = config['URLs']['relocate2'],
         md5 = config['MD5s']['relocate2'],
         zipfile = config['paths']['install']+"tools/relocate2/relocate2.zip",
-        log = config['paths']['log_dir']+"install.log",
+        log = config['paths']['log_dir']+"install.log"
 
     output:
         config['output']['relocate2']
