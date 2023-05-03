@@ -19,6 +19,7 @@ def main():
     median_insert_size_file = snakemake.input.median_insert_size
     log = snakemake.params.log
     status_log = snakemake.params.status_log
+    script_dir = snakemake.params.script_dir
 
     try:
         # ensures intermediate files from previous runs are removed
@@ -55,10 +56,11 @@ def main():
 
 
         median_insert_size = get_median_insert_size(median_insert_size_file)
-        output = subprocess.Popen(["which", "relocaTE2.py"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        script = output.stdout.read()
-        script = script.decode()
-        script = script.replace("\n","")
+        # output = subprocess.Popen(["which", "relocaTE2.py"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        # script = output.stdout.read()
+        # script = script.decode()
+        # script = script.replace("\n","")
+        script = script_dir+"/relocaTE2.py"
 
 
 
