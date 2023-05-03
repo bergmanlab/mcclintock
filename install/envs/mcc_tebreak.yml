@@ -19,3 +19,4 @@ dependencies:
   - lockfile=0.12.2
   - ipython_genutils=0.2.0
   - unzip=6.0
+  - numpy>=1.16.5, <1.23.0 
