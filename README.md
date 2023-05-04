@@ -127,7 +127,7 @@ python3 mcclintock.py --install --resume
 
 ## <a name="run"></a> McClintock Usage
 
-Running the complete McClintock pipeline requires a fasta reference genome (option `-r`), a set of TE consensus/canonical sequences present in the organism (option `-c`), and fastq paired-end sequencing reads (options `-1` and `-2`). If only single-end fastq sequencing data are available, then this can be supplied using only option `-1`, however only the TE detectors that handle single-ended data will be run. Optionally, if a detailed annotation of TE sequences in the reference genome has been performed, a GFF file with annotated reference TEs (option `-g`) and a tab-delimited "taxonomy" file linking annotated insertions to their TE family (option `-t`) can be supplied. Eexample input files are included in the [test](https://github.com/bergmanlab/mcclintock/blob/master/test/). 
+Running the complete McClintock pipeline requires a fasta reference genome (option `-r`), a set of TE consensus/canonical sequences present in the organism (option `-c`), and fastq paired-end sequencing reads (options `-1` and `-2`). If only single-end fastq sequencing data are available, then this can be supplied using only option `-1`, however only the TE detectors that handle single-ended data will be run. Optionally, if a detailed annotation of TE sequences in the reference genome has been performed, a GFF file with annotated reference TEs (option `-g`) and a tab-delimited "taxonomy" file linking annotated insertions to their TE family (option `-t`) can be supplied. Example input files are included in the [test](https://github.com/bergmanlab/mcclintock/blob/master/test/) directory. 
 
 ```
 ##########################
@@ -417,7 +417,7 @@ teflon          414       390          24
 tebreak         60        0            60            
 -----------------------------------------------------
 ```
-* NOTE: popoolationte and popoolationte2 exhibit run-to-run variation so the 
+* NOTE: `popoolationte` and `popoolationte2` exhibit run-to-run variation so numbers for these methods will differ slightly on replicate runs of the test data.
 
 #### Running McClintock with specific component methods
 * By default, McClintock runs all components (all 12 TE detection methods plus the coverage module using the output of the trimgalore method).
