@@ -28,7 +28,6 @@ python3 mcclintock.py \
 ## Table of Contents
 * [Getting Started](#started)
 * [Introduction](#intro)
-* [Software Components](#methods)
 * [Installing Conda/Mamba](#conda)
 * [Installing McClintock](#install)
 * [McClintock Usage](#run)
@@ -39,11 +38,8 @@ python3 mcclintock.py \
 * [License](#license)
 
 ## <a name="intro"></a> Introduction
-Many methods have been developed to detect transposable element (TE) insertions from short-read whole genome sequencing (WGS) data, each of which has different dependencies, run interfaces, and output formats. McClintock provides a meta-pipeline to reproducibly install, execute and evaluate multiple TE detectors, and generate output in standardized output formats. A description of the original McClintock 1 pipeline and evaluation of the original six TE detectors on the yeast genome can be found in [Nelson, Linheiro and Bergman (2017) *G3* 7:2763-2778](http://www.g3journal.org/content/7/8/2763). A description of the re-implemented McClintock 2 pipeline, the reproducible simulation system, and evaluation of 12 TE detectors on the yeast genome can be found in [Chen, Basting, Han, Garfinkel and Bergman (2023) bioRxiv](https://www.biorxiv.org/content/10.1101/2023.02.13.528343v1).
+Many methods have been developed to detect transposable element (TE) insertions from short-read whole genome sequencing (WGS) data, each of which has different dependencies, run interfaces, and output formats. McClintock provides a meta-pipeline to reproducibly install, execute, and evaluate multiple TE detectors, and generate output in standardized output formats. A description of the original McClintock 1 pipeline and evaluation of the original six TE detectors on the yeast genome can be found in [Nelson, Linheiro and Bergman (2017) *G3* 7:2763-2778](http://www.g3journal.org/content/7/8/2763). A description of the re-implemented McClintock 2 pipeline, the reproducible simulation system, and evaluation of 12 TE detectors on the yeast genome can be found in [Chen, Basting, Han, Garfinkel and Bergman (2023) bioRxiv](https://www.biorxiv.org/content/10.1101/2023.02.13.528343v1). The set of TE detectors currently included in McClintock 2 are:
 
-The complete pipeline requires a fasta reference genome, a fasta consensus set of TE sequences present in the organism and fastq paired-end sequencing reads. Optionally if a detailed annotation of TE sequences in the reference genome has been performed, a GFF file with the locations of reference genome TE annotations and a tab delimited taxonomy file linking individual insertions to the TE family they belong to can be supplied (an example of this file is included in the test directory as sac_cer_te_families.tsv). If only single-end fastq sequencing data are available, then this can be supplied as option -1, however only ngs_te_mapper and RelocaTE will run as these are the only methods that handle single-ended data.
-
-## <a name="methods"></a> McClintock Component Methods for Detecting TE Insertions in WGS Data
  * [ngs_te_mapper](https://github.com/bergmanlab/ngs_te_mapper) - [Linheiro and Bergman (2012)](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0030008)
  * [ngs_te_mapper2](https://github.com/bergmanlab/ngs_te_mapper2) - [Han *et al.* (2021)](https://academic.oup.com/genetics/article/219/2/iyab113/6321957)
  * [PoPoolationTE](https://sourceforge.net/projects/popoolationte/) - [Kofler *et al.* (2012)](https://journals.plos.org/plosgenetics/article?id=10.1371/journal.pgen.1002487)
@@ -56,7 +52,6 @@ The complete pipeline requires a fasta reference genome, a fasta consensus set o
  * [TE-locate](https://sourceforge.net/projects/te-locate/) - [Platzer *et al.* (2012)](http://www.mdpi.com/2079-7737/1/2/395)
  * [TEMP](https://github.com/JialiUMassWengLab/TEMP) - [Zhuang *et al.* (2014)](http://nar.oxfordjournals.org/content/42/11/6826.full)
  * [TEMP2](https://github.com/weng-lab/TEMP2) - [Yu *et al.* (2021)](https://academic.oup.com/nar/article/49/8/e44/6123378?login=true)
-
 
 ## <a name="conda"></a> Installing Conda/Mamba
 McClintock is written in Python3 leveraging the [SnakeMake](https://snakemake.readthedocs.io/en/stable/) workflow system and is designed to run on linux operating systems. Installation of software dependencies for McClintock and its component methods is automated by [Conda](https://docs.conda.io/en/latest/), thus a working installation of Conda is required to install  McClintock. Conda can be installed via the [Miniconda installer](https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh).
@@ -131,6 +126,9 @@ python3 mcclintock.py --install --resume
 * *NOTE: If you use the `--resume` flag when installing specific method(s) with `-m`, the installation script will only install the specified method(s) if they haven't previously been installed. Do not use the `--resume` flag if you want to do a clean installation of a specific method.*
 
 ## <a name="run"></a> McClintock Usage
+
+Running the complete McClintock pipeline requires a fasta reference genome (option `-r`), a set of TE consensus/canonical sequences present in the organism (option `-c`), and fastq paired-end sequencing reads (options `-1` and `-2`). If only single-end fastq sequencing data are available, then this can be supplied using only option `-1`, however only the TE detectors that handle single-ended data will be run. Optionally, if a detailed annotation of TE sequences in the reference genome has been performed, a GFF file with annotated reference TEs (option `-g`) and a tab-delimited "taxonomy" file linking annotated insertions to their TE family (option `-t`) can be supplied. Example input files are included in the [test](https://github.com/bergmanlab/mcclintock/blob/master/test/) directory. 
+
 ```
 ##########################
 ##       Required       ##
@@ -388,6 +386,38 @@ python3 mcclintock.py \
 ```
 * Change `/path/to/output/directory` to a real path where you desire the McClintock output to be created.
 * You can also increase `-p 4` to a higher number if you have more CPU threads available.
+* A working installation of McClintock applied to the test data should yield the following results in `/path/to/output/directory/SRR800842_1/results/summary/data/run/summary_report.txt`:
+
+```
+----------------------------------
+MAPPED READ INFORMATION
+----------------------------------
+read1 sequence length:  94
+read2 sequence length:  94
+read1 reads:            18547818
+read2 reads:            18558408
+median insert size:     302
+avg genome coverage:    268.185
+----------------------------------
+
+-----------------------------------------------------
+METHOD          ALL       REFERENCE    NON-REFERENCE 
+-----------------------------------------------------
+ngs_te_mapper   35        21           14            
+ngs_te_mapper2  87        49           38            
+relocate        80        63           17            
+relocate2       139       41           98            
+temp            365       311          54            
+temp2           367       311          56            
+retroseq        58        0            58            
+popoolationte   141       130          11            
+popoolationte2  186       164          22            
+te-locate       713       164          549           
+teflon          414       390          24            
+tebreak         60        0            60            
+-----------------------------------------------------
+```
+* NOTE: `popoolationte` and `popoolationte2` exhibit run-to-run variation so numbers for these methods will differ slightly on replicate runs of the test data.
 
 #### Running McClintock with specific component methods
 * By default, McClintock runs all components (all 12 TE detection methods plus the coverage module using the output of the trimgalore method).
