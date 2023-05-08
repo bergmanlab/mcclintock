@@ -8,8 +8,8 @@ def main():
     #set up installation path and variable names for component method
     install_path = snakemake.config['paths']['install']+"tools/"
 
-    raw_name = "RelocaTE-ce3a2066e15f5c14e2887fdf8dce0485e1750e5b"
-    method_name = "relocate"
+    raw_name = "RelocaTE2-2.0.1"
+    method_name = "relocate2"
 
     #download component method source code and check for integrity
     #note: snakemake.params are found in /install/Snakefile
@@ -37,31 +37,24 @@ def main():
         command = ["mv", install_path+raw_name+"/"+f, install_path+method_name]
         mccutils.run_command(command, log=snakemake.params.log)
 
-    #patch component method source code files
-    command = ["patch", "-i", snakemake.params.patch, install_path+method_name+"/scripts/relocaTE_insertionFinder.pl"]
-    mccutils.run_command(command, log=snakemake.params.log)
+    tools = [ "bwa", "bowtie2", "bowtie2_build", "blat", "samtools", "bedtools", "seqtk" ]
+
+    #update paths to executables in relocate2 config file
+    with open(install_path+method_name+"/CONFIG","w") as config_file:
+        config_file.write("#tools\n")
+        for tool in tools:
+            if tool == "bowtie2_build":
+                tool_bin = "bowtie2-build"
+            else:
+                tool_bin = tool
+            output = subprocess.Popen(["which", tool_bin], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            path = output.stdout.read()
+            path = path.decode()
+            line = tool+"="+path
+            config_file.write(line)
 
     mccutils.remove(install_path+raw_name)
     mccutils.remove(snakemake.params.zipfile)
-
-    output = subprocess.Popen(["which", "perl"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    perl_path = output.stdout.read()
-    perl_path = perl_path.decode()
-
-    #update version of perl used in source code files
-    for f in os.listdir(install_path+method_name+"/scripts/"):
-        if "pl" == f.split(".")[-1]:
-            with open(install_path+"tmp","w") as tmp:
-                with open(install_path+method_name+"/scripts/"+f, "r") as script:
-                    for line in script:
-                        if "#!/usr/bin/perl" in line:
-                            line = "#!/usr/bin/env perl\n"
-                        elif "defined @" in line:
-                            line = line.replace("defined @", "@")
-                        elif "$scripts/" in line and "perl" not in line and "relocaTE.pl" in f:
-                            line = line.replace("$scripts/", "perl $scripts/")
-                        tmp.write(line)
-            mccutils.run_command(["mv", install_path+"tmp", install_path+method_name+"/scripts/"+f])
 
     #write version to file
     with open(install_path+method_name+"/version.log","w") as version:

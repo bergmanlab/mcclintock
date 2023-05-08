@@ -12,6 +12,7 @@ rule relocaTE2_run:
     conda: config['envs']['relocate2']
 
     params:
+        script_dir = config['args']['mcc_path']+"/install/tools/relocate2/scripts/",
         raw_fq2 = config['in']['fq2'],
         out_dir = config['outdir']['relocate2']+"unfiltered/",
         log = config['args']['log_dir']+"relocaTE2.log",

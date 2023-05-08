@@ -67,7 +67,7 @@ OUTPUT = {
     "ngs_te_mapper2": INSTALL_PATH+"tools/ngs_te_mapper2/sourceCode/ngs_te_mapper2.py",
     "popoolationte" : INSTALL_PATH+"tools/popoolationte/identify-te-insertsites.pl",
     "popoolationte2" : INSTALL_PATH+"tools/popoolationte2/popte2-v1.10.03.jar",
-    "relocate2" : INSTALL_PATH+"tools/relocate2/relocaTE2.log",
+    "relocate2" : INSTALL_PATH+"tools/relocate2/scripts/relocaTE2.py",
     "tepid" : INSTALL_PATH+"tools/tepid/tepid-map",
     "teflon" : INSTALL_PATH+"tools/teflon/teflon.v0.4.py",
     "jitterbug": INSTALL_PATH+"tools/jitterbug/jitterbug.py",

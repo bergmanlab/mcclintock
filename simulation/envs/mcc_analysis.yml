@@ -19,3 +19,4 @@ dependencies:
   - bioconda::bedtools=2.30.0
   - conda-forge::r-ggally
   - bioconda::bcftools
+  - conda-forge::r-upsetr
