@@ -17,7 +17,11 @@ mamba env create -f simulation/envs/mcc_analysis.yml --name mcc_analysis
 ```
 
 ## Quick Start
-- Sample script to submit the entire evaluation framework as a SLURM cluster job:
+- Sample script to submit the entire evaluation framework as a SLURM cluster job can be found as following.
+  - The default depth of simulated reads in the sample script is 3x, 6x, 12x, 25x, 50x, 100x.
+  - The default number of replications per depth is 30.
+  - By default, for each candidate insertion site, two synthetic insertions are created on different strands (i.e, forward and reverse).
+  - Other default settings not included in the sample script are described in detail in Section ["Creating configuration for simulation"](https://github.com/bergmanlab/mcclintock/edit/documentation/simulation/README.md#1-creating-configuration-for-simulation) 
 ```bash
 #!/bin/bash
 #SBATCH --partition=batch
