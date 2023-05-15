@@ -26,7 +26,7 @@ dir <- paste0(sim_dir, "/", cov)
 
 
 # method list
-methods <- c("ngs_te_mapper","relocate","temp","retroseq","popoolationte","te-locate","ngs_te_mapper2","relocate2","temp2","teflon","popoolationte2","tebreak")
+methods <- c("ngs_te_mapper","relocate","temp","popoolationte","retroseq","te-locate","ngs_te_mapper2","relocate2","temp2","popoolationte2","teflon","tebreak")
 
 ##################### density plots ##################### 
 
@@ -98,8 +98,8 @@ simdensity_plots <- function(TE){
     output.location <- paste0(out_dir, "/density_data/",cov)
     dir.create(output.location, showWarnings = FALSE, recursive = TRUE)
     # methods title
-    title2 <- c("ngs_te_mapper","RelocaTE","TEMP","RetroSeq","PoPoolationTE","TE-locate","TE-locate","ngs_te_mapper2","RelocaTE2","TEMP2","TEFLoN","PoPoolationTE2","TEBreak","Coverage")
-    names(title2) <- c("ngs_te_mapper","relocate","temp","retroseq","popoolationte","te-locate","telocate","ngs_te_mapper2","relocate2","temp2","teflon","popoolationte2","tebreak","coverage")
+    title2 <- c("ngs_te_mapper","RelocaTE","TEMP","PoPoolationTE","RetroSeq","TE-locate","TE-locate","ngs_te_mapper2","RelocaTE2","TEMP2","PoPoolationTE2","TEFLoN","TEBreak","Coverage")
+    names(title2) <- c("ngs_te_mapper","relocate","temp","popoolationte","retroseq","te-locate","telocate","ngs_te_mapper2","relocate2","temp2","popoolationte2","teflon","tebreak","coverage")
     
     get_ty_plot <- function(method,TE){
 
