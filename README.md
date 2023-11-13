@@ -368,7 +368,7 @@ C14: numbered identifier for each TE in the population
 
 ## <a name="examples"></a> Run Examples
 #### Running McClintock with test data
-This repository also provides test data to ensure your McClintock installation is working. Test data can be found in the `test/` directory which includes a yeast reference genome (UCSC sacCer2) and an annotation of TEs in this version of the yeast genome from [Carr, Bensasson and Bergman (2012)](http://www.plosone.org/article/info%3Adoi%2F10.1371%2Fjournal.pone.0050978). A pair of fastq files can be downloaded from SRA using the `test/download_test_data.py` script:
+This repository also provides test data to ensure your McClintock installation is working. Test data can be found in the `test/` directory which includes a yeast reference genome (UCSC sacCer2) and an annotation of TEs in this version of the yeast genome from [Carr et al. (2012)](http://www.plosone.org/article/info%3Adoi%2F10.1371%2Fjournal.pone.0050978). A pair of fastq files can be downloaded from SRA using the `test/download_test_data.py` script:
 ```
 python test/download_test_data.py
 ```
@@ -491,7 +491,7 @@ python3 mcclintock.py \
 ## <a name="citation"></a> Citation
 To cite McClintock 1, the general TE detector meta-pipeline concept, or the single synthetic insertion simulation framework, please use: Nelson, M.G., R.S. Linheiro & C.M. Bergman (2017) McClintock: An integrated pipeline for detecting transposable element insertions in whole genome shotgun sequencing data. [G3. 7:2763-2778](https://academic.oup.com/g3journal/article/7/8/2763/6031520).
 
-To cite McClintock 2 or the reproducible simulation system, please use: Chen, J., P.J. Basting, S. Han, D.J. Garfinkel & C.M. Bergman (2023) Reproducible evaluation of short-read transposable element detectors and large-scale data mining of insertion patterns in yeast [bioRxiv](https://www.biorxiv.org/content/10.1101/2023.02.13.528343v1).
+To cite McClintock 2 or the reproducible simulation system, please use: Chen, J., P.J. Basting, S. Han, D.J. Garfinkel & C.M. Bergman (2023) Reproducible evaluation of transposable element detectors with McClintock 2 guides accurate inference of Ty insertion patterns in yeast [Mobile DNA 14:8](https://mobilednajournal.biomedcentral.com/articles/10.1186/s13100-023-00296-4).
 
 ## <a name="license"></a> License
 ------
