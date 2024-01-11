@@ -463,7 +463,7 @@ python3 mcclintock.py \
 * The locations of the reference TE annotation GFF and TE Taxonomy TSV files generated using `--make_annotations` are as follows:
   * Reference TE locations GFF: `<output>/<reference_name>/reference_te_locations/unaugmented_inrefTEs.gff`
   * TE Taxonomy TSV:  `<output>/<reference_name>/te_taxonomy/unaugmented_taxonomy.tsv`
-* You can then use the `--resume` flag for future runs with the same reference genome and output directory without having to redundantly generate themse files for each run:
+* You can then use the `--resume` flag for future runs with the same reference genome and output directory without having to redundantly generate these files for each run:
 
 ```bash
 python3 mcclintock.py \
