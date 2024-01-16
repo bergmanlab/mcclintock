@@ -708,7 +708,7 @@ def run_workflow(args, sample_name, ref_name, run_id, out_files, debug=False, an
     mccutils.mkdir(snakemake_path)
     mccutils.run_command(["cp", path+"/Snakefile", snakemake_path])
     os.chdir(snakemake_path)
-    command = ["snakemake", "--latency-wait 120", "--use-conda", "--conda-prefix", path+"/install/envs/conda"]
+    command = ["snakemake", "--latency-wait", "120", "--use-conda", "--conda-prefix", path+"/install/envs/conda"]
 
     config_json = args.out+"/snakemake/config/config_"+str(run_id)+".json"
     command += ["--configfile", config_json]
