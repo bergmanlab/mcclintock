@@ -53,28 +53,17 @@ Many methods have been developed to detect transposable element (TE) insertions 
  * [TEMP](https://github.com/JialiUMassWengLab/TEMP) - [Zhuang *et al.* (2014)](http://nar.oxfordjournals.org/content/42/11/6826.full)
  * [TEMP2](https://github.com/weng-lab/TEMP2) - [Yu *et al.* (2021)](https://academic.oup.com/nar/article/49/8/e44/6123378?login=true)
 
-## <a name="conda"></a> Installing Conda/Mamba
-McClintock is written in Python3 leveraging the [SnakeMake](https://snakemake.readthedocs.io/en/stable/) workflow system and is designed to run on linux operating systems. Installation of software dependencies for McClintock and its component methods is automated by [Conda](https://docs.conda.io/en/latest/), thus a working installation of Conda is required to install  McClintock. Conda can be installed via the [Miniconda installer](https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh).
+## <a name="conda"></a> Installing Conda/Mamba via Miniforge
+McClintock is written in Python3 leveraging the [SnakeMake](https://snakemake.readthedocs.io/en/stable/) workflow system and is designed to run on linux operating systems. Installation of software dependencies for McClintock and its component methods is automated by [Conda](https://docs.conda.io/en/latest/), thus a working installation of Conda (and it's reimplementation [Mamba](https://mamba.readthedocs.io/en/latest/)) is required to install McClintock. Conda/Mamba can be installed via the [Miniforge installer](https://github.com/conda-forge/miniforge?tab=readme-ov-file#install).
 
-#### Installing Miniconda (Python 3.X)
 ```bash
-wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O $HOME//miniconda.sh
-bash ~/miniconda.sh -b -p $HOME/miniconda # silent mode
-echo "export PATH=\$PATH:\$HOME/miniconda/bin" >> $HOME/.bashrc # add to .bashrc
-source $HOME/.bashrc
+wget -O Miniforge3.sh "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-$(uname)-$(uname -m).sh"
+bash Miniforge3.sh -b -p "${HOME}/conda" 
+source "${HOME}/conda/etc/profile.d/conda.sh"
+source "${HOME}/conda/etc/profile.d/mamba.sh"
 conda init
 ```
 * `conda init` requires you to close and open a new terminal before it take effect
-
-#### Update Conda
-```bash
-conda update -y conda
-```
-
-#### Install Mamba
-```bash
-conda install -c conda-forge mamba
-```
 
 ## <a name="install"></a> Installing McClintock
 After installing and updating Conda/Mamba, McClintock and its component methods can be installed by: **1.** cloning the repository, **2.** creating the Conda environment, and **3.** running the install script.
@@ -89,7 +78,7 @@ cd mcclintock
 ```bash
 mamba env create -f install/envs/mcclintock.yml --name mcclintock
 ```
-* This installs the base dependencies (`Snakemake`, `Python3`, `BioPython`) needed to run the main McClintock script into the McClintock Conda environment
+* This installs the base dependencies needed to run the main McClintock script (`Snakemake`, `Python3`, `BioPython`) into the `mcclintock` Conda environment.
 
 #### Activate McClintock Conda Environment
 ```bash
@@ -495,7 +484,7 @@ To cite McClintock 2 or the reproducible simulation system, please use: Chen, J.
 
 ## <a name="license"></a> License
 ------
-Copyright 2014-2023 Preston Basting, Jingxuan Chen, Shunhua Han, Michael G. Nelson, and Casey M. Bergman
+Copyright 2014-2025 Preston Basting, Jingxuan Chen, Shunhua Han, Michael G. Nelson, and Casey M. Bergman
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
 
