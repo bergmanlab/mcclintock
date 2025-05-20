@@ -116,6 +116,8 @@ python3 mcclintock.py --install --resume
 
 ## <a name="run"></a> McClintock Usage
 
+**NOTE: As of May 20, 2025 the RelocaTE2 module in McClintock is not functioning properly. We are working on fixing this and will provide an update as soon as we can. In the interim, please invoke the rest of the pipeline using `-m ngs_te_mapper,ngs_te_mapper2,relocate,temp,temp2,retroseq,popoolationte,popoolationte2,te-locate,teflon,tebreak,coverage,trimgalore,map_reads`**
+
 Running the complete McClintock pipeline requires a fasta reference genome (option `-r`), a set of TE consensus/canonical sequences present in the organism (option `-c`), and fastq paired-end sequencing reads (options `-1` and `-2`). If only single-end fastq sequencing data are available, then this can be supplied using only option `-1`, however only the TE detectors that handle single-ended data will be run. Optionally, if a detailed annotation of TE sequences in the reference genome has been performed, a GFF file with annotated reference TEs (option `-g`) and a tab-delimited "taxonomy" file linking annotated insertions to their TE family (option `-t`) can be supplied. Example input files are included in the [test](https://github.com/bergmanlab/mcclintock/blob/master/test/) directory. 
 
 ```
@@ -356,6 +358,9 @@ C14: numbered identifier for each TE in the population
 * `<sample>_teflon_nonredundant.bed` : BED file containing all reference and non-reference predictions from `unfiltered/genotypes/sample.genotypes.txt`. Reference predictions use the coordinates for the TE with the reference ID from column 7. By default, only non-reference predictions with both breakpoints (C2 and C3) are kept in this file. Non-reference predictions must also have at least 3 presence reads (C10) and an allele frequency greater than `0.1` (C13). These filtering restrictions can be changed by modifying the TEFLoN config file: `/path/to/mcclintock/config/teflon/teflon_post.py`
 
 ## <a name="examples"></a> Run Examples
+
+**NOTE: As of May 20, 2025 the RelocaTE2 module in McClintock is not functioning properly. We are working on fixing this and will provide an update as soon as we can. In the interim, please invoke the rest of the pipeline using `-m ngs_te_mapper,ngs_te_mapper2,relocate,temp,temp2,retroseq,popoolationte,popoolationte2,te-locate,teflon,tebreak,coverage,trimgalore,map_reads`**
+
 #### Running McClintock with test data
 This repository also provides test data to ensure your McClintock installation is working. Test data can be found in the `test/` directory which includes a yeast reference genome (UCSC sacCer2) and an annotation of TEs in this version of the yeast genome from [Carr et al. (2012)](http://www.plosone.org/article/info%3Adoi%2F10.1371%2Fjournal.pone.0050978). A pair of fastq files can be downloaded from SRA using the `test/download_test_data.py` script:
 ```
