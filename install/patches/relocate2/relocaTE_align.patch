@@ -1,0 +1,20 @@
+--- relocaTE_align.py	2025-05-26 11:17:16.785961665 -0400
++++ relocaTE_align_fixed.py	2025-05-26 11:17:07.152469234 -0400
+@@ -305,7 +305,7 @@
+             #need to rewrite this part, get all pairs that not matched to TE, which will be used as suporting reads
+             #cmd = '%s/clean_pairs_memory.pl -1 %s -2 %s 1> %s/flanking_seq/%s.unPaired.fq 2>> %s/%s.stderr' 
+             #%(scripts, fastq1, fastq2, path, fq_name, path, target)
+-            cmd = '%s/clean_pairs_memory.py --fq1 %s --fq2 %s --repeat %s/te_containing_fq --fq_dir %s --seqtk %s' %(scripts, fastq1, fastq2, path, fastq_dir, seqtk)
++            cmd = 'python %s/clean_pairs_memory.py --fq1 %s --fq2 %s --repeat %s/te_containing_fq --fq_dir %s --seqtk %s' %(scripts, fastq1, fastq2, path, fastq_dir, seqtk)
+             if verbose > 3: print cmd
+             os.system(cmd)
+         match1 = '%s.matched' %(fastq1)
+@@ -540,7 +540,7 @@
+                 #prepare paired file fastq1.matched, fastq2.matched and *.unPaired.fq
+                 #need to rewrite this part, get all pairs that not matched to TE, which will be used as suporting reads
+                 #cmd = '%s/clean_pairs_memory.pl -1 %s -2 %s 1> %s/flanking_seq/%s.unPaired.fq 2>> %s/%s.stderr' %(scripts, fastq1, fastq2, path, fq_name, path, target)
+-                cmd = '%s/clean_pairs_memory.py --fq1 %s --fq2 %s --repeat %s/te_containing_fq --fq_dir %s' %(scripts, fastq1, fastq2, path, fastq_dir)
++                cmd = 'python %s/clean_pairs_memory.py --fq1 %s --fq2 %s --repeat %s/te_containing_fq --fq_dir %s' %(scripts, fastq1, fastq2, path, fastq_dir)
+                 os.system(cmd)
+             match1 = '%s.matched' %(fastq1)
+             match2 = '%s.matched' %(fastq2)

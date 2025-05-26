@@ -37,6 +37,10 @@ def main():
         command = ["mv", install_path+raw_name+"/"+f, install_path+method_name]
         mccutils.run_command(command, log=snakemake.params.log)
 
+    #patch component method source code files
+    command = ["patch", "-i", snakemake.params.patch, install_path+method_name+"/scripts/relocaTE_align.py"]
+    mccutils.run_command(command, log=snakemake.params.log)        
+
     tools = [ "bwa", "bowtie2", "bowtie2_build", "blat", "samtools", "bedtools", "seqtk" ]
 
     #update paths to executables in relocate2 config file
