@@ -193,7 +193,7 @@ Running the complete McClintock pipeline requires a fasta reference genome (opti
   --resume              This option will attempt to use existing intermediate 
                         files from a previous McClintock run
   --debug               This option will allow snakemake to print progress to 
-                        stdout
+                        stdout/stderr
   --serial              This option runs without attempting to optimize thread 
                         usage to run rules concurrently. Each multithread rule 
                         will use the max processors designated by -p/--proc
@@ -207,7 +207,7 @@ Running the complete McClintock pipeline requires a fasta reference genome (opti
 
 * Available methods to use with `-m/--methods`:
   * `trimgalore` : Runs [Trim Galore](https://github.com/FelixKrueger/TrimGalore) to QC the fastq file(s) and trim the adaptors prior to running the component methods
-  * `coverage` : Estimates copy number based on normalized coverage and creates coverage plots for each TE in the fasta provided by `-c/--consensus` or `-s/coverage_fasta` if provided
+  * `coverage` : Estimates copy number based on normalized coverage and creates coverage plots for each TE in the fasta provided by `-c/--consensus` (or `-s/coverage_fasta` if provided)
   * `map_reads` : Maps the reads to the reference genome. This is useful to ensure the BAM alignment file is produced regardless if another method requires it as input
   * `ngs_te_mapper` : Runs the [ngs_te_mapper](https://github.com/bergmanlab/ngs_te_mapper) component method
   * `ngs_te_mapper2`: Runs the [ngs_te_mapper2](https://github.com/bergmanlab/ngs_te_mapper2) component method
@@ -273,7 +273,7 @@ The results of McClintock component methods are output to the directory `<output
 * `<output>/<sample>/results/summary/data/run/summary_report.txt` : Summary Report of McClintock run. Contains information on the McClintock command used, when and where the script was run, details about the mapped reads, and table that shows the number of TE predictions produced from each method.
 * `<output>/<sample>/results/summary/data/run/te_prediction_summary.txt` : A comma-delimited table showing reference and non-reference predictions for each component method
 * `<output>/<sample>/results/summary/data/families/family_prediction_summary.txt` : a comma-delimited table showing TE predictions (all, reference, non-reference) from each method for each TE family
-* `<output>/<sample>/results/summary/data/coverage/te_depth.txt` : (Only produced if coverage module is run) a comma-delimited table showing normalized depth for each consensus TE or TE provided in coverage fasta.
+* `<output>/<sample>/results/summary/data/coverage/te_depth.txt` : (Only produced if coverage module is run) a comma-delimited table showing normalized depth for each consensus TE or TE provided in coverage fasta for all mapped read (Normalized-Depth) or uniquely-mapping reads (Normalized-Unique-Depth).
 * All tables and plots contain a link to the raw data so that users can manually filter or visualize it with other programs.
 
 #### TrimGalore : `<output>/<sample>/results/trimgalore/`
