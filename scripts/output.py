@@ -237,7 +237,7 @@ def make_redundant_bed(insertions, sample_name, out_dir, method="popoolationte")
     malformed_inserts = []
     properly_formed_inserts = []
     for insert in insertions:
-        if insert.start <= insert.end:
+        if insert.start <= insert.end and insert.start > 0 and insert.end > 0:
             insertion_dict[ "_".join([insert.chromosome, str(insert.start-1), str(insert.end), insert.name, "0", insert.strand])] = insert
             properly_formed_inserts.append(insert)
         else:
